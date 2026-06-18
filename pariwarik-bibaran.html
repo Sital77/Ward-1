@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पारिवारिक विवरण प्रमाणित प्रणाली - गौरादह नगरपालिका</title>
+    <link rel="stylesheet" href="charkilla.css">
+    <style>
+        .signature-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sig-title-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .sig-name {
+            font-weight: bold;
+            border-top: 1.5px dashed #000;
+            padding-top: 6px;
+            display: inline-block;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        /* Custom input table style improvements */
+        .member-row-block {
+            background: #ffffff;
+            border: 1px solid #cbd5e0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+            transition: all 0.2s ease;
+        }
+
+        .member-row-block:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .member-row-block .row-num-badge {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #2b6cb0;
+            margin-bottom: 8px;
+        }
+
+        /* Override details table font size to match body (13.5pt) */
+        .details-table {
+            width: 100%;
+            font-size: 13.5pt !important;
+            margin: 8px 0;
+        }
+
+        .details-table th,
+        .details-table td {
+            font-size: 13.5pt !important;
+            padding: 5px 6px !important;
+        }
+
+        /* ===== PRINT: Force single page ===== */
+        @media print {
+            @page { size: A4; margin: 0; }
+            .input-panel, .modal-overlay { display: none !important; }
+            .preview-panel {
+                margin-left: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                display: block !important;
+            }
+            .a4-page {
+                box-shadow: none !important;
+                width: 210mm !important;
+                min-height: unset !important;
+                height: auto !important;
+                max-height: 297mm !important;
+                overflow: hidden !important;
+                padding: 10mm 16mm 10mm 16mm !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">📝 पारिवारिक विवरण प्रविष्टि</h2>
+            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+
+        <div class="row-grid">
+            <div class="form-group">
+                <label>पत्र संख्या:</label>
+                <select id="inPatraSankhya" onchange="updateDoc()">
+                    <option value="२०८२/०८३" selected>२०८२/०८३</option>
+                    <option value="२०८३/०८४">२०८३/०८४</option>
+                    <option value="२०८४/०८५">२०८४/०८५</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>चलानी नं :</label>
+                <input type="text" id="inChalani" placeholder="उदा: ११५४" value="" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="row-grid">
+            <div class="form-group">
+                <label>मिति (वि.सं.):</label>
+                <input type="text" id="inMiti" value="२०८३/" oninput="updateDoc()">
+            </div>
+            <div class="form-group">
+                <label>नेपाल संवत् :</label>
+                <input type="text" id="inNepalSamvat" value="११४६" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="row-grid">
+            <div class="form-group">
+                <label>वडा नं (हाल):</label>
+                <select id="inWadaNo" onchange="updateDoc()">
+                    <option value="१" selected>१</option>
+                    <option value="२">२</option>
+                    <option value="३">३</option>
+                    <option value="४">४</option>
+                    <option value="५">५</option>
+                    <option value="६">६</option>
+                    <option value="७">७</option>
+                    <option value="८">८</option>
+                    <option value="९">९</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>साबिक वडा नं:</label>
+                <input type="text" id="inSabikWada" value="१" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>निवेदकको पुरा नाम :</label>
+            <input type="text" id="inName" placeholder="उदा: डिल्ली राम श्रेष्ठ" oninput="syncOwnerName(); updateDoc()">
+        </div>
+
+        <div class="row-grid"
+            style="background: #f7fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e0; margin-bottom: 15px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.85rem;">नागरिकता नं. :</label>
+                <input type="text" id="inCitNo" placeholder="उदा: ३४१५२८८५" oninput="updateDoc()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.85rem;">जारी मिति (वैकल्पिक):</label>
+                <input type="text" id="inCitDate" placeholder="उदा: २०७०/०५/१२" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>परिवारको मूली / व्यक्तिको नाम :</label>
+            <input type="text" id="inOwnerName" placeholder="उदा: डिल्ली राम श्रेष्ठ" oninput="updateDoc()">
+        </div>
+
+        <div class="table-builder">
+            <h3>👨‍👩‍👧‍👦 पारिवारिक सदस्यहरूको विवरण</h3>
+            <div id="familyRowsContainer"></div>
+            <button type="button" class="btn-add-row" onclick="addFamilyRow()">➕ पारिवारिक सदस्य थप्नुहोस्</button>
+        </div>
+
+        <div class="form-group"
+            style="margin-top: 15px; background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
+            <label style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc();">
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="केशर बहादुर खवास|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास</option>
+                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+            </select>
+
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40"
+                    oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र सुरक्षित गर्नुस्</button>
+    </div>
+
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ पारिवारिक विवरण प्रमाणित सिफारिस अभिलेख</h3>
+            <div class="search-container">
+                <label>🔍 नामबाट खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..."
+                    oninput="renderDatabaseTable()">
+            </div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">क्रम</th>
+                        <th style="width: 40%;">निवेदकको नाम</th>
+                        <th style="width: 25%;">विषय</th>
+                        <th style="width: 17%;">मिति</th>
+                        <th style="width: 10%;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="preview-panel">
+        <div class="a4-page">
+            <!-- letterhead matching user's image -->
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Emblem of Nepal">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblPatraSankhya">२०८२/०८३</span></div>
+                        <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
+                    </div>
+                </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title"><span id="lblWadaHeader">१</span> नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३/</span></div>
+                    <div class="ns-block">नेपाल संवत् : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४६</span></div>
+                </div>
+            </div>
+
+            <div class="header-red-line"></div>
+            <div class="address-to" style="font-weight: bold; font-size: 14pt; margin-top: 4px; margin-bottom: 10px;">
+                श्री यो जो जससँग सम्बन्धित छ ।
+            </div>
+
+            <div class="subject-container" style="text-align: center; margin: 6px 0 12px 0;">
+                <div class="subject-title"
+                    style="font-size: 16pt; font-weight: bold; text-decoration: underline; display: inline-block;">
+                    <span style="color: #e51a23;">विषय:-</span> पारिवारिक विवरण प्रमाणित सम्बन्धमा ।
+                </div>
+            </div>
+
+            <div class="letter-body"
+                style="text-align: justify; text-justify: inter-word; font-size: 13.5pt; line-height: 1.7; margin-bottom: 10px; text-indent: 50px;">
+                प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं. <span id="lblWadaBody1" class="fill-space"
+                    style="min-width:25px;">१</span> बसोबास गर्ने <span id="lblApplicantName" class="fill-space"
+                    style="font-weight:bold; min-width:150px;">.......</span><span id="lblCitBlock"
+                    style="display:none; font-weight:normal;"></span> ले सिफारिस गरि पाउँ भनी यस कार्यालयमा दिनु भएको निवेदन अनुसार जिल्ला झापा गौरादह नगरपालिका वडा नं. <span id="lblWadaBody2" class="fill-space"
+                    style="min-width:25px;">१</span> मा बसोबास गर्ने <span id="lblOwnerName" class="fill-space"
+                    style="font-weight:bold; min-width:150px;">.......</span> को एकाघर सगोल परिवारको पारिवारिक विवरण तपसिल बमोजिम रहेको हुँदा सो को व्यहोरा प्रमाणित गरिन्छ ।
+            </div>
+
+            <div style="font-weight: bold; text-align: center; margin-bottom: 5px; font-size: 13pt;"><u>पारिवारिक विवरण तपसिल</u></div>
+
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">क्र.स.</th>
+                        <th style="width: 45%;">नाम थर</th>
+                        <th style="width: 25%;">ना.प्र.नं./ज.द.नं.</th>
+                        <th style="width: 20%;">नाता</th>
+                    </tr>
+                </thead>
+                <tbody id="outputTableBody"></tbody>
+            </table>
+
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 40px;">
+                <div class="signature-block">
+                    <div class="sig-space"></div>
+                    <div class="sig-title-line">
+                        <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
+                        <div class="sig-title" id="lblSigTitle" style="font-weight:normal;">वडा अध्यक्ष</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- datalist for relationships -->
+    <datalist id="relList">
+        <option value="आफैँ"></option>
+        <option value="श्रीमती"></option>
+        <option value="श्रीमान्"></option>
+        <option value="छोरा"></option>
+        <option value="छोरी"></option>
+        <option value="बुहारी"></option>
+        <option value="बुबा"></option>
+        <option value="आमा"></option>
+        <option value="नाति"></option>
+        <option value="नातिनी"></option>
+    </datalist>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="script-pariwarik-bibaran.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,793 @@
+/* Importing Beautiful and Professional Nepali Font - Mukta */
+@import url('https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap');
+
+* {
+    box-sizing: border-box;
+    font-family: 'Mukta', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f7fafc;
+    color: #2d3748;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ---------------- PREMIUM SIDEBAR FORM PANEL ---------------- */
+.input-panel {
+    width: 480px;
+    background-color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 5px 0 15px rgba(0, 0, 0, 0.02);
+    padding: 30px 25px;
+    overflow-y: auto;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Preview Canvas Container */
+.preview-panel {
+    margin-left: 480px;
+    flex-grow: 1;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #cbd5e0;
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+/* Sidebar Title Header */
+.header-action-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 12px;
+    margin-bottom: 25px;
+}
+
+.panel-title {
+    margin: 0;
+    color: #1a202c;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* CLASSIC FORM FIELDS WITH GLOW HOVER EFFECTS */
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #4a5568;
+    font-size: 0.95rem;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #2d3748;
+    transition: all 0.2s ease-in-out;
+    background-color: #f8fafc;
+}
+
+/* Input Fields Hover & Focus Effects */
+input[type="text"]:hover,
+select:hover {
+    border-color: #a0aec0;
+    background-color: #edf2f7;
+}
+
+input[type="text"]:focus,
+select:focus {
+    border-color: #3182ce;
+    outline: none;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.2);
+    transform: translateY(-1px);
+    /* Slight lift on focus */
+}
+
+.row-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* PREMIUM SEGMENTED RADIO CONTROLS */
+.radio-container {
+    display: flex;
+    background-color: #edf2f7;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 2px;
+}
+
+.radio-option {
+    flex: 1;
+}
+
+.radio-option input[type="radio"] {
+    display: none;
+}
+
+.radio-label {
+    display: block;
+    padding: 9px 5px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #4a5568;
+    transition: all 0.2s ease;
+}
+
+.radio-label:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #1a202c;
+}
+
+.radio-option input[type="radio"]:checked+.radio-label {
+    background-color: #ffffff;
+    color: #2b6cb0;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+    transform: scale(1.02);
+}
+
+/* ---------------- UNIQUE BUTTONS WITH FLUID INTERACTIVE HOVER ---------------- */
+
+/* 1. GREEN ABHILEKH BUTTON (Glow on Hover) */
+.btn-abhilekh {
+    background: linear-gradient(135deg, #2f855a 0%, #22543d 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 10px rgba(47, 131, 90, 0.2);
+}
+
+.btn-abhilekh:hover {
+    background: linear-gradient(135deg, #38a169 0%, #276749 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(47, 131, 90, 0.35);
+}
+
+.btn-abhilekh:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(47, 131, 90, 0.2);
+}
+
+/* 2. BLUE ADD KITTA BUTTON (Scale on Hover) */
+.btn-add-row {
+    background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+    color: white;
+    border: none;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.25);
+}
+
+.btn-add-row:hover {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(66, 153, 225, 0.4);
+}
+
+.btn-add-row:active {
+    transform: translateY(0);
+}
+
+/* 3. RED MASTER PRINT BUTTON (Deep Fade Ripple Concept) */
+.btn-print {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #e51a23 0%, #b31017 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 5px 15px rgba(229, 26, 35, 0.3);
+}
+
+.btn-print:hover {
+    background: linear-gradient(135deg, #ff2e37 0%, #d3161e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(229, 26, 35, 0.45);
+}
+
+.btn-print:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 10px rgba(229, 26, 35, 0.2);
+}
+
+/* 4. CHILLY RED DELETE BUTTON */
+.btn-delete-row {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    background: #fff5f5;
+    color: #e53e3e;
+    border: 1px solid #fed7d7;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-row:hover {
+    background: #e53e3e;
+    color: white;
+    border-color: #e53e3e;
+    transform: scale(1.05);
+}
+
+/* KITTA TABLE BUILDER MATRIX CARDS */
+.table-builder {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 20px;
+}
+
+.table-builder h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #2d3748;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 6px;
+}
+
+.kitta-row-block {
+    background: #ffffff;
+    border: 1px solid #cbd5e0;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease;
+}
+
+.kitta-row-block:hover {
+    transform: scale(1.01);
+    /* Subtle grow effect when working on specific row */
+    border-color: #cbd5e0;
+}
+
+.kitta-row-block .row-num-badge {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2b6cb0;
+    margin-bottom: 10px;
+}
+
+.table-row-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* RANGE SLIDER SMOOTH THUMB STYLE */
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 5px;
+    outline: none;
+    margin-top: 8px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2b6cb0;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+    background: #3182ce;
+}
+
+/* ---------------- UNIQUE POP-UP MODAL WINDOW ---------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 32, 44, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 100;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #ffffff;
+    width: 900px;
+    max-width: 95%;
+    max-height: 85vh;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 30px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #e53e3e;
+    color: white;
+    border-color: #e53e3e;
+    transform: rotate(90deg);
+}
+
+.modal-title {
+    color: #1a202c;
+    margin-top: 0;
+    border-bottom: 2px solid #edf2f7;
+    padding-bottom: 12px;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.search-container {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.search-container label {
+    margin-bottom: 0;
+    color: #4a5568;
+    font-size: 1rem;
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+.search-container input {
+    background-color: #fff;
+}
+
+.db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+}
+
+.db-table th,
+.db-table td {
+    border-bottom: 1px solid #edf2f7;
+    padding: 12px 14px;
+    text-align: left;
+}
+
+.db-table th {
+    background: #f7fafc;
+    color: #4a5568;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #edf2f7;
+}
+
+.db-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.btn-action {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.15s;
+}
+
+.btn-edit-db {
+    background: #feebc8;
+    color: #c05621;
+    margin-right: 5px;
+}
+
+.btn-edit-db:hover {
+    background: #fbd38d;
+    transform: translateY(-1px);
+}
+
+.btn-del-db {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.btn-del-db:hover {
+    background: #feb2b2;
+    transform: translateY(-1px);
+}
+
+/* ---------------- OFFICIAL NEPALESE DOCUMENT STYLE (A4 PRINT) ---------------- */
+.a4-page {
+    width: 210mm;
+    height: 297mm;
+    background-color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    padding: 12mm 18mm 15mm 18mm;
+    position: relative;
+    color: #000;
+    font-size: 13pt;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* LETTERHEAD HEADER COMPRESSED SYSTEM (MATCHED TO A4-1.JPG) */
+.doc-header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.gov-logo {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+}
+
+.header-text-container {
+    text-align: center;
+    color: #e51a23;
+    line-height: 1.1;
+}
+
+.municipality-name {
+    font-size: 20pt;
+    font-weight: 500;
+    margin: 0 0 2px 0;
+}
+
+.office-title {
+    font-size: 34pt;
+    font-weight: 800;
+    margin: 0 0 2px 0;
+    letter-spacing: 0.2px;
+}
+
+.location-title {
+    font-size: 14pt;
+    font-weight: 500;
+    margin: 0;
+    color: #e51a23;
+}
+
+.email-title {
+    font-size: 11pt;
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+/* Metadata Line */
+.meta-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 13pt;
+    font-weight: 600;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    color: #000;
+}
+
+.meta-left div,
+.meta-right div {
+    margin-bottom: 1px;
+}
+
+/* Solid Red Divider Line */
+.header-red-line {
+    border-top: 3px solid #e51a23;
+    width: 100%;
+    margin-top: 0px;
+    margin-bottom: 15px;
+}
+
+.subject-container {
+    text-align: center;
+    margin: 10px 0 15px 0;
+}
+
+.subject-title {
+    font-size: 16pt;
+    font-weight: bold;
+    text-decoration: underline;
+    display: inline-block;
+}
+
+.address-to {
+    font-weight: bold;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.letter-body {
+    text-align: justify;
+    text-indent: 50px;
+    margin-bottom: 15px;
+}
+
+.fill-space {
+    font-weight: bold;
+    padding: 0 4px;
+    display: inline;
+    text-indent: 0;
+}
+
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 11.5pt;
+}
+
+.details-table th,
+.details-table td {
+    border: 1px solid #000;
+    padding: 5px 4px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.details-table th {
+    background-color: #f3f4f6;
+    font-weight: bold;
+}
+
+.landuse-container {
+    margin-top: 15px;
+    text-align: justify;
+    font-size: 12.5pt;
+    line-height: 1.5;
+    display: none;
+}
+
+.doc-footer {
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.signature-block {
+    text-align: center;
+    width: 240px;
+    font-size: 13.5pt;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sig-space {
+    height: 50px;
+}
+
+.sig-title-line {
+    border-top: none;
+    padding-top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sig-name {
+    font-weight: bold;
+    border-top: 1.5px dashed #000;
+    padding-top: 6px;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+}
+
+/* ===== THREE-COLUMN LETTERHEAD (पारिवारिक विवरण शैली) ===== */
+.letterhead-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 2px;
+}
+
+.lh-left {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.lh-logo {
+    width: 95px;
+    height: 95px;
+    object-fit: contain;
+    margin-bottom: 6px;
+}
+
+.lh-meta {
+    font-size: 12pt;
+    font-weight: 600;
+    line-height: 1.45;
+    text-align: left;
+    color: #000;
+}
+
+.lh-center {
+    width: 50%;
+    text-align: center;
+    color: #e51a23;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lh-center .muni-n {
+    font-size: 18pt;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.lh-center .wada-title {
+    font-size: 32pt;
+    font-weight: 800;
+    margin: 2px 0;
+    line-height: 1.1;
+}
+
+.lh-center .loc-t {
+    font-size: 14pt;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.lh-center .prov-t {
+    font-size: 14pt;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.lh-center .email-t {
+    font-size: 11pt;
+    margin-top: 2px;
+    font-weight: 500;
+    color: #e51a23;
+}
+
+.lh-right {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-top: 101px;
+    font-size: 12pt;
+    font-weight: 600;
+    color: #000;
+}
+
+.lh-right .miti-block {
+    text-align: right;
+    line-height: 1.45;
+}
+
+.lh-right .ns-block {
+    font-size: 12pt;
+    font-weight: 600;
+    line-height: 1.45;
+    text-align: right;
+    color: #000;
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    .input-panel,
+    .modal-overlay {
+        display: none !important;
+    }
+
+    .preview-panel {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        background-color: #fff !important;
+        display: block !important;
+    }
+
+    .a4-page {
+        box-shadow: none !important;
+        padding: 12mm 16mm 10mm 16mm !important;
+        width: 210mm !important;
+        min-height: unset !important;
+        height: auto !important;
+        max-height: 297mm !important;
+        overflow: hidden !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+}

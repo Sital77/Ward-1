@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सिफारिस दस्तुर क्यालकुलेटर</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Mukta', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f8fafc; color: #2d3748; padding: 20px; }
+        
+        .calculator-wrapper { background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .calc-input-group { margin-bottom: 20px; }
+        .calc-input-group label { display: block; font-weight: 700; color: #4a5568; margin-bottom: 8px; font-size: 1.05rem; }
+        .calc-field { width: 100%; padding: 12px 15px; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 1.05rem; outline: none; background: #f1f5f9; transition: border-color 0.2s; }
+        .calc-field:focus { border-color: #4c51bf; background: #fff; }
+        
+        .btn-add { background: #4c51bf; color: white; border: none; padding: 12px; font-size: 1.05rem; font-weight: 700; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.2s; margin-top: 10px; }
+        .btn-add:hover { background: #434190; }
+
+        .result-panel { background: #ebf4ff; border: 2px dashed #a3bffa; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
+        .kitta-list { flex-grow: 1; max-height: 150px; overflow-y: auto; margin-bottom: 15px; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px; }
+        .kitta-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 8px; font-size: 1rem; font-weight: 600; }
+        .btn-remove { background: #e53e3e; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        
+        .final-result { margin-top: auto; font-size: 1.15rem; line-height: 1.6; }
+        .highlight-fee { font-size: 1.8rem; font-weight: 800; color: #e51a23; display: block; margin-top: 5px; }
+
+        @media (max-width: 768px) { .calc-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-wrapper">
+        <div class="calc-grid">
+            <div>
+                <div class="calc-input-group">
+                    <label>सिफारिसको प्रकार छान्नुहोस्:</label>
+                    <select id="recType" class="calc-field" onchange="calculateFee()">
+                        <option value="charKilla">🗺️ चार किल्ला प्रमाणित</option>
+                        <option value="gharBato">🏠 घर बाटो प्रमाणित</option>
+                    </select>
+                </div>
+                
+                <div class="calc-input-group">
+                    <label>कित्ताको क्षेत्रफल (वर्ग मिटर - m²) हाल्नुस्:</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="sqmInput" class="calc-field" placeholder="उदा: ३००" onkeypress="if(event.key === 'Enter') addKitta()">
+                        <button class="btn-add" style="width: 130px; margin-top:0;" onclick="addKitta()">+ थप्नुस्</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-panel">
+                <div class="kitta-list" id="kittaListContainer">
+                    <span style="color:#718096; font-size:0.95rem;">यहाँ थपिएका कित्ताहरू देखिनेछन्...</span>
+                </div>
+                
+                <div class="final-result" id="calculationResult">
+                    <strong>जम्मा कित्ता:</strong> ० वटा <br>
+                    <strong>कुल क्षेत्रफल:</strong> ०.०० कट्ठा <br>
+                    <div style="margin-top:12px; border-top:2px dashed #a3bffa; padding-top:12px;">
+                        लाग्ने जम्मा दस्तुर:
+                        <span class="highlight-fee">रु. ०</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let kittaList = [];
+
+        function formatNepaliNum(num) { return num.toLocaleString('en-IN'); }
+
+        function addKitta() {
+            let inputVal = parseFloat(document.getElementById("sqmInput").value);
+            if(isNaN(inputVal) || inputVal <= 0) { alert("⚠️ कृपया सही वर्ग मिटर (m²) लेख्नुहोस्!"); return; }
+            kittaList.push(inputVal);
+            document.getElementById("sqmInput").value = "";
+            renderKittaList(); calculateFee();
+        }
+
+        function removeKitta(index) {
+            kittaList.splice(index, 1);
+            renderKittaList(); calculateFee();
+        }
+
+        function renderKittaList() {
+            const container = document.getElementById("kittaListContainer");
+            container.innerHTML = "";
+            if(kittaList.length === 0) {
+                container.innerHTML = `<span style="color:#718096; font-size:0.95rem;">यहाँ थपिएका कित्ताहरू देखिनेछन्...</span>`;
+                return;
+            }
+            kittaList.forEach((sqm, index) => {
+                let div = document.createElement("div");
+                div.className = "kitta-item";
+                div.innerHTML = `<span>कित्ता ${index + 1}: ${sqm} m²</span> <button class="btn-remove" onclick="removeKitta(${index})">हटाउनुस्</button>`;
+                container.appendChild(div);
+            });
+        }
+
+        function calculateFee() {
+            const recType = document.getElementById("recType").value;
+            const totalKittas = kittaList.length;
+            const totalSqm = kittaList.reduce((acc, val) => acc + val, 0);
+            const totalKattha = totalSqm / 338.63;
+            
+            let totalFee = 0; let note = "";
+
+            if (totalKittas > 0) {
+                if (recType === "charKilla") {
+                    let runningKattha = 0; let extraKittas = 0;
+                    for(let i = 0; i < totalKittas; i++) {
+                        runningKattha += (kittaList[i] / 338.63);
+                        if(runningKattha > 5) extraKittas++;
+                    }
+                    totalFee = 700 + (extraKittas * 700);
+                    note = extraKittas === 0 ? "५ कट्ठा सम्मको न्यूनतम दस्तुर (रु. ७००)" : `५ कट्ठा सम्मको रु. ७०० र क्रस गरेपछिका ${extraKittas} कित्ताको रु. ७०० का दरले`;
+                } 
+                else if (recType === "gharBato") {
+                    if (totalKattha <= 5) {
+                        totalFee = 900; note = "५ कट्ठा सम्मको न्यूनतम दस्तुर (रु. ९००)";
+                    } else {
+                        totalFee = totalKattha * 1200; note = `५ कट्ठा नाघेकोले कुल क्षेत्रफल (${totalKattha.toFixed(3)} कट्ठा) लाई प्रति कट्ठा रु. १२०० ले गुणन गर्दा`;
+                    }
+                }
+            }
+
+            document.getElementById("calculationResult").innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="color:#4a5568;"><strong>जम्मा कित्ता:</strong></span> <span style="color:#2d3748; font-weight:700;">${totalKittas} वटा</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span style="color:#4a5568;"><strong>कुल क्षेत्रफल:</strong></span> <span style="color:#2b6cb0; font-weight:700;">${totalKattha.toFixed(3)} कट्ठा</span>
+                </div>
+                <div style="margin-top:15px; border-top:2px dashed #a3bffa; padding-top:15px; text-align:center;">
+                    <div style="font-size:1.05rem; color:#4a5568; font-weight:700;">लाग्ने जम्मा दस्तुर</div>
+                    <div class="highlight-fee">रु. ${formatNepaliNum(Math.round(totalFee))}</div>
+                    <div style="font-size:0.85rem; color:#718096; margin-top:8px; line-height:1.4;">*नियम: ${note}</div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

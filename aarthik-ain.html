@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>आर्थिक ऐन तथा दस्तुर विवरण - गौरादह नगरपालिका</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { box-sizing: border-box; font-family: 'Mukta', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f8fafc; color: #2d3748; padding: 20px; }
+        
+        .tax-info-container { max-width: 100%; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 12px; }
+        
+        /* ---------- SEARCH & TABLE STYLES ---------- */
+        .search-box {
+            width: 100%; padding: 14px 18px; margin-bottom: 25px; border: 2px solid #e2e8f0;
+            border-radius: 10px; font-size: 16px; outline: none; font-weight: 600; background: #f1f5f9;
+            transition: all 0.2s;
+        }
+        .search-box:focus { border-color: #dd6b20; background: #ffffff; box-shadow: 0 0 0 3px rgba(221, 107, 32, 0.15); }
+        
+        .table-responsive { overflow-x: auto; margin-bottom: 30px; border: 1px solid #e2e8f0; border-radius: 10px; }
+        .tax-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 15px; }
+        .tax-table th, .tax-table td { padding: 14px 16px; border-bottom: 1px solid #edf2f7; text-align: left; }
+        .tax-table th { background-color: #2c3e50; color: #ffffff; font-weight: 700; font-size: 16px; position: sticky; top: 0; }
+        .tax-table tr:nth-child(even) { background-color: #f8fafc; }
+        .tax-table tr:hover { background-color: #fffaf0; }
+        .section-title { color: #2c3e50; border-bottom: 3px solid #dd6b20; padding-bottom: 8px; margin-top: 10px; margin-bottom: 18px; font-size: 1.4rem; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+    <div class="tax-info-container">
+        
+        <input type="text" id="liveSearchInput" class="search-box" onkeyup="filterData()" placeholder="🔍 सिफारिसको नाम, शुल्क वा विवरण खोज्नुहोस्...">
+
+        <h3 class="section-title">📊 सिफारिस तथा दस्तुर विवरण</h3>
+        <div class="table-responsive">
+            <table class="tax-table" id="feeTable">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">वर्ग</th>
+                        <th style="width: 50%;">सिफारिसको प्रकार / विवरण</th>
+                        <th style="width: 30%;">दस्तुर (रु.)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>जग्गा सम्बन्धि</td><td>चार किल्ला ५ कट्टा सम्म</td><td>७०० (५ कट्ठा माथि प्रति कित्ता थपः ७००) । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>जग्गा वर्गीकरण सिफारिस</td><td>५०० । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>घरबाटो सिफारिस</td><td>९०० (५ कट्ठा भन्दा कम), १२०० प्रति कट्ठा (५ कट्टा भन्दा माथि) । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>धनीपूर्जा संसोधन तथा प्रतिलिपि</td><td>५०० । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>बाटो प्रमाणित</td><td>५०० । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>कर चुक्ता प्रमाणित (नेपालीमा)</td><td>१०० । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>मोही नामसारी तथा लागत कट्टा सिफारिस</td><td>२०० (प्रति कट्ठा) । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>घर कायम सिफारिस</td><td>पक्की १ तले ७५० (१ तला माथि प्रति तला ५००), कच्ची घरः ५०० । </td></tr>
+                    <tr><td>जग्गा सम्बन्धि</td><td>बाटो कायम सिफारिस</td><td>आवासीय १३००, कृषि क्षेत्र १००० । </td></tr>
+                    
+                    <tr><td>व्यक्तिगत</td><td>अविवाहित प्रमाणित</td><td>५०० । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>विवाह प्रमाणित</td><td>६०० (२०३७ साल अघि), ४०० (३७ साल पछी) । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>नागरिकता सिफारिस</td><td>३५० (वैवाहिक अङ्गीकृतको हकमा- १५००) । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>तीन पुस्ते कायम</td><td>५५० । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>नाम, उमेर, थर संशोधन दस्तुर</td><td>५०० । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>नाता प्रमाणित सिफारिस (नेपालीमा)</td><td>५०० । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>बसोबास प्रमाणित</td><td>५०० । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>वार्षिक आय प्रमाणित</td><td>१०० (प्रति लाख) । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>विद्युत मिटर जडान</td><td>आवासीयः २५०, सिँचाई प्रयोजनको लागिः १०० । </td></tr>
+                    <tr><td>व्यक्तिगत</td><td>नाबालक परिचय पत्र</td><td>३०० । </td></tr>
+
+                    <tr><td>व्यवसाय</td><td>पाना नं. बन्द सिफारिस</td><td>२५० । </td></tr>
+                    <tr><td>व्यवसाय</td><td>पाना नं सिफारिस</td><td>३०० । </td></tr>
+                    <tr><td>व्यवसाय</td><td>घरेलु उद्योग दर्ता (१ लाख सम्म पुँजी)</td><td>४०० । </td></tr>
+                    <tr><td>व्यवसाय</td><td>घरेलु उद्योग दर्ता (१ लाख १ देखि ५ लाख सम्म)</td><td>५०० । </td></tr>
+                    <tr><td>व्यवसाय</td><td>घरेलु उद्योग दर्ता (५ लाख १ देखि २० लाख सम्म)</td><td>७५० । </td></tr>
+                    <tr><td>व्यवसाय</td><td>घरेलु उद्योग दर्ता (२० लाख १ देखि ५० लाख सम्म)</td><td>१००० । </td></tr>
+
+                    <tr><td>अङ्ग्रेजी सिफारिस</td><td>Tax Clearance</td><td>500 । </td></tr>
+                    <tr><td>अङ्ग्रेजी सिफारिस</td><td>Relationship Certificate</td><td>600 । </td></tr>
+                    <tr><td>अङ्ग्रेजी सिफारिस</td><td>Address Verification</td><td>500 । </td></tr>
+                    <tr><td>अङ्ग्रेजी सिफारिस</td><td>Birth Verification</td><td>400 (Nepali: 250) । </td></tr>
+
+                    <tr><td>सर्जमिन</td><td>व्यक्तिगत सर्जमिन</td><td>५०० । </td></tr>
+                    <tr><td>सर्जमिन</td><td>जग्गा नामसारी सिफारिस अंशबण्डा समेत</td><td>नियमानुसार । </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterData() {
+            let input = document.getElementById("liveSearchInput");
+            let filter = input.value.toUpperCase();
+            
+            let feeTable = document.getElementById("feeTable");
+            let feeRows = feeTable.getElementsByTagName("tr");
+            for (let i = 1; i < feeRows.length; i++) {
+                let txtValue = feeRows[i].textContent || feeRows[i].innerText;
+                feeRows[i].style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none";
+            }
+
+            let landTable = document.getElementById("landUseTable");
+            if (landTable) {
+                let landRows = landTable.getElementsByTagName("tr");
+                for (let i = 1; i < landRows.length; i++) {
+                    let txtValue = landRows[i].textContent || landRows[i].innerText;
+                    landRows[i].style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

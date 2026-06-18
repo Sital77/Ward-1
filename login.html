@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>लग-इन | गौरादह नगरपालिका वडा नं. १ सिफारिस प्रणाली</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Mukta', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #e8edf3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            display: flex;
+            width: 820px;
+            max-width: 96vw;
+            min-height: 420px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        }
+
+        /* ===== LEFT BLUE PANEL ===== */
+        .login-left {
+            width: 42%;
+            background: linear-gradient(160deg, #1e3a8a 0%, #1e40af 55%, #2563eb 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 30px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            bottom: -80px;
+            right: -80px;
+        }
+
+        .login-left::after {
+            content: '';
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            top: -40px;
+            left: -40px;
+        }
+
+        .login-left img.emblem {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left .gov-label {
+            font-size: 14pt;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left .divider {
+            width: 50px;
+            height: 2px;
+            background: rgba(255,255,255,0.4);
+            margin-bottom: 18px;
+            border-radius: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left .system-name {
+            font-size: 17pt;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left .welcome-text {
+            font-size: 11pt;
+            opacity: 0.78;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left .footer-label {
+            position: absolute;
+            bottom: 18px;
+            font-size: 9pt;
+            opacity: 0.55;
+            z-index: 1;
+        }
+
+        /* ===== RIGHT WHITE PANEL ===== */
+        .login-right {
+            width: 58%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 50px 50px;
+        }
+
+        .login-right h2 {
+            font-size: 22pt;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 10pt;
+            font-weight: 600;
+            color: #718096;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 12pt;
+            color: #2d3748;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+            outline: none;
+            font-family: 'Mukta', sans-serif;
+        }
+
+        .form-input:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        .form-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .error-msg {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 10pt;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-msg.show {
+            display: flex;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13pt;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+            font-family: 'Mukta', sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-login:hover {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.45);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
+        }
+
+        /* Enter key shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake { animation: shake 0.4s ease; }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card">
+        <!-- LEFT BLUE PANEL -->
+        <div class="login-left">
+            <img class="emblem" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+            <div class="gov-label">नेपाल सरकार</div>
+            <div class="divider"></div>
+            <div class="system-name">गौरादह नगरपालिका<br>वडा नं. १<br>सिफारिस प्रणाली</div>
+            <div class="welcome-text" style="margin-top: 12px;">मा तपाईंलाई स्वागत छ</div>
+            <div class="footer-label">© गौरादह नगरपालिका वडा कार्यालय</div>
+        </div>
+
+        <!-- RIGHT WHITE PANEL -->
+        <div class="login-right">
+            <h2>लग-इन</h2>
+
+            <label class="form-label" for="inUsername">प्रयोगकर्ता आईडी</label>
+            <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस्" autocomplete="username">
+
+            <label class="form-label" for="inPassword">पासवर्ड</label>
+            <input class="form-input" type="password" id="inPassword" placeholder="••••••••" autocomplete="current-password">
+
+            <div class="error-msg" id="errorMsg">
+                <span>⚠️</span>
+                <span id="errorText">आईडी वा पासवर्ड गलत छ !</span>
+            </div>
+
+            <button class="btn-login" id="btnLogin" onclick="doLogin()">लग-इन</button>
+        </div>
+    </div>
+
+    <script>
+        // If already logged in and came from a sifarish page, go back there
+        if (sessionStorage.getItem('sifarish_auth') === 'true') {
+            const dest = sessionStorage.getItem('sifarish_redirect') || 'gharbato.html';
+            sessionStorage.removeItem('sifarish_redirect');
+            window.location.replace(dest);
+        }
+
+        function doLogin() {
+            const username = document.getElementById('inUsername').value.trim();
+            const password = document.getElementById('inPassword').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            const card = document.querySelector('.login-right');
+
+            if (username === 'wada1' && password === 'wada1') {
+                sessionStorage.setItem('sifarish_auth', 'true');
+                document.getElementById('btnLogin').textContent = '✅ प्रवेश हुँदैछ...';
+                document.getElementById('btnLogin').style.background = 'linear-gradient(135deg, #276749, #38a169)';
+                // Redirect to the originally requested page, or fallback to gharbato
+                const dest = sessionStorage.getItem('sifarish_redirect') || 'gharbato.html';
+                sessionStorage.removeItem('sifarish_redirect');
+                setTimeout(() => {
+                    window.location.replace(dest);
+                }, 600);
+            } else {
+                errorMsg.classList.add('show');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
+                document.getElementById('inPassword').value = '';
+                document.getElementById('inPassword').focus();
+            }
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doLogin();
+        });
+    </script>
+
+</body>
+</html>
