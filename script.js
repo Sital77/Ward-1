@@ -1,6 +1,27 @@
+const firebaseConfig = {
+    apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+    authDomain: "gauradaha-ward1.firebaseapp.com",
+    projectId: "gauradaha-ward1",
+    storageBucket: "gauradaha-ward1.firebasestorage.app",
+    messagingSenderId: "905617778132",
+    appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+};
+
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 let rowCounter = 0;
 let activeRowIds = [];
-let globalDatabase = JSON.parse(localStorage.getItem('muniRecordsDB_v3')) || [];
+let globalDatabase = [];
+
+db.collection("gharBatoRecords").onSnapshot((snapshot) => {
+    globalDatabase = [];
+    snapshot.forEach((doc) => {
+        globalDatabase.push({ id: doc.id, ...doc.data() });
+    });
+    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+    renderDatabaseTable();
+});
 
 // Converts english digits into clean Nepali unicode numbers
 function toNepaliDigit(num) {
@@ -154,7 +175,7 @@ function updateDoc() {
 }
 
 // Trigger Print Framework and Synchronize State Matrix Into Storage
-function printAndSaveSystem() {
+async function printAndSaveSystem() {
     const name = document.getElementById('inName').value.trim();
     if (!name) { alert("कृपया जग्गाधनीको नाम अनिवार्य लेख्नुहोस् ।"); return; }
 
@@ -166,18 +187,20 @@ function printAndSaveSystem() {
     let kittaRecords = [];
     activeRowIds.forEach(id => {
         const block = document.getElementById(id);
-        const checkedRadio = block.querySelector('input[type="radio"]:checked');
-        kittaRecords.push({
-            sit: block.querySelector('.input-sit').value,
-            kitta: block.querySelector('.input-kitta').value,
-            area: block.querySelector('.input-area').value,
-            ghar: checkedRadio ? checkedRadio.value : '-',
-            bato: block.querySelector('.input-bato').value,
-            remarks: block.querySelector('.input-remarks').value
-        });
+        if (block) {
+            const checkedRadio = block.querySelector('input[type="radio"]:checked');
+            kittaRecords.push({
+                sit: block.querySelector('.input-sit').value,
+                kitta: block.querySelector('.input-kitta').value,
+                area: block.querySelector('.input-area').value,
+                ghar: checkedRadio ? checkedRadio.value : '-',
+                bato: block.querySelector('.input-bato').value,
+                remarks: block.querySelector('.input-remarks').value
+            });
+        }
     });
 
-    const recordIndex = document.getElementById('editRecordIndex').value;
+    const recordId = document.getElementById('editRecordIndex').value;
     const currentObj = {
         patra, chalani, wada, name, miti,
         subject: "घर बाटो प्रमाणित",
@@ -190,19 +213,23 @@ function printAndSaveSystem() {
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin: document.getElementById('inSigMargin').value,
         landUseZone: document.getElementById('inLandUseZone').value,
-        kittas: kittaRecords
+        kittas: kittaRecords,
+        timestamp: Date.now()
     };
 
-    if (recordIndex !== "") {
-        globalDatabase[recordIndex] = currentObj;
-        document.getElementById('editRecordIndex').value = "";
-        document.getElementById('formMainTitle').innerText = "📝 सिफारिस प्रविष्टि";
-    } else {
-        globalDatabase.push(currentObj);
+    try {
+        if (recordId !== "") {
+            await db.collection("gharBatoRecords").doc(recordId).update(currentObj);
+            document.getElementById('editRecordIndex').value = "";
+            document.getElementById('formMainTitle').innerText = "📝 सिफारिस प्रविष्टि";
+        } else {
+            await db.collection("gharBatoRecords").add(currentObj);
+        }
+        window.print();
+    } catch (e) {
+        console.error(e);
+        alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
     }
-
-    localStorage.setItem('muniRecordsDB_v3', JSON.stringify(globalDatabase));
-    window.print();
 }
 
 // Renders the Modal Grid Elements Based on Target Parameters Filter Queries
@@ -212,7 +239,7 @@ function renderDatabaseTable() {
     tbody.innerHTML = '';
 
     let counter = 0;
-    globalDatabase.forEach((rec, idx) => {
+    globalDatabase.forEach((rec) => {
         if (search && !rec.name.toLowerCase().includes(search)) return;
         counter++;
         const rowHtml = `
@@ -223,8 +250,8 @@ function renderDatabaseTable() {
                 <td>${toNepaliDigit(rec.miti)}</td>
                 <td>
                     <div style="display:flex; gap:4px;">
-                        <button class="btn-action btn-edit-db" onclick="editFromDB(${idx})">📝</button>
-                        <button class="btn-action btn-del-db" onclick="deleteFromDB(${idx})">❌</button>
+                        <button class="btn-action btn-edit-db" onclick="editFromDB('${rec.id}')">📝</button>
+                        <button class="btn-action btn-del-db" onclick="deleteFromDB('${rec.id}')">❌</button>
                     </div>
                 </td>
             </tr>
@@ -234,10 +261,11 @@ function renderDatabaseTable() {
 }
 
 // Pulls Specific History Context Variables Back onto Screen
-function editFromDB(idx) {
-    const rec = globalDatabase[idx];
-    document.getElementById('editRecordIndex').value = idx;
-    document.getElementById('formMainTitle').innerText = "🔄 रेकर्ड सम्पादन मोड (" + toNepaliDigit(idx + 1) + ")";
+function editFromDB(id) {
+    const rec = globalDatabase.find(r => r.id === id);
+    if (!rec) return;
+    document.getElementById('editRecordIndex').value = id;
+    document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
 
     document.getElementById('inPatraSankhya').value = rec.patra;
     document.getElementById('inChalani').value = rec.chalani === '-' ? '' : rec.chalani;
@@ -272,11 +300,14 @@ function editFromDB(idx) {
 }
 
 // Deletes the Record Entry Permanently
-function deleteFromDB(idx) {
-    if (confirm("के तपाईं यो रेकर्ड डेटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
-        globalDatabase.splice(idx, 1);
-        localStorage.setItem('muniRecordsDB_v3', JSON.stringify(globalDatabase));
-        renderDatabaseTable();
+async function deleteFromDB(id) {
+    if (confirm("के तपाईं यो रेकर्ड क्लाउड डेटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
+        try {
+            await db.collection("gharBatoRecords").doc(id).delete();
+        } catch (e) {
+            console.error(e);
+            alert("डिलिट गर्न समस्या भयो ।");
+        }
     }
 }
 
