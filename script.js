@@ -98,7 +98,7 @@ function updateDoc() {
     document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value || '........';
     document.getElementById('lblOfficeName').innerText = document.getElementById('inOffice').value || '........';
     document.getElementById('lblOfficeAddress').innerText = document.getElementById('inOfficeAddress').value ? document.getElementById('inOfficeAddress').value + ' ।' : '........ ।';
-    
+
     const selectedWada = document.getElementById('inWadaNo').value;
     document.getElementById('lblWadaHeader').innerText = selectedWada;
     document.getElementById('lblWadaBody').innerText = selectedWada;
@@ -130,7 +130,7 @@ function updateDoc() {
     document.getElementById('lblSigTitle').innerText = sigTitle;
 
     const tbody = document.getElementById('outputTableBody');
-    tbody.innerHTML = ''; 
+    tbody.innerHTML = '';
 
     activeRowIds.forEach((id, index) => {
         const block = document.getElementById(id);
@@ -162,7 +162,7 @@ function printAndSaveSystem() {
     const patra = document.getElementById('inPatraSankhya').value;
     const wada = document.getElementById('inWadaNo').value;
     const miti = document.getElementById('inMiti').value;
-    
+
     let kittaRecords = [];
     activeRowIds.forEach(id => {
         const block = document.getElementById(id);
@@ -180,7 +180,7 @@ function printAndSaveSystem() {
     const recordIndex = document.getElementById('editRecordIndex').value;
     const currentObj = {
         patra, chalani, wada, name, miti,
-        subject: "घर बाटो प्रमाणित", 
+        subject: "घर बाटो प्रमाणित",
         ns: document.getElementById('inNepalSamvat').value,
         office: document.getElementById('inOffice').value,
         officeAddress: document.getElementById('inOfficeAddress').value,
@@ -189,20 +189,20 @@ function printAndSaveSystem() {
         customSignName: document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin: document.getElementById('inSigMargin').value,
-        landUseZone: document.getElementById('inLandUseZone').value, 
+        landUseZone: document.getElementById('inLandUseZone').value,
         kittas: kittaRecords
     };
 
     if (recordIndex !== "") {
-        globalDatabase[recordIndex] = currentObj; 
+        globalDatabase[recordIndex] = currentObj;
         document.getElementById('editRecordIndex').value = "";
         document.getElementById('formMainTitle').innerText = "📝 सिफारिस प्रविष्टि";
     } else {
-        globalDatabase.push(currentObj); 
+        globalDatabase.push(currentObj);
     }
 
     localStorage.setItem('muniRecordsDB_v3', JSON.stringify(globalDatabase));
-    window.print(); 
+    window.print();
 }
 
 // Renders the Modal Grid Elements Based on Target Parameters Filter Queries
@@ -210,7 +210,7 @@ function renderDatabaseTable() {
     const tbody = document.getElementById('dbTableBody');
     const search = document.getElementById('searchField').value.trim().toLowerCase();
     tbody.innerHTML = '';
-    
+
     let counter = 0;
     globalDatabase.forEach((rec, idx) => {
         if (search && !rec.name.toLowerCase().includes(search)) return;
@@ -237,7 +237,7 @@ function renderDatabaseTable() {
 function editFromDB(idx) {
     const rec = globalDatabase[idx];
     document.getElementById('editRecordIndex').value = idx;
-    document.getElementById('formMainTitle').innerText = "🔄 रेकर्ड सम्पादन मोड (" + toNepaliDigit(idx+1) + ")";
+    document.getElementById('formMainTitle').innerText = "🔄 रेकर्ड सम्पादन मोड (" + toNepaliDigit(idx + 1) + ")";
 
     document.getElementById('inPatraSankhya').value = rec.patra;
     document.getElementById('inChalani').value = rec.chalani === '-' ? '' : rec.chalani;
@@ -256,10 +256,10 @@ function editFromDB(idx) {
     } else {
         document.getElementById('customSignBox').style.display = 'none';
     }
-    
+
     document.getElementById('inLandUseZone').value = rec.landUseZone || 'NONE';
-    
-    if(rec.sigMargin) {
+
+    if (rec.sigMargin) {
         document.getElementById('inSigMargin').value = rec.sigMargin;
         adjustSignaturePosition(rec.sigMargin);
     }
@@ -268,7 +268,7 @@ function editFromDB(idx) {
     activeRowIds = [];
     rec.kittas.forEach(kData => { addKittaRow(kData); });
     updateDoc();
-    toggleModal(false); 
+    toggleModal(false);
 }
 
 // Deletes the Record Entry Permanently
@@ -333,15 +333,15 @@ function initializeFiscalYear(bsYear, bsMonth) {
         if (bsMonth < 4) {
             currentStartYear = bsYear - 1;
         }
-        
+
         const fySelect = document.getElementById('inPatraSankhya');
         if (fySelect) {
             fySelect.innerHTML = '';
-            
+
             const prevFY = formatFiscalYear(currentStartYear - 1);
             const currFY = formatFiscalYear(currentStartYear);
             const nextFY = formatFiscalYear(currentStartYear + 1);
-            
+
             fySelect.insertAdjacentHTML('beforeend', `<option value="${prevFY}">${prevFY}</option>`);
             fySelect.insertAdjacentHTML('beforeend', `<option value="${currFY}" selected>${currFY}</option>`);
             fySelect.insertAdjacentHTML('beforeend', `<option value="${nextFY}">${nextFY}</option>`);
@@ -365,7 +365,7 @@ function initializeAutomaticDate() {
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
             const adDateStr = `${yyyy}-${mm}-${dd}`;
-            
+
             const bsDate = converter.adToBs(adDateStr);
             let bsDayVal = 27;
             if (typeof bsDate === 'string') {
@@ -413,8 +413,8 @@ function initializeAutomaticDate() {
 }
 
 // Page Bootstrap Init
-window.onload = function() {
+window.onload = function () {
     initializeAutomaticDate();
-    addKittaRow(); 
-    adjustSignaturePosition(40); 
+    addKittaRow();
+    adjustSignaturePosition(40);
 };

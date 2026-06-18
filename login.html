@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>लग-इन | गौरादह नगरपालिका वडा नं. १ सिफारिस प्रणाली</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -53,7 +54,7 @@
             width: 280px;
             height: 280px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             bottom: -80px;
             right: -80px;
         }
@@ -64,7 +65,7 @@
             width: 160px;
             height: 160px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             top: -40px;
             left: -40px;
         }
@@ -74,7 +75,7 @@
             height: 80px;
             object-fit: contain;
             margin-bottom: 12px;
-            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
             position: relative;
             z-index: 1;
         }
@@ -92,7 +93,7 @@
         .login-left .divider {
             width: 50px;
             height: 2px;
-            background: rgba(255,255,255,0.4);
+            background: rgba(255, 255, 255, 0.4);
             margin-bottom: 18px;
             border-radius: 2px;
             position: relative;
@@ -222,11 +223,26 @@
 
         /* Enter key shake animation */
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-6px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(6px);
+            }
         }
-        .shake { animation: shake 0.4s ease; }
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
     </style>
 </head>
 
@@ -235,7 +251,8 @@
     <div class="login-card">
         <!-- LEFT BLUE PANEL -->
         <div class="login-left">
-            <img class="emblem" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+            <img class="emblem" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg"
+                alt="Nepal Emblem">
             <div class="gov-label">नेपाल सरकार</div>
             <div class="divider"></div>
             <div class="system-name">गौरादह नगरपालिका<br>वडा नं. १<br>सिफारिस प्रणाली</div>
@@ -251,7 +268,8 @@
             <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस्" autocomplete="username">
 
             <label class="form-label" for="inPassword">पासवर्ड</label>
-            <input class="form-input" type="password" id="inPassword" placeholder="••••••••" autocomplete="current-password">
+            <input class="form-input" type="password" id="inPassword" placeholder="••••••••"
+                autocomplete="current-password">
 
             <div class="error-msg" id="errorMsg">
                 <span>⚠️</span>
@@ -278,7 +296,7 @@
 
             if (username === 'wada1' && password === 'wada1') {
                 sessionStorage.setItem('sifarish_auth', 'true');
-                document.getElementById('btnLogin').textContent = '✅ प्रवेश हुँदैछ...';
+                document.getElementById('btnLogin').textContent = 'Verifying...';
                 document.getElementById('btnLogin').style.background = 'linear-gradient(135deg, #276749, #38a169)';
                 // Redirect to the originally requested page, or fallback to gharbato
                 const dest = sessionStorage.getItem('sifarish_redirect') || 'gharbato.html';
@@ -296,10 +314,11 @@
         }
 
         // Allow Enter key to submit
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') doLogin();
         });
     </script>
 
 </body>
+
 </html>

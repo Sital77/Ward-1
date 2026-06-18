@@ -101,42 +101,14 @@
 
         <div class="table-builder">
             <h3>🛣️ जग्गा र बाटोको विवरण</h3>
-            <div class="row-grid">
-                <div class="form-group">
-                    <label> कितता नं.:</label>
-                    <input type="text" id="inKitta" placeholder="उदा: १५२" oninput="updateDoc()">
-                </div>
-                <div class="form-group">
-                    <label>क्षेत्रफल (व.मि):</label>
-                    <input type="text" id="inArea" placeholder="उदा: ३५०" oninput="updateDoc()">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>बाटोको दिशा (छान्नुस् वा आफैँ लेख्नुस्):</label>
-                <input type="text" id="inDirection" list="dirList" placeholder="उदा: पूर्व" oninput="updateDoc()">
-                <datalist id="dirList">
-                    <option value="पूर्व"></option>
-                    <option value="पश्चिम"></option>
-                    <option value="उत्तर"></option>
-                    <option value="दक्षिण"></option>
-                </datalist>
-            </div>
-
-            <div class="row-grid">
-                <div class="form-group">
-                    <label>बाटोको चौडाइ (फिटमा):</label>
-                    <input type="text" id="inRoadWidth" placeholder="उदा: २०" oninput="updateDoc()">
-                </div>
-                <div class="form-group">
-                    <label>बाटोको प्रकार:</label>
-                    <select id="inRoadType" onchange="updateDoc()">
-                        <option value="पक्की">पक्की</option>
-                        <option value="कच्ची">कच्ची</option>
-                        <option value="ग्राभेल">ग्राभेल</option>
-                    </select>
-                </div>
-            </div>
+            <div id="kittaRowsContainer"></div>
+            <button type="button" class="btn-add-row" onclick="addKittaRow()">➕ थप जग्गा विवरण थप्नुहोस्</button>
+            <datalist id="dirList">
+                <option value="पूर्व"></option>
+                <option value="पश्चिम"></option>
+                <option value="उत्तर"></option>
+                <option value="दक्षिण"></option>
+            </datalist>
         </div>
 
         <div class="form-group"
@@ -239,12 +211,7 @@
                     style="display:none; font-weight:normal;"></span>ले यस वडा कार्यालयमा पेश गर्नुभएको माग बमोजिम निज
                 निवेदकको नाममा झापा जिल्ला गौरादह नगरपालिका वडा नं. <span id="lblWadaBody2" class="fill-space"
                     style="min-width:30px;">१</span> (साविक <span id="lblSabikAddress" class="fill-space"
-                    style="min-width:150px;">गौरादह गा.वि.स. वडा नं. १</span>) मा दर्ता कायम रहेको कित्ता नं. <span
-                    id="lblKittaNo" class="fill-space" style="min-width:70px;">...</span> को क्षेत्रफल: <span
-                    id="lblArea" class="fill-space" style="min-width:80px;">...</span> व.मि जग्गाहरूको <span
-                    id="lblDirection" class="fill-space" style="min-width:80px;">...</span> तर्फ <span id="lblRoadWidth"
-                    class="fill-space" style="min-width:50px;">...</span> फुटे <span id="lblRoadType" class="fill-space"
-                    style="min-width:80px;">पक्की</span> बाटो भएको व्यहोरा प्रमाणित गरिन्छ ।
+                    style="min-width:150px;">गौरादह गा.वि.स. वडा नं. १</span>) मा <span id="lblLandDetails">दर्ता कायम रहेको ...</span>
             </div>
 
             <div class="doc-footer" id="docFooterSection" style="margin-top: 80px;">
