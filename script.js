@@ -121,7 +121,6 @@ function updateDoc() {
     document.getElementById('lblOfficeAddress').innerText = document.getElementById('inOfficeAddress').value ? document.getElementById('inOfficeAddress').value + ' ।' : '........ ।';
 
     const selectedWada = document.getElementById('inWadaNo').value;
-    document.getElementById('lblWadaHeader').innerText = selectedWada;
     document.getElementById('lblWadaBody').innerText = selectedWada;
     document.getElementById('lblSabikAddress').innerText = 'गौरादह गा.वि.स. वडा नं. ' + (document.getElementById('inSabikWada').value || '...');
 
@@ -417,10 +416,27 @@ function initializeAutomaticDate() {
             nepaliBSDateStr = toNepaliDigit(englishBSDateStr);
         } else {
             const today = new Date();
-            const year = today.getFullYear();
-            bsYearVal = year + 57;
-            bsMonthVal = today.getMonth() < 6 ? 2 : 4;
-            nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/`);
+            const adYear  = today.getFullYear();
+            const adMonth = today.getMonth() + 1;
+            const adDay   = today.getDate();
+            let bsY = adYear + 57;
+            let bsM = 1;
+            if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
+            else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
+            else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
+            else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
+            else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
+            else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
+            else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
+            else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
+            else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
+            else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
+            else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
+            else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
+            bsYearVal  = bsY;
+            bsMonthVal = bsM;
+            const bsMStr = String(bsMonthVal).padStart(2, '0');
+            nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsMStr}/`);
         }
 
         initializeFiscalYear(bsYearVal, bsMonthVal);
