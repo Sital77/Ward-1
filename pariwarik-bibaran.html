@@ -67,7 +67,7 @@
 
         /* ===== PRINT: Force single page ===== */
         @media print {
-            @page { size: A4; margin: 0; }
+            @page { size: A4; margin: 1in; }
             .input-panel, .modal-overlay { display: none !important; }
             .preview-panel {
                 margin-left: 0 !important;
@@ -77,12 +77,12 @@
             }
             .a4-page {
                 box-shadow: none !important;
-                width: 210mm !important;
+                width: 100% !important;
                 min-height: unset !important;
                 height: auto !important;
-                max-height: 297mm !important;
+                max-height: none !important;
                 overflow: hidden !important;
-                padding: 10mm 16mm 10mm 16mm !important;
+                padding: 0 !important;
                 page-break-after: avoid !important;
                 page-break-inside: avoid !important;
             }

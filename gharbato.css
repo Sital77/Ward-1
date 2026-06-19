@@ -544,7 +544,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 @media print {
     @page {
         size: A4;
-        margin: 0;
+        margin: 1in;
     }
 
     .input-panel,
@@ -561,9 +561,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
     .a4-page {
         box-shadow: none !important;
-        padding: 12mm 18mm 15mm 18mm !important;
-        width: 210mm !important;
-        height: 297mm !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
         page-break-inside: avoid;
     }
 }

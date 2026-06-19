@@ -663,7 +663,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 @media print {
     @page {
         size: A4;
-        margin: 0;
+        margin: 1in;
     }
 
     .input-panel,
@@ -680,11 +680,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
     .a4-page {
         box-shadow: none !important;
-        padding: 12mm 16mm 10mm 16mm !important;
-        width: 210mm !important;
+        padding: 0 !important;
+        width: 100% !important;
         min-height: unset !important;
         height: auto !important;
-        max-height: 297mm !important;
+        max-height: none !important;
         overflow: hidden !important;
         page-break-after: avoid !important;
         page-break-inside: avoid !important;
