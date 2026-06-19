@@ -224,10 +224,18 @@
             <div class="form-group">
                 <label>पालिका:</label>
                 <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:3px;" id="palikaRadioGroup">
-                    <div class="radio-option"><input type="radio" id="p1" name="palikaRadio" value="कमल गाउँपालिका" onchange="updateDoc()" checked><label for="p1" class="radio-label" style="font-size:0.82rem;">कमल गाउँपालिका</label></div>
-                    <div class="radio-option"><input type="radio" id="p2" name="palikaRadio" value="गौरादह नगरपालिका" onchange="updateDoc()"><label for="p2" class="radio-label" style="font-size:0.82rem;">गौरादह न.पा.</label></div>
-                    <div class="radio-option"><input type="radio" id="p3" name="palikaRadio" value="दमक नगरपालिका" onchange="updateDoc()"><label for="p3" class="radio-label" style="font-size:0.82rem;">दमक न.पा.</label></div>
-                    <div class="radio-option"><input type="radio" id="p4" name="palikaRadio" value="CUSTOM" onchange="updateDoc(); toggleCustomPalika()"><label for="p4" class="radio-label" style="font-size:0.82rem;">आफैँ हाल्ने</label></div>
+                    <div class="radio-option"><input type="radio" id="p1" name="palikaRadio" value="कमल गाउँपालिका"
+                            onchange="updateDoc()" checked><label for="p1" class="radio-label"
+                            style="font-size:0.82rem;">कमल गाउँपालिका</label></div>
+                    <div class="radio-option"><input type="radio" id="p2" name="palikaRadio" value="गौरादह नगरपालिका"
+                            onchange="updateDoc()"><label for="p2" class="radio-label" style="font-size:0.82rem;">गौरादह
+                            न.पा.</label></div>
+                    <div class="radio-option"><input type="radio" id="p3" name="palikaRadio" value="दमक नगरपालिका"
+                            onchange="updateDoc()"><label for="p3" class="radio-label" style="font-size:0.82rem;">दमक
+                            न.पा.</label></div>
+                    <div class="radio-option"><input type="radio" id="p4" name="palikaRadio" value="CUSTOM"
+                            onchange="updateDoc(); toggleCustomPalika()"><label for="p4" class="radio-label"
+                            style="font-size:0.82rem;">आफैँ हाल्ने</label></div>
                 </div>
                 <input type="text" id="inCustomPalika" placeholder="पालिकाको नाम लेख्नुस्..."
                     style="display:none; margin-top:8px;" oninput="updateDoc()">
@@ -389,7 +397,7 @@
 
             <!-- ── Subject ── -->
             <div style="margin: 12px 0 20px 0; font-size:13.5pt; font-weight:700; text-align: center; width: 100%;">
-                विषय:- सिफारिस सम्बन्धमा ।
+                विषय:- <span id="lblSubject">स्थायी लेखा नम्बर सिफारिस सम्बन्धमा ।</span>
             </div>
 
             <!-- ── Body (खोल्ने) ── -->
@@ -397,9 +405,8 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा झापा जिल्ला
                 <span id="lblPalika"></span>
                 वडा नं. <span id="lblWadaBody"></span>
-                बसोबास गर्ने <span id="lblNameK"></span>ले यस कार्यालयमा पेश गर्नु भएको माग निवेदन अनुसार निज निवेदकको
-                नाममा
-                झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा सञ्चालन गर्नुभएको
+                बसोबास गर्ने <span id="lblNameK"></span>ले यस कार्यालयमा पेश गर्नु भएको माग निवेदन अनुसार
+                <span id="lblSifarisNamaK"></span> नाममा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा सञ्चालन गर्नुभएको
                 <span id="lblBusinessK"></span>
                 नामको व्यवसायको
                 <span id="lblDartaK" style="display:none;">(<span id="lblDartaNoK"></span><span
@@ -412,12 +419,12 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा झापा जिल्ला
                 <span id="lblPalikaBanda"></span>
                 वडा नं. <span id="lblWadaBodyBanda"></span>
-                बसोबास गर्ने निवेदक <span id="lblNameBanda"></span>ले यस कार्यालयमा पेश गर्नु भएको माग निवेदन अनुसार
-                <span id="lblSifarisNama"></span>को नाममा गौरादह नगरपालिका वडा नं.१ मा सञ्चालन गर्नुभएको
+                बसोबास गर्ने <span id="lblNameBanda"></span>ले यस कार्यालयमा पेश गर्नु भएको माग निवेदन अनुसार
+                <span id="lblSifarisNama"></span> नाममा गौरादह नगरपालिका वडा नं.१ मा सञ्चालन गर्नुभएको
                 <span id="lblBusinessBanda"></span>
                 <span id="lblDartaBanda" style="display:none;">(<span id="lblDartaNoBanda"></span><span
                         id="lblDartaMitiBanda"></span>)</span>
-                व्यवसायको हाल व्यवसाय बन्द भएको हुँदा सो व्यवसायको नाममा रहेको
+                व्यवसाय हाल बन्द भएको हुँदा सो व्यवसायको नाममा रहेको
                 स्थायी लेखा नं. <span id="lblPAN"></span>
                 को तहाँ कार्यालयको नियमानुसार बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>

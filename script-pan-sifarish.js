@@ -188,15 +188,25 @@ function updateDoc() {
     const dartaNo  = document.getElementById('inDartaNo').value  || '';
     const dartaMiti= document.getElementById('inDartaMiti').value|| '';
 
+    // Subject dynamic update based on mode
+    if (mode === 'kholne') {
+        document.getElementById('lblSubject').innerText = "स्थायी लेखा नम्बर सिफारिस सम्बन्धमा ।";
+    } else {
+        document.getElementById('lblSubject').innerText = "स्थायी लेखा नम्बर बन्द गरिदिने सम्बन्धमा ।";
+    }
+
     // sifarisNama resolution for preview
     const sifarisNamaRadios = document.getElementsByName('sifarisNamaRadio');
     let sifarisNamaType = 'nivedak';
     for (const r of sifarisNamaRadios) {
         if (r.checked) { sifarisNamaType = r.value; break; }
     }
-    let sifarisNamaVal = name;
-    if (sifarisNamaType === 'custom') {
-        sifarisNamaVal = document.getElementById('inSifarisNama').value || '';
+    let sifarisNamaVal = '';
+    if (sifarisNamaType === 'nivedak') {
+        sifarisNamaVal = 'निज निवेदकको';
+    } else {
+        const customName = document.getElementById('inSifarisNama').value.trim();
+        sifarisNamaVal = customName ? (customName + 'को') : '';
     }
 
     if (mode === 'kholne') {
