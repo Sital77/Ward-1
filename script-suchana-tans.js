@@ -62,6 +62,7 @@ function getSelectedAY() {
 // ── Live preview updater ────────────────────────────
 function updateDoc() {
     const ay       = getSelectedAY();
+    const bodyAY   = document.getElementById('inBodyAY').value;
     const chalani  = document.getElementById('inChalani').value       || '........';
     const miti     = document.getElementById('inMiti').value           || '........';
     const ns       = document.getElementById('inNepalSamvat').value    || '........';
@@ -78,7 +79,7 @@ function updateDoc() {
     document.getElementById('lblWadaHeader').innerText  = wada;
 
     // Body
-    document.getElementById('lblBodyAY').innerText       = ay;
+    document.getElementById('lblBodyAY').innerText       = bodyAY;
     document.getElementById('lblBodyChalani').innerText  = chalani;
     document.getElementById('lblBodyWada').innerText     = wada;
     document.getElementById('lblSandhiyarName').innerText= sandhiyar;
@@ -109,6 +110,7 @@ async function printAndSaveSystem() {
     }
 
     const ay          = getSelectedAY();
+    const bodyAY      = document.getElementById('inBodyAY').value;
     const chalani     = document.getElementById('inChalani').value.trim()        || '-';
     const miti        = document.getElementById('inMiti').value.trim()            || '-';
     const ns          = document.getElementById('inNepalSamvat').value.trim()     || '-';
@@ -123,7 +125,7 @@ async function printAndSaveSystem() {
     const recordId = document.getElementById('editRecordIndex').value;
 
     const obj = {
-        ay, chalani, miti, ns, wada,
+        ay, bodyAY, chalani, miti, ns, wada,
         name: sandhiyar,        // use sandhiyar as searchable name
         sandhiyar, praaptaMiti, tansMiti,
         subject: "सूचना टाँस",
@@ -183,6 +185,9 @@ function editFromDB(id) {
     // आ.व. radio
     const radios = document.querySelectorAll('input[name="ayRadio"]');
     radios.forEach(r => { r.checked = (r.value === rec.ay); });
+
+    // पत्रमा उल्लेख आ.व. dropdown
+    document.getElementById('inBodyAY').value = rec.bodyAY || rec.ay || '२०८०/०८१';
 
     document.getElementById('inChalani').value        = rec.chalani === '-' ? '' : rec.chalani;
     document.getElementById('inMiti').value           = rec.miti;
@@ -253,6 +258,8 @@ function initializeFiscalYear(bsYear, bsMonth) {
         let startYear = bsYear;
         if (bsMonth < 4) startYear = bsYear - 1;
         const currFY = formatFiscalYear(startYear);
+        
+        // Select letterhead FY radio
         const radios = document.querySelectorAll('input[name="ayRadio"]');
         let matched = false;
         radios.forEach(r => {
@@ -260,6 +267,12 @@ function initializeFiscalYear(bsYear, bsMonth) {
         });
         // fallback: select last option if no match
         if (!matched && radios.length) radios[radios.length - 1].checked = true;
+
+        // Select body FY option
+        const inBodyAY = document.getElementById('inBodyAY');
+        if (inBodyAY) {
+            inBodyAY.value = currFY;
+        }
     } catch (e) { console.error(e); }
 }
 

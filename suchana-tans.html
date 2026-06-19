@@ -22,15 +22,6 @@
         .recv-office { font-size: 11.5pt; font-weight: 600; }
         .recv-loc   { font-size: 11pt; }
 
-        /* Subject line */
-        .subject-line {
-            font-size: 13pt;
-            font-weight: 700;
-            text-align: left;
-            margin: 14px 0 12px 0;
-        }
-        .subject-line span.label { color: #e51a23; }
-
         /* Body paragraph */
         .letter-body-para {
             font-size: 13pt;
@@ -41,26 +32,10 @@
 
         /* Inline fill-space spans */
         .fill-space {
-            border-bottom: 1px solid #333;
             display: inline-block;
             min-width: 80px;
             text-align: center;
         }
-
-        /* Signature right-aligned */
-        .sig-block-right {
-            margin-top: 60px;
-            text-align: right;
-        }
-        .sig-block-right .sig-name {
-            font-weight: 700;
-            border-top: 1.5px dashed #000;
-            padding-top: 5px;
-            display: inline-block;
-            min-width: 150px;
-            text-align: center;
-        }
-        .sig-block-right .sig-title { font-size: 11pt; }
 
         /* Print: hide input panel */
         @media print {
@@ -85,7 +60,7 @@
 
         <!-- आ.व. -->
         <div class="form-group">
-            <label>आर्थिक वर्ष (आ.व.):</label>
+            <label>आर्थिक वर्ष (आ.व.) (लेटर हेडको लागि):</label>
             <div class="radio-container" id="ayRadioGroup">
                 <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८०/०८१" onchange="updateDoc()"><label for="ay1" class="radio-label">२०८०/०८१</label></div>
                 <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"><label for="ay2" class="radio-label">२०८१/०८२</label></div>
@@ -93,6 +68,18 @@
                 <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८३/०८४" onchange="updateDoc()"><label for="ay4" class="radio-label">२०८३/०८४</label></div>
                 <div class="radio-option"><input type="radio" id="ay5" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()"><label for="ay5" class="radio-label">२०८४/०८५</label></div>
             </div>
+        </div>
+
+        <!-- पत्रमा उल्लेख आ.व. -->
+        <div class="form-group">
+            <label>पत्रको व्यहोरामा उल्लेख गरिने आ.व.:</label>
+            <select id="inBodyAY" onchange="updateDoc()">
+                <option value="२०८०/०८१">२०८०/०८१</option>
+                <option value="२०८१/०८२">२०८१/०८२</option>
+                <option value="२०८२/०८३">२०८२/०८३</option>
+                <option value="२०८३/०८४">२०८३/०८४</option>
+                <option value="२०८४/०८५">२०८४/०८५</option>
+            </select>
         </div>
 
         <!-- च.नं. र मिति -->
@@ -237,8 +224,10 @@
             </div>
 
             <!-- ── Subject ── -->
-            <div class="subject-line">
-                <span class="label">विषयः</span> &nbsp;सूचना टाँस सम्बन्धमा ।
+            <div class="subject-container" style="text-align: center; margin: 15px 0 25px 0;">
+                <div class="subject-title" style="font-size: 16pt; font-weight: bold; text-decoration: underline; display: inline-block;">
+                    <span style="color: #e51a23;">विषयः</span> सूचना टाँस सम्बन्धमा ।
+                </div>
             </div>
 
             <!-- ── Body ── -->
@@ -258,9 +247,9 @@
 
             <!-- ── Signature ── -->
             <div class="doc-footer" id="docFooterSection">
-                <div class="sig-block-right">
+                <div class="signature-block">
                     <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
-                    <div class="sig-title" id="lblSigTitle">वडा अध्यक्ष</div>
+                    <div class="sig-title" id="lblSigTitle" style="font-weight: normal; font-size: 12pt;">वडा अध्यक्ष</div>
                 </div>
             </div>
 
