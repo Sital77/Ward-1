@@ -58,7 +58,7 @@ function setMode(mode) {
         btnBanda.className  = "mode-btn";
 
         // Form Fields
-        sifarisNamaSection.style.display = "none";
+        sifarisNamaSection.style.display = "block";
         panSection.style.display         = "none";
 
         // Preview Letters
@@ -76,11 +76,11 @@ function setMode(mode) {
         // Preview Letters
         bodyKholne.style.display = "none";
         bodyBanda.style.display  = "block";
-
-        // Sync initial name if needed
-        syncNivedakName();
-        toggleSifarisNama();
     }
+    
+    // Sync initial name if needed
+    syncNivedakName();
+    toggleSifarisNama();
     updateDoc();
 }
 
@@ -98,20 +98,17 @@ function toggleCustomPalika() {
 }
 
 function syncNivedakName() {
-    const mode = document.getElementById('currentMode').value;
-    if (mode === 'banda') {
-        const radios = document.getElementsByName('sifarisNamaRadio');
-        let sifarisNamaType = 'nivedak';
-        for (const r of radios) {
-            if (r.checked) {
-                sifarisNamaType = r.value;
-                break;
-            }
+    const radios = document.getElementsByName('sifarisNamaRadio');
+    let sifarisNamaType = 'nivedak';
+    for (const r of radios) {
+        if (r.checked) {
+            sifarisNamaType = r.value;
+            break;
         }
-        if (sifarisNamaType === 'nivedak') {
-            const nameVal = document.getElementById('inName').value;
-            document.getElementById('inSifarisNama').value = nameVal;
-        }
+    }
+    if (sifarisNamaType === 'nivedak') {
+        const nameVal = document.getElementById('inName').value;
+        document.getElementById('inSifarisNama').value = nameVal;
     }
 }
 
@@ -191,10 +188,22 @@ function updateDoc() {
     const dartaNo  = document.getElementById('inDartaNo').value  || '';
     const dartaMiti= document.getElementById('inDartaMiti').value|| '';
 
+    // sifarisNama resolution for preview
+    const sifarisNamaRadios = document.getElementsByName('sifarisNamaRadio');
+    let sifarisNamaType = 'nivedak';
+    for (const r of sifarisNamaRadios) {
+        if (r.checked) { sifarisNamaType = r.value; break; }
+    }
+    let sifarisNamaVal = name;
+    if (sifarisNamaType === 'custom') {
+        sifarisNamaVal = document.getElementById('inSifarisNama').value || '';
+    }
+
     if (mode === 'kholne') {
         document.getElementById('lblPalika').innerText     = palikaVal;
         document.getElementById('lblWadaBody').innerText   = wada;
         document.getElementById('lblNameK').innerText       = name;
+        document.getElementById('lblSifarisNamaK').innerText = sifarisNamaVal;
         document.getElementById('lblBusinessK').innerText   = business;
 
         const lblDartaK = document.getElementById('lblDartaK');
@@ -209,19 +218,8 @@ function updateDoc() {
         document.getElementById('lblPalikaBanda').innerText = palikaVal;
         document.getElementById('lblWadaBodyBanda').innerText = wada;
         document.getElementById('lblNameBanda').innerText   = name;
-        document.getElementById('lblBusinessBanda').innerText = business;
-
-        // sifarisNama resolution for preview
-        const sifarisNamaRadios = document.getElementsByName('sifarisNamaRadio');
-        let sifarisNamaType = 'nivedak';
-        for (const r of sifarisNamaRadios) {
-            if (r.checked) { sifarisNamaType = r.value; break; }
-        }
-        let sifarisNamaVal = name;
-        if (sifarisNamaType === 'custom') {
-            sifarisNamaVal = document.getElementById('inSifarisNama').value || '';
-        }
         document.getElementById('lblSifarisNama').innerText = sifarisNamaVal;
+        document.getElementById('lblBusinessBanda').innerText = business;
 
         const lblDartaBanda = document.getElementById('lblDartaBanda');
         if (hasDarta) {
@@ -406,15 +404,19 @@ function editFromDB(id) {
     document.getElementById('inDartaNo').value   = rec.dartaNo || '';
     document.getElementById('inDartaMiti').value = rec.dartaMiti || '';
 
-    // SifarisNama (banda only)
+    // SifarisNama (both modes)
+    const sifarisNamaRadios = document.getElementsByName('sifarisNamaRadio');
+    sifarisNamaRadios.forEach(r => {
+        r.checked = (r.value === rec.sifarisNamaRadio);
+    });
+    toggleSifarisNama();
+    document.getElementById('inSifarisNama').value = rec.sifarisNama || '';
+
+    // PAN (banda only)
     if (mode === 'banda') {
-        const sifarisNamaRadios = document.getElementsByName('sifarisNamaRadio');
-        sifarisNamaRadios.forEach(r => {
-            r.checked = (r.value === rec.sifarisNamaRadio);
-        });
-        toggleSifarisNama();
-        document.getElementById('inSifarisNama').value = rec.sifarisNama || '';
-        document.getElementById('inPAN').value          = rec.panVal || '';
+        document.getElementById('inPAN').value = rec.panVal || '';
+    } else {
+        document.getElementById('inPAN').value = '';
     }
 
     document.getElementById('inSignAuthority').value = rec.signAuth || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
