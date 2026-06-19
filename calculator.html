@@ -113,13 +113,18 @@
 
             if (totalKittas > 0) {
                 if (recType === "charKilla") {
-                    let runningKattha = 0; let extraKittas = 0;
-                    for(let i = 0; i < totalKittas; i++) {
-                        runningKattha += (kittaList[i] / 338.63);
-                        if(runningKattha > 5) extraKittas++;
+                    if (totalKittas === 1) {
+                        totalFee = 700;
+                        note = "१ कित्ताको जतिसुकै क्षेत्रफल भए पनि दस्तुर रु. ७०० मात्र लाग्नेछ।";
+                    } else {
+                        if (totalKattha <= 5) {
+                            totalFee = totalKittas * 700;
+                            note = "५ कट्ठा सम्मको लागि प्रति कित्ता रु. ७०० का दरले";
+                        } else {
+                            totalFee = totalKittas * 1400;
+                            note = "कुल क्षेत्रफल ५ कट्ठा नाघेकोले प्रति कित्ता रु. १४०० का दरले";
+                        }
                     }
-                    totalFee = 700 + (extraKittas * 700);
-                    note = extraKittas === 0 ? "५ कट्ठा सम्मको न्यूनतम दस्तुर (रु. ७००)" : `५ कट्ठा सम्मको रु. ७०० र क्रस गरेपछिका ${extraKittas} कित्ताको रु. ७०० का दरले`;
                 } 
                 else if (recType === "gharBato") {
                     if (totalKattha <= 5) {
