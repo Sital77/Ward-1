@@ -24,6 +24,7 @@ The sifarish section is protected by a login system. Users must authenticate bef
 | 🗺️ **चार किल्ला प्रमाणित** | Four boundary (land boundary) certification |
 | 🛣️ **बाटो प्रमाणित** | Road certification with land plot details |
 | 👨‍👩‍👧‍👦 **पारिवारिक विवरण प्रमाणित** | Family detail verification letter |
+| 📋 **सूचना टाँस पत्र** | 15-day public notice posting letter (सँधियार notice) |
 
 ### 🛠️ Public Utility Tools (No Login Required)
 | Tool | Description |
@@ -54,6 +55,9 @@ Ward-1/
 ├── charkilla.js                  # Charkilla form logic
 ├── script-bato-pramanit.js       # Bato Pramanit form logic
 ├── script-pariwarik-bibaran.js   # Pariwarik Bibaran form logic
+├── script-suchana-tans.js        # Suchana Tans form logic
+│
+├── suchana-tans.html             # सूचना टाँस पत्र form
 │
 ├── style.css                     # Global styles (Gharbato)
 ├── charkilla.css                 # Shared styles (Charkilla, Bato, Pariwarik)
