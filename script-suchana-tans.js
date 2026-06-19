@@ -61,13 +61,14 @@ function getSelectedAY() {
 
 // ── Live preview updater ────────────────────────────
 function updateDoc() {
-    const ay       = getSelectedAY();
-    const bodyAY   = document.getElementById('inBodyAY').value;
-    const chalani  = document.getElementById('inChalani').value       || '........';
-    const miti     = document.getElementById('inMiti').value           || '........';
-    const ns       = document.getElementById('inNepalSamvat').value    || '........';
-    const wada     = document.getElementById('inWadaNo').value;
-    const praaptaMiti= document.getElementById('inPraaptaMiti').value  || '........';
+    const ay          = getSelectedAY();
+    const bodyAY      = document.getElementById('inBodyAY').value;
+    const chalani     = document.getElementById('inChalani').value       || '........';
+    const bodyChalani = document.getElementById('inBodyChalani').value   || '........';
+    const miti        = document.getElementById('inMiti').value           || '........';
+    const ns          = document.getElementById('inNepalSamvat').value    || '........';
+    const wada        = document.getElementById('inWadaNo').value;
+    const praaptaMiti = document.getElementById('inPraaptaMiti').value   || '........';
 
     // Header
     document.getElementById('lblAY').innerText          = ay;
@@ -78,7 +79,7 @@ function updateDoc() {
 
     // Body
     document.getElementById('lblBodyAY').innerText       = bodyAY;
-    document.getElementById('lblBodyChalani').innerText  = chalani;
+    document.getElementById('lblBodyChalani').innerText  = bodyChalani;
     document.getElementById('lblBodyWada').innerText     = wada;
     document.getElementById('lblPraaptaMiti').innerText  = praaptaMiti;
 
@@ -108,6 +109,7 @@ async function printAndSaveSystem() {
     const ay          = getSelectedAY();
     const bodyAY      = document.getElementById('inBodyAY').value;
     const chalani     = document.getElementById('inChalani').value.trim()        || '-';
+    const bodyChalani = document.getElementById('inBodyChalani').value.trim()    || '-';
     const miti        = document.getElementById('inMiti').value.trim()            || '-';
     const ns          = document.getElementById('inNepalSamvat').value.trim()     || '-';
     const wada        = document.getElementById('inWadaNo').value;
@@ -120,8 +122,8 @@ async function printAndSaveSystem() {
     const recordId = document.getElementById('editRecordIndex').value;
 
     const obj = {
-        ay, bodyAY, chalani, miti, ns, wada,
-        name: chalani,          // searchable key = chalani
+        ay, bodyAY, chalani, bodyChalani, miti, ns, wada,
+        name: chalani,
         praaptaMiti,
         subject: "सूचना टाँस",
         signAuth, customSignName, customSignTitle, sigMargin,
@@ -186,6 +188,7 @@ function editFromDB(id) {
     document.getElementById('inBodyAY').value = rec.bodyAY || rec.ay || '२०८०/०८१';
 
     document.getElementById('inChalani').value        = rec.chalani === '-' ? '' : rec.chalani;
+    document.getElementById('inBodyChalani').value     = rec.bodyChalani === '-' ? '' : (rec.bodyChalani || rec.chalani || '');
     document.getElementById('inMiti').value           = rec.miti;
     document.getElementById('inNepalSamvat').value    = rec.ns;
     document.getElementById('inWadaNo').value         = rec.wada;

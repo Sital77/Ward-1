@@ -37,6 +37,36 @@
             text-align: center;
         }
 
+        /* ── Section Cards ── */
+        .section-card {
+            border-radius: 10px;
+            padding: 14px 14px 6px 14px;
+            margin-bottom: 18px;
+        }
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        /* Letterhead card — light grey */
+        .lh-section {
+            background: #f7fafc;
+            border: 1.5px solid #e2e8f0;
+        }
+        .lh-section .section-label { color: #4a5568; }
+        /* Body card — blue theme with low opacity */
+        .body-section {
+            background: rgba(43, 108, 176, 0.07);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
+        }
+        .body-section .section-label { color: #2b6cb0; }
+        .body-section label { color: #2c5282; }
+
         /* Print: hide input panel */
         @media print {
             .input-panel  { display: none !important; }
@@ -58,67 +88,83 @@
 
         <input type="hidden" id="editRecordIndex" value="">
 
-        <!-- आ.व. -->
-        <div class="form-group">
-            <label>आर्थिक वर्ष (आ.व.) (लेटर हेडको लागि):</label>
-            <div class="radio-container" id="ayRadioGroup">
-                <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८०/०८१" onchange="updateDoc()"><label for="ay1" class="radio-label">२०८०/०८१</label></div>
-                <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"><label for="ay2" class="radio-label">२०८१/०८२</label></div>
-                <div class="radio-option"><input type="radio" id="ay3" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()"><label for="ay3" class="radio-label">२०८२/०८३</label></div>
-                <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८३/०८४" onchange="updateDoc()"><label for="ay4" class="radio-label">२०८३/०८४</label></div>
-                <div class="radio-option"><input type="radio" id="ay5" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()"><label for="ay5" class="radio-label">२०८४/०८५</label></div>
+        <!-- ══ LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 लेटर हेड विवरण</div>
+
+            <!-- आ.व. (letterhead) -->
+            <div class="form-group">
+                <label>आर्थिक वर्ष (आ.व.):</label>
+                <div class="radio-container" id="ayRadioGroup">
+                    <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८०/०८१" onchange="updateDoc()"><label for="ay1" class="radio-label">२०८०/०८१</label></div>
+                    <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"><label for="ay2" class="radio-label">२०८१/०८२</label></div>
+                    <div class="radio-option"><input type="radio" id="ay3" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()"><label for="ay3" class="radio-label">२०८२/०८३</label></div>
+                    <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८३/०८४" onchange="updateDoc()"><label for="ay4" class="radio-label">२०८३/०८४</label></div>
+                    <div class="radio-option"><input type="radio" id="ay5" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()"><label for="ay5" class="radio-label">२०८४/०८५</label></div>
+                </div>
+            </div>
+
+            <!-- च.नं. र मिति -->
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="२०८३/०२/१८" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- नेपाल संवत् -->
+            <div class="form-group">
+                <label>नेपाल संवत् :</label>
+                <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
             </div>
         </div>
 
-        <!-- पत्रमा उल्लेख आ.व. -->
-        <div class="form-group">
-            <label>पत्रको व्यहोरामा उल्लेख गरिने आ.व.:</label>
-            <select id="inBodyAY" onchange="updateDoc()">
-                <option value="२०८०/०८१">२०८०/०८१</option>
-                <option value="२०८१/०८२">२०८१/०८२</option>
-                <option value="२०८२/०८३">२०८२/०८३</option>
-                <option value="२०८३/०८४">२०८३/०८४</option>
-                <option value="२०८४/०८५">२०८४/०८५</option>
-            </select>
-        </div>
+        <!-- ══ BODY SECTION ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">📝 विषयवस्तु विवरण</div>
 
-        <!-- च.नं. र मिति -->
-        <div class="row-grid">
+            <!-- आ.व. (body) -->
             <div class="form-group">
-                <label>चलानी नं (च.नं.):</label>
-                <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
-            </div>
-            <div class="form-group">
-                <label>मिति (वि.सं.):</label>
-                <input type="text" id="inMiti" placeholder="२०८३/०२/१८" oninput="updateDoc()">
-            </div>
-        </div>
-
-        <!-- नेपाल संवत् -->
-        <div class="form-group">
-            <label>नेपाल संवत् :</label>
-            <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
-        </div>
-
-        <!-- वडा नं -->
-        <div class="row-grid">
-            <div class="form-group">
-                <label>वडा नं (हाल):</label>
-                <select id="inWadaNo" onchange="updateDoc()">
-                    <option value="१" selected>१</option>
-                    <option value="२">२</option>
-                    <option value="३">३</option>
-                    <option value="४">४</option>
-                    <option value="५">५</option>
-                    <option value="६">६</option>
-                    <option value="७">७</option>
-                    <option value="८">८</option>
-                    <option value="९">९</option>
+                <label>आर्थिक वर्ष (आ.व.):</label>
+                <select id="inBodyAY" onchange="updateDoc()">
+                    <option value="२०८०/०८१">२०८०/०८१</option>
+                    <option value="२०८१/०८२">२०८१/०८२</option>
+                    <option value="२०८२/०८३">२०८२/०८३</option>
+                    <option value="२०८३/०८४">२०८३/०८४</option>
+                    <option value="२०८४/०८५">२०८४/०८५</option>
                 </select>
             </div>
+
+            <!-- च.नं. (body — SEPARATE) -->
             <div class="form-group">
-                <label>सूचना प्राप्त पत्रको मिति:</label>
-                <input type="text" id="inPraaptaMiti" placeholder="२०८३/०२/१८" oninput="updateDoc()">
+                <label>चलानी नं (च.नं.) — पत्रको विषयवस्तुमा:</label>
+                <input type="text" id="inBodyChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+            </div>
+
+            <!-- वडा नं र प्राप्त मिति -->
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>वडा नं:</label>
+                    <select id="inWadaNo" onchange="updateDoc()">
+                        <option value="१" selected>१</option>
+                        <option value="२">२</option>
+                        <option value="३">३</option>
+                        <option value="४">४</option>
+                        <option value="५">५</option>
+                        <option value="६">६</option>
+                        <option value="७">७</option>
+                        <option value="८">८</option>
+                        <option value="९">९</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>सूचना प्राप्त पत्रको मिति:</label>
+                    <input type="text" id="inPraaptaMiti" placeholder="२०८३/०२/१८" oninput="updateDoc()">
+                </div>
             </div>
         </div>
 
