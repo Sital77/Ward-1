@@ -39,6 +39,7 @@
         .card-act::before { background: linear-gradient(90deg, #dd6b20, #c05621); }
         .card-class::before { background: linear-gradient(90deg, #3182ce, #2b6cb0); }
         .card-sifarish::before { background: linear-gradient(90deg, #e51a23, #b31017); }
+        .card-suchana::before { background: linear-gradient(90deg, #6b46c1, #553c9a); }
 
         .card-icon { font-size: 3.2rem; margin-bottom: 12px; transition: transform 0.3s ease; }
         .card-title { font-size: 1.3rem; font-weight: 800; color: #1a202c; margin-bottom: 8px; }
@@ -54,6 +55,7 @@
         .card-act:hover { box-shadow: 0 15px 30px rgba(221, 107, 32, 0.15); border: 1px solid #fbd38d; }
         .card-class:hover { box-shadow: 0 15px 30px rgba(49, 130, 206, 0.15); border: 1px solid #bee3f8; }
         .card-sifarish:hover { box-shadow: 0 15px 30px rgba(229, 26, 35, 0.15); border: 1px solid #fed7d7; }
+        .card-suchana:hover { box-shadow: 0 15px 30px rgba(107, 70, 193, 0.15); border: 1px solid #d6bcfa; }
 
         /* Unified Modals Framework */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 32, 44, 0.65); backdrop-filter: blur(6px); z-index: 1000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
@@ -113,6 +115,8 @@
         body.dark-mode .system-footer { border-color: #4a5568; }
 
         @media (max-width: 900px) { .portal-grid { grid-template-columns: 1fr 1fr; } }
+        .portal-grid-wide { grid-template-columns: repeat(4, 1fr) !important; }
+        @media (max-width: 900px) { .portal-grid-wide { grid-template-columns: 1fr 1fr !important; } }
         @media (max-width: 600px) { .portal-grid, .sifarish-btn-grid { grid-template-columns: 1fr; } .mega-dashboard { padding: 25px 15px; } .muni-title { font-size: 20pt; } .wada-title { font-size: 24pt; } }
     </style>
 </head>
@@ -128,7 +132,8 @@
             <div class="sub-title">डिजिटल सेवा तथा सिफारिस व्यवस्थापन पोर्टल</div>
         </div>
 
-        <div class="portal-grid">
+        <!-- Row 1: 3 utility cards -->
+        <div class="portal-grid" style="margin-bottom:20px;">
             <div class="portal-card card-land" onclick="openModal('modal-land')">
                 <div class="card-icon">📐</div>
                 <div class="card-title">जग्गा / क्षेत्रफल</div>
@@ -146,7 +151,10 @@
                 <div class="card-title">सिफारिस दस्तुर</div>
                 <div class="card-desc">घर बाटो र चार किल्लाको क्षेत्रफल अनुसार लाग्ने राजस्व हिसाब गर्नुस्।</div>
             </div>
+        </div>
 
+        <!-- Row 2: 4 action cards -->
+        <div class="portal-grid portal-grid-wide">
             <div class="portal-card card-act" onclick="openModal('modal-act')">
                 <div class="card-icon">📜</div>
                 <div class="card-title">आर्थिक ऐन</div>
@@ -163,6 +171,12 @@
                 <div class="card-icon">🗂️</div>
                 <div class="card-title">सिफारिस प्रणाली</div>
                 <div class="card-desc">डिजिटल सिफारिस फर्म र अभिलेख प्रणाली खोल्नुहोस्।</div>
+            </div>
+
+            <div class="portal-card card-suchana" onclick="openSifarishLink('suchana-tans.html')">
+                <div class="card-icon">📋</div>
+                <div class="card-title">सूचना टाँस</div>
+                <div class="card-desc">१५ दिने सँधियार सूचना टाँस पत्र तयार गर्नुहोस्।</div>
             </div>
         </div>
 
@@ -252,8 +266,9 @@
             <div class="sifarish-btn-grid">
                 <a href="gharbato.html" class="sifarish-link-card"><span class="emoji">🏠</span> घर बाटो प्रमाणित</a>
                 <a href="charkilla.html" class="sifarish-link-card"><span class="emoji">🗺️</span> चार किल्ला प्रमाणित</a>
-                <a href="bato-pramanit.html" class="sifarish-link-card"><span class="emoji">🛣️</span> बाटो प्रमाणित </a>
+                <a href="bato-pramanit.html" class="sifarish-link-card"><span class="emoji">🛣️</span> बाटो प्रमाणित</a>
                 <a href="pariwarik-bibaran.html" class="sifarish-link-card"><span class="emoji">👨‍👩‍👧‍👦</span> पारिवारिक विवरण प्रमाणित</a>
+                <a href="suchana-tans.html" class="sifarish-link-card" style="border-color:#d6bcfa; grid-column: span 2;"><span class="emoji">📋</span> सूचना टाँस पत्र</a>
             </div>
         </div>
     </div>
@@ -293,6 +308,16 @@
             }
         }
 
+        function openSifarishLink(url) {
+            if (sessionStorage.getItem('sifarish_auth') === 'true') {
+                window.location.href = url;
+            } else {
+                sessionStorage.setItem('sifarish_redirect', url);
+                openModal('modal-sif-login');
+                setTimeout(() => document.getElementById('sifUser').focus(), 350);
+            }
+        }
+
         function doSifLogin() {
             const u = document.getElementById('sifUser').value.trim();
             const p = document.getElementById('sifPass').value.trim();
@@ -310,7 +335,13 @@
                     btn.textContent = 'लग-इन';
                     btn.style.background = '';
                     errEl.classList.remove('show');
-                    openModal('modal-sifarish');
+                    const redirect = sessionStorage.getItem('sifarish_redirect');
+                    if (redirect) {
+                        sessionStorage.removeItem('sifarish_redirect');
+                        window.location.href = redirect;
+                    } else {
+                        openModal('modal-sifarish');
+                    }
                 }, 700);
             } else {
                 errEl.classList.add('show');
