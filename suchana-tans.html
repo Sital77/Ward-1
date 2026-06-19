@@ -100,12 +100,6 @@
             <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
         </div>
 
-        <!-- सँधियारको नाम -->
-        <div class="form-group">
-            <label>सँधियारको नाम (जसको नाम टाँस गरिएको छ):</label>
-            <input type="text" id="inSandhiyarName" placeholder="उदा: राम बहादुर श्रेष्ठ" oninput="updateDoc()">
-        </div>
-
         <!-- वडा नं -->
         <div class="row-grid">
             <div class="form-group">
@@ -126,12 +120,6 @@
                 <label>सूचना प्राप्त पत्रको मिति:</label>
                 <input type="text" id="inPraaptaMiti" placeholder="२०८३/०२/१८" oninput="updateDoc()">
             </div>
-        </div>
-
-        <!-- सूचना टाँस मिति -->
-        <div class="form-group">
-            <label>सूचना टाँस गरिएको मिति:</label>
-            <input type="text" id="inTansMiti" placeholder="२०८३/०२/१८" oninput="updateDoc()">
         </div>
 
         <!-- हस्ताक्षर अधिकारी -->
@@ -168,14 +156,14 @@
             <button class="modal-close" onclick="toggleModal(false)">×</button>
             <h3 class="modal-title">🗄️ सूचना टाँस अभिलेख</h3>
             <div class="search-container">
-                <label>🔍 नामबाट खोज्नुहोस्:</label>
-                <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..." oninput="renderDatabaseTable()">
+                <label>🔍 च.नं. बाट खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="चलानी नं. टाइप गर्नुस्..." oninput="renderDatabaseTable()">
             </div>
             <table class="db-table">
                 <thead>
                     <tr>
                         <th style="width: 8%;">क्रम</th>
-                        <th style="width: 38%;">सँधियारको नाम</th>
+                        <th style="width: 38%;">चलानी नं.</th>
                         <th style="width: 27%;">विषय</th>
                         <th style="width: 17%;">मिति</th>
                         <th style="width: 10%;">कार्य</th>
@@ -238,11 +226,7 @@
                 को मिति:
                 <span id="lblPraaptaMiti" class="fill-space" style="min-width:90px;"></span>
                 को प्राप्त पत्र अनुसार गौरादह नगरपालिका वडा नं.<span id="lblBodyWada" class="fill-space" style="min-width:30px;"></span>
-                को सार्वजनिक सूचना पाटीमा
-                <span id="lblSandhiyarName" class="fill-space" style="min-width:160px; font-weight:700;"></span>
-                को नाम जारी भएको १५ दिने सूचना
-                <span id="lblTansMiti" class="fill-space" style="min-width:90px;"></span>
-                मिति देखि टाँस गरिएको व्यहोरा जानकारी गराइन्छ ।
+                को सार्वजनिक सूचना पाटीमा सँधियारको नाम जारी भएको १५ दिने सूचना टाँस गरिएको व्यहोरा जानकारी गराइन्छ ।
             </div>
 
             <!-- ── Signature ── -->

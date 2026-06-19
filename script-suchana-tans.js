@@ -67,9 +67,7 @@ function updateDoc() {
     const miti     = document.getElementById('inMiti').value           || '........';
     const ns       = document.getElementById('inNepalSamvat').value    || '........';
     const wada     = document.getElementById('inWadaNo').value;
-    const sandhiyar= document.getElementById('inSandhiyarName').value  || '.....................';
     const praaptaMiti= document.getElementById('inPraaptaMiti').value  || '........';
-    const tansMiti = document.getElementById('inTansMiti').value       || '........';
 
     // Header
     document.getElementById('lblAY').innerText          = ay;
@@ -82,9 +80,7 @@ function updateDoc() {
     document.getElementById('lblBodyAY').innerText       = bodyAY;
     document.getElementById('lblBodyChalani').innerText  = chalani;
     document.getElementById('lblBodyWada').innerText     = wada;
-    document.getElementById('lblSandhiyarName').innerText= sandhiyar;
     document.getElementById('lblPraaptaMiti').innerText  = praaptaMiti;
-    document.getElementById('lblTansMiti').innerText     = tansMiti;
 
     // Signature
     const signSelect = document.getElementById('inSignAuthority').value;
@@ -116,7 +112,6 @@ async function printAndSaveSystem() {
     const ns          = document.getElementById('inNepalSamvat').value.trim()     || '-';
     const wada        = document.getElementById('inWadaNo').value;
     const praaptaMiti = document.getElementById('inPraaptaMiti').value.trim()    || '-';
-    const tansMiti    = document.getElementById('inTansMiti').value.trim()        || '-';
     const signAuth    = document.getElementById('inSignAuthority').value;
     const customSignName  = document.getElementById('inCustomSignName').value;
     const customSignTitle = document.getElementById('inCustomSignTitle').value;
@@ -126,8 +121,8 @@ async function printAndSaveSystem() {
 
     const obj = {
         ay, bodyAY, chalani, miti, ns, wada,
-        name: sandhiyar,        // use sandhiyar as searchable name
-        sandhiyar, praaptaMiti, tansMiti,
+        name: chalani,          // searchable key = chalani
+        praaptaMiti,
         subject: "सूचना टाँस",
         signAuth, customSignName, customSignTitle, sigMargin,
         timestamp: Date.now()
@@ -155,14 +150,15 @@ function renderDatabaseTable() {
     tbody.innerHTML = '';
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        if (search && !rec.sandhiyar.toLowerCase().includes(search)) return;
+        const chalaniVal = (rec.chalani || '').toLowerCase();
+        if (search && !chalaniVal.includes(search)) return;
         counter++;
         tbody.insertAdjacentHTML('beforeend', `
             <tr>
                 <td><b>${toNepaliDigit(counter)}</b></td>
-                <td><b>${rec.sandhiyar}</b></td>
+                <td><b>${rec.chalani || '-'}</b></td>
                 <td><span style="color:#2b6cb0; font-weight:bold;">${rec.subject}</span></td>
-                <td>${toNepaliDigit(rec.miti)}</td>
+                <td>${rec.miti || '-'}</td>
                 <td>
                     <div style="display:flex; gap:4px;">
                         <button class="btn-action btn-edit-db" onclick="editFromDB('${rec.id}')">📝</button>
@@ -193,9 +189,7 @@ function editFromDB(id) {
     document.getElementById('inMiti').value           = rec.miti;
     document.getElementById('inNepalSamvat').value    = rec.ns;
     document.getElementById('inWadaNo').value         = rec.wada;
-    document.getElementById('inSandhiyarName').value  = rec.sandhiyar;
     document.getElementById('inPraaptaMiti').value    = rec.praaptaMiti;
-    document.getElementById('inTansMiti').value       = rec.tansMiti;
     document.getElementById('inSignAuthority').value  = rec.signAuth;
 
     if (rec.signAuth === 'CUSTOM') {
@@ -322,9 +316,6 @@ function initializeAutomaticDate() {
 
         const inPraaptaMiti = document.getElementById('inPraaptaMiti');
         if (inPraaptaMiti) inPraaptaMiti.value = nepaliBSDateStr;
-
-        const inTansMiti = document.getElementById('inTansMiti');
-        if (inTansMiti) inTansMiti.value = nepaliBSDateStr;
 
         const inNS = document.getElementById('inNepalSamvat');
         if (inNS) inNS.value = toNepaliDigit(nsYear);
