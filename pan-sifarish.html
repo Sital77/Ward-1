@@ -191,7 +191,7 @@
             <div class="row-grid">
                 <div class="form-group">
                     <label>वडा नं.:</label>
-                    <input type="text" id="inWadaNo" placeholder="उदा: १" oninput="updateDoc()">
+                    <input type="text" id="inWadaNo" placeholder="उदा: १" value="१" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
                     <label>निवेदकको नाम:</label>
@@ -303,8 +303,8 @@
                 <div class="lh-left">
                     <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
                     <div class="lh-meta">
-                        <div>आ.व. <span id="lblAY" class="fill-space" style="min-width:80px;"></span></div>
-                        <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width:60px;"></span></div>
+                        <div>आ.व. <span id="lblAY"></span></div>
+                        <div>च.नं. <span id="lblChalani"></span></div>
                     </div>
                 </div>
                 <div class="lh-center">
@@ -315,15 +315,15 @@
                     <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
                 </div>
                 <div class="lh-right">
-                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width:90px;"></span></div>
-                    <div class="ns-block">नेपाल संवत् : <span id="lblNepalSamvat" class="fill-space" style="min-width:50px;"></span></div>
+                    <div class="miti-block">मिति : <span id="lblMiti"></span></div>
+                    <div class="ns-block">नेपाल संवत् : <span id="lblNepalSamvat"></span></div>
                 </div>
             </div>
 
             <div class="header-red-line"></div>
 
             <!-- ── Receiver ── -->
-            <div style="margin-top:10px; margin-bottom:16px;">
+            <div style="margin-top:10px; margin-bottom:16px; text-align: left; width: 100%;">
                 <div style="font-weight:700; font-size:13.5pt; line-height:1.7;">
                     श्री करदाता सेवा कार्यालय<br>
                     गौरादह नगरपालिका<br>
@@ -332,19 +332,19 @@
             </div>
 
             <!-- ── Subject ── -->
-            <div style="margin: 12px 0 20px 0; font-size:13.5pt; font-weight:700;">
-                <span style="color:#e51a23;">विषय:-</span> सिफारिस सम्बन्धमा ।
+            <div style="margin: 12px 0 20px 0; font-size:13.5pt; font-weight:700; text-align: center; width: 100%;">
+                विषय:- सिफारिस सम्बन्धमा ।
             </div>
 
             <!-- ── Body (खोल्ने) ── -->
             <div class="letter-body-para" id="bodyKholne">
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा झापा जिल्ला
-                <span id="lblPalika" class="fill-space" style="min-width:120px; font-weight:700;"></span>
-                वडा नं.<span id="lblWadaBody" class="fill-space" style="min-width:30px;"></span>
-                बसोबास गर्ने <span id="lblNameK" class="fill-space" style="min-width:140px; font-weight:700;"></span>
+                <span id="lblPalika"></span>
+                वडा नं. <span id="lblWadaBody"></span>
+                बसोबास गर्ने निवेदक <span id="lblNameK"></span>
                 ले यस कार्यालयमा पेश गर्नु भएको माग निवेदन अनुसार निज निवेदकको नाममा
                 झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा सञ्चालन गर्नुभएको
-                <span id="lblBusinessK" class="fill-space" style="min-width:150px; font-weight:700;"></span>
+                <span id="lblBusinessK"></span>
                 नामको व्यवसायको
                 <span id="lblDartaK" style="display:none;">(<span id="lblDartaNoK"></span><span id="lblDartaMitiK"></span>)</span>
                 को लागि तहाँ कार्यालयको नियमानुसार स्थायी लेखा नम्बर उपलब्ध गराईदिनुहुन सिफारिस साथ अनुरोध छ ।
@@ -353,16 +353,16 @@
             <!-- ── Body (बन्द) ── -->
             <div class="letter-body-para" id="bodyBanda" style="display:none;">
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा झापा जिल्ला
-                <span id="lblPalikaBanda" class="fill-space" style="min-width:120px; font-weight:700;"></span>
-                वडा नं.<span id="lblWadaBodyBanda" class="fill-space" style="min-width:30px;"></span>
-                बसोबास गर्ने <span id="lblNameBanda" class="fill-space" style="min-width:140px; font-weight:700;"></span>
+                <span id="lblPalikaBanda"></span>
+                वडा नं. <span id="lblWadaBodyBanda"></span>
+                बसोबास गर्ने <span id="lblNameBanda"></span>
                 ले यस कार्यालयमा पेश गर्नु भएको माग निवेदन अनुसार
-                <span id="lblSifarisNama" class="fill-space" style="min-width:140px; font-weight:700;"></span>
+                <span id="lblSifarisNama"></span>
                 नाममा गौरादह नगरपालिका वडा नं.१ मा सञ्चालन गर्नुभएको
-                <span id="lblBusinessBanda" class="fill-space" style="min-width:150px; font-weight:700;"></span>
+                <span id="lblBusinessBanda"></span>
                 <span id="lblDartaBanda" style="display:none;">(<span id="lblDartaNoBanda"></span><span id="lblDartaMitiBanda"></span>)</span>
                 व्यवसायको हाल व्यवसाय बन्द भएको हुँदा सो व्यवसायको नाममा रहेको
-                स्थायी लेखा नं.<span id="lblPAN" class="fill-space" style="min-width:100px; font-weight:700;"></span>
+                स्थायी लेखा नं. <span id="lblPAN"></span>
                 को तहाँ कार्यालयको नियमानुसार बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>
 

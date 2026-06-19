@@ -159,12 +159,12 @@ function toggleModal(show) {
 function updateDoc() {
     const mode    = document.getElementById('currentMode').value;
     const ay      = getSelectedAY();
-    const chalani = document.getElementById('inChalani').value     || '........';
-    const miti    = document.getElementById('inMiti').value         || '........';
-    const ns      = document.getElementById('inNepalSamvat').value  || '........';
-    const wada    = document.getElementById('inWadaNo').value;
-    const name    = document.getElementById('inName').value         || '....................';
-    const business= document.getElementById('inBusiness').value     || '....................';
+    const chalani = document.getElementById('inChalani').value     || '';
+    const miti    = document.getElementById('inMiti').value         || '';
+    const ns      = document.getElementById('inNepalSamvat').value  || '';
+    const wada    = document.getElementById('inWadaNo').value.trim()|| '१';
+    const name    = document.getElementById('inName').value         || '';
+    const business= document.getElementById('inBusiness').value     || '';
 
     // Palika calculation
     let palikaVal = '';
@@ -176,7 +176,7 @@ function updateDoc() {
         }
     }
     if (palikaVal === 'CUSTOM') {
-        palikaVal = document.getElementById('inCustomPalika').value || '................';
+        palikaVal = document.getElementById('inCustomPalika').value || '';
     }
 
     // Letterhead
@@ -188,8 +188,8 @@ function updateDoc() {
 
     // Darta details
     const hasDarta = document.getElementById('chkDarta').checked;
-    const dartaNo  = document.getElementById('inDartaNo').value  || '........';
-    const dartaMiti= document.getElementById('inDartaMiti').value|| '........';
+    const dartaNo  = document.getElementById('inDartaNo').value  || '';
+    const dartaMiti= document.getElementById('inDartaMiti').value|| '';
 
     if (mode === 'kholne') {
         document.getElementById('lblPalika').innerText     = palikaVal;
@@ -200,7 +200,7 @@ function updateDoc() {
         const lblDartaK = document.getElementById('lblDartaK');
         if (hasDarta) {
             lblDartaK.style.display = 'inline';
-            document.getElementById('lblDartaNoK').innerText   = `व्यवसाय दर्ता नं.${dartaNo}, `;
+            document.getElementById('lblDartaNoK').innerText   = `व्यवसाय दर्ता नं. ${dartaNo}, `;
             document.getElementById('lblDartaMitiK').innerText = `व्यवसाय दर्ता मिति: ${dartaMiti}`;
         } else {
             lblDartaK.style.display = 'none';
@@ -219,7 +219,7 @@ function updateDoc() {
         }
         let sifarisNamaVal = name;
         if (sifarisNamaType === 'custom') {
-            sifarisNamaVal = document.getElementById('inSifarisNama').value || '................';
+            sifarisNamaVal = document.getElementById('inSifarisNama').value || '';
         }
         document.getElementById('lblSifarisNama').innerText = sifarisNamaVal;
 
@@ -232,7 +232,7 @@ function updateDoc() {
             lblDartaBanda.style.display = 'none';
         }
 
-        const panVal = document.getElementById('inPAN').value || '................';
+        const panVal = document.getElementById('inPAN').value || '';
         document.getElementById('lblPAN').innerText = panVal;
     }
 
@@ -240,8 +240,8 @@ function updateDoc() {
     const signSelect = document.getElementById('inSignAuthority').value;
     let sigName = '', sigTitle = '';
     if (signSelect === 'CUSTOM') {
-        sigName  = document.getElementById('inCustomSignName').value  || '....................';
-        sigTitle = document.getElementById('inCustomSignTitle').value || '....................';
+        sigName  = document.getElementById('inCustomSignName').value  || '';
+        sigTitle = document.getElementById('inCustomSignTitle').value || '';
     } else {
         const parts = signSelect.split('|');
         sigName  = parts[0];
