@@ -157,7 +157,15 @@ window.updateDoc = function () {
     const selectedWada = document.getElementById('inWadaNo').value;
     document.getElementById('lblWadaBody1').innerText = selectedWada;
     document.getElementById('lblWadaBody2').innerText = selectedWada;
-    document.getElementById('lblSabikAddress').innerText = 'गौरादह गा.वि.स. वडा नं. ' + (document.getElementById('inSabikWada').value || '...');
+
+    const sabikWada = document.getElementById('inSabikWada').value.trim();
+    const lblSabikContainer = document.getElementById('lblSabikContainer');
+    if (sabikWada === '') {
+        if (lblSabikContainer) lblSabikContainer.style.display = 'none';
+    } else {
+        if (lblSabikContainer) lblSabikContainer.style.display = 'inline';
+        document.getElementById('lblSabikAddress').innerText = 'गौरादह गा.वि.स. वडा नं. ' + sabikWada;
+    }
 
     document.getElementById('lblOwnerName').innerText = document.getElementById('inName').value || '...........................';
 
@@ -324,7 +332,7 @@ window.editFromDB = function (id) {
     document.getElementById('inMiti').value = rec.miti;
     document.getElementById('inNepalSamvat').value = rec.ns;
     document.getElementById('inWadaNo').value = rec.wada;
-    document.getElementById('inSabikWada').value = rec.sabikWada;
+    document.getElementById('inSabikWada').value = (rec.sabikWada === '-' || !rec.sabikWada) ? '' : rec.sabikWada;
     document.getElementById('inName').value = rec.name;
     document.getElementById('inCitNo').value = rec.citNo || '';
     document.getElementById('inCitDate').value = rec.citDate || '';

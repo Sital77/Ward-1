@@ -94,8 +94,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>साबिक वडा नं:</label>
-                <input type="text" id="inSabikWada" value="१" oninput="updateDoc()">
+                <label>साबिक वडा नं (वैकल्पिक):</label>
+                <input type="text" id="inSabikWada" value="" placeholder="उदा: १" oninput="updateDoc()">
             </div>
         </div>
 
@@ -211,8 +211,8 @@
                     style="font-weight:bold; min-width:200px;">.......</span><span id="lblCitBlock"
                     style="display:none; font-weight:normal;"></span>ले यस वडा कार्यालयमा पेश गर्नुभएको माग बमोजिम निज
                 निवेदकको नाममा झापा जिल्ला गौरादह नगरपालिका वडा नं. <span id="lblWadaBody2" class="fill-space"
-                    style="min-width:30px;">१</span> (साविक <span id="lblSabikAddress" class="fill-space"
-                    style="min-width:150px;">गौरादह गा.वि.स. वडा नं. १</span>) मा <span id="lblLandDetails">दर्ता कायम रहेको ...</span>
+                    style="min-width:30px;">१</span> <span id="lblSabikContainer">(साविक <span id="lblSabikAddress" class="fill-space"
+                    style="min-width:150px;">गौरादह गा.वि.स. वडा नं. १</span>)</span> मा <span id="lblLandDetails">दर्ता कायम रहेको ...</span>
             </div>
 
             <div class="doc-footer" id="docFooterSection" style="margin-top: 80px;">
@@ -231,7 +231,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="nepali-keyboard.js"></script>
     <script src="script-bato-pramanit.js"></script>
 </body>
 
