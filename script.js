@@ -138,15 +138,23 @@ function updateDoc() {
 
     const signSelect = document.getElementById('inSignAuthority').value;
     let sigName = "", sigTitle = "";
-    if (signSelect === 'CUSTOM') {
-        sigName = document.getElementById('inCustomSignName').value || '....................';
-        sigTitle = document.getElementById('inCustomSignTitle').value || '....................';
+    const lblSigName = document.getElementById('lblSigName');
+    if (signSelect === 'BLANK') {
+        sigName = "";
+        sigTitle = "";
+        lblSigName.style.borderTop = "none";
     } else {
-        const signData = signSelect.split('|');
-        sigName = signData[0];
-        sigTitle = signData[1];
+        lblSigName.style.borderTop = "1.5px dashed #000";
+        if (signSelect === 'CUSTOM') {
+            sigName = document.getElementById('inCustomSignName').value || '....................';
+            sigTitle = document.getElementById('inCustomSignTitle').value || '....................';
+        } else {
+            const signData = signSelect.split('|');
+            sigName = signData[0];
+            sigTitle = signData[1];
+        }
     }
-    document.getElementById('lblSigName').innerText = sigName;
+    lblSigName.innerText = sigName;
     document.getElementById('lblSigTitle').innerText = sigTitle;
 
     const tbody = document.getElementById('outputTableBody');

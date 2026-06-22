@@ -245,16 +245,24 @@ function updateDoc() {
 
     // Signature
     const signSelect = document.getElementById('inSignAuthority').value;
-    let sigName = '', sigTitle = '';
-    if (signSelect === 'CUSTOM') {
-        sigName  = document.getElementById('inCustomSignName').value  || '';
-        sigTitle = document.getElementById('inCustomSignTitle').value || '';
+    let sigName = "", sigTitle = "";
+    const lblSigName = document.getElementById('lblSigName');
+    if (signSelect === 'BLANK') {
+        sigName = "";
+        sigTitle = "";
+        lblSigName.style.borderTop = "none";
     } else {
-        const parts = signSelect.split('|');
-        sigName  = parts[0];
-        sigTitle = parts[1];
+        lblSigName.style.borderTop = "1.5px dashed #000";
+        if (signSelect === 'CUSTOM') {
+            sigName = document.getElementById('inCustomSignName').value || '....................';
+            sigTitle = document.getElementById('inCustomSignTitle').value || '....................';
+        } else {
+            const parts = signSelect.split('|');
+            sigName = parts[0];
+            sigTitle = parts[1];
+        }
     }
-    document.getElementById('lblSigName').innerText = sigName;
+    lblSigName.innerText = sigName;
     document.getElementById('lblSigTitle').innerText = sigTitle;
 }
 
