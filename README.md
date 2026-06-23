@@ -80,7 +80,7 @@ Ward-1/
 | **Database** | Firebase Firestore (for sifarish records) |
 | **Date Conversion** | `@sbmdkl/nepali-date-converter` (BS ↔ AD) |
 | **Print** | CSS `@media print` — A4 single-page output |
-| **Auth** | Session-based (`sessionStorage`) |
+| **Auth** | Session-based (`localStorage`) |
 
 ---
 
@@ -112,7 +112,7 @@ Each sifarish form includes:
 - नगेन्द्र भण्डारी — वडा अध्यक्ष
 - अन्जु निरौला — कार्यवाहक वडा अध्यक्ष
 - लक्ष्मीदेवी विश्वकर्मा — कार्यवाहक वडा अध्यक्ष
-- केशर बहादुर खवास — कार्यवाहक वडा अध्यक्ष
+- केशर बहादुर खवास भुजेल — कार्यवाहक वडा अध्यक्ष
 - जमुन राई — कार्यवाहक वडा अध्यक्ष
 - ✍️ Custom (user-defined)
 

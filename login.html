@@ -282,9 +282,9 @@
 
     <script>
         // If already logged in and came from a sifarish page, go back there
-        if (sessionStorage.getItem('sifarish_auth') === 'true') {
-            const dest = sessionStorage.getItem('sifarish_redirect') || 'gharbato.html';
-            sessionStorage.removeItem('sifarish_redirect');
+        if (localStorage.getItem('sifarish_auth') === 'true') {
+            const dest = localStorage.getItem('sifarish_redirect') || 'gharbato.html';
+            localStorage.removeItem('sifarish_redirect');
             window.location.replace(dest);
         }
 
@@ -295,12 +295,12 @@
             const card = document.querySelector('.login-right');
 
             if (username === 'wada1' && password === 'wada1') {
-                sessionStorage.setItem('sifarish_auth', 'true');
+                localStorage.setItem('sifarish_auth', 'true');
                 document.getElementById('btnLogin').textContent = 'Verifying...';
                 document.getElementById('btnLogin').style.background = 'linear-gradient(135deg, #276749, #38a169)';
                 // Redirect to the originally requested page, or fallback to gharbato
-                const dest = sessionStorage.getItem('sifarish_redirect') || 'gharbato.html';
-                sessionStorage.removeItem('sifarish_redirect');
+                const dest = localStorage.getItem('sifarish_redirect') || 'gharbato.html';
+                localStorage.removeItem('sifarish_redirect');
                 setTimeout(() => {
                     window.location.replace(dest);
                 }, 600);

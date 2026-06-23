@@ -743,7 +743,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     flex-direction: column;
     align-items: flex-end;
     padding-top: 101px;
-    font-size: 12pt;
+    font-size: 11pt;
     font-weight: 600;
     color: #000;
 }
@@ -751,14 +751,17 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .lh-right .miti-block {
     text-align: right;
     line-height: 1.45;
+    white-space: nowrap;
+    font-size: 11pt;
 }
 
 .lh-right .ns-block {
-    font-size: 12pt;
+    font-size: 11pt;
     font-weight: 600;
     line-height: 1.45;
     text-align: right;
     color: #000;
+    white-space: nowrap;
 }
 
 @media print {

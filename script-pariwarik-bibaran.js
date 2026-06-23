@@ -536,7 +536,7 @@ window.updateNepalSambatFromMiti = function () {
 
 window.fetchCurrentNepalSambat = async function () {
     try {
-        const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://www.nepalsambat.com/widget/nsstandard.php');
+        const url = 'https://corsproxy.io/?' + encodeURIComponent('https://www.nepalsambat.com/widget/nsstandard.php');
         const res = await fetch(url);
         if (!res.ok) return;
         const html = await res.text();
