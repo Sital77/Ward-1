@@ -15,6 +15,7 @@ const db = firebase.firestore();
 let globalDatabase = [];
 let rowCounter = 0;
 let activeRowIds = [];
+let isFirstRowSynced = true;
 
 // ३. रियल-टाइम डाटाबेस सिङ्क
 db.collection("pariwarikRecords").onSnapshot((snapshot) => {
@@ -59,12 +60,30 @@ window.syncOwnerName = function () {
     }
 }
 
+window.handleFirstRowManualEdit = function (rowId) {
+    if (activeRowIds.length > 0 && activeRowIds[0] === rowId) {
+        isFirstRowSynced = false;
+    }
+}
+
 window.addFamilyRow = function (data = null) {
     rowCounter++;
     const rowId = 'family_row_' + rowCounter;
     activeRowIds.push(rowId);
 
     const container = document.getElementById('familyRowsContainer');
+    
+    // Determine values to populate
+    let nameVal = data ? data.name : '';
+    let docVal = data ? data.document : '';
+    let relVal = data ? data.relationship : '';
+
+    if (activeRowIds.length === 1 && !data && isFirstRowSynced) {
+        nameVal = document.getElementById('inName').value;
+        docVal = document.getElementById('inCitNo').value;
+        relVal = 'आफैँ';
+    }
+
     const rowHtml = `
         <div class="member-row-block" id="${rowId}">
             <div class="row-num-badge">क्रम संख्या: <span class="row-index-display"></span></div>
@@ -72,17 +91,17 @@ window.addFamilyRow = function (data = null) {
             
             <div class="form-group" style="margin-bottom: 8px;">
                 <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">नाम थर:</label>
-                <input type="text" class="input-member-name" placeholder="उदा: रोजना श्रेष्ठ" value="${data ? data.name : ''}" oninput="updateDoc()">
+                <input type="text" class="input-member-name" placeholder="उदा: रोजना श्रेष्ठ" value="${nameVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
             </div>
             
             <div class="row-grid" style="margin-bottom: 0;">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">ना.प्र.नं./ज.द.नं.:</label>
-                    <input type="text" class="input-member-document" placeholder="उदा: ३४१५/२४०" value="${data ? data.document : ''}" oninput="updateDoc()">
+                    <input type="text" class="input-member-document" placeholder="उदा: ३४१५/२४०" value="${docVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">नाता:</label>
-                    <input type="text" class="input-member-relationship" list="relList" placeholder="उदा: श्रीमती" value="${data ? data.relationship : ''}" oninput="updateDoc()">
+                    <input type="text" class="input-member-relationship" list="relList" placeholder="उदा: श्रीमती" value="${relVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
                 </div>
             </div>
         </div>
@@ -93,6 +112,19 @@ window.addFamilyRow = function (data = null) {
 }
 
 window.removeFamilyRow = function (rowId) {
+    if (activeRowIds.length > 0 && activeRowIds[0] === rowId) {
+        // If first row is cleared, empty its inputs and stop auto-sync
+        const block = document.getElementById(rowId);
+        if (block) {
+            block.querySelector('.input-member-name').value = '';
+            block.querySelector('.input-member-document').value = '';
+            block.querySelector('.input-member-relationship').value = '';
+        }
+        isFirstRowSynced = false;
+        updateDoc();
+        return;
+    }
+
     if (activeRowIds.length <= 1) return;
     const el = document.getElementById(rowId);
     if (el) el.remove();
@@ -108,13 +140,43 @@ function reindexFormRows() {
             block.querySelector('.row-index-display').innerText = window.toNepaliDigit(index + 1);
             const delBtn = document.getElementById(`del_btn_${id}`);
             if (delBtn) {
-                delBtn.style.display = (activeRowIds.length === 1) ? 'none' : 'block';
+                // First row delete button is always visible so user can clear it
+                if (index === 0) {
+                    delBtn.style.display = 'block';
+                } else {
+                    delBtn.style.display = (activeRowIds.length === 1) ? 'none' : 'block';
+                }
             }
         }
     });
 }
 
+
 window.updateDoc = function () {
+    // Sync first row details if enabled
+    if (isFirstRowSynced && activeRowIds.length > 0) {
+        const firstRowId = activeRowIds[0];
+        const firstRowBlock = document.getElementById(firstRowId);
+        if (firstRowBlock) {
+            const applicantName = document.getElementById('inName').value;
+            const citNo = document.getElementById('inCitNo').value;
+            
+            const nameInput = firstRowBlock.querySelector('.input-member-name');
+            const docInput = firstRowBlock.querySelector('.input-member-document');
+            const relInput = firstRowBlock.querySelector('.input-member-relationship');
+            
+            if (document.activeElement !== nameInput) {
+                nameInput.value = applicantName;
+            }
+            if (document.activeElement !== docInput) {
+                docInput.value = citNo;
+            }
+            if (document.activeElement !== relInput) {
+                relInput.value = 'आफैँ';
+            }
+        }
+    }
+
     document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
     document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '........';
     document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value || '........';
@@ -277,6 +339,7 @@ window.editFromDB = function (id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
+    isFirstRowSynced = false;
     document.getElementById('editRecordIndex').value = id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
 
