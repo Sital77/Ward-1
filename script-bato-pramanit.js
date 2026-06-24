@@ -58,7 +58,11 @@ window.addKittaRow = function (data = null) {
             <div class="row-num-badge">क्रम संख्या: <span class="row-index-display"></span></div>
             <button type="button" class="btn-delete-row" id="del_btn_${rowId}" onclick="removeKittaRow('${rowId}')">हटाउनुस्</button>
             
-            <div class="row-grid">
+            <div class="row-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <div class="form-group">
+                    <label>सिट नं. (वैकल्पिक):</label>
+                    <input type="text" class="input-sit" placeholder="उदा: २ ग" value="${data ? (data.sit || '') : ''}" oninput="updateDoc()">
+                </div>
                 <div class="form-group">
                     <label>कित्ता नं.:</label>
                     <input type="text" class="input-kitta" placeholder="उदा: १५२" value="${data ? data.kitta : ''}" oninput="updateDoc()">
@@ -123,13 +127,15 @@ function generateLandDetailsText(lands) {
     
     let parts = [];
     lands.forEach((land) => {
+        const sit = land.sit ? land.sit.trim() : '';
         const kitta = land.kitta || '.......';
         const area = land.area || '.......';
         const direction = land.direction || '.......';
         const roadWidth = land.roadWidth || '....';
         const roadType = land.roadType || '.......';
         
-        parts.push(`कित्ता नं. <span class="fill-space" style="font-weight:bold;">${kitta}</span> को क्षेत्रफल: <span class="fill-space" style="font-weight:bold;">${area}</span> व.मि जग्गाको <span class="fill-space" style="font-weight:bold;">${direction}</span> तर्फ <span class="fill-space" style="font-weight:bold;">${roadWidth}</span> फुटे <span class="fill-space" style="font-weight:bold;">${roadType}</span> बाटो भएको`);
+        const sitText = sit ? `(सिट नं. <span class="fill-space">${sit}</span>) ` : '';
+        parts.push(`${sitText}कित्ता नं. <span class="fill-space">${kitta}</span> को क्षेत्रफल: <span class="fill-space">${area}</span> व.मि जग्गाको <span class="fill-space">${direction}</span> तर्फ <span class="fill-space">${roadWidth}</span> फुटे <span class="fill-space">${roadType}</span> बाटो भएको`);
     });
     
     let text = "दर्ता कायम रहेको ";
@@ -148,27 +154,24 @@ window.toggleCustomSign = function () {
     document.getElementById('customSignBox').style.display = (val === 'CUSTOM') ? 'grid' : 'none';
 }
 
+window.toggleAddressFields = function() {
+    const isChecked = document.getElementById('chkChangeAddress').checked;
+    document.getElementById('custAddressBox').style.display = isChecked ? 'grid' : 'none';
+}
+
 window.updateDoc = function () {
     document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
-    document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '........';
+    document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '';
     document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value || '........';
     document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value || '........';
 
     const selectedWada = document.getElementById('inWadaNo').value;
-    document.getElementById('lblWadaBody1').innerText = selectedWada;
-    document.getElementById('lblWadaBody2').innerText = selectedWada;
+    const changeAddress = document.getElementById('chkChangeAddress').checked;
 
-    const sabikWada = document.getElementById('inSabikWada').value.trim();
-    const lblSabikContainer = document.getElementById('lblSabikContainer');
-    if (sabikWada === '') {
-        if (lblSabikContainer) lblSabikContainer.style.display = 'none';
-    } else {
-        if (lblSabikContainer) lblSabikContainer.style.display = 'inline';
-        document.getElementById('lblSabikAddress').innerText = 'गौरादह गा.वि.स. वडा नं. ' + sabikWada;
-    }
+    document.getElementById('defaultLetterBody').style.display = changeAddress ? 'none' : 'block';
+    document.getElementById('customLetterBody').style.display = changeAddress ? 'block' : 'none';
 
-    document.getElementById('lblOwnerName').innerText = document.getElementById('inName').value || '...........................';
-
+    const nameVal = document.getElementById('inName').value || '...........................';
     const citNo = document.getElementById('inCitNo').value.trim();
     const citDate = document.getElementById('inCitDate').value.trim();
     let citText = "";
@@ -179,19 +182,12 @@ window.updateDoc = function () {
         citText += "जारी मिति: " + citDate;
     }
 
-    const citBlock = document.getElementById('lblCitBlock');
-    if (citText !== "") {
-        citBlock.innerText = " (" + citText + ") ";
-        citBlock.style.display = 'inline';
-    } else {
-        citBlock.style.display = 'none';
-    }
-
     let lands = [];
     activeRowIds.forEach(id => {
         const block = document.getElementById(id);
         if (block) {
             lands.push({
+                sit: block.querySelector('.input-sit') ? block.querySelector('.input-sit').value.trim() : '',
                 kitta: block.querySelector('.input-kitta').value.trim(),
                 area: block.querySelector('.input-area').value.trim(),
                 direction: block.querySelector('.input-direction').value.trim(),
@@ -202,9 +198,50 @@ window.updateDoc = function () {
     });
 
     const landDetailsText = generateLandDetailsText(lands);
-    const lblLandDetails = document.getElementById('lblLandDetails');
-    if (lblLandDetails) {
-        lblLandDetails.innerHTML = landDetailsText;
+
+    if (changeAddress) {
+        document.getElementById('lblCustDistrict').innerText = document.getElementById('inCustDistrict').value || '..........';
+        document.getElementById('lblCustPalika').innerText = document.getElementById('inCustPalika').value || '..........';
+        document.getElementById('lblCustWada').innerText = document.getElementById('inCustWada').value || '.........';
+        document.getElementById('lblOwnerNameCust').innerText = nameVal;
+        
+        const citBlockCust = document.getElementById('lblCitBlockCust');
+        if (citText !== "") {
+            citBlockCust.innerText = " (" + citText + ") ";
+            citBlockCust.style.display = 'inline';
+        } else {
+            citBlockCust.style.display = 'none';
+        }
+        
+        document.getElementById('lblWadaBody2Cust').innerText = selectedWada;
+        document.getElementById('lblLandDetailsCust').innerHTML = landDetailsText;
+    } else {
+        document.getElementById('lblWadaBody1').innerText = selectedWada;
+        document.getElementById('lblWadaBody2').innerText = selectedWada;
+
+        const sabikWada = document.getElementById('inSabikWada').value.trim();
+        const lblSabikContainer = document.getElementById('lblSabikContainer');
+        if (sabikWada === '') {
+            if (lblSabikContainer) lblSabikContainer.style.display = 'none';
+        } else {
+            if (lblSabikContainer) lblSabikContainer.style.display = 'inline';
+            document.getElementById('lblSabikAddress').innerText = 'गौरादह गा.वि.स. वडा नं. ' + sabikWada;
+        }
+
+        document.getElementById('lblOwnerName').innerText = nameVal;
+
+        const citBlock = document.getElementById('lblCitBlock');
+        if (citText !== "") {
+            citBlock.innerText = " (" + citText + ") ";
+            citBlock.style.display = 'inline';
+        } else {
+            citBlock.style.display = 'none';
+        }
+
+        const lblLandDetails = document.getElementById('lblLandDetails');
+        if (lblLandDetails) {
+            lblLandDetails.innerHTML = landDetailsText;
+        }
     }
 
     const signSelect = document.getElementById('inSignAuthority').value;
@@ -234,13 +271,21 @@ window.printAndSaveSystem = async function () {
     const name = document.getElementById('inName').value.trim();
     if (!name) { alert("कृपया निवेदकको नाम अनिवार्य लेख्नुहोस् ।"); return; }
 
-    const recordId = document.getElementById('editRecordIndex').value; // अब यसले क्लाउडको ID बोक्छ
+    const btn = document.querySelector('.btn-print');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⏳ सुरक्षित हुँदैछ...";
+    }
+
+    const recordId = document.getElementById('editRecordIndex').value; 
 
     let lands = [];
     activeRowIds.forEach(id => {
         const block = document.getElementById(id);
         if (block) {
             lands.push({
+                sit: block.querySelector('.input-sit') ? block.querySelector('.input-sit').value.trim() : '',
                 kitta: block.querySelector('.input-kitta').value.trim(),
                 area: block.querySelector('.input-area').value.trim(),
                 direction: block.querySelector('.input-direction').value.trim(),
@@ -250,7 +295,6 @@ window.printAndSaveSystem = async function () {
         }
     });
 
-    // डाटाबेस पठाउने प्याकेज
     const currentObj = {
         patra: document.getElementById('inPatraSankhya').value,
         chalani: document.getElementById('inChalani').value.trim() || '-',
@@ -262,6 +306,11 @@ window.printAndSaveSystem = async function () {
         subject: "बाटो प्रमाणित सिफारिस",
         ns: document.getElementById('inNepalSamvat').value,
         sabikWada: document.getElementById('inSabikWada').value,
+        changeAddress: document.getElementById('chkChangeAddress').checked,
+        custDistrict: document.getElementById('inCustDistrict').value,
+        custPalika: document.getElementById('inCustPalika').value,
+        custWada: document.getElementById('inCustWada').value,
+        sit: lands[0] ? lands[0].sit : '',
         kitta: lands[0] ? lands[0].kitta : '',
         area: lands[0] ? lands[0].area : '',
         direction: lands[0] ? lands[0].direction : '',
@@ -272,24 +321,26 @@ window.printAndSaveSystem = async function () {
         customSignName: document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin: document.getElementById('inSigMargin').value,
-        timestamp: Date.now() // समय रेकर्ड गर्ने
+        timestamp: Date.now() 
     };
 
     try {
         if (recordId !== "") {
-            // पुरानो रेकर्ड अपडेट (Edit) गर्ने
             await db.collection("batoPramanitRecords").doc(recordId).update(currentObj);
-            document.getElementById('editRecordIndex').value = "";
-            document.getElementById('formMainTitle').innerText = "📝 बाटो प्रमाणित प्रविष्टि";
         } else {
-            // नयाँ रेकर्ड क्लाउडमा थप्ने
-            await db.collection("batoPramanitRecords").add(currentObj);
+            const docRef = await db.collection("batoPramanitRecords").add(currentObj);
+            document.getElementById('editRecordIndex').value = docRef.id;
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
         }
-        // काम सफल भएपछि मात्र प्रिन्ट विन्डो खुल्छ
         window.print();
     } catch (e) {
         console.error(e);
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 }
 
@@ -337,10 +388,19 @@ window.editFromDB = function (id) {
     document.getElementById('inCitNo').value = rec.citNo || '';
     document.getElementById('inCitDate').value = rec.citDate || '';
 
+    // Custom address toggle and fields
+    const changeAddress = rec.changeAddress || false;
+    document.getElementById('chkChangeAddress').checked = changeAddress;
+    document.getElementById('inCustDistrict').value = rec.custDistrict || '';
+    document.getElementById('inCustPalika').value = rec.custPalika || '';
+    document.getElementById('inCustWada').value = rec.custWada || '';
+    window.toggleAddressFields();
+
     // Load landDetails with legacy fallback
     let lands = rec.landDetails;
     if (!lands || !Array.isArray(lands)) {
         lands = [{
+            sit: rec.sit || '',
             kitta: rec.kitta || '',
             area: rec.area || '',
             direction: rec.direction || '',

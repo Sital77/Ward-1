@@ -178,7 +178,7 @@ window.updateDoc = function () {
     }
 
     document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
-    document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '........';
+    document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '';
     document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value || '........';
     document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value || '........';
 
@@ -246,7 +246,7 @@ window.updateDoc = function () {
             tbody.insertAdjacentHTML('beforeend', `
                 <tr>
                     <td>${window.toNepaliDigit(index + 1)}</td>
-                    <td style="text-align: left; padding-left: 15px; font-weight: bold;">${mName || '................'}</td>
+                    <td style="text-align: left; padding-left: 15px;">${mName || '................'}</td>
                     <td>${mDoc}</td>
                     <td>${mRel}</td>
                 </tr>
@@ -294,18 +294,30 @@ window.printAndSaveSystem = async function () {
         timestamp: Date.now()
     };
 
+    const btn = document.querySelector('.btn-print');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⏳ सुरक्षित हुँदैछ...";
+    }
+
     try {
         if (recordId !== "") {
             await db.collection("pariwarikRecords").doc(recordId).update(currentObj);
-            document.getElementById('editRecordIndex').value = "";
-            document.getElementById('formMainTitle').innerText = "📝 पारिवारिक विवरण प्रविष्टि";
         } else {
-            await db.collection("pariwarikRecords").add(currentObj);
+            const docRef = await db.collection("pariwarikRecords").add(currentObj);
+            document.getElementById('editRecordIndex').value = docRef.id;
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
         }
         window.print();
     } catch (e) {
         console.error(e);
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 }
 

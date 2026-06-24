@@ -314,18 +314,30 @@ async function printAndSaveSystem() {
         timestamp:       Date.now()
     };
 
+    const btn = document.querySelector('.btn-print');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⏳ सुरक्षित हुँदैछ...";
+    }
+
     try {
         if (recordId !== "") {
             await db.collection("panRecords").doc(recordId).update(obj);
-            document.getElementById('editRecordIndex').value = "";
-            document.getElementById('formMainTitle').innerText = "📑 स्थायी लेखा नं. सिफारिस";
         } else {
-            await db.collection("panRecords").add(obj);
+            const docRef = await db.collection("panRecords").add(obj);
+            document.getElementById('editRecordIndex').value = docRef.id;
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
         }
         window.print();
     } catch (e) {
         console.error(e);
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 }
 

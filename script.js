@@ -114,7 +114,7 @@ function reindexFormRows() {
 // Core Dynamic Preview Updates Sync Controller Engine
 function updateDoc() {
     document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
-    document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '........';
+    document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '';
     document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value || '........';
     document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value || '........';
     document.getElementById('lblOfficeName').innerText = document.getElementById('inOffice').value || '........';
@@ -224,18 +224,30 @@ async function printAndSaveSystem() {
         timestamp: Date.now()
     };
 
+    const btn = document.querySelector('.btn-print');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⏳ सुरक्षित हुँदैछ...";
+    }
+
     try {
         if (recordId !== "") {
             await db.collection("gharBatoRecords").doc(recordId).update(currentObj);
-            document.getElementById('editRecordIndex').value = "";
-            document.getElementById('formMainTitle').innerText = "📝 सिफारिस प्रविष्टि";
         } else {
-            await db.collection("gharBatoRecords").add(currentObj);
+            const docRef = await db.collection("gharBatoRecords").add(currentObj);
+            document.getElementById('editRecordIndex').value = docRef.id;
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
         }
         window.print();
     } catch (e) {
         console.error(e);
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 }
 
