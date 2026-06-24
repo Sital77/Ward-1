@@ -251,6 +251,20 @@ async function printAndSaveSystem() {
     }
 }
 
+function formatTimestamp(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hr = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const formatted = `${y}/${m}/${day} ${hr}:${min}`;
+    const toNep = typeof toNepaliDigit === 'function' ? toNepaliDigit : (window.toNepaliDigit || (x => x));
+    return toNep(formatted);
+}
+
 // Renders the Modal Grid Elements Based on Target Parameters Filter Queries
 function renderDatabaseTable() {
     const tbody = document.getElementById('dbTableBody');
@@ -266,7 +280,10 @@ function renderDatabaseTable() {
                 <td><b>${toNepaliDigit(counter)}</b></td>
                 <td><b>${rec.name}</b></td>
                 <td><span style="color:#a51d24; font-weight:bold;">${rec.subject}</span></td>
-                <td>${toNepaliDigit(rec.miti)}</td>
+                <td>
+                    ${toNepaliDigit(rec.miti)}
+                    ${rec.timestamp ? `<div style="font-size:0.8rem; color:#718096; margin-top:2px;">⏱️ ${formatTimestamp(rec.timestamp)}</div>` : ''}
+                </td>
                 <td>
                     <div style="display:flex; gap:4px;">
                         <button class="btn-action btn-edit-db" onclick="editFromDB('${rec.id}')">📝</button>
