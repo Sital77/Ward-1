@@ -207,7 +207,7 @@ window.updateDoc = function () {
         
         const citBlockCust = document.getElementById('lblCitBlockCust');
         if (citText !== "") {
-            citBlockCust.innerText = " (" + citText + ") ";
+            citBlockCust.innerText = " (" + citText + ")";
             citBlockCust.style.display = 'inline';
         } else {
             citBlockCust.style.display = 'none';
@@ -232,7 +232,7 @@ window.updateDoc = function () {
 
         const citBlock = document.getElementById('lblCitBlock');
         if (citText !== "") {
-            citBlock.innerText = " (" + citText + ") ";
+            citBlock.innerText = " (" + citText + ")";
             citBlock.style.display = 'inline';
         } else {
             citBlock.style.display = 'none';

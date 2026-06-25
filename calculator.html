@@ -113,17 +113,12 @@
 
             if (totalKittas > 0) {
                 if (recType === "charKilla") {
-                    if (totalKittas === 1) {
-                        totalFee = 700;
-                        note = "१ कित्ताको जतिसुकै क्षेत्रफल भए पनि दस्तुर रु. ७०० मात्र लाग्नेछ।";
+                    if (totalKattha <= 5) {
+                        totalFee = totalKittas * 700;
+                        note = "५ कट्ठा सम्मको क्षेत्रफल भएमा प्रति कित्ता रु. ७०० का दरले";
                     } else {
-                        if (totalKattha <= 5) {
-                            totalFee = totalKittas * 700;
-                            note = "५ कट्ठा सम्मको लागि प्रति कित्ता रु. ७०० का दरले";
-                        } else {
-                            totalFee = totalKittas * 1400;
-                            note = "कुल क्षेत्रफल ५ कट्ठा नाघेकोले प्रति कित्ता रु. १४०० का दरले";
-                        }
+                        totalFee = 700 + ((totalKittas - 1) * 700);
+                        note = "५ कट्ठा भन्दा माथि भएमा (सुरुको ५ सम्मलाई रु. ७०० + बाँकी प्रति कित्ता थप रु. ७००)";
                     }
                 } 
                 else if (recType === "gharBato") {

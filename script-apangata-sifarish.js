@@ -100,7 +100,7 @@ function updateDoc() {
         if (citNo) parts.push(`ना.प्र.नं. ${citNo}`);
         if (citDate) parts.push(`जारी मिति: ${citDate}`);
         if (citDistrict) parts.push(`${citDistrict}`);
-        citBlock.innerText = ` (${parts.join(', ')}) `;
+        citBlock.innerText = ` (${parts.join(', ')})`;
     } else {
         citBlock.innerText = '';
     }
