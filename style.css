@@ -486,6 +486,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* ---------------- OFFICIAL NEPALESE DOCUMENT STYLE (A4 PRINT) ---------------- */
+.a4-page,
+.a4-page * {
+    font-family: 'Utsaah', 'Mukta', sans-serif;
+}
+
 .a4-page {
     width: 210mm;
     height: 297mm;
@@ -499,7 +504,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    font-family: 'Utsaah', 'Mukta', sans-serif;
 }
 
 /* Explicitly keep letterhead elements in Mukta font */

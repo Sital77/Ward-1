@@ -405,6 +405,11 @@ select:focus {
     transform: translateY(-1px);
 }
 
+.a4-page,
+.a4-page * {
+    font-family: 'Utsaah', 'Mukta', sans-serif;
+}
+
 .a4-page {
     width: 210mm;
     height: 297mm;
@@ -418,7 +423,6 @@ select:focus {
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    font-family: 'Utsaah', 'Mukta', sans-serif;
 }
 
 /* Explicitly keep letterhead elements in Mukta font */
