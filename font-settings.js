@@ -177,10 +177,15 @@
                 .address-to,
                 .address-to span,
                 .subject-container,
+                .subject-title,
                 .sig-name,
                 .sig-title {
                     font-size: var(--doc-font-size) !important;
                     color: var(--doc-text-color) !important;
+                }
+                
+                .subject-title span {
+                    font-size: var(--doc-font-size) !important;
                 }
                 
                 .letter-body,
