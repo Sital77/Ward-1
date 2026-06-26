@@ -5,7 +5,7 @@
         if (!btnPrint) return; // Not a template page or panel not ready
 
         // 1. Get saved styling values or defaults (Size: 18pt, Italic: false, Color: black)
-        const savedSize = localStorage.getItem('doc_font_size') || '18';
+        const savedSize = localStorage.getItem('doc_font_size') || '17';
         const savedItalic = localStorage.getItem('doc_font_style') === 'italic';
         const savedColor = localStorage.getItem('doc_text_color') || '#000000';
 
