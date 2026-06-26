@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सिफारिस प्रणाली - गौरादह नगरपालिका</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-group-dynamic {
+            margin-bottom: 15px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .form-group-dynamic:hover {
+            border-color: #cbd5e0;
+            background-color: #f1f5f9;
+        }
+
+        .fill-space {
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            border-bottom: 1px dashed #cbd5e0;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Authentication Guard -->
+    <script src="auth.js"></script>
+
+    <!-- Side Input Panel -->
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">📝 सिफारिस प्रविष्टि</h2>
+            <button class="btn-abhilekh" onclick="toggleRecordModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+
+        <!-- Dynamic Form Fields Container -->
+        <div id="dynamicInputsContainer">
+            <div style="color: #64748b; padding: 15px; text-align: center;">
+                🌀 सिफारिस ढाँचा लोड हुँदैछ... (Loading Fields)
+            </div>
+        </div>
+
+        <!-- Signature Authority Section -->
+        <div class="form-group" style="margin-top: 20px; background: #fff3f3; padding: 12px; border: 1px solid #feb2b2; border-radius: 8px;">
+            <label style="color: #c53030; font-weight: 700;">🖋️ हस्ताक्षर अधिकारी (Signature):</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
+                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()" class="input-field">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()" class="input-field">
+            </div>
+
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी (स्थान) मिलाउनुस्:</span>
+                    <span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40" oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र डेटाबेस सुरक्षित गर्नुस्</button>
+    </div>
+
+    <!-- Abhilekh Modal Dialog (Database Records) -->
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleRecordModal(false)">×</button>
+            <h3 class="modal-title">🗄️ सिफारिस अभिलेख (Database Records)</h3>
+
+            <div class="search-container" style="margin-bottom: 20px;">
+                <label style="font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">🔍 नामबाट खोज्नुहोस् (Search Name):</label>
+                <input type="text" id="searchField" class="input-field" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..." oninput="renderRecordsTable()">
+            </div>
+
+            <table class="db-table" style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+                <thead>
+                    <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0; text-align:left;">
+                        <th style="padding:10px; width: 10%;">क्रम</th>
+                        <th style="padding:10px; width: 45%;">निवेदक / सम्बन्धित नाम</th>
+                        <th style="padding:10px; width: 25%;">मिति</th>
+                        <th style="padding:10px; width: 20%; text-align:center;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px; color:#64748b;">अभिलेख लोड हुँदैछ...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Preview Panel A4 Page -->
+    <div class="preview-panel">
+        <div class="a4-page">
+            <!-- Standard Municipal Letterhead -->
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblPatraSankhya">२०८३/०८४</span></div>
+                        <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
+                    </div>
+                </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title">१ नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;"></span></div>
+                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;"></span></div>
+                </div>
+            </div>
+
+            <div class="header-red-line"></div>
+
+            <!-- Dynamic Template body is injected here dynamically -->
+            <div id="dynamicPageContentContainer"></div>
+        </div>
+    </div>
+
+    <!-- Script Imports -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="font-settings.js"></script>
+    
+    <script>
+        // Parse template ID from query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const templateId = urlParams.get('id');
+
+        if (!templateId) {
+            alert('⚠️ सिफारिस आईडी फेला परेन !');
+            window.location.replace('index.html');
+        }
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        let templateData = null;
+        let placeholders = [];
+        let globalRecords = [];
+        let currentRecordId = '';
+
+        // 1. Load template content
+        db.collection('sifarish_templates').doc(templateId).get().then(doc => {
+            if (!doc.exists) {
+                alert('⚠️ सिफारिस फेला परेन !');
+                window.location.replace('index.html');
+                return;
+            }
+            
+            templateData = doc.data();
+            document.title = `${templateData.title} - गौरादह नगरपालिका`;
+            document.getElementById('formMainTitle').innerText = `📝 ${templateData.title}`;
+
+            // Inject the content
+            const contentContainer = document.getElementById('dynamicPageContentContainer');
+            contentContainer.innerHTML = templateData.template_content;
+
+            // Process the template to find variables and placeholders
+            parsePlaceholders();
+            
+            // Generate form input fields
+            renderInputs();
+
+            // Set up date and initialize Sambat
+            initializeAutomaticDate();
+            adjustSignaturePosition(40);
+            updateDoc();
+
+            // Load records
+            loadRecords();
+
+        }).catch(err => {
+            console.error("Failed to load dynamic template:", err);
+            alert("डेटाबेस त्रुटि: " + err.message);
+        });
+
+        // 2. Extract variable placeholders (either double curly braces or elements with lbl id)
+        function parsePlaceholders() {
+            placeholders = [];
+            const container = document.getElementById('dynamicPageContentContainer');
+
+            // Find elements with ID starting with "lbl" (like lblOwnerName)
+            const lblElements = container.querySelectorAll('[id^="lbl"]');
+            
+            // Exclude header fields which are filled automatically
+            const excludeIds = ['lblMiti', 'lblNepalSamvat', 'lblPatraSankhya', 'lblChalani', 'lblSigName', 'lblSigTitle'];
+
+            lblElements.forEach(el => {
+                if (!excludeIds.includes(el.id)) {
+                    // Check if already added
+                    if (!placeholders.some(p => p.key === el.id)) {
+                        placeholders.push({
+                            type: 'id',
+                            key: el.id,
+                            label: getLabelForId(el.id)
+                        });
+                    }
+                }
+            });
+
+            // Find bracket variables {{placeholders}} inside HTML text content
+            const textContent = container.innerHTML;
+            const regex = /\{\{([^}]+)\}\}/g;
+            let match;
+            const bracketKeys = [];
+            
+            while ((match = regex.exec(textContent)) !== null) {
+                const varName = match[1].trim();
+                if (!bracketKeys.includes(varName)) {
+                    bracketKeys.push(varName);
+                }
+            }
+
+            bracketKeys.forEach((key, index) => {
+                // Generate a unique selector ID for this bracket var
+                const spanId = `bracket_var_${index}`;
+                // Replace all occurrences of {{key}} with a span in the DOM
+                container.innerHTML = container.innerHTML.replaceAll(`{{${key}}}`, `<span id="${spanId}" class="fill-space">.......</span>`);
+                placeholders.push({
+                    type: 'bracket',
+                    key: spanId,
+                    label: key
+                });
+            });
+        }
+
+        // Mappings for standard ID label translations
+        function getLabelForId(id) {
+            const mapping = {
+                'lblOwnerName': 'जग्गाधनी/निवेदकको पुरा नाम',
+                'lblWadaBody': 'वडा नं.',
+                'lblWadaBody2': 'वडा नं. (दोस्रो स्थान)',
+                'lblSabikAddress': 'साबिक ठेगाना (गा.वि.स. र वडा)',
+                'lblSabikAddress2': 'साबिक ठेगाना (दोस्रो स्थान)',
+                'lblOfficeName': 'कार्यालयको नाम',
+                'lblOfficeAddress': 'कार्यालयको ठेगाना',
+                'lblCitNo': 'नागरिकता नं.',
+                'lblCitDate': 'नागरिकता जारी मिति',
+                'lblCitDistrict': 'नागरिकता जारी जिल्ला',
+                'lblApplicantName': 'निवेदकको नाम',
+                'lblBatoName': 'बाटोको नाम',
+                'lblKittaNo': 'कित्ता नं.',
+                'lblArea': 'क्षेत्रफल',
+                'lblLandUseStatement': 'भूउपयोग ऐन व्यहोरा',
+                'lblSelectedZone': 'वर्गीकृत क्षेत्र',
+                'lblPAN': 'स्थायी लेखा नं. (PAN)'
+            };
+            if (mapping[id]) return mapping[id];
+            return id.replace(/^lbl/, '').replace(/([A-Z])/g, ' $1').trim();
+        }
+
+        // 3. Render left panel form inputs dynamically
+        function renderInputs() {
+            const container = document.getElementById('dynamicInputsContainer');
+            container.innerHTML = '';
+
+            // Add standard metadata fields
+            const standardFields = `
+                <div class="form-group">
+                    <label>पत्र संख्या (Patra Sankhya):</label>
+                    <select id="inPatraSankhya" onchange="updateDoc()">
+                        <option value="२०८२/०८३">२०८२/०८३</option>
+                        <option value="२०८३/०८४" selected>२०८३/०८४</option>
+                        <option value="२०८४/०८५">२०८४/०८५</option>
+                        <option value="२०८५/०८६">२०८५/०८६</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>चलानी नं (Chalani No):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५१" oninput="updateDoc()">
+                </div>
+                <div class="row-grid">
+                    <div class="form-group">
+                        <label>मिति (मिति):</label>
+                        <input type="text" id="inMiti" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                    </div>
+                    <div class="form-group">
+                        <label>ने.स. :</label>
+                        <input type="text" id="inNepalSamvat" oninput="updateDoc()">
+                    </div>
+                </div>
+                <hr style="border:0; border-top:1px solid #edf2f7; margin:20px 0;">
+            `;
+            container.insertAdjacentHTML('beforeend', standardFields);
+
+            // Add dynamic fields
+            placeholders.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'form-group form-group-dynamic';
+                row.innerHTML = `
+                    <label>${p.label}:</label>
+                    <input type="text" class="input-dynamic-field" id="input_${p.key}" placeholder="${p.label} लेख्नुहोस्" oninput="updateDoc()">
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // 4. Update preview document text in real time
+        function updateDoc() {
+            // Update standard fields
+            const patraVal = document.getElementById('inPatraSankhya').value;
+            const chalaniVal = document.getElementById('inChalani').value;
+            const mitiVal = document.getElementById('inMiti').value;
+            const nsVal = document.getElementById('inNepalSamvat').value;
+
+            document.getElementById('lblPatraSankhya').innerText = patraVal;
+            document.getElementById('lblChalani').innerText = chalaniVal || '.......';
+            document.getElementById('lblMiti').innerText = mitiVal || '.......';
+            document.getElementById('lblNepalSamvat').innerText = nsVal || '.......';
+
+            // Update dynamic placeholders
+            placeholders.forEach(p => {
+                const inputVal = document.getElementById(`input_${p.key}`).value;
+                const element = document.getElementById(p.key);
+                if (element) {
+                    element.innerText = inputVal || '.......';
+                }
+            });
+
+            // Update signatures
+            const sigAuthority = document.getElementById('inSignAuthority').value;
+            let sigName = '';
+            let sigTitle = '';
+
+            if (sigAuthority === 'CUSTOM') {
+                sigName = document.getElementById('inCustomSignName').value;
+                sigTitle = document.getElementById('inCustomSignTitle').value;
+            } else if (sigAuthority !== 'BLANK') {
+                const parts = sigAuthority.split('|');
+                sigName = parts[0];
+                sigTitle = parts[1];
+            }
+
+            const lblName = document.getElementById('lblSigName');
+            const lblTitle = document.getElementById('lblSigTitle');
+
+            if (lblName) lblName.innerText = sigName;
+            if (lblTitle) lblTitle.innerText = sigTitle;
+        }
+
+        // Toggle custom signature inputs
+        function toggleCustomSign() {
+            const val = document.getElementById('inSignAuthority').value;
+            document.getElementById('customSignBox').style.display = (val === 'CUSTOM') ? 'grid' : 'none';
+        }
+
+        // Convert English digit to Nepali unicode
+        function toNepaliDigit(num) {
+            const nd = ['०','१','२','३','४','५','६','७','८','९'];
+            return num.toString().split('').map(d => nd[d] || d).join('');
+        }
+
+        // Adjust signature margins
+        function adjustSignaturePosition(value) {
+            document.getElementById('marginVal').innerText = toNepaliDigit(value) + " px";
+            const docFooter = document.getElementById('docFooterSection');
+            if (docFooter) docFooter.style.marginTop = value + "px";
+        }
+
+        // 5. Automatic date initialization
+        function initializeAutomaticDate() {
+            const today = new NepaliDate();
+            const formatted = today.format('YYYY/MM/DD');
+            document.getElementById('inMiti').value = formatted;
+            updateNepalSambatFromMiti();
+        }
+
+        function updateNepalSambatFromMiti() {
+            const mitiVal = document.getElementById('inMiti').value.trim();
+            try {
+                const parts = mitiVal.split('/');
+                if (parts.length === 3) {
+                    const yr = parseInt(parts[0]);
+                    const mt = parseInt(parts[1]) - 1;
+                    const dy = parseInt(parts[2]);
+                    
+                    const nepDate = new NepaliDate(yr, mt, dy);
+                    const engDate = nepDate.toJsDate();
+                    
+                    // Simple estimation: Nepal Sambat is approx English Year + 880 years (Karthik Sukla Pratipada)
+                    const engYear = engDate.getFullYear();
+                    const nsYear = toNepaliDigit(engYear - 879);
+                    document.getElementById('inNepalSamvat').value = nsYear;
+                }
+            } catch (e) {
+                console.warn("Sambat calculation failed:", e);
+            }
+        }
+
+        // 6. Real-time records management (Abhilekh)
+        function loadRecords() {
+            db.collection('dynamicSifarishRecords')
+                .where('templateId', '==', templateId)
+                .onSnapshot(snapshot => {
+                    globalRecords = [];
+                    snapshot.forEach(doc => {
+                        globalRecords.push({ id: doc.id, ...doc.data() });
+                    });
+                    globalRecords.sort((a,b) => b.timestamp - a.timestamp);
+                    renderRecordsTable();
+                });
+        }
+
+        // Render records in table list
+        function renderRecordsTable() {
+            const searchVal = document.getElementById('searchField').value.toLowerCase().trim();
+            const body = document.getElementById('dbTableBody');
+            body.innerHTML = '';
+
+            const filtered = globalRecords.filter(r => {
+                return r.applicantName.toLowerCase().includes(searchVal);
+            });
+
+            if (filtered.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px; color:#64748b;">कुनै अभिलेख फेला परेन।</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((r, idx) => {
+                const dateStr = r.miti || 'N/A';
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #edf2f7';
+                tr.innerHTML = `
+                    <td style="padding:10px;">${idx + 1}</td>
+                    <td style="padding:10px; font-weight:700;">${r.applicantName}</td>
+                    <td style="padding:10px;">${dateStr}</td>
+                    <td style="padding:10px; text-align:center;">
+                        <button onclick="editRecord('${r.id}')" style="background:#3182ce; color:#fff; border:none; padding:4px 8px; border-radius:5px; cursor:pointer; margin-right:5px;">✏️</button>
+                        <button onclick="deleteRecord('${r.id}')" style="background:#e53e3e; color:#fff; border:none; padding:4px 8px; border-radius:5px; cursor:pointer;">🗑️</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        // Open/Close modal
+        function toggleRecordModal(show) {
+            const modal = document.getElementById('abhilekhModal');
+            if (show) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+            } else {
+                modal.classList.remove('active');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+        }
+
+        // Pre-fill fields for editing record
+        function editRecord(id) {
+            const rec = globalRecords.find(r => r.id === id);
+            if (!rec) return;
+
+            currentRecordId = rec.id;
+            document.getElementById('editRecordIndex').value = rec.id;
+
+            // Load standard metadata values
+            document.getElementById('inPatraSankhya').value = rec.patraSankhya || '२०८३/०८४';
+            document.getElementById('inChalani').value = rec.chalani || '';
+            document.getElementById('inMiti').value = rec.miti || '';
+            document.getElementById('inNepalSamvat').value = rec.nepalSamvat || '';
+
+            // Load signature settings
+            if (rec.sigAuthority) {
+                document.getElementById('inSignAuthority').value = rec.sigAuthority;
+                toggleCustomSign();
+                if (rec.sigAuthority === 'CUSTOM') {
+                    document.getElementById('inCustomSignName').value = rec.sigName || '';
+                    document.getElementById('inCustomSignTitle').value = rec.sigTitle || '';
+                }
+            }
+
+            // Load dynamic values
+            placeholders.forEach(p => {
+                const val = rec.formData && rec.formData[p.key] ? rec.formData[p.key] : '';
+                document.getElementById(`input_${p.key}`).value = val;
+            });
+
+            updateDoc();
+            toggleRecordModal(false);
+            alert('📝 अभिलेख डेटा लोड भयो! सम्पादन गरी सुरक्षित गर्न सक्नुहुन्छ।');
+        }
+
+        // Delete record from history
+        function deleteRecord(id) {
+            const check = confirm('❌ के तपाईं यो अभिलेख हटाउन निश्चित हुनुहुन्छ?');
+            if (!check) return;
+
+            db.collection('dynamicSifarishRecords').doc(id).delete()
+                .then(() => alert('🗑️ अभिलेख सफलतापूर्वक हटाइयो!'))
+                .catch(err => alert('⚠️ हटाउन सकिएन: ' + err.message));
+        }
+
+        // 7. Save generation record and execute print
+        function printAndSaveSystem() {
+            // Find applicant name from first text input field as candidate
+            let applicantName = 'सम्बन्धित निवेदक';
+            if (placeholders.length > 0) {
+                const firstVal = document.getElementById(`input_${placeholders[0].key}`).value;
+                if (firstVal) applicantName = firstVal;
+            }
+
+            const formData = {};
+            placeholders.forEach(p => {
+                formData[p.key] = document.getElementById(`input_${p.key}`).value;
+            });
+
+            const patraSankhya = document.getElementById('inPatraSankhya').value;
+            const chalani = document.getElementById('inChalani').value;
+            const miti = document.getElementById('inMiti').value;
+            const nepalSamvat = document.getElementById('inNepalSamvat').value;
+
+            // Signature configuration
+            const sigAuthority = document.getElementById('inSignAuthority').value;
+            let sigName = '';
+            let sigTitle = '';
+            if (sigAuthority === 'CUSTOM') {
+                sigName = document.getElementById('inCustomSignName').value;
+                sigTitle = document.getElementById('inCustomSignTitle').value;
+            } else if (sigAuthority !== 'BLANK') {
+                const parts = sigAuthority.split('|');
+                sigName = parts[0];
+                sigTitle = parts[1];
+            }
+
+            const recordData = {
+                templateId: templateId,
+                applicantName: applicantName,
+                patraSankhya: patraSankhya,
+                chalani: chalani,
+                miti: miti,
+                nepalSamvat: nepalSamvat,
+                sigAuthority: sigAuthority,
+                sigName: sigName,
+                sigTitle: sigTitle,
+                formData: formData,
+                timestamp: Date.now()
+            };
+
+            const saveDocId = currentRecordId || 'rec_' + Date.now();
+
+            db.collection('dynamicSifarishRecords').doc(saveDocId).set(recordData, { merge: true })
+                .then(() => {
+                    console.log('Saved printed recommendation record successfully.');
+                    currentRecordId = ''; // Reset edit mode
+                    document.getElementById('editRecordIndex').value = '';
+                    window.print();
+                })
+                .catch(err => {
+                    console.error('Saving record failed:', err);
+                    window.print(); // print anyway
+                });
+        }
+    </script>
+</body>
+</html>

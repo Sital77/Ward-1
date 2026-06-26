@@ -1,11 +1,180 @@
-// Dynamic Font Styling Controls for recommendation system
+// Dynamic Font Styling Controls and CMS Loader for Recommendation System
 (function () {
+    'use strict';
+
+    // Intercept firebase initializeApp to prevent duplicate app errors
+    if (window.firebase) {
+        const originalInitializeApp = firebase.initializeApp;
+        firebase.initializeApp = function (config, name) {
+            if (!name && firebase.apps.length > 0) {
+                return firebase.apps[0];
+            }
+            return originalInitializeApp.apply(this, arguments);
+        };
+    }
+
+    // 1. Detect which sifarish template page we are on
+    const path = window.location.pathname;
+    let templateId = '';
+    if (path.includes('gharbato.html')) templateId = 'gharbato';
+    else if (path.includes('charkilla.html')) templateId = 'charkilla';
+    else if (path.includes('bato-pramanit.html')) templateId = 'bato-pramanit';
+    else if (path.includes('apangata-sifarish.html')) templateId = 'apangata-sifarish';
+    else if (path.includes('abibahit-pramanit.html')) templateId = 'abibahit-pramanit';
+    else if (path.includes('ghar-kayam.html')) templateId = 'ghar-kayam';
+    else if (path.includes('pan-sifarish.html')) templateId = 'pan-sifarish';
+    else if (path.includes('pariwarik-bibaran.html')) templateId = 'pariwarik-bibaran';
+    else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
+
+    // Set up a promise to block window.onload execution until the database template loads
+    let resolveTemplatePromise;
+    const loadTemplatePromise = new Promise((resolve) => {
+        resolveTemplatePromise = resolve;
+        setTimeout(resolve, 3500); // 3.5s fallback timeout
+    });
+
+    if (templateId) {
+        // Intercept window.onload assigner
+        let originalOnload = window.onload;
+        Object.defineProperty(window, 'onload', {
+            get: function () { return originalOnload; },
+            set: function (fn) {
+                originalOnload = async function () {
+                    try {
+                        await loadTemplatePromise;
+                    } catch (e) {
+                        console.error("Error waiting for template load:", e);
+                    }
+                    fn();
+                };
+            },
+            configurable: true
+        });
+
+        // Initialize Firebase / Firestore
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+
+        if (window.firebase) {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                const db = firebase.firestore();
+
+                // Fetch dynamic template content from Firestore database
+                db.collection('sifarish_templates').doc(templateId).get().then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data.status === 'Active' && data.template_content) {
+                            injectTemplateHTML(data.template_content);
+                        }
+                        resolveTemplatePromise();
+                    } else {
+                        // Document doesn't exist yet, so automatically seed it from local HTML
+                        seedLocalContent(db, templateId)
+                            .then(resolveTemplatePromise)
+                            .catch(resolveTemplatePromise);
+                    }
+                }).catch((err) => {
+                    console.error("Firestore template loading error:", err);
+                    resolveTemplatePromise();
+                });
+            } catch (e) {
+                console.error("Firebase load setup failed:", e);
+                resolveTemplatePromise();
+            }
+        } else {
+            resolveTemplatePromise();
+        }
+    }
+
+    // Helper: Replace existing page elements after the red line with the database template
+    function injectTemplateHTML(htmlContent) {
+        const redLine = document.querySelector('.header-red-line');
+        if (!redLine) return;
+
+        // Clean up everything after the red line
+        while (redLine.nextSibling) {
+            redLine.nextSibling.remove();
+        }
+
+        // Insert new database-managed HTML elements
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        while (tempDiv.firstChild) {
+            redLine.parentNode.insertBefore(tempDiv.firstChild, null);
+        }
+    }
+
+    // Helper: Seeds local HTML into Firestore for first-time migration
+    async function seedLocalContent(db, id) {
+        try {
+            const redLine = document.querySelector('.header-red-line');
+            if (!redLine) return;
+
+            const tempContainer = document.createElement('div');
+            let sibling = redLine.nextSibling;
+            while (sibling) {
+                tempContainer.appendChild(sibling.cloneNode(true));
+                sibling = sibling.nextSibling;
+            }
+            const localContent = tempContainer.innerHTML;
+
+            const titles = {
+                'gharbato': 'घर बाटो प्रमाणित',
+                'charkilla': 'चार किल्ला प्रमाणित',
+                'bato-pramanit': 'बाटो प्रमाणित',
+                'pariwarik-bibaran': 'पारिवारिक विवरण प्रमाणित',
+                'suchana-tans': 'सूचना टाँस पत्र',
+                'ghar-kayam': 'घर कायम सिफारिस',
+                'pan-sifarish': 'स्थायी लेखा नं. सिफारिस',
+                'abibahit-pramanit': 'अविवाहित प्रमाणित',
+                'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस'
+            };
+
+            const categories = {
+                'gharbato': 'जग्गा सम्बन्धि',
+                'charkilla': 'जग्गा सम्बन्धि',
+                'bato-pramanit': 'जग्गा सम्बन्धि',
+                'pariwarik-bibaran': 'व्यक्तिगत प्रमाणित',
+                'suchana-tans': 'कार्यालय/प्रशासन',
+                'ghar-kayam': 'जग्गा सम्बन्धि',
+                'pan-sifarish': 'कार्यालय/प्रशासन',
+                'abibahit-pramanit': 'व्यक्तिगत प्रमाणित',
+                'apangata-sifarish': 'व्यक्तिगत प्रमाणित'
+            };
+
+            await db.collection('sifarish_templates').doc(id).set({
+                id: id,
+                title: titles[id] || id,
+                category: categories[id] || 'अन्य',
+                template_content: localContent,
+                font_family: 'Mukta',
+                default_font_size: 13,
+                status: 'Active',
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log(`Successfully seeded sifarish template for ${id} in Firestore.`);
+        } catch (e) {
+            console.error("Self-seeding template failed:", e);
+        }
+    }
+
+    // 2. Setup dynamic Font & Styling options card in the input panel
     function initFontSettings() {
         const btnPrint = document.querySelector('.btn-print');
-        if (!btnPrint) return; // Not a template page or panel not ready
+        if (!btnPrint) return;
 
-        // 1. Get saved styling values or defaults (Size: 18pt, Italic: false, Color: black)
-        const savedSize = localStorage.getItem('doc_font_size') || '17';
+        // 1. Get saved styling values or defaults (Size: 13pt, Italic: false, Color: black)
+        const savedSize = localStorage.getItem('doc_font_size') || '13';
         const savedItalic = localStorage.getItem('doc_font_style') === 'italic';
         const savedColor = localStorage.getItem('doc_text_color') || '#000000';
 
@@ -153,7 +322,7 @@
             document.head.appendChild(cardStyleTag);
         }
 
-        // 4. Function to apply styles to content elements dynamically
+        // 4. Function to apply styles dynamically
         function applyStyles(sz, it, col) {
             styleTag.textContent = `
                 :root {
@@ -173,6 +342,8 @@
                 .letter-body-para p,
                 .details-table td,
                 .details-table th,
+                .land-table td,
+                .land-table th,
                 .landuse-container,
                 .address-to,
                 .address-to span,
@@ -193,6 +364,9 @@
                 .details-table,
                 .details-table td,
                 .details-table th,
+                .land-table,
+                .land-table td,
+                .land-table th,
                 .landuse-container,
                 .address-to,
                 .subject-container {
@@ -234,7 +408,7 @@
             <div class="font-settings-row">
                 <span class="font-settings-label">अक्षरको साइज (Size):</span>
                 <div class="font-settings-control">
-                    <input type="range" class="font-settings-slider" id="fsSlider" min="12" max="28" value="${savedSize}">
+                    <input type="range" class="font-settings-slider" id="fsSlider" min="10" max="26" value="${savedSize}">
                     <span class="font-settings-val" id="fsVal">${savedSize} pt</span>
                 </div>
             </div>

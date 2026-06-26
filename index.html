@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Mukta', sans-serif; margin: 0; padding: 0; }
         body { background: linear-gradient(135deg, #f4f6f9 0%, #e2e8f0 100%); color: #2d3748; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; transition: background 0.3s, color 0.3s; }
@@ -15,9 +17,10 @@
         .mega-dashboard { width: 1200px; max-width: 100%; background: #ffffff; border-radius: 24px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.03); padding: 40px; border: 1px solid #edf2f7; position: relative; transition: background 0.3s, border-color 0.3s; }
         body.dark-mode .mega-dashboard { background: #242526; border-color: #4a5568; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 
-        #themeToggle { position: absolute; top: 30px; right: 40px; background: #edf2f7; border: 1px solid #cbd5e0; color: #4a5568; padding: 8px 16px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-        #themeToggle:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        body.dark-mode #themeToggle { background: #4a5568; color: #f7fafc; border-color: #718096; }
+        .top-bar-buttons { position: absolute; top: 30px; right: 40px; display: flex; gap: 10px; z-index: 100; }
+        #themeToggle, #adminBtn { background: #edf2f7; border: 1px solid #cbd5e0; color: #4a5568; padding: 8px 16px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.3s; display: inline-block; text-decoration: none; }
+        #themeToggle:hover, #adminBtn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        body.dark-mode #themeToggle, body.dark-mode #adminBtn { background: #4a5568; color: #f7fafc; border-color: #718096; }
 
         .muni-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 35px; border-bottom: 3px solid #e51a23; padding-bottom: 25px; }
         .gov-logo { width: 110px; height: 110px; object-fit: contain; margin-bottom: 12px; }
@@ -123,7 +126,10 @@
 <body>
 
     <div class="mega-dashboard">
-        <button id="themeToggle">🌙 Dark</button>
+        <div class="top-bar-buttons">
+            <button id="themeToggle">🌙 Dark</button>
+            <button id="adminBtn" style="display: none;" onclick="location.href='admin.html'">⚙️ Admin</button>
+        </div>
 
         <div class="muni-header">
             <img class="gov-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
@@ -254,16 +260,8 @@
                 <button onclick="sifarishLogout()" style="background:linear-gradient(135deg,#c53030,#9b2c2c);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">🚪 लग-आउट</button>
                 <h2 style="color:#e51a23; font-size:1.6rem; font-weight:800; margin:0;">🗂️ सिफारिस प्रणाली भित्र स्वागत छ</h2>
             </div>
-            <div class="sifarish-btn-grid">
-                <a href="gharbato.html" class="sifarish-link-card"><span class="emoji">🏠</span> घर बाटो प्रमाणित</a>
-                <a href="charkilla.html" class="sifarish-link-card"><span class="emoji">🗺️</span> चार किल्ला प्रमाणित</a>
-                <a href="bato-pramanit.html" class="sifarish-link-card"><span class="emoji">🛣️</span> बाटो प्रमाणित</a>
-                <a href="pariwarik-bibaran.html" class="sifarish-link-card"><span class="emoji">👨‍👩‍👧‍👦</span> पारिवारिक विवरण प्रमाणित</a>
-                <a href="suchana-tans.html" class="sifarish-link-card" style="border-color:#d6bcfa;"><span class="emoji">📋</span> सूचना टाँस पत्र</a>
-                <a href="ghar-kayam.html" class="sifarish-link-card" style="border-color:#9ae6b4;"><span class="emoji">🏗️</span> घर कायम सिफारिस</a>
-                <a href="pan-sifarish.html" class="sifarish-link-card" style="border-color:#b2f5ea;"><span class="emoji">💳</span> स्थायी लेखा नं. सिफारिस</a>
-                <a href="abibahit-pramanit.html" class="sifarish-link-card" style="border-color:#fed7d7;"><span class="emoji">💍</span> अविवाहित प्रमाणित</a>
-                <a href="apangata-sifarish.html" class="sifarish-link-card" style="border-color:#fbd38d;"><span class="emoji">♿</span> अपाङ्ग परिचयपत्र सिफारिस</a>
+            <div class="sifarish-btn-grid" id="sifarishGridContainer">
+                <div style="text-align: center; padding: 20px; color: #a0aec0; grid-column: span 2;">🌀 लोड हुँदैछ...</div>
             </div>
         </div>
     </div>
@@ -318,8 +316,23 @@
             const p = document.getElementById('sifPass').value.trim();
             const errEl = document.getElementById('sifErr');
             const rightPanel = document.querySelector('.sif-login-right');
+            
+            let authenticated = false;
+            let isAdmin = false;
+            
             if (u === 'wada1' && p === 'wada1') {
+                authenticated = true;
+                isAdmin = false;
+            } else if (u === 'admin' && p === 'admin') {
+                authenticated = true;
+                isAdmin = true;
+            }
+            
+            if (authenticated) {
                 localStorage.setItem('sifarish_auth', 'true');
+                localStorage.setItem('sifarish_admin', isAdmin ? 'true' : 'false');
+                document.getElementById('adminBtn').style.display = isAdmin ? 'block' : 'none';
+                
                 const btn = document.getElementById('sifLoginBtn');
                 btn.textContent = '✅ प्रवेश हुँदैछ...';
                 btn.style.background = 'linear-gradient(135deg,#276749,#38a169)';
@@ -330,6 +343,7 @@
                     btn.textContent = 'लग-इन';
                     btn.style.background = '';
                     errEl.classList.remove('show');
+                    
                     const redirect = localStorage.getItem('sifarish_redirect');
                     if (redirect) {
                         localStorage.removeItem('sifarish_redirect');
@@ -349,6 +363,8 @@
 
         function sifarishLogout() {
             localStorage.removeItem('sifarish_auth');
+            localStorage.removeItem('sifarish_admin');
+            document.getElementById('adminBtn').style.display = 'none';
             closeModal('modal-sifarish');
         }
 
@@ -375,6 +391,93 @@
         let dataCache = null;
         async function fetchLandData() { if (dataCache) return dataCache; try { const response = await fetch('./convertcsv.json'); if (!response.ok) throw new Error('Data file not found.'); dataCache = await response.json(); return dataCache; } catch (error) { throw error; } }
         async function findClassification() { const kittaInput = document.getElementById("kittaInput").value.trim(); const mapSheetInput = document.getElementById("mapSheetInput").value.trim(); const resultDiv = document.getElementById("classificationResult"); if (!kittaInput && !mapSheetInput) { resultDiv.innerHTML = `<span style="color:#e53e3e;">⚠️ कृपया कित्ता वा नक्सा सिट नं. लेख्नुहोस्।</span>`; return; } resultDiv.innerHTML = `<span style="color:#3182ce;">🌀 खोजी हुँदैछ...</span>`; try { const data = await fetchLandData(); let results = data.filter(item => { const itemKitta = String(item.H || "").trim(); const itemMapSheet = String(item.G || "").trim(); if (kittaInput && mapSheetInput) return itemKitta === kittaInput && itemMapSheet === mapSheetInput; else if (kittaInput) return itemKitta === kittaInput; else if (mapSheetInput) return itemMapSheet === mapSheetInput; return false; }); if (results.length > 0) { let html = `<div style="color:#3182ce; font-weight:700; margin-bottom:8px;">${results.length} नतिजा भेटियो:</div><ul style="padding-left: 20px;">`; results.forEach(res => { html += `<li style="margin-bottom:8px;"><strong>कित्ता नं:</strong> ${res.H} | <strong>सिट नं:</strong> ${res.G} | <strong>साविक:</strong> ${res.F}<br><span style="color:#e51a23; font-weight:700;">👉 भु-उपयोग: ${res.I}</span></li>`; }); html += "</ul>"; resultDiv.innerHTML = html; } else { resultDiv.innerHTML = `<span style="color:#e53e3e;">❌ विवरण भेटिएन।</span>`; } } catch (error) { resultDiv.innerHTML = `<span style="color:#e53e3e;">🚫 डाटा लोड गर्न त्रुटि भयो (convertcsv.json छैन)।</span>`; } }
+        // Firebase Initialization and Listener
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // Show/hide admin button initially on load
+        const isAuthAdmin = localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true';
+        document.getElementById('adminBtn').style.display = isAuthAdmin ? 'block' : 'none';
+
+        // Load templates dynamically in real time
+        const emojiMap = {
+            'gharbato': '🏠',
+            'charkilla': '🗺️',
+            'bato-pramanit': '🛣️',
+            'pariwarik-bibaran': '👨‍👩‍👧‍👦',
+            'suchana-tans': '📋',
+            'ghar-kayam': '🏗️',
+            'pan-sifarish': '💳',
+            'abibahit-pramanit': '💍',
+            'apangata-sifarish': '♿'
+        };
+        const borderMap = {
+            'suchana-tans': '#d6bcfa',
+            'ghar-kayam': '#9ae6b4',
+            'pan-sifarish': '#b2f5ea',
+            'abibahit-pramanit': '#fed7d7',
+            'apangata-sifarish': '#fbd38d'
+        };
+        const categoryEmojis = {
+            'जग्गा सम्बन्धि': '🗺️',
+            'व्यक्तिगत प्रमाणित': '👤',
+            'कार्यालय/प्रशासन': '🏢',
+            'अन्य': '📄'
+        };
+
+        db.collection('sifarish_templates').where('status', '==', 'Active').onSnapshot((snapshot) => {
+            const container = document.getElementById('sifarishGridContainer');
+            container.innerHTML = '';
+            
+            const templates = [];
+            snapshot.forEach(doc => {
+                templates.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Sort list
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish'];
+            templates.sort((a, b) => {
+                const idxA = order.indexOf(a.id);
+                const idxB = order.indexOf(b.id);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.title.localeCompare(b.title);
+            });
+
+            if (templates.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 20px; color: #a0aec0; grid-column: span 2;">कुनै सिफारिसहरू उपलब्ध छैनन्।</div>`;
+                return;
+            }
+
+            templates.forEach(t => {
+                const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
+                const borderColor = borderMap[t.id] || '#e2e8f0';
+                
+                const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish'];
+                const targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
+                
+                const card = document.createElement('a');
+                card.className = 'sifarish-link-card';
+                card.style.borderColor = borderColor;
+                card.href = 'javascript:void(0)';
+                card.onclick = () => openSifarishLink(targetUrl);
+                card.innerHTML = `<span class="emoji">${emoji}</span> ${t.title}`;
+                container.appendChild(card);
+            });
+        });
+
         window.onload = function() { fetchLandData().catch(e=>console.log("No initial JSON")); }
     </script>
 </body>

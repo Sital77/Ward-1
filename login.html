@@ -294,12 +294,24 @@
             const errorMsg = document.getElementById('errorMsg');
             const card = document.querySelector('.login-right');
 
+            let authenticated = false;
+            let isAdmin = false;
+
             if (username === 'wada1' && password === 'wada1') {
+                authenticated = true;
+                isAdmin = false;
+            } else if (username === 'admin' && password === 'admin') {
+                authenticated = true;
+                isAdmin = true;
+            }
+
+            if (authenticated) {
                 localStorage.setItem('sifarish_auth', 'true');
+                localStorage.setItem('sifarish_admin', isAdmin ? 'true' : 'false');
                 document.getElementById('btnLogin').textContent = 'Verifying...';
                 document.getElementById('btnLogin').style.background = 'linear-gradient(135deg, #276749, #38a169)';
-                // Redirect to the originally requested page, or fallback to gharbato
-                const dest = localStorage.getItem('sifarish_redirect') || 'gharbato.html';
+                // Redirect to the originally requested page, or fallback to index.html (or gharbato if needed)
+                const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
                 localStorage.removeItem('sifarish_redirect');
                 setTimeout(() => {
                     window.location.replace(dest);

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सिफारिस प्रणाली व्यवस्थापन (Admin Panel) - गौरादह नगरपालिका</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Mukta', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Admin Navigation Header */
+        .admin-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            color: #ffffff;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-header {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        .btn-back:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-create:hover {
+            background: linear-gradient(135deg, #34d399 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Dashboard content container */
+        .admin-container {
+            max-width: 1300px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 25px;
+            flex-grow: 1;
+        }
+
+        /* Filter & Search Bar styling */
+        .filter-bar {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            background-color: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #1e3a8a;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+        }
+
+        /* Table Card & Actions styling */
+        .table-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.98rem;
+        }
+
+        .admin-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            padding: 16px 20px;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #edf2f7;
+            color: #334155;
+        }
+
+        .admin-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .status-badge.active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-action-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .btn-edit {
+            background-color: #3b82f6;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-edit:hover {
+            background-color: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .btn-duplicate {
+            background-color: #8b5cf6;
+            box-shadow: 0 2px 6px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-duplicate:hover {
+            background-color: #7c3aed;
+            transform: scale(1.05);
+        }
+
+        .btn-delete {
+            background-color: #ef4444;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-delete:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            width: 850px;
+            max-width: 95%;
+            max-height: 90vh;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            transform: scale(0.96);
+            transition: transform 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #ef4444;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-full {
+            grid-column: span 2;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid #edf2f7;
+            padding-top: 20px;
+            margin-top: 10px;
+        }
+
+        .btn-modal {
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-modal-cancel {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-modal-cancel:hover {
+            background-color: #cbd5e0;
+        }
+
+        .btn-modal-save {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+        }
+
+        .btn-modal-save:hover {
+            background: linear-gradient(135deg, #172554 0%, #2563eb 100%);
+            transform: translateY(-1px);
+        }
+
+        .textarea-content {
+            min-height: 250px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .helper-text {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        .placeholder-tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        
+        .placeholder-tag {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            color: #334155;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .placeholder-tag:hover {
+            background-color: #cbd5e0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Access Authentication Check -->
+    <script>
+        if (localStorage.getItem('sifarish_auth') !== 'true' || localStorage.getItem('sifarish_admin') !== 'true') {
+            window.location.replace('login.html');
+        }
+    </script>
+
+    <!-- Top Navigation Header -->
+    <header class="admin-header">
+        <div class="header-left">
+            <img class="header-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Logo">
+            <div class="header-title">
+                <h1>सिफारिस प्रणाली व्यवस्थापन</h1>
+                <p>गौरादह नगरपालिका वडा नं. १ कार्यालय • Admin Panel</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="index.html" class="btn-header btn-back">🔙 गृहपृष्ठ (Home)</a>
+            <button class="btn-header btn-create" onclick="openCreateModal()">➕ नयाँ सिफारिस थप्नुहोस्</button>
+        </div>
+    </header>
+
+    <!-- Main Content Dashboard -->
+    <main class="admin-container">
+        
+        <!-- Filter & Search Bar -->
+        <section class="filter-bar">
+            <div class="input-group">
+                <label for="searchFilter">🔍 सिफारिस खोज्नुहोस् (Search Title):</label>
+                <input type="text" id="searchFilter" class="input-field" placeholder="खोज्न चाहेको सिफारिसको नाम लेख्नुहोस्..." oninput="filterTemplates()">
+            </div>
+            <div class="input-group">
+                <label for="categoryFilter">📂 वर्गीकरण फिल्टर (Category):</label>
+                <select id="categoryFilter" class="input-field" onchange="filterTemplates()">
+                    <option value="ALL">-- सबै श्रेणी (All Categories) --</option>
+                    <option value="जग्गा सम्बन्धि">जग्गा सम्बन्धि</option>
+                    <option value="व्यक्तिगत प्रमाणित">व्यक्तिगत प्रमाणित</option>
+                    <option value="कार्यालय/प्रशासन">कार्यालय/प्रशासन</option>
+                    <option value="अन्य">अन्य</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="statusFilter">🚥 स्थिति फिल्टर (Status):</label>
+                <select id="statusFilter" class="input-field" onchange="filterTemplates()">
+                    <option value="ALL">-- सबै स्थिति (All Statuses) --</option>
+                    <option value="Active">सक्रिय (Active)</option>
+                    <option value="Inactive">निष्क्रिय (Inactive)</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Template Data Table Card -->
+        <section class="table-card">
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">क्र.सं.</th>
+                            <th style="width: 35%;">सिफारिसको शीर्षक (Title)</th>
+                            <th style="width: 25%;">श्रेणी (Category)</th>
+                            <th style="width: 10%;">फन्ट साइज (Size)</th>
+                            <th style="width: 12%;">स्थिति (Status)</th>
+                            <th style="width: 13%; text-align: center;">कार्य (Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templateTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">
+                                🌀 डेटाबेस लोड हुँदैछ... (Loading Templates)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Create / Edit Template Modal Dialog Overlay -->
+    <div class="modal-overlay" id="templateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitleDisplay">सिफारिस थप्नुहोस्/सम्पादन गर्नुस्</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            
+            <form id="templateForm" onsubmit="saveTemplateForm(event)">
+                <input type="hidden" id="formTemplateId" value="">
+                <input type="hidden" id="formMode" value="create">
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="formTitle">📝 सिफारिसको शीर्षक (Title):</label>
+                        <input type="text" id="formTitle" class="input-field" placeholder="उदा: चार किल्ला प्रमाणित" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="formCategory">📂 सिफारिस श्रेणी (Category):</label>
+                        <select id="formCategory" class="input-field" required>
+                            <option value="जग्गा सम्बन्धि">जग्गा सम्बन्धि</option>
+                            <option value="व्यक्तिगत प्रमाणित">व्यक्तिगत प्रमाणित</option>
+                            <option value="कार्यालय/प्रशासन">कार्यालय/प्रशासन</option>
+                            <option value="अन्य">अन्य</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="formSize">📐 डिफ़ल्ट फन्ट साइज (Default Size in pt):</label>
+                        <input type="number" id="formSize" class="input-field" value="13" min="10" max="28" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="formStatus">🚥 स्थिति (Status):</label>
+                        <select id="formStatus" class="input-field" required>
+                            <option value="Active">सक्रिय (Active)</option>
+                            <option value="Inactive">निष्क्रिय (Inactive)</option>
+                        </select>
+                    </div>
+                    <div class="input-group form-full">
+                        <label for="formContent">📄 सिफारिसको बडी भाग सामग्री (Template content HTML):</label>
+                        <textarea id="formContent" class="input-field textarea-content" placeholder="HTML र variables थप्नुहोस्..." required></textarea>
+                        <div class="helper-text">
+                            <strong>सुझाव:</strong> सिफारिसको पत्र बडीको HTML भाग (address-to, subject-container, letter-body) यहाँ पेस्ट गर्नुहोस्। 
+                            डेटा इनपुट भर्न मिल्ने गरी तलका प्लेसहोल्डरहरू थप्न सक्नुहुन्छ:
+                            <div class="placeholder-tag-group">
+                                <span class="placeholder-tag" onclick="insertAtCursor('{{निवेदकको नाम}}')">{{निवेदकको नाम}}</span>
+                                <span class="placeholder-tag" onclick="insertAtCursor('{{नागरिकता नं}}')">{{नागरिकता नं}}</span>
+                                <span class="placeholder-tag" onclick="insertAtCursor('{{वडा नं}}')">{{वडा नं}}</span>
+                                <span class="placeholder-tag" onclick="insertAtCursor('{{मिति}}')">{{मिति}}</span>
+                                <span class="placeholder-tag" onclick="insertAtCursor('<span id=\'lblOwnerName\'>.......</span>')">lblOwnerName</span>
+                                <span class="placeholder-tag" onclick="insertAtCursor('<span id=\'lblWadaBody\'>.......</span>')">lblWadaBody</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-modal btn-modal-cancel" onclick="closeModal()">रद्द गर्नुहोस् (Cancel)</button>
+                    <button type="submit" class="btn-modal btn-modal-save" id="btnSaveSubmit">सुरक्षित गर्नुहोस् (Save)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Connection SDK Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // Automated Testing Mock helpers for prompt and confirm dialogs
+        if (new URLSearchParams(window.location.search).get('mockPrompt') === 'true') {
+            window.prompt = function(message, defaultValue) {
+                return 'नयाँ घरबाटो प्रमाणित';
+            };
+            window.confirm = function(message) {
+                return true;
+            };
+        }
+
+        let templatesList = [];
+
+        // Real-time listener to load templates
+        db.collection('sifarish_templates').onSnapshot((snapshot) => {
+            templatesList = [];
+            snapshot.forEach(doc => {
+                templatesList.push({ id: doc.id, ...doc.data() });
+            });
+            // Sort templates by created_at or title
+            templatesList.sort((a, b) => a.title.localeCompare(b.title));
+            renderTemplatesTable(templatesList);
+        }, (error) => {
+            console.error("Firestore loading failed:", error);
+            document.getElementById('templateTableBody').innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 30px; color: #ef4444;">
+                        ❌ डेटाबेस लोड गर्न असमर्थ भयो ! (Database Error)
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Render template database row listing
+        function renderTemplatesTable(items) {
+            const body = document.getElementById('templateTableBody');
+            body.innerHTML = '';
+
+            if (items.length === 0) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">
+                            📭 कुनै विवरण भेटिएन। (No records found)
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td style="font-weight: 700;">${item.title}</td>
+                    <td><span style="font-weight: 600; color: #475569;">📂 ${item.category}</span></td>
+                    <td style="font-weight: bold; color: #2563eb;">${item.default_font_size || 13} pt</td>
+                    <td>
+                        <span class="status-badge ${item.status === 'Active' ? 'active' : 'inactive'}">
+                            ${item.status === 'Active' ? 'सक्रिय' : 'निष्क्रिय'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="btn-action-group" style="justify-content: center;">
+                            <button class="btn-action btn-edit" onclick="openEditModal('${item.id}')" title="सम्पादन गर्नुहोस्">✏️</button>
+                            <button class="btn-action btn-duplicate" onclick="duplicateTemplate('${item.id}')" title="प्रतिलिपि (Duplicate)">📋</button>
+                            <button class="btn-action btn-delete" onclick="deleteTemplate('${item.id}')" title="हटाउनुहोस्">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        // Apply filters on the list
+        function filterTemplates() {
+            const searchVal = document.getElementById('searchFilter').value.toLowerCase().trim();
+            const catVal = document.getElementById('categoryFilter').value;
+            const statusVal = document.getElementById('statusFilter').value;
+
+            const filtered = templatesList.filter(item => {
+                const matchesSearch = item.title.toLowerCase().includes(searchVal);
+                const matchesCat = (catVal === 'ALL' || item.category === catVal);
+                const matchesStatus = (statusVal === 'ALL' || item.status === statusVal);
+                return matchesSearch && matchesCat && matchesStatus;
+            });
+
+            renderTemplatesTable(filtered);
+        }
+
+        // Modal triggers
+        function openModal() {
+            const modal = document.getElementById('templateModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('templateModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.getElementById('templateForm').reset();
+                document.getElementById('formTemplateId').value = '';
+            }, 300);
+        }
+
+        // Open Modal for Create Mode
+        function openCreateModal() {
+            document.getElementById('formMode').value = 'create';
+            document.getElementById('modalTitleDisplay').innerText = '➕ नयाँ सिफारिस थप्नुहोस् (Create Template)';
+            document.getElementById('formTemplateId').value = '';
+            document.getElementById('templateForm').reset();
+            document.getElementById('formSize').value = 13;
+            openModal();
+        }
+
+        // Open Modal for Edit Mode
+        function openEditModal(id) {
+            const item = templatesList.find(t => t.id === id);
+            if (!item) return;
+
+            document.getElementById('formMode').value = 'edit';
+            document.getElementById('modalTitleDisplay').innerText = '✏️ सिफारिस सम्पादन गर्नुहोस् (Edit Template)';
+            document.getElementById('formTemplateId').value = item.id;
+            document.getElementById('formTitle').value = item.title;
+            document.getElementById('formCategory').value = item.category;
+            document.getElementById('formSize').value = item.default_font_size || 13;
+            document.getElementById('formStatus').value = item.status || 'Active';
+            document.getElementById('formContent').value = item.template_content || '';
+
+            openModal();
+        }
+
+        // Helper to insert placeholders in content textarea
+        function insertAtCursor(text) {
+            const txtArea = document.getElementById('formContent');
+            const scrollPos = txtArea.scrollTop;
+            let strPos = txtArea.selectionStart;
+            const front = (txtArea.value).substring(0, strPos);
+            const back = (txtArea.value).substring(strPos, txtArea.value.length);
+            txtArea.value = front + text + back;
+            strPos = strPos + text.length;
+            txtArea.selectionStart = strPos;
+            txtArea.selectionEnd = strPos;
+            txtArea.focus();
+            txtArea.scrollTop = scrollPos;
+        }
+
+        // Form Submit Save Logic
+        function saveTemplateForm(event) {
+            event.preventDefault();
+
+            const mode = document.getElementById('formMode').value;
+            const id = document.getElementById('formTemplateId').value;
+            const title = document.getElementById('formTitle').value.trim();
+            const category = document.getElementById('formCategory').value;
+            const size = parseInt(document.getElementById('formSize').value) || 13;
+            const status = document.getElementById('formStatus').value;
+            const content = document.getElementById('formContent').value;
+
+            const saveBtn = document.getElementById('btnSaveSubmit');
+            saveBtn.disabled = true;
+            saveBtn.innerText = 'प्रक्रिया चल्दैछ... (Saving...)';
+
+            // Generate lowercase url friendly id if creating
+            let docId = id;
+            if (mode === 'create') {
+                docId = 'temp_' + Date.now();
+            }
+
+            const data = {
+                id: docId,
+                title: title,
+                category: category,
+                default_font_size: size,
+                status: status,
+                template_content: content,
+                font_family: 'Mukta',
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (mode === 'create') {
+                data.created_at = firebase.firestore.FieldValue.serverTimestamp();
+            }
+
+            db.collection('sifarish_templates').doc(docId).set(data, { merge: true })
+                .then(() => {
+                    closeModal();
+                    alert('🎉 सफलतापूर्वक सुरक्षित भयो !');
+                })
+                .catch((error) => {
+                    console.error("Saving template failed:", error);
+                    alert('⚠️ सुरक्षित गर्न सकिएन ! त्रुटि: ' + error.message);
+                })
+                .finally(() => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = 'सुरक्षित गर्नुहोस् (Save)';
+                });
+        }
+
+        // Duplicate template logic
+        function duplicateTemplate(id) {
+            const item = templatesList.find(t => t.id === id);
+            if (!item) return;
+
+            const newTitle = prompt("प्रतिलिपि सिफारिसको शीर्षक लेख्नुहोस् (New Title):", item.title + " (Copy)");
+            if (!newTitle) return;
+
+            const newId = 'temp_' + Date.now();
+
+            const duplicatedData = {
+                id: newId,
+                title: newTitle.trim(),
+                category: item.category,
+                default_font_size: item.default_font_size || 13,
+                status: item.status || 'Active',
+                template_content: item.template_content || '',
+                font_family: item.font_family || 'Mukta',
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection('sifarish_templates').doc(newId).set(duplicatedData)
+                .then(() => {
+                    alert('📋 सिफारिस सफलतापूर्वक प्रतिलिपि भयो !');
+                })
+                .catch((error) => {
+                    alert('⚠️ प्रतिलिपि गर्न असफल भयो ! ' + error.message);
+                });
+        }
+
+        // Delete template logic (with Confirmation)
+        function deleteTemplate(id) {
+            const item = templatesList.find(t => t.id === id);
+            if (!item) return;
+
+            const check = confirm(`❌ के तपाईं "${item.title}" लाई हटाउन निश्चित हुनुहुन्छ?\nयो काम पुन: फर्काउन सकिने छैन!`);
+            if (!check) return;
+
+            db.collection('sifarish_templates').doc(id).delete()
+                .then(() => {
+                    alert('🗑️ सिफारिस सफलतापूर्वक हटाइयो !');
+                })
+                .catch((error) => {
+                    alert('⚠️ हटाउन असफल भयो ! ' + error.message);
+                });
+        }
+    </script>
+</body>
+</html>
