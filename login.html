@@ -281,9 +281,9 @@
     </div>
 
     <script>
-        // If already logged in and came from a sifarish page, go back there
+        // If already logged in, go back to the redirected page or index.html portal homepage
         if (localStorage.getItem('sifarish_auth') === 'true') {
-            const dest = localStorage.getItem('sifarish_redirect') || 'gharbato.html';
+            const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
             localStorage.removeItem('sifarish_redirect');
             window.location.replace(dest);
         }

@@ -18,9 +18,9 @@
         body.dark-mode .mega-dashboard { background: #242526; border-color: #4a5568; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 
         .top-bar-buttons { position: absolute; top: 30px; right: 40px; display: flex; gap: 10px; z-index: 100; }
-        #themeToggle, #adminBtn { background: #edf2f7; border: 1px solid #cbd5e0; color: #4a5568; padding: 8px 16px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.3s; display: inline-block; text-decoration: none; }
-        #themeToggle:hover, #adminBtn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        body.dark-mode #themeToggle, body.dark-mode #adminBtn { background: #4a5568; color: #f7fafc; border-color: #718096; }
+        #themeToggle, #adminBtn, #logoutBtn { background: #edf2f7; border: 1px solid #cbd5e0; color: #4a5568; padding: 8px 16px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.3s; display: inline-block; text-decoration: none; }
+        #themeToggle:hover, #adminBtn:hover, #logoutBtn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        body.dark-mode #themeToggle, body.dark-mode #adminBtn, body.dark-mode #logoutBtn { background: #4a5568; color: #f7fafc; border-color: #718096; }
 
         .muni-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 35px; border-bottom: 3px solid #e51a23; padding-bottom: 25px; }
         .gov-logo { width: 110px; height: 110px; object-fit: contain; margin-bottom: 12px; }
@@ -129,6 +129,7 @@
         <div class="top-bar-buttons">
             <button id="themeToggle">🌙 Dark</button>
             <button id="adminBtn" style="display: none;" onclick="location.href='admin.html'">⚙️ Admin</button>
+            <button id="logoutBtn" style="display: none;" onclick="sifarishLogout()">🚪 लग-आउट</button>
         </div>
 
         <div class="muni-header">
@@ -331,7 +332,7 @@
             if (authenticated) {
                 localStorage.setItem('sifarish_auth', 'true');
                 localStorage.setItem('sifarish_admin', isAdmin ? 'true' : 'false');
-                document.getElementById('adminBtn').style.display = isAdmin ? 'block' : 'none';
+                updateTopBarButtons();
                 
                 const btn = document.getElementById('sifLoginBtn');
                 btn.textContent = '✅ प्रवेश हुँदैछ...';
@@ -364,7 +365,7 @@
         function sifarishLogout() {
             localStorage.removeItem('sifarish_auth');
             localStorage.removeItem('sifarish_admin');
-            document.getElementById('adminBtn').style.display = 'none';
+            updateTopBarButtons();
             closeModal('modal-sifarish');
         }
 
@@ -406,9 +407,97 @@
         }
         const db = firebase.firestore();
 
-        // Show/hide admin button initially on load
-        const isAuthAdmin = localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true';
-        document.getElementById('adminBtn').style.display = isAuthAdmin ? 'block' : 'none';
+        // Show/hide admin and logout buttons initially on load
+        function updateTopBarButtons() {
+            const isAuth = localStorage.getItem('sifarish_auth') === 'true';
+            const isAdmin = isAuth && localStorage.getItem('sifarish_admin') === 'true';
+            document.getElementById('adminBtn').style.display = isAdmin ? 'inline-block' : 'none';
+            document.getElementById('logoutBtn').style.display = isAuth ? 'inline-block' : 'none';
+        }
+        updateTopBarButtons();
+
+        // Automatic Background Seeding of all missing templates
+        async function seedTemplateFromLocalFile(id) {
+            const titles = {
+                'gharbato': 'घर बाटो प्रमाणित',
+                'charkilla': 'चार किल्ला प्रमाणित',
+                'bato-pramanit': 'बाटो प्रमाणित',
+                'pariwarik-bibaran': 'पारिवारिक विवरण प्रमाणित',
+                'suchana-tans': 'सूचना टाँस पत्र',
+                'ghar-kayam': 'घर कायम सिफारिस',
+                'pan-sifarish': 'स्थायी लेखा नं. सिफारिस',
+                'abibahit-pramanit': 'अविवाहित प्रमाणित',
+                'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस'
+            };
+            const categories = {
+                'gharbato': 'जग्गा सम्बन्धि',
+                'charkilla': 'जग्गा सम्बन्धि',
+                'bato-pramanit': 'जग्गा सम्बन्धि',
+                'pariwarik-bibaran': 'व्यक्तिगत प्रमाणित',
+                'suchana-tans': 'कार्यालय/प्रशासन',
+                'ghar-kayam': 'जग्गा सम्बन्धि',
+                'pan-sifarish': 'कार्यालय/प्रशासन',
+                'abibahit-pramanit': 'व्यक्तिगत प्रमाणित',
+                'apangata-sifarish': 'व्यक्तिगत प्रमाणित'
+            };
+
+            try {
+                const response = await fetch(`./${id}.html`);
+                if (!response.ok) throw new Error(`Could not fetch ${id}.html`);
+                const html = await response.text();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const redLine = doc.querySelector('.header-red-line');
+                
+                let templateContent = '';
+                if (redLine) {
+                    const tempContainer = doc.createElement('div');
+                    let sibling = redLine.nextSibling;
+                    while (sibling) {
+                        tempContainer.appendChild(sibling.cloneNode(true));
+                        sibling = sibling.nextSibling;
+                    }
+                    templateContent = tempContainer.innerHTML;
+                } else {
+                    const pageEl = doc.querySelector('.a4-page') || doc.body;
+                    templateContent = pageEl ? pageEl.innerHTML : html;
+                }
+
+                if (!templateContent) return;
+
+                await db.collection('sifarish_templates').doc(id).set({
+                    id: id,
+                    title: titles[id] || id,
+                    category: categories[id] || 'अन्य',
+                    template_content: templateContent,
+                    font_family: 'Mukta',
+                    default_font_size: 13,
+                    status: 'Active',
+                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log(`Successfully seeded ${id} from local file.`);
+            } catch (e) {
+                console.error(`Failed to seed ${id} from local file:`, e);
+            }
+        }
+
+        const defaultTemplateIds = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish'];
+        db.collection('sifarish_templates').get().then(snapshot => {
+            const existingIds = [];
+            snapshot.forEach(doc => {
+                existingIds.push(doc.id);
+            });
+            
+            defaultTemplateIds.forEach(id => {
+                if (!existingIds.includes(id)) {
+                    seedTemplateFromLocalFile(id);
+                }
+            });
+        }).catch(err => {
+            console.error("Error checking templates for seeding:", err);
+        });
 
         // Load templates dynamically in real time
         const emojiMap = {
