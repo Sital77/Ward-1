@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap');
 
+@font-face {
+    font-family: "Utsaah";
+    src: url("https://db.onlinewebfonts.com/t/8a7d5ef1c37a77234417883ec9fdd6f6.woff2") format("woff2"),
+         url("https://db.onlinewebfonts.com/t/8a7d5ef1c37a77234417883ec9fdd6f6.woff") format("woff"),
+         url("https://db.onlinewebfonts.com/t/8a7d5ef1c37a77234417883ec9fdd6f6.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     box-sizing: border-box;
     font-family: 'Mukta', sans-serif;
@@ -409,6 +418,19 @@ select:focus {
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    font-family: 'Utsaah', 'Mukta', sans-serif;
+}
+
+/* Explicitly keep letterhead elements in Mukta font */
+.letterhead-container,
+.letterhead-container *,
+.doc-header-wrapper,
+.doc-header-wrapper *,
+.meta-line,
+.meta-line *,
+.lh-right,
+.lh-right * {
+    font-family: 'Mukta', sans-serif !important;
 }
 
 .doc-header-wrapper {

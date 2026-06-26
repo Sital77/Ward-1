@@ -1,6 +1,15 @@
 /* Importing Beautiful and Professional Nepali Font - Mukta */
 @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap');
 
+@font-face {
+    font-family: "Utsaah";
+    src: url("https://db.onlinewebfonts.com/t/8a7d5ef1c37a77234417883ec9fdd6f6.woff2") format("woff2"),
+         url("https://db.onlinewebfonts.com/t/8a7d5ef1c37a77234417883ec9fdd6f6.woff") format("woff"),
+         url("https://db.onlinewebfonts.com/t/8a7d5ef1c37a77234417883ec9fdd6f6.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     box-sizing: border-box;
     font-family: 'Mukta', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -490,6 +499,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    font-family: 'Utsaah', 'Mukta', sans-serif;
+}
+
+/* Explicitly keep letterhead elements in Mukta font */
+.letterhead-container,
+.letterhead-container *,
+.doc-header-wrapper,
+.doc-header-wrapper *,
+.meta-line,
+.meta-line *,
+.lh-right,
+.lh-right * {
+    font-family: 'Mukta', sans-serif !important;
 }
 
 /* LETTERHEAD HEADER COMPRESSED SYSTEM (MATCHED TO A4-1.JPG) */
