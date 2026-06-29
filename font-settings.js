@@ -91,7 +91,7 @@
                 db.collection('sifarish_templates').doc(templateId).get().then((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
-                        if (data.status === 'Active' && data.template_content) {
+                        if ((data.status === 'Active' || data.status === 'Published') && data.template_content) {
                             injectTemplateHTML(data.template_content);
                         }
                         resolveTemplatePromise();
