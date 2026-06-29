@@ -397,32 +397,158 @@
         }
 
         // 5. Automatic date initialization
+        function getNepalSambatYear(adDate) {
+            const year = adDate.getFullYear();
+            const newYearDates = {
+                2020: new Date(2020,10,15), 2021: new Date(2021,10,5),
+                2022: new Date(2022, 9,26), 2023: new Date(2023,10,14),
+                2024: new Date(2024,10, 2), 2025: new Date(2025, 9,22),
+                2026: new Date(2026,10,10), 2027: new Date(2027, 9,30),
+                2028: new Date(2028, 9,19), 2029: new Date(2029,10, 7),
+                2030: new Date(2030, 9,27), 2031: new Date(2031,10,15),
+                2032: new Date(2032,10, 3), 2033: new Date(2033, 9,23),
+                2034: new Date(2034,10,12), 2035: new Date(2035,10, 1)
+            };
+            const ny = newYearDates[year];
+            if (ny) return adDate >= ny ? year - 879 : year - 880;
+            if (adDate.getMonth() > 9 || (adDate.getMonth() === 9 && adDate.getDate() >= 25))
+                return year - 879;
+            return year - 880;
+        }
+
         function initializeAutomaticDate() {
-            const today = new NepaliDate();
-            const formatted = today.format('YYYY/MM/DD');
-            document.getElementById('inMiti').value = formatted;
-            updateNepalSambatFromMiti();
+            try {
+                let nepaliBSDateStr = '';
+                let bsYearVal  = 2083;
+                let bsMonthVal = 2;
+
+                const converter = window["@sbmdkl/nepali-date-converter"];
+                if (converter && typeof converter.adToBs === 'function') {
+                    const today = new Date();
+                    const yyyy  = today.getFullYear();
+                    const mm    = String(today.getMonth() + 1).padStart(2, '0');
+                    const dd    = String(today.getDate()).padStart(2, '0');
+                    const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+
+                    let bsDayVal = 1;
+                    if (typeof bsDate === 'string') {
+                        const parts = bsDate.split(/[-/]/);
+                        bsYearVal  = parseInt(parts[0], 10);
+                        bsMonthVal = parseInt(parts[1], 10);
+                        bsDayVal   = parseInt(parts[2], 10);
+                    } else if (bsDate && typeof bsDate === 'object') {
+                        bsYearVal  = bsDate.bsYear  || bsDate.year  || 2083;
+                        bsMonthVal = bsDate.bsMonth || bsDate.month || 2;
+                        bsDayVal   = bsDate.bsDay   || bsDate.day   || 1;
+                    }
+                    const bsM = String(bsMonthVal).padStart(2, '0');
+                    const bsD = String(bsDayVal).padStart(2, '0');
+                    nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsM}/${bsD}`);
+                } else {
+                    const today = new Date();
+                    const adYear  = today.getFullYear();
+                    const adMonth = today.getMonth() + 1;
+                    const adDay   = today.getDate();
+                    let bsY = adYear + 57;
+                    let bsM = 1;
+                    if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
+                    else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
+                    else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
+                    else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
+                    else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
+                    else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
+                    else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
+                    else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
+                    else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
+                    else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
+                    else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
+                    else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
+                    bsYearVal  = bsY;
+                    bsMonthVal = bsM;
+                    const bsMStr = String(bsMonthVal).padStart(2, '0');
+                    nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsMStr}/`);
+                }
+
+                // Initialize fiscal year dropdown
+                let startYear = bsYearVal;
+                if (bsMonthVal < 4) startYear = bsYearVal - 1;
+                const fySelect = document.getElementById('inPatraSankhya');
+                if (fySelect) {
+                    const prevSuffix = String(startYear).slice(-2);
+                    const currSuffix = String(startYear + 1).slice(-2);
+                    const nextSuffix = String(startYear + 2).slice(-2);
+                    const prevFY = toNepaliDigit(`${startYear - 1}/${prevSuffix}`);
+                    const currFY = toNepaliDigit(`${startYear}/${currSuffix}`);
+                    const nextFY = toNepaliDigit(`${startYear + 1}/${nextSuffix}`);
+                    fySelect.innerHTML = '';
+                    fySelect.insertAdjacentHTML('beforeend', `<option value="${prevFY}">${prevFY}</option>`);
+                    fySelect.insertAdjacentHTML('beforeend', `<option value="${currFY}" selected>${currFY}</option>`);
+                    fySelect.insertAdjacentHTML('beforeend', `<option value="${nextFY}">${nextFY}</option>`);
+                }
+
+                const inMiti = document.getElementById('inMiti');
+                if (inMiti) inMiti.value = nepaliBSDateStr;
+
+                const today = new Date();
+                const nsYear = getNepalSambatYear(today);
+                const inNS = document.getElementById('inNepalSamvat');
+                if (inNS) inNS.value = toNepaliDigit(nsYear);
+            } catch (e) {
+                console.error("Date init error:", e);
+            }
         }
 
         function updateNepalSambatFromMiti() {
-            const mitiVal = document.getElementById('inMiti').value.trim();
-            try {
-                const parts = mitiVal.split('/');
-                if (parts.length === 3) {
-                    const yr = parseInt(parts[0]);
-                    const mt = parseInt(parts[1]) - 1;
-                    const dy = parseInt(parts[2]);
-                    
-                    const nepDate = new NepaliDate(yr, mt, dy);
-                    const engDate = nepDate.toJsDate();
-                    
-                    // Simple estimation: Nepal Sambat is approx English Year + 880 years (Karthik Sukla Pratipada)
-                    const engYear = engDate.getFullYear();
-                    const nsYear = toNepaliDigit(engYear - 879);
-                    document.getElementById('inNepalSamvat').value = nsYear;
+            const inMiti = document.getElementById('inMiti');
+            const inNS = document.getElementById('inNepalSamvat');
+            if (!inMiti || !inNS) return;
+
+            const bsDateStr = inMiti.value.trim();
+            if (!bsDateStr) return;
+
+            const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            let engMiti = bsDateStr.split('').map(char => {
+                const index = nepaliDigits.indexOf(char);
+                return index !== -1 ? index : char;
+            }).join('');
+
+            const parts = engMiti.split(/[-/.]/);
+            if (parts.length >= 3) {
+                const y = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10);
+                const d = parseInt(parts[2], 10);
+                if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                    const converter = window["@sbmdkl/nepali-date-converter"];
+                    if (converter && typeof converter.bsToAd === 'function') {
+                        try {
+                            const formattedBsStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                            const adResult = converter.bsToAd(formattedBsStr);
+                            let adDate = null;
+                            if (typeof adResult === 'string') {
+                                adDate = new Date(adResult);
+                            } else if (adResult && typeof adResult === 'object') {
+                                const adY = adResult.year || adResult.adYear;
+                                const adM = adResult.month || adResult.adMonth;
+                                const adD = adResult.day || adResult.adDay;
+                                if (adY && adM && adD) {
+                                    adDate = new Date(adY, adM - 1, adD);
+                                }
+                            }
+                            if (adDate && !isNaN(adDate.getTime())) {
+                                const nsYear = getNepalSambatYear(adDate);
+                                inNS.value = toNepaliDigit(nsYear);
+                            }
+                        } catch (e) {
+                            console.error("Error converting BS to AD:", e);
+                        }
+                    } else {
+                        let nsYear = y - 937;
+                        if (m > 7 || (m === 7 && d >= 15)) {
+                            nsYear = y - 936;
+                        }
+                        inNS.value = toNepaliDigit(nsYear);
+                    }
                 }
-            } catch (e) {
-                console.warn("Sambat calculation failed:", e);
             }
         }
 

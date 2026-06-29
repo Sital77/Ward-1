@@ -473,7 +473,7 @@ function getNepalSambatYear(adDate) {
         2024: new Date(2024, 10, 2),
         2025: new Date(2025, 9, 22),
         2026: new Date(2026, 10, 10),
-        2027: new Date(2027, 9, 31),
+        2027: new Date(2027, 9, 30),
         2028: new Date(2028, 9, 19),
         2029: new Date(2029, 10, 7),
         2030: new Date(2030, 9, 27),
@@ -500,7 +500,7 @@ function getNepalSambatYear(adDate) {
 
 function formatFiscalYear(startYear) {
     const endYear = startYear + 1;
-    const endYearSuffix = '0' + String(endYear).slice(-2);
+    const endYearSuffix = String(endYear).slice(-2);
     const englishFY = `${startYear}/${endYearSuffix}`;
     return window.toNepaliDigit(englishFY);
 }
