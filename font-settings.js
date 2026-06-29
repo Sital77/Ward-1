@@ -2,6 +2,29 @@
 (function () {
     'use strict';
 
+    let db;
+    const firebaseConfig = {
+        apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+        authDomain: "gauradaha-ward1.firebaseapp.com",
+        projectId: "gauradaha-ward1",
+        storageBucket: "gauradaha-ward1.firebasestorage.app",
+        messagingSenderId: "905617778132",
+        appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+    };
+
+    // Collection map for checking duplicate citizens
+    const collectionMap = {
+        'gharbato': { collection: 'gharBatoRecords', title: 'घर बाटो प्रमाणित' },
+        'charkilla': { collection: 'charKillaRecords', title: 'चार किल्ला प्रमाणित' },
+        'bato-pramanit': { collection: 'batoPramanitRecords', title: 'बाटो प्रमाणित' },
+        'pariwarik-bibaran': { collection: 'pariwarikRecords', title: 'पारिवारिक विवरण प्रमाणित' },
+        'suchana-tans': { collection: 'suchanaTansRecords', title: 'सूचना टाँस पत्र' },
+        'ghar-kayam': { collection: 'gharKayamRecords', title: 'घर कायम सिफारिस' },
+        'pan-sifarish': { collection: 'panRecords', title: 'स्थायी लेखा नं. सिफारिस' },
+        'abibahit-pramanit': { collection: 'abibahitRecords', title: 'अविवाहित प्रमाणित' },
+        'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' }
+    };
+
     // Intercept firebase initializeApp to prevent duplicate app errors
     if (window.firebase) {
         const originalInitializeApp = firebase.initializeApp;
@@ -16,6 +39,8 @@
     // 1. Detect which sifarish template page we are on
     const path = window.location.pathname;
     let templateId = '';
+    let isDynamic = false;
+
     if (path.includes('gharbato.html')) templateId = 'gharbato';
     else if (path.includes('charkilla.html')) templateId = 'charkilla';
     else if (path.includes('bato-pramanit.html')) templateId = 'bato-pramanit';
@@ -25,6 +50,10 @@
     else if (path.includes('pan-sifarish.html')) templateId = 'pan-sifarish';
     else if (path.includes('pariwarik-bibaran.html')) templateId = 'pariwarik-bibaran';
     else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
+    else if (path.includes('dynamic-sifarish.html')) {
+        templateId = new URLSearchParams(window.location.search).get('id') || '';
+        isDynamic = true;
+    }
 
     // Set up a promise to block window.onload execution until the database template loads
     let resolveTemplatePromise;
@@ -33,7 +62,7 @@
         setTimeout(resolve, 3500); // 3.5s fallback timeout
     });
 
-    if (templateId) {
+    if (templateId && !isDynamic) {
         // Intercept window.onload assigner
         let originalOnload = window.onload;
         Object.defineProperty(window, 'onload', {
@@ -51,22 +80,12 @@
             configurable: true
         });
 
-        // Initialize Firebase / Firestore
-        const firebaseConfig = {
-            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
-            authDomain: "gauradaha-ward1.firebaseapp.com",
-            projectId: "gauradaha-ward1",
-            storageBucket: "gauradaha-ward1.firebasestorage.app",
-            messagingSenderId: "905617778132",
-            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
-        };
-
         if (window.firebase) {
             try {
                 if (!firebase.apps.length) {
                     firebase.initializeApp(firebaseConfig);
                 }
-                const db = firebase.firestore();
+                db = firebase.firestore();
 
                 // Fetch dynamic template content from Firestore database
                 db.collection('sifarish_templates').doc(templateId).get().then((doc) => {
@@ -93,6 +112,8 @@
         } else {
             resolveTemplatePromise();
         }
+    } else {
+        resolveTemplatePromise();
     }
 
     // Helper: Replace existing page elements after the red line with the database template
@@ -172,6 +193,101 @@
     function initFontSettings() {
         const btnPrint = document.querySelector('.btn-print');
         if (!btnPrint) return;
+
+        // Initialize Firebase / Firestore if it wasn't done yet (e.g., dynamic-sifarish page)
+        if (window.firebase && !db) {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.firestore();
+            } catch(e) {
+                console.error("Firebase init in font settings failed:", e);
+            }
+        }
+
+        // Register duplicate citizen warning listener
+        if (db && templateId) {
+            document.addEventListener('change', function (event) {
+                const target = event.target;
+                let isNameInput = false;
+                let fieldName = 'name';
+                
+                if (target.id === 'inName') {
+                    isNameInput = true;
+                    fieldName = 'name';
+                } else if (isDynamic && target.classList.contains('input-dynamic-field')) {
+                    // Check if it is the first dynamic input field (used as applicantName)
+                    const firstDynamicInput = document.querySelector('.input-dynamic-field');
+                    if (firstDynamicInput && target === firstDynamicInput) {
+                        isNameInput = true;
+                        fieldName = 'applicantName';
+                    }
+                }
+
+                if (!isNameInput) return;
+
+                const nameVal = target.value.trim();
+                if (!nameVal) return;
+
+                let col = '';
+                let tTitle = '';
+                if (isDynamic) {
+                    col = 'dynamicSifarishRecords';
+                    tTitle = document.title || 'सिफारिस';
+                } else {
+                    const mapping = collectionMap[templateId];
+                    if (mapping) {
+                        col = mapping.collection;
+                        tTitle = mapping.title;
+                    }
+                }
+
+                if (!col) return;
+
+                const currentRecordId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value : '';
+
+                db.collection(col)
+                    .where(fieldName, '==', nameVal)
+                    .get()
+                    .then(snapshot => {
+                        const docs = [];
+                        snapshot.forEach(doc => {
+                            if (doc.id !== currentRecordId) {
+                                docs.push({ id: doc.id, ...doc.data() });
+                            }
+                        });
+                        if (docs.length > 0) {
+                            // Sort by timestamp descending to find latest
+                            docs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                            const latest = docs[0];
+                            const timestamp = latest.timestamp || Date.now();
+                            const diffTime = Math.abs(Date.now() - timestamp);
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                            const msg = `⚠ This citizen already received\n${tTitle}\n${diffDays} days ago.\n\nOpen Previous ?`;
+                            if (confirm(msg)) {
+                                if (isDynamic) {
+                                    if (typeof window.editRecord === 'function') {
+                                        window.editRecord(latest.id);
+                                    } else if (typeof editRecord === 'function') {
+                                        editRecord(latest.id);
+                                    }
+                                } else {
+                                    if (typeof window.editFromDB === 'function') {
+                                        window.editFromDB(latest.id);
+                                    } else if (typeof editFromDB === 'function') {
+                                        editFromDB(latest.id);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Duplicate citizen check query failed:", err);
+                    });
+            });
+        }
 
         // 1. Get saved styling values or defaults (Size: 13pt, Italic: false, Color: black)
         const savedSize = localStorage.getItem('doc_font_size') || '13';

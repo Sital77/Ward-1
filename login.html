@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>लग-इन | गौरादह नगरपालिका वडा नं. १ सिफारिस प्रणाली</title>
+    <meta name="description" content="गौरादह नगरपालिका वडा नं. १ सिफारिस प्रणाली लगइन पृष्ठ">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -18,20 +19,21 @@
 
         body {
             min-height: 100vh;
-            background: #e8edf3;
+            background: linear-gradient(135deg, #e8edf3 0%, #dfe6f0 100%);
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .login-card {
             display: flex;
-            width: 820px;
+            width: 840px;
             max-width: 96vw;
-            min-height: 420px;
-            border-radius: 16px;
+            min-height: 460px;
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
         }
 
         /* ===== LEFT BLUE PANEL ===== */
@@ -140,7 +142,14 @@
             font-size: 22pt;
             font-weight: 700;
             color: #1a202c;
-            margin-bottom: 30px;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            font-size: 10pt;
+            color: #94a3b8;
+            margin-bottom: 26px;
+            font-weight: 500;
         }
 
         .form-label {
@@ -152,16 +161,21 @@
             letter-spacing: 0.3px;
         }
 
+        .form-input-wrap {
+            position: relative;
+            margin-bottom: 18px;
+        }
+
         .form-input {
             width: 100%;
             padding: 13px 16px;
+            padding-left: 44px;
             border: 1.5px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 12pt;
             color: #2d3748;
             background: #f8fafc;
             transition: all 0.2s ease;
-            margin-bottom: 20px;
             outline: none;
             font-family: 'Mukta', sans-serif;
         }
@@ -176,6 +190,74 @@
             color: #a0aec0;
         }
 
+        .form-input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .toggle-password:hover { color: #475569; }
+
+        /* Remember Me & Forgot Password Row */
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+        }
+
+        .remember-me span {
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .forgot-password {
+            font-size: 9pt;
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .forgot-password:hover { color: #1d4ed8; text-decoration: underline; }
+
         .error-msg {
             background: #fff5f5;
             border: 1px solid #fed7d7;
@@ -188,11 +270,21 @@
             display: none;
             align-items: center;
             gap: 8px;
+            animation: fadeIn 0.3s ease;
         }
 
         .error-msg.show {
             display: flex;
         }
+
+        .field-error {
+            font-size: 8.5pt;
+            color: #ef4444;
+            font-weight: 600;
+            margin-top: 4px;
+            display: none;
+        }
+        .field-error.show { display: block; }
 
         .btn-login {
             width: 100%;
@@ -200,7 +292,7 @@
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 13pt;
             font-weight: 700;
             cursor: pointer;
@@ -208,6 +300,10 @@
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
             font-family: 'Mukta', sans-serif;
             letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-login:hover {
@@ -221,27 +317,85 @@
             box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
         }
 
-        /* Enter key shake animation */
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            20%,
-            60% {
-                transform: translateX(-6px);
-            }
-
-            40%,
-            80% {
-                transform: translateX(6px);
-            }
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .shake {
-            animation: shake 0.4s ease;
+        .btn-login .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        .btn-login.loading .spinner { display: block; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Forgot Password Modal */
+        .forgot-modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15,23,42,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .forgot-modal-overlay.show { display: flex; }
+
+        .forgot-modal {
+            background: white;
+            width: 420px;
+            max-width: 92vw;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .forgot-modal h3 { font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 12px; }
+        .forgot-modal p { font-size: 0.92rem; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
+        .forgot-modal .close-forgot {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Mukta', sans-serif;
+            transition: all 0.2s;
+        }
+        .forgot-modal .close-forgot:hover { transform: translateY(-1px); }
+
+        /* Enter key shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake { animation: shake 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .login-card { flex-direction: column; min-height: auto; }
+            .login-left { width: 100%; padding: 30px 20px; }
+            .login-right { width: 100%; padding: 30px 24px; }
         }
     </style>
 </head>
@@ -263,71 +417,245 @@
         <!-- RIGHT WHITE PANEL -->
         <div class="login-right">
             <h2>लग-इन</h2>
+            <div class="login-subtitle">सिफारिस प्रणालीमा प्रवेश गर्नुहोस्</div>
 
             <label class="form-label" for="inUsername">प्रयोगकर्ता आईडी</label>
-            <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस्" autocomplete="username">
+            <div class="form-input-wrap">
+                <span class="input-icon">👤</span>
+                <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस्" autocomplete="username">
+            </div>
+            <div class="field-error" id="usernameError">कृपया प्रयोगकर्ता आईडी लेख्नुहोस्</div>
 
             <label class="form-label" for="inPassword">पासवर्ड</label>
-            <input class="form-input" type="password" id="inPassword" placeholder="••••••••"
-                autocomplete="current-password">
+            <div class="form-input-wrap">
+                <span class="input-icon">🔒</span>
+                <input class="form-input" type="password" id="inPassword" placeholder="••••••••" autocomplete="current-password">
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" id="togglePassBtn" aria-label="Toggle password visibility">👁️</button>
+            </div>
+            <div class="field-error" id="passwordError">कृपया पासवर्ड लेख्नुहोस्</div>
+
+            <div class="login-options">
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <span>मलाई सम्झनुहोस्</span>
+                </label>
+                <a class="forgot-password" onclick="showForgotModal()">पासवर्ड बिर्सनुभयो?</a>
+            </div>
 
             <div class="error-msg" id="errorMsg">
                 <span>⚠️</span>
                 <span id="errorText">आईडी वा पासवर्ड गलत छ !</span>
             </div>
 
-            <button class="btn-login" id="btnLogin" onclick="doLogin()">लग-इन</button>
+            <button class="btn-login" id="btnLogin" onclick="doLogin()">
+                <span class="spinner"></span>
+                <span class="btn-text">लग-इन</span>
+            </button>
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div class="forgot-modal-overlay" id="forgotModal">
+        <div class="forgot-modal">
+            <h3>🔑 पासवर्ड रिसेट</h3>
+            <p>पासवर्ड रिसेट गर्न कृपया प्रशासक (Admin) लाई सम्पर्क गर्नुहोस्।<br><br>
+            📧 Email: gauradaha.ward1@gmail.com<br>
+            📞 फोन: वडा कार्यालय</p>
+            <button class="close-forgot" onclick="closeForgotModal()">बुझें</button>
+        </div>
+    </div>
+
+    <!-- Include auth utilities -->
     <script>
-        // If already logged in, go back to the redirected page or index.html portal homepage
-        if (localStorage.getItem('sifarish_auth') === 'true') {
-            const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
-            localStorage.removeItem('sifarish_redirect');
-            window.location.replace(dest);
+        // Auth config and utility functions (inline for login page)
+        const AUTH_CONFIG = {
+            SESSION_KEY: 'sifarish_session',
+            ADMIN_KEY: 'sifarish_admin',
+            AUTH_KEY: 'sifarish_auth',
+            REDIRECT_KEY: 'sifarish_redirect',
+            DEFAULT_EXPIRY_HOURS: 24,
+            REMEMBER_EXPIRY_HOURS: 168
+        };
+
+        function generateSessionToken(rememberMe) {
+            const expiry = rememberMe ? AUTH_CONFIG.REMEMBER_EXPIRY_HOURS : AUTH_CONFIG.DEFAULT_EXPIRY_HOURS;
+            const expiresAt = Date.now() + (expiry * 60 * 60 * 1000);
+            const tokenId = 'sif_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
+            return { token: tokenId, createdAt: Date.now(), expiresAt: expiresAt, rememberMe: rememberMe };
         }
+
+        function createSession(isAdmin, rememberMe) {
+            const session = generateSessionToken(rememberMe || false);
+            session.isAdmin = isAdmin;
+            localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
+            localStorage.setItem(AUTH_CONFIG.AUTH_KEY, 'true');
+            localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, isAdmin ? 'true' : 'false');
+            if (!rememberMe) {
+                sessionStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
+            }
+        }
+
+        function isSessionValid() {
+            try {
+                const sessionStr = localStorage.getItem(AUTH_CONFIG.SESSION_KEY);
+                if (!sessionStr) return false;
+                const session = JSON.parse(sessionStr);
+                if (!session.token || !session.expiresAt) return false;
+                if (Date.now() > session.expiresAt) {
+                    localStorage.removeItem(AUTH_CONFIG.SESSION_KEY);
+                    localStorage.removeItem(AUTH_CONFIG.AUTH_KEY);
+                    localStorage.removeItem(AUTH_CONFIG.ADMIN_KEY);
+                    return false;
+                }
+                return true;
+            } catch (e) { return false; }
+        }
+
+        // If already logged in, redirect
+        if (isSessionValid() || localStorage.getItem('sifarish_auth') === 'true') {
+            const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
+            const requiresAdmin = dest.includes('admin.html');
+            const isUserAdmin = localStorage.getItem('sifarish_admin') === 'true';
+
+            if (!requiresAdmin || isUserAdmin) {
+                localStorage.removeItem('sifarish_redirect');
+                window.location.replace(dest);
+            }
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('inPassword');
+            const btn = document.getElementById('togglePassBtn');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                passInput.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        // Forgot password modal
+        function showForgotModal() {
+            document.getElementById('forgotModal').classList.add('show');
+        }
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.remove('show');
+        }
+
+        // Clear field error on input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('inUsername').addEventListener('input', function() {
+                this.classList.remove('error');
+                document.getElementById('usernameError').classList.remove('show');
+                document.getElementById('errorMsg').classList.remove('show');
+            });
+            document.getElementById('inPassword').addEventListener('input', function() {
+                this.classList.remove('error');
+                document.getElementById('passwordError').classList.remove('show');
+                document.getElementById('errorMsg').classList.remove('show');
+            });
+        });
 
         function doLogin() {
             const username = document.getElementById('inUsername').value.trim();
             const password = document.getElementById('inPassword').value.trim();
             const errorMsg = document.getElementById('errorMsg');
             const card = document.querySelector('.login-right');
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const btn = document.getElementById('btnLogin');
+            const usernameInput = document.getElementById('inUsername');
+            const passwordInput = document.getElementById('inPassword');
 
-            let authenticated = false;
-            let isAdmin = false;
+            // Reset errors
+            errorMsg.classList.remove('show');
+            usernameInput.classList.remove('error');
+            passwordInput.classList.remove('error');
+            document.getElementById('usernameError').classList.remove('show');
+            document.getElementById('passwordError').classList.remove('show');
 
-            if (username === 'wada1' && password === 'wada1') {
-                authenticated = true;
-                isAdmin = false;
-            } else if (username === 'admin' && password === 'admin') {
-                authenticated = true;
-                isAdmin = true;
+            // Validation
+            let hasError = false;
+            if (!username) {
+                usernameInput.classList.add('error');
+                document.getElementById('usernameError').classList.add('show');
+                hasError = true;
             }
-
-            if (authenticated) {
-                localStorage.setItem('sifarish_auth', 'true');
-                localStorage.setItem('sifarish_admin', isAdmin ? 'true' : 'false');
-                document.getElementById('btnLogin').textContent = 'Verifying...';
-                document.getElementById('btnLogin').style.background = 'linear-gradient(135deg, #276749, #38a169)';
-                // Redirect to the originally requested page, or fallback to index.html (or gharbato if needed)
-                const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
-                localStorage.removeItem('sifarish_redirect');
-                setTimeout(() => {
-                    window.location.replace(dest);
-                }, 600);
-            } else {
-                errorMsg.classList.add('show');
+            if (!password) {
+                passwordInput.classList.add('error');
+                document.getElementById('passwordError').classList.add('show');
+                hasError = true;
+            }
+            if (hasError) {
                 card.classList.add('shake');
                 setTimeout(() => card.classList.remove('shake'), 400);
-                document.getElementById('inPassword').value = '';
-                document.getElementById('inPassword').focus();
+                return;
             }
+
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.classList.add('loading');
+            btn.querySelector('.btn-text').textContent = 'प्रमाणित गर्दैछ...';
+
+            // Simulate authentication delay for security feel
+            setTimeout(() => {
+                let authenticated = false;
+                let isAdmin = false;
+
+                if (username === 'wada1' && password === 'wada1') {
+                    authenticated = true;
+                    isAdmin = false;
+                } else if (username === 'admin' && password === 'admin') {
+                    authenticated = true;
+                    isAdmin = true;
+                }
+
+                if (authenticated) {
+                    // Create secure session
+                    createSession(isAdmin, rememberMe);
+
+                    btn.querySelector('.btn-text').textContent = '✅ प्रवेश हुँदैछ...';
+                    btn.style.background = 'linear-gradient(135deg, #276749, #38a169)';
+
+                    let dest = localStorage.getItem('sifarish_redirect') || 'index.html';
+                    if (dest.includes('admin.html') && !isAdmin) {
+                        dest = 'index.html';
+                    }
+                    localStorage.removeItem('sifarish_redirect');
+                    setTimeout(() => {
+                        window.location.replace(dest);
+                    }, 500);
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                    btn.querySelector('.btn-text').textContent = 'लग-इन';
+
+                    document.getElementById('errorText').textContent = 'आईडी वा पासवर्ड गलत छ !';
+                    errorMsg.classList.add('show');
+                    card.classList.add('shake');
+                    setTimeout(() => card.classList.remove('shake'), 400);
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            }, 600);
         }
 
         // Allow Enter key to submit
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') doLogin();
+            if (e.key === 'Enter') {
+                // Don't submit if forgot modal is open
+                if (document.getElementById('forgotModal').classList.contains('show')) {
+                    closeForgotModal();
+                    return;
+                }
+                doLogin();
+            }
+        });
+
+        // Close forgot modal on overlay click
+        document.getElementById('forgotModal').addEventListener('click', function(e) {
+            if (e.target === this) closeForgotModal();
         });
     </script>
 

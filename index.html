@@ -128,7 +128,7 @@
     <div class="mega-dashboard">
         <div class="top-bar-buttons">
             <button id="themeToggle">🌙 Dark</button>
-            <button id="adminBtn" style="display: none;" onclick="location.href='admin.html'">⚙️ Admin</button>
+            <button id="adminBtn" onclick="openAdminPanel()">⚙️ Admin</button>
             <button id="logoutBtn" style="display: none;" onclick="sifarishLogout()">🚪 लग-आउट</button>
         </div>
 
@@ -407,14 +407,22 @@
         }
         const db = firebase.firestore();
 
-        // Show/hide admin and logout buttons initially on load
+        // Show/hide logout buttons initially on load (Admin button is always visible)
         function updateTopBarButtons() {
             const isAuth = localStorage.getItem('sifarish_auth') === 'true';
-            const isAdmin = isAuth && localStorage.getItem('sifarish_admin') === 'true';
-            document.getElementById('adminBtn').style.display = isAdmin ? 'inline-block' : 'none';
             document.getElementById('logoutBtn').style.display = isAuth ? 'inline-block' : 'none';
         }
         updateTopBarButtons();
+
+        // Redirect helper for the admin panel button
+        function openAdminPanel() {
+            if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
+                window.location.href = 'admin.html';
+            } else {
+                localStorage.setItem('sifarish_redirect', 'admin.html');
+                window.location.href = 'login.html';
+            }
+        }
 
         // Automatic Background Seeding of all missing templates
         async function seedTemplateFromLocalFile(id) {
@@ -525,7 +533,7 @@
             'अन्य': '📄'
         };
 
-        db.collection('sifarish_templates').where('status', '==', 'Active').onSnapshot((snapshot) => {
+        db.collection('sifarish_templates').where('status', 'in', ['Active', 'Published']).onSnapshot((snapshot) => {
             const container = document.getElementById('sifarishGridContainer');
             container.innerHTML = '';
             
