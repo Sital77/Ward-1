@@ -492,6 +492,7 @@ function initializeAutomaticDate() {
             inNepalSamvat.value = nepaliNSYearStr;
         }
 
+        if (typeof updateDoc === 'function') updateDoc();
         fetchCurrentNepalSambat();
     } catch (error) {
         console.error("Error initializing automatic date:", error);

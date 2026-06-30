@@ -417,11 +417,13 @@ function initializeFiscalYear(bsYear, bsMonth) {
     try {
         let startYear = bsYear;
         if (bsMonth < 4) startYear = bsYear - 1;
-        const currFY = formatFiscalYear(startYear);
+        const suffix = String(startYear + 1).slice(-2);
+        const currFY1 = toNepaliDigit(`${startYear}/${suffix}`);
+        const currFY2 = toNepaliDigit(`${startYear}/0${suffix}`);
         const radios = document.querySelectorAll('input[name="ayRadio"]');
         let matched = false;
         radios.forEach(r => {
-            if (r.value === currFY) { r.checked = true; matched = true; }
+            if (r.value === currFY1 || r.value === currFY2) { r.checked = true; matched = true; }
         });
         if (!matched && radios.length) radios[radios.length - 1].checked = true;
     } catch (e) { console.error(e); }
@@ -491,6 +493,7 @@ function initializeAutomaticDate() {
         const inNS = document.getElementById('inNepalSamvat');
         if (inNS) inNS.value = toNepaliDigit(nsYear);
 
+        if (typeof updateDoc === 'function') updateDoc();
         fetchCurrentNepalSambat();
     } catch (e) { console.error("Date init error:", e); }
 }

@@ -564,6 +564,7 @@ function initializeAutomaticDate() {
             inNepalSamvat.value = nepaliNSYearStr;
         }
 
+        if (typeof updateDoc === 'function') updateDoc();
         if (typeof window.fetchCurrentNepalSambat === 'function') {
             window.fetchCurrentNepalSambat();
         }
