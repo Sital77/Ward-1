@@ -108,6 +108,47 @@
             font-weight: bold;
         }
 
+        .mode-toggle-wrap {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #edf2f7;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 11px 8px;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4a5568;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .mode-btn.active-janma {
+            background: linear-gradient(135deg, #276749, #38a169);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(39, 103, 73, 0.3);
+        }
+
+        .mode-btn.active-bibaha {
+            background: linear-gradient(135deg, #c53030, #9b2c2c);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
+        }
+
+        .mode-btn.active-transfer {
+            background: linear-gradient(135deg, #2b6cb0, #3182ce);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
+        }
+
         @media print {
             .input-panel {
                 display: none !important;
@@ -139,11 +180,14 @@
 
         <!-- ── MODE TOGGLE ── -->
         <div class="mode-toggle-wrap">
-            <button id="btnJanma" class="mode-btn active-kholne" onclick="setMode('janma')">
+            <button id="btnJanma" class="mode-btn active-janma" onclick="setMode('janma')">
                 👶 जन्म दर्ता अभिलेख
             </button>
             <button id="btnBibaha" class="mode-btn" onclick="setMode('bibaha')">
                 💑 विवाह दर्ता अभिलेख
+            </button>
+            <button id="btnTransfer" class="mode-btn" onclick="setMode('transfer')">
+                🔄 जन्म दर्ता स्थानान्तरण
             </button>
         </div>
 
@@ -174,7 +218,7 @@
         </div>
 
         <!-- ══ RECIPIENT OFFICE SECTION ══ -->
-        <div class="section-card lh-section" style="background:#edf2f7; border-color:#cbd5e0;">
+        <div id="recipientSectionCard" class="section-card lh-section" style="background:#edf2f7; border-color:#cbd5e0;">
             <div class="section-label" style="color:#4a5568;">🏢 पठाउने कार्यालय (सम्बोधन)</div>
             
             <div class="form-group">
@@ -305,6 +349,62 @@
             </div>
         </div>
 
+        <!-- ══ BODY SECTION (TRANSFER MODE) ══ -->
+        <div id="formSectionTransfer" class="section-card body-section" style="display:none; background:rgba(43, 108, 176, 0.05); border-color:#3182ce;">
+            <div class="section-label" style="color:#2b6cb0;">🔄 जन्म दर्ता स्थानान्तरण विवरण</div>
+
+            <div class="form-group" style="background:#e6fffa; padding:12px; border-radius:8px; border:1.5px dashed #319795; margin-bottom:15px;">
+                <label style="color:#234e52; font-weight:bold; display:flex; align-items:center; gap:5px;">
+                    📥 जन्म दर्ता अभिलेखबाट डाटा तान्नुहोस् (वैकल्पिक):
+                </label>
+                <select id="inPullBirthRecord" onchange="pullBirthRecordData(this.value)" style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e0; font-family:inherit; margin-top:5px; font-weight:500;">
+                    <option value="">-- अभिलेख सूची लोड हुँदैछ वा खाली छ --</option>
+                </select>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>बुवाको नाम:</label>
+                    <input type="text" id="inTransferFatherName" placeholder="उदा: हरिप्रसाद शर्मा" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>आमाको नाम:</label>
+                    <input type="text" id="inTransferMotherName" placeholder="उदा: सरिता देवी शर्मा" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>नाता:</label>
+                    <div class="radio-container">
+                        <div class="radio-option">
+                            <input type="radio" id="genderTransfer1" name="transferChildGenderRadio" value="छोरी" onchange="updateDoc()" checked>
+                            <label for="genderTransfer1" class="radio-label">छोरी</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="genderTransfer2" name="transferChildGenderRadio" value="छोरा" onchange="updateDoc()">
+                            <label for="genderTransfer2" class="radio-label">छोरा</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>छोरा/छोरीको नाम:</label>
+                    <input type="text" id="inTransferChildName" placeholder="उदा: अञ्जली शर्मा" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>जन्म मिति (वि.सं.):</label>
+                    <input type="text" id="inTransferBirthDate" placeholder="उदा: २०६०/०५/१२" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>जन्म दर्ता नं.:</label>
+                    <input type="text" id="inTransferBirthRegNo" placeholder="उदा: १२४५/६७" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
         <!-- ══ COMMON OPTIONAL SETTINGS ══ -->
         <div class="section-card lh-section">
             <div class="section-label">⚙️ थप सेटिङहरू</div>
@@ -401,7 +501,7 @@
 
             <!-- ── Receiver ── -->
             <div style="margin-top:10px; margin-bottom:16px; text-align: left; width: 100%;">
-                <div style="font-weight:700; font-size:13.5pt; line-height:1.7;">
+                <div style="font-weight:700; font-size:13.5pt; line-height:1.7;" id="receiverAddressContainer">
                     श्री स्थानीय पञ्जिकाधिकारीज्यू<br>
                     <span id="lblTargetOffice">.................. गाउँपालिका, वडा नं. ... ।</span>
                 </div>
@@ -409,7 +509,7 @@
 
             <!-- ── Subject ── -->
             <div style="margin: 12px 0 20px 0; font-size:13.5pt; font-weight:700; text-align: center; width: 100%;">
-                विषय:- अभिलेख प्रमाणित गरि पठाईदिने बारे ।
+                विषय:- <span id="lblSubject">अभिलेख प्रमाणित गरि पठाईदिने बारे ।</span>
             </div>
 
             <!-- ── Body (Birth) ── -->
@@ -420,6 +520,11 @@
             <!-- ── Body (Marriage) ── -->
             <div class="letter-body-para" id="bodyTextBibaha" style="text-indent: 50px; display:none;">
                 प्रस्तुत विषयमा तहाँ वडाबाट मिति: <strong id="lblMigrationMitiBibaha">....................</strong> गते बसाईसराई आई हाल झापा जिल्ला गौरादह नगरपालिका वडा नं. १ बसोबास गर्ने <strong id="lblHusband">..................</strong> तथा <strong id="lblWife">..................</strong> को तपसिल अनुसारको बिवाह दर्ताको अभिलेख प्रमाणित गरि पठाईदिनुहुन सिफारिस साथ अनुरोध छ ।
+            </div>
+
+            <!-- ── Body (Transfer) ── -->
+            <div class="letter-body-para" id="bodyTextTransfer" style="text-indent: 50px; display:none;">
+                प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा बसोबास गर्ने <strong id="lblTransferFather">..................</strong> तथा <strong id="lblTransferMother">..................</strong>को <span id="lblTransferGenderWord">छोरी</span> <strong id="lblTransferChild">..................</strong>को जन्म दर्ताको प्रतिलिपिको लागी यस वडा कार्यालयमा निवेदन पेस भएको हुँदा निजहरूको व्यक्तिगत परिचयपत्र नं स्थानान्तरण गरिदिनुहुन आवश्यक कागजात संलग्न गरी पठाईएको व्यहोरा सिफारिस साथ अनुरोध छ ।
             </div>
 
             <!-- ── Tapsil Section (Birth) ── -->
@@ -477,6 +582,27 @@
                 <div class="tapsil-item" id="lblRegistrarRowBibaha" style="display:none;">
                     <span class="tapsil-label">स्थानीय पञ्जिकाधिकारी:</span>
                     <span class="tapsil-val" id="lblTapsilRegistrarBibaha">..................</span>
+                </div>
+            </div>
+
+            <!-- ── Tapsil Section (Transfer) ── -->
+            <div class="tapsil-container" id="tapsilSectionTransfer" style="display:none;">
+                <div class="tapsil-title">तपसिल:</div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">नाम:</span>
+                    <span class="tapsil-val" id="lblTapsilTransferName">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">जन्म मिति:</span>
+                    <span class="tapsil-val" id="lblTapsilTransferBirthDate">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">जन्म दर्ता नं.:</span>
+                    <span class="tapsil-val" id="lblTapsilTransferBirthRegNo">..................</span>
+                </div>
+                <div class="tapsil-item" id="lblRegistrarRowTransfer" style="display:none;">
+                    <span class="tapsil-label">स्थानीय पञ्जिकाधिकारी:</span>
+                    <span class="tapsil-val" id="lblTapsilRegistrarTransfer">..................</span>
                 </div>
             </div>
 

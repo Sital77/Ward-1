@@ -25,7 +25,54 @@ db.collection("abhilekhRecords").onSnapshot((snapshot) => {
     });
     globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
     renderDatabaseTable();
+    populateBirthRecordsDropdown();
 });
+
+function populateBirthRecordsDropdown() {
+    const select = document.getElementById('inPullBirthRecord');
+    if (!select) return;
+    select.innerHTML = '<option value="">-- जन्म दर्ता अभिलेखबाट डेटा तान्नुहोस् (वैकल्पिक) --</option>';
+    
+    // Filter records in globalDatabase where mode === 'janma'
+    const birthRecs = globalDatabase.filter(r => r.mode === 'janma');
+    
+    if (birthRecs.length === 0) {
+        select.innerHTML = '<option value="">-- कुनै पनि जन्म दर्ता अभिलेख फेला परेन --</option>';
+        return;
+    }
+    
+    birthRecs.forEach(rec => {
+        const option = document.createElement('option');
+        option.value = rec.id;
+        option.innerText = `${rec.childName} (बुवा: ${rec.fatherName}, दर्ता नं: ${rec.birthRegNo})`;
+        select.appendChild(option);
+    });
+}
+
+function pullBirthRecordData(id) {
+    if (!id) return;
+    const rec = globalDatabase.find(r => r.id === id);
+    if (!rec) return;
+
+    const inFather = document.getElementById('inTransferFatherName');
+    const inMother = document.getElementById('inTransferMotherName');
+    const inChild = document.getElementById('inTransferChildName');
+    const inBirthDate = document.getElementById('inTransferBirthDate');
+    const inBirthReg = document.getElementById('inTransferBirthRegNo');
+
+    if (inFather) inFather.value = rec.fatherName || '';
+    if (inMother) inMother.value = rec.motherName || '';
+    if (inChild) inChild.value = rec.childName || '';
+    if (inBirthDate) inBirthDate.value = rec.birthDate || '';
+    if (inBirthReg) inBirthReg.value = rec.birthRegNo || '';
+
+    const genRadios = document.querySelectorAll('input[name="transferChildGenderRadio"]');
+    for (const r of genRadios) {
+        r.checked = (r.value === rec.childGender);
+    }
+    
+    updateDoc();
+}
 
 // ── Helpers ─────────────────────────────────────────
 function toNepaliDigit(num) {
@@ -45,46 +92,88 @@ function getSelectedChildGender() {
     return 'छोरी';
 }
 
+function getSelectedTransferChildGender() {
+    const radios = document.querySelectorAll('input[name="transferChildGenderRadio"]');
+    for (const r of radios) { if (r.checked) return r.value; }
+    return 'छोरी';
+}
+
 // ── Mode toggle ─────────────────────────────────────
 function setMode(mode) {
     document.getElementById('currentMode').value = mode;
 
     const btnJanma = document.getElementById('btnJanma');
     const btnBibaha = document.getElementById('btnBibaha');
+    const btnTransfer = document.getElementById('btnTransfer');
 
     const formJanma = document.getElementById('formSectionJanma');
     const formBibaha = document.getElementById('formSectionBibaha');
+    const formTransfer = document.getElementById('formSectionTransfer');
 
     const bodyJanma = document.getElementById('bodyTextJanma');
     const bodyBibaha = document.getElementById('bodyTextBibaha');
+    const bodyTransfer = document.getElementById('bodyTextTransfer');
 
     const tapsilJanma = document.getElementById('tapsilSectionJanma');
     const tapsilBibaha = document.getElementById('tapsilSectionBibaha');
+    const tapsilTransfer = document.getElementById('tapsilSectionTransfer');
+
+    const recipientCard = document.getElementById('recipientSectionCard');
 
     if (mode === 'janma') {
-        btnJanma.className = "mode-btn active-kholne";
+        btnJanma.className = "mode-btn active-janma";
         btnBibaha.className = "mode-btn";
+        if (btnTransfer) btnTransfer.className = "mode-btn";
 
         formJanma.style.display = "block";
         formBibaha.style.display = "none";
+        if (formTransfer) formTransfer.style.display = "none";
 
         bodyJanma.style.display = "block";
         bodyBibaha.style.display = "none";
+        if (bodyTransfer) bodyTransfer.style.display = "none";
 
         tapsilJanma.style.display = "block";
         tapsilBibaha.style.display = "none";
-    } else {
+        if (tapsilTransfer) tapsilTransfer.style.display = "none";
+
+        if (recipientCard) recipientCard.style.display = "block";
+    } else if (mode === 'bibaha') {
         btnJanma.className = "mode-btn";
-        btnBibaha.className = "mode-btn active-banda";
+        btnBibaha.className = "mode-btn active-bibaha";
+        if (btnTransfer) btnTransfer.className = "mode-btn";
 
         formJanma.style.display = "none";
         formBibaha.style.display = "block";
+        if (formTransfer) formTransfer.style.display = "none";
 
         bodyJanma.style.display = "none";
         bodyBibaha.style.display = "block";
+        if (bodyTransfer) bodyTransfer.style.display = "none";
 
         tapsilJanma.style.display = "none";
         tapsilBibaha.style.display = "block";
+        if (tapsilTransfer) tapsilTransfer.style.display = "none";
+
+        if (recipientCard) recipientCard.style.display = "block";
+    } else {
+        btnJanma.className = "mode-btn";
+        btnBibaha.className = "mode-btn";
+        if (btnTransfer) btnTransfer.className = "mode-btn active-transfer";
+
+        formJanma.style.display = "none";
+        formBibaha.style.display = "none";
+        if (formTransfer) formTransfer.style.display = "block";
+
+        bodyJanma.style.display = "none";
+        bodyBibaha.style.display = "none";
+        if (bodyTransfer) bodyTransfer.style.display = "block";
+
+        tapsilJanma.style.display = "none";
+        tapsilBibaha.style.display = "none";
+        if (tapsilTransfer) tapsilTransfer.style.display = "block";
+
+        if (recipientCard) recipientCard.style.display = "none";
     }
     
     updateDoc();
@@ -96,6 +185,8 @@ function toggleRegistrarSection() {
     document.getElementById('registrarSection').style.display = chk.checked ? 'block' : 'none';
     document.getElementById('lblRegistrarRow').style.display = chk.checked ? 'flex' : 'none';
     document.getElementById('lblRegistrarRowBibaha').style.display = chk.checked ? 'flex' : 'none';
+    const rowTr = document.getElementById('lblRegistrarRowTransfer');
+    if (rowTr) rowTr.style.display = chk.checked ? 'flex' : 'none';
 }
 
 function toggleCustomSign() {
@@ -134,14 +225,27 @@ function updateDoc() {
     const lblNS = document.getElementById('lblNepalSamvat');
     if (lblNS) lblNS.innerText = ns || '........';
 
-    // Recipient address
-    const targetMuniType = getSelectedMuniType();
-    const targetMuniName = document.getElementById('inMuniName').value || '..................';
-    const targetWadaNo = document.getElementById('inTargetWadaNo').value || '...';
-    
-    const lblTargetOffice = document.getElementById('lblTargetOffice');
-    if (lblTargetOffice) {
-        lblTargetOffice.innerHTML = `${targetMuniName} ${targetMuniType}, वडा नं. ${toNepaliDigit(targetWadaNo)} ।`;
+    // Recipient address & Subject
+    const receiverAddressContainer = document.getElementById('receiverAddressContainer');
+    const lblSubject = document.getElementById('lblSubject');
+
+    if (mode === 'transfer') {
+        if (receiverAddressContainer) {
+            receiverAddressContainer.innerHTML = `श्री गौरादह नगरपालिका<br>नगर कार्यपालिकाको कार्यालय<br>गौरादह, झापा ।`;
+        }
+        if (lblSubject) {
+            lblSubject.innerText = "व्यक्तिगत परिचयपत्र स्थानान्तरण सम्बन्धमा ।";
+        }
+    } else {
+        const targetMuniType = getSelectedMuniType();
+        const targetMuniName = document.getElementById('inMuniName').value || '..................';
+        const targetWadaNo = document.getElementById('inTargetWadaNo').value || '...';
+        if (receiverAddressContainer) {
+            receiverAddressContainer.innerHTML = `श्री स्थानीय पञ्जिकाधिकारीज्यू<br><span id="lblTargetOffice">${targetMuniName} ${targetMuniType}, वडा नं. ${toNepaliDigit(targetWadaNo)} ।</span>`;
+        }
+        if (lblSubject) {
+            lblSubject.innerText = "अभिलेख प्रमाणित गरि पठाईदिने बारे ।";
+        }
     }
 
     // बसाईसराई मिति
@@ -185,12 +289,11 @@ function updateDoc() {
         if (lblTapsilMother) lblTapsilMother.innerText = mother;
         
         // Registrar option
-        const chkRegistrar = document.getElementById('chkRegistrar');
         const regName = document.getElementById('inRegistrarName').value || '..................';
         const lblTapsilRegistrar = document.getElementById('lblTapsilRegistrar');
         if (lblTapsilRegistrar) lblTapsilRegistrar.innerText = regName;
         
-    } else {
+    } else if (mode === 'bibaha') {
         // Marriage mode preview updates
         const husband = document.getElementById('inHusbandName').value || '..................';
         const wife = document.getElementById('inWifeName').value || '..................';
@@ -222,10 +325,40 @@ function updateDoc() {
         if (lblTapsilMarriageRegNo) lblTapsilMarriageRegNo.innerText = marriageRegNo;
         
         // Registrar option
-        const chkRegistrar = document.getElementById('chkRegistrar');
         const regName = document.getElementById('inRegistrarName').value || '..................';
         const lblTapsilRegistrarBibaha = document.getElementById('lblTapsilRegistrarBibaha');
         if (lblTapsilRegistrarBibaha) lblTapsilRegistrarBibaha.innerText = regName;
+    } else {
+        // Transfer mode preview updates
+        const father = document.getElementById('inTransferFatherName').value || '..................';
+        const mother = document.getElementById('inTransferMotherName').value || '..................';
+        const child = document.getElementById('inTransferChildName').value || '..................';
+        const gender = getSelectedTransferChildGender();
+        const birthDate = document.getElementById('inTransferBirthDate').value || '..................';
+        const birthRegNo = document.getElementById('inTransferBirthRegNo').value || '..................';
+
+        // Body Text
+        const lblTransferFather = document.getElementById('lblTransferFather');
+        if (lblTransferFather) lblTransferFather.innerText = father;
+        const lblTransferMother = document.getElementById('lblTransferMother');
+        if (lblTransferMother) lblTransferMother.innerText = mother;
+        const lblTransferGenderWord = document.getElementById('lblTransferGenderWord');
+        if (lblTransferGenderWord) lblTransferGenderWord.innerText = gender;
+        const lblTransferChild = document.getElementById('lblTransferChild');
+        if (lblTransferChild) lblTransferChild.innerText = child;
+
+        // Tapsil
+        const lblTapsilTransferName = document.getElementById('lblTapsilTransferName');
+        if (lblTapsilTransferName) lblTapsilTransferName.innerText = child;
+        const lblTapsilTransferBirthDate = document.getElementById('lblTapsilTransferBirthDate');
+        if (lblTapsilTransferBirthDate) lblTapsilTransferBirthDate.innerText = birthDate;
+        const lblTapsilTransferBirthRegNo = document.getElementById('lblTapsilTransferBirthRegNo');
+        if (lblTapsilTransferBirthRegNo) lblTapsilTransferBirthRegNo.innerText = birthRegNo;
+
+        // Registrar option
+        const regName = document.getElementById('inRegistrarName').value || '..................';
+        const lblTapsilRegistrarTransfer = document.getElementById('lblTapsilRegistrarTransfer');
+        if (lblTapsilRegistrarTransfer) lblTapsilRegistrarTransfer.innerText = regName;
     }
 
     // Signature Block updates
@@ -468,7 +601,7 @@ async function printAndSaveSystem() {
             alert("कृपया छोरा/छोरीको नाम अनिवार्य लेख्नुहोस् ।");
             return;
         }
-    } else {
+    } else if (mode === 'bibaha') {
         const husband = document.getElementById('inHusbandName').value.trim();
         const wife = document.getElementById('inWifeName').value.trim();
         if (!husband || !wife) {
@@ -476,6 +609,12 @@ async function printAndSaveSystem() {
             return;
         }
         name = `${husband} र ${wife}`;
+    } else {
+        name = document.getElementById('inTransferChildName').value.trim();
+        if (!name) {
+            alert("कृपया छोरा/छोरीको नाम अनिवार्य लेख्नुहोस् ।");
+            return;
+        }
     }
 
     const recordId = document.getElementById('editRecordIndex').value;
@@ -508,6 +647,14 @@ async function printAndSaveSystem() {
         marriageDate:    document.getElementById('inMarriageDate').value.trim()    || '',
         marriageRegNo:   document.getElementById('inMarriageRegNo').value.trim()   || '',
         marriageRegDate: document.getElementById('inMarriageRegDate').value.trim()  || '',
+
+        // Transfer fields
+        transferFatherName:  document.getElementById('inTransferFatherName') ? document.getElementById('inTransferFatherName').value.trim() : '',
+        transferMotherName:  document.getElementById('inTransferMotherName') ? document.getElementById('inTransferMotherName').value.trim() : '',
+        transferChildGender: getSelectedTransferChildGender(),
+        transferChildName:   document.getElementById('inTransferChildName') ? document.getElementById('inTransferChildName').value.trim() : '',
+        transferBirthDate:   document.getElementById('inTransferBirthDate') ? document.getElementById('inTransferBirthDate').value.trim() : '',
+        transferBirthRegNo:  document.getElementById('inTransferBirthRegNo') ? document.getElementById('inTransferBirthRegNo').value.trim() : '',
 
         // Common
         hasRegistrar:    document.getElementById('chkRegistrar').checked,
@@ -581,7 +728,11 @@ function renderDatabaseTable() {
 
     filtered.forEach((rec, index) => {
         const row = document.createElement('tr');
-        const typeLabel = rec.mode === 'janma' ? '👶 जन्म दर्ता' : '💑 विवाह दर्ता';
+        let typeLabel = '';
+        if (rec.mode === 'janma') typeLabel = '👶 जन्म दर्ता';
+        else if (rec.mode === 'bibaha') typeLabel = '💑 विवाह दर्ता';
+        else typeLabel = '🔄 स्थानान्तरण';
+        
         row.innerHTML = `
             <td>${toNepaliDigit(index + 1)}</td>
             <td><b>${rec.name || '-'}</b></td>
@@ -648,6 +799,23 @@ async function loadRecordToForm(id) {
     document.getElementById('inMarriageDate').value = rec.marriageDate || '';
     document.getElementById('inMarriageRegNo').value = rec.marriageRegNo || '';
     document.getElementById('inMarriageRegDate').value = rec.marriageRegDate || '';
+
+    // Transfer Mode fields
+    const inTF = document.getElementById('inTransferFatherName');
+    if (inTF) inTF.value = rec.transferFatherName || '';
+    const inTM = document.getElementById('inTransferMotherName');
+    if (inTM) inTM.value = rec.transferMotherName || '';
+    const inTCN = document.getElementById('inTransferChildName');
+    if (inTCN) inTCN.value = rec.transferChildName || '';
+    const inTBD = document.getElementById('inTransferBirthDate');
+    if (inTBD) inTBD.value = rec.transferBirthDate || '';
+    const inTBR = document.getElementById('inTransferBirthRegNo');
+    if (inTBR) inTBR.value = rec.transferBirthRegNo || '';
+
+    const transGenRadios = document.querySelectorAll('input[name="transferChildGenderRadio"]');
+    for (const r of transGenRadios) {
+        r.checked = (r.value === rec.transferChildGender);
+    }
 
     // Common Registrar Settings
     const chkReg = document.getElementById('chkRegistrar');
