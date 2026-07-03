@@ -732,3 +732,7 @@ window.onload = function () {
     window.addKittaRow();
     window.adjustSignaturePosition(40);
 };
+
+window.addEventListener('templateInjected', function() {
+    initializeAutomaticDate();
+});

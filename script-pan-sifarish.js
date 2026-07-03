@@ -723,3 +723,7 @@ window.onload = function () {
     adjustSignaturePosition(40);
     setMode('kholne'); // start with kholne mode
 };
+
+window.addEventListener('templateInjected', function() {
+    initializeAutomaticDate();
+});

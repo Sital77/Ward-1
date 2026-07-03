@@ -704,3 +704,7 @@ window.onload = function () {
     window.updateDoc();
     window.adjustSignaturePosition(40);
 };
+
+window.addEventListener('templateInjected', function() {
+    initializeAutomaticDate();
+});

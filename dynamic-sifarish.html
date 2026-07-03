@@ -220,8 +220,10 @@
 
             // Load records
             loadRecords();
-        }
         loadTemplateConfig();
+        window.addEventListener('templateInjected', () => {
+            initializeAutomaticDate();
+        });
 
         // 2. Extract variable placeholders (either double curly braces or elements with lbl id)
         function parsePlaceholders() {

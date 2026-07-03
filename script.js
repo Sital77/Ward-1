@@ -621,3 +621,7 @@ window.onload = function () {
     addKittaRow();
     adjustSignaturePosition(40);
 };
+
+window.addEventListener('templateInjected', function() {
+    initializeAutomaticDate();
+});

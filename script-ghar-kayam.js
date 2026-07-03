@@ -619,3 +619,7 @@ window.onload = function () {
     adjustSignaturePosition(40);
     updateDoc();
 };
+
+window.addEventListener('templateInjected', function() {
+    initializeAutomaticDate();
+});

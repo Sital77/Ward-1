@@ -132,7 +132,10 @@
     // Helper: Replace existing page elements after the red line with the database template
     function injectTemplateHTML(htmlContent) {
         const redLine = document.querySelector('.header-red-line');
-        if (!redLine) return;
+        if (!redLine || !htmlContent) return;
+
+        // Auto-migrate any stored आ.व. references in Firestore template to प.सं.
+        htmlContent = htmlContent.replace(/आ\.व\.\s*<span id="(lblPatraSankhya|lblAY)"/g, 'प.सं. <span id="$1"');
 
         // Clean up everything after the red line
         while (redLine.nextSibling) {
@@ -145,6 +148,17 @@
         while (tempDiv.firstChild) {
             redLine.parentNode.insertBefore(tempDiv.firstChild, null);
         }
+
+        // Immediately trigger live synchronization of dates and form fields into newly injected DOM
+        setTimeout(() => {
+            if (typeof initializeAutomaticDate === 'function') {
+                initializeAutomaticDate();
+            }
+            if (typeof updateDoc === 'function') {
+                updateDoc();
+            }
+            window.dispatchEvent(new Event('templateInjected'));
+        }, 30);
     }
 
     // Helper: Seeds local HTML into Firestore for first-time migration
@@ -614,6 +628,10 @@
             let bsD = today.getDate() >= 16 ? today.getDate() - 15 : today.getDate() + 16;
             if (bsD > 32) bsD = 30;
             const converter = window["@sbmdkl/nepali-date-converter"];
+            if (!converter && (window._fontBadgeRetries || 0) < 5) {
+                window._fontBadgeRetries = (window._fontBadgeRetries || 0) + 1;
+                setTimeout(initFontSettings, 400);
+            }
             if (converter && typeof converter.adToBs === 'function') {
                 try {
                     const yyyy = today.getFullYear();
@@ -631,12 +649,16 @@
             const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
             const dateStr = `मिति : ${toNep(bsY)} ${nepaliMonths[bsM - 1] || 'असार'} ${toNep(bsD)} गते, ${dayName}`;
             
-            const badge = document.createElement('div');
-            badge.style.cssText = 'background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(30,58,138,0.25); border: 1px solid rgba(255,255,255,0.25); font-family: inherit;';
-            badge.innerHTML = `<span>🗓️ <strong>स्वचालित नेपाली मिति:</strong></span> <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; letter-spacing: 0.5px;">${dateStr}</span>`;
-            if (card && card.parentNode) {
-                card.parentNode.insertBefore(badge, card);
+            let badge = document.getElementById('nepaliDateBannerBadge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.id = 'nepaliDateBannerBadge';
+                badge.style.cssText = 'background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(30,58,138,0.25); border: 1px solid rgba(255,255,255,0.25); font-family: inherit;';
+                if (card && card.parentNode) {
+                    card.parentNode.insertBefore(badge, card);
+                }
             }
+            badge.innerHTML = `<span>🗓️ <strong>स्वचालित नेपाली मिति:</strong></span> <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; letter-spacing: 0.5px;">${dateStr}</span>`;
         } catch(e) {}
     }
 

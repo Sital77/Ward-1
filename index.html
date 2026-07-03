@@ -640,6 +640,10 @@
                 let bsD = today.getDate() >= 16 ? today.getDate() - 15 : today.getDate() + 16;
                 if (bsD > 32) bsD = 30;
                 const converter = window["@sbmdkl/nepali-date-converter"];
+                if (!converter && (window._portalDateRetries || 0) < 5) {
+                    window._portalDateRetries = (window._portalDateRetries || 0) + 1;
+                    setTimeout(initPortalNepaliDate, 400);
+                }
                 if (converter && typeof converter.adToBs === 'function') {
                     try {
                         const yyyy = today.getFullYear();
