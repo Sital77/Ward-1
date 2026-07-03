@@ -306,7 +306,7 @@ function initializeFiscalYear(bsYear, bsMonth) {
         // Select body FY option
         const inBodyAY = document.getElementById('inBodyAY');
         if (inBodyAY) {
-            inBodyAY.value = currFY;
+            inBodyAY.value = currFY1;
         }
     } catch (e) { console.error(e); }
 }
