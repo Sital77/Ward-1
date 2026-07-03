@@ -427,6 +427,10 @@ function initializeAutomaticDate() {
         let bsMonthVal = 2;
 
         const converter = window["@sbmdkl/nepali-date-converter"];
+        if (!converter && (window._dateInitRetries || 0) < 5) {
+            window._dateInitRetries = (window._dateInitRetries || 0) + 1;
+            setTimeout(initializeAutomaticDate, 400);
+        }
         if (converter && typeof converter.adToBs === 'function') {
             const today = new Date();
             const yyyy = today.getFullYear();
