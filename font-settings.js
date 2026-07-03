@@ -184,7 +184,8 @@
                 'ghar-kayam': 'घर कायम सिफारिस',
                 'pan-sifarish': 'स्थायी लेखा नं. सिफारिस',
                 'abibahit-pramanit': 'अविवाहित प्रमाणित',
-                'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस'
+                'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
+                'abhilekh-pramanit': 'अभिलेख प्रमाणित'
             };
 
             const categories = {
@@ -196,7 +197,8 @@
                 'ghar-kayam': 'जग्गा सम्बन्धि',
                 'pan-sifarish': 'कार्यालय/प्रशासन',
                 'abibahit-pramanit': 'व्यक्तिगत प्रमाणित',
-                'apangata-sifarish': 'व्यक्तिगत प्रमाणित'
+                'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
+                'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित'
             };
 
             await db.collection('sifarish_templates').doc(id).set({

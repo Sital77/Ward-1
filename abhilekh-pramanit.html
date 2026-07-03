@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>अभिलेख प्रमाणित - गौरादह नगरपालिका वडा नं.१</title>
+    <link rel="stylesheet" href="charkilla.css">
+    <style>
+        .preview-panel .a4-page,
+        .preview-panel .a4-page * {
+            font-family: 'Mukta', sans-serif;
+        }
+
+        .letter-body-para {
+            font-size: 13pt;
+            line-height: 1.9;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .fill-space {
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .section-card {
+            border-radius: 10px;
+            padding: 14px 14px 6px 14px;
+            margin-bottom: 18px;
+        }
+
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lh-section {
+            background: #f7fafc;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .lh-section .section-label {
+            color: #4a5568;
+        }
+
+        .body-section {
+            background: rgba(43, 108, 176, 0.07);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
+        }
+
+        .body-section .section-label {
+            color: #2b6cb0;
+        }
+
+        .body-section label {
+            color: #2c5282;
+        }
+
+        .optional-toggle {
+            font-size: 0.82rem;
+            color: #718096;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            user-select: none;
+        }
+
+        .optional-toggle input {
+            cursor: pointer;
+        }
+
+        /* Tapsil list styles in preview */
+        .tapsil-container {
+            margin: 15px 0;
+            font-size: 12.5pt;
+            line-height: 1.8;
+            padding-left: 30px;
+            text-align: left;
+        }
+        
+        .tapsil-title {
+            font-weight: bold;
+            font-size: 13pt;
+            margin-bottom: 5px;
+        }
+
+        .tapsil-item {
+            display: flex;
+            margin-bottom: 4px;
+        }
+
+        .tapsil-label {
+            width: 180px;
+            font-weight: normal;
+        }
+
+        .tapsil-val {
+            font-weight: bold;
+        }
+
+        @media print {
+            .input-panel {
+                display: none !important;
+            }
+
+            .preview-panel {
+                width: 100% !important;
+            }
+
+            .modal-overlay {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="auth.js"></script>
+
+    <!-- ══════════════ INPUT PANEL ══════════════ -->
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">🗄️ अभिलेख प्रमाणित सिफारिस</h2>
+            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+        <input type="hidden" id="currentMode" value="janma">
+
+        <!-- ── MODE TOGGLE ── -->
+        <div class="mode-toggle-wrap">
+            <button id="btnJanma" class="mode-btn active-kholne" onclick="setMode('janma')">
+                👶 जन्म दर्ता अभिलेख
+            </button>
+            <button id="btnBibaha" class="mode-btn" onclick="setMode('bibaha')">
+                💑 विवाह दर्ता अभिलेख
+            </button>
+        </div>
+
+        <!-- ══ LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 लेटर हेड विवरण</div>
+
+            <div class="form-group">
+                <label>पत्र संख्या (प.सं.):</label>
+                <select id="inPatraSankhya" onchange="updateDoc()"></select>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="२०८३/०२/१८" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ने.स. :</label>
+                <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ RECIPIENT OFFICE SECTION ══ -->
+        <div class="section-card lh-section" style="background:#edf2f7; border-color:#cbd5e0;">
+            <div class="section-label" style="color:#4a5568;">🏢 पठाउने कार्यालय (सम्बोधन)</div>
+            
+            <div class="form-group">
+                <label>कार्यालयको स्थानीय तह प्रकार:</label>
+                <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:3px;">
+                    <div class="radio-option">
+                        <input type="radio" id="muniType1" name="muniTypeRadio" value="गाउँपालिका" onchange="updateDoc()" checked>
+                        <label for="muniType1" class="radio-label">गाउँपालिका</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="muniType2" name="muniTypeRadio" value="नगरपालिका" onchange="updateDoc()">
+                        <label for="muniType2" class="radio-label">नगरपालिका</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="muniType3" name="muniTypeRadio" value="उपमहानगरपालिका" onchange="updateDoc()">
+                        <label for="muniType3" class="radio-label">उपमहानगरपालिका</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="muniType4" name="muniTypeRadio" value="महानगरपालिका" onchange="updateDoc()">
+                        <label for="muniType4" class="radio-label">महानगरपालिका</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>तह/कार्यालयको नाम:</label>
+                    <input type="text" id="inMuniName" placeholder="उदा: कमल" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>वडा नं.:</label>
+                    <input type="text" id="inTargetWadaNo" placeholder="उदा: ३" oninput="updateDoc()">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>बसाईसराई आएको मिति (वि.सं.):</label>
+                <input type="text" id="inMigrationMiti" placeholder="उदा: २०८१/१०/१५" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ BODY SECTION (BIRTH MODE) ══ -->
+        <div id="formSectionJanma" class="section-card body-section">
+            <div class="section-label">👶 जन्म दर्ता विवरण</div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>बुवाको नाम:</label>
+                    <input type="text" id="inFatherName" placeholder="उदा: हरिप्रसाद शर्मा" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>आमाको नाम:</label>
+                    <input type="text" id="inMotherName" placeholder="उदा: सरिता देवी शर्मा" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>नाता:</label>
+                    <div class="radio-container">
+                        <div class="radio-option">
+                            <input type="radio" id="genderChild1" name="childGenderRadio" value="छोरी" onchange="updateDoc()" checked>
+                            <label for="genderChild1" class="radio-label">छोरी</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="genderChild2" name="childGenderRadio" value="छोरा" onchange="updateDoc()">
+                            <label for="genderChild2" class="radio-label">छोरा</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>छोरा/छोरीको नाम:</label>
+                    <input type="text" id="inChildName" placeholder="उदा: अञ्जली शर्मा" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>जन्म मिति (वि.सं.):</label>
+                <input type="text" id="inBirthDate" placeholder="उदा: २०६०/०५/१२" oninput="updateDoc()">
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>जन्म दर्ता नं.:</label>
+                    <input type="text" id="inBirthRegNo" placeholder="उदा: १२४५/६७" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>जन्म दर्ता मिति:</label>
+                    <input type="text" id="inBirthRegDate" placeholder="उदा: २०६०/०६/०५" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ BODY SECTION (MARRIAGE MODE) ══ -->
+        <div id="formSectionBibaha" class="section-card body-section" style="display:none;">
+            <div class="section-label">💑 विवाह दर्ता विवरण</div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>श्रीमानको नाम (पति):</label>
+                    <input type="text" id="inHusbandName" placeholder="उदा: रमेश अधिकारी" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>श्रीमतीको नाम (पत्नी):</label>
+                    <input type="text" id="inWifeName" placeholder="उदा: अनिता अधिकारी" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>तपसिलमा देखाउनुपर्ने नाम (Default: श्रीमान र श्रीमती):</label>
+                <input type="text" id="inTapsilMarriageName" placeholder="रमेश अधिकारी र अनिता अधिकारी" oninput="updateDoc()">
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>विवाह भएको मिति:</label>
+                    <input type="text" id="inMarriageDate" placeholder="उदा: २०७८/११/२५" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>विवाह दर्ता नं.:</label>
+                    <input type="text" id="inMarriageRegNo" placeholder="उदा: ५६७/०७८" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>विवाह दर्ता मिति:</label>
+                <input type="text" id="inMarriageRegDate" placeholder="उदा: २०७८/१२/०२" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ COMMON OPTIONAL SETTINGS ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">⚙️ थप सेटिङहरू</div>
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkRegistrar" onchange="toggleRegistrarSection(); updateDoc();">
+                तपसिलमा स्थानीय पञ्जिकाधिकारीको नाम समावेश गर्ने
+            </label>
+            <div id="registrarSection" style="display:none;">
+                <div class="form-group">
+                    <label>स्थानीय पञ्जिकाधिकारीको नाम:</label>
+                    <input type="text" id="inRegistrarName" placeholder="उदा: मनिषा भट्टराई" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- हस्ताक्षर अधिकारी -->
+        <div class="form-group"
+            style="margin-top: 5px; background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
+            <label style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
+                <option value="अनिता अधिकारी|स्थानीय पञ्जिकाधिकारी">स्थानीय पञ्जिकाधिकारी - अनिता अधिकारी</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40"
+                    oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र सुरक्षित गर्नुस्</button>
+    </div>
+
+    <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ अभिलेख प्रमाणित सिफारिस अभिलेख</h3>
+            <div class="search-container">
+                <label>🔍 नामबाट खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..."
+                    oninput="renderDatabaseTable()">
+            </div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width:8%;">क्रम</th>
+                        <th style="width:35%;">प्रमाणित नाम</th>
+                        <th style="width:25%;">प्रकार</th>
+                        <th style="width:20%;">मिति</th>
+                        <th style="width:12%;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ══════════════ PREVIEW PANEL (A4 Letter) ══════════════ -->
+    <div class="preview-panel">
+        <div class="a4-page">
+
+            <!-- ── Letterhead ── -->
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg"
+                        alt="Nepal Emblem">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblAY"></span></div>
+                        <div>च.नं. <span id="lblChalani"></span></div>
+                    </div>
+                </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title">१ नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti"></span></div>
+                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat"></span></div>
+                </div>
+            </div>
+
+            <div class="header-red-line"></div>
+
+            <!-- ── Receiver ── -->
+            <div style="margin-top:10px; margin-bottom:16px; text-align: left; width: 100%;">
+                <div style="font-weight:700; font-size:13.5pt; line-height:1.7;">
+                    श्री स्थानीय पञ्जिकाधिकारीज्यू<br>
+                    <span id="lblTargetOffice">.................. गाउँपालिका, वडा नं. ... ।</span>
+                </div>
+            </div>
+
+            <!-- ── Subject ── -->
+            <div style="margin: 12px 0 20px 0; font-size:13.5pt; font-weight:700; text-align: center; width: 100%;">
+                विषय:- अभिलेख प्रमाणित गरि पठाईदिने बारे ।
+            </div>
+
+            <!-- ── Body (Birth) ── -->
+            <div class="letter-body-para" id="bodyTextJanma" style="text-indent: 50px;">
+                प्रस्तुत विषयमा तहाँ वडाबाट मिति: <strong id="lblMigrationMiti">....................</strong> गते बसाईसराई आई हाल झापा जिल्ला गौरादह नगरपालिका वडा नं. १ बसोबास गर्ने <strong id="lblFather">..................</strong> तथा <strong id="lblMother">..................</strong> को <span id="lblGenderWord">छोरी</span> <strong id="lblChildName">..................</strong> को तपसिल अनुसारको जन्म दर्ताको अभिलेख प्रमाणित गरि पठाईदिनुहुन सिफारिस साथ अनुरोध छ ।
+            </div>
+
+            <!-- ── Body (Marriage) ── -->
+            <div class="letter-body-para" id="bodyTextBibaha" style="text-indent: 50px; display:none;">
+                प्रस्तुत विषयमा तहाँ वडाबाट मिति: <strong id="lblMigrationMitiBibaha">....................</strong> गते बसाईसराई आई हाल झापा जिल्ला गौरादह नगरपालिका वडा नं. १ बसोबास गर्ने <strong id="lblHusband">..................</strong> तथा <strong id="lblWife">..................</strong> को तपसिल अनुसारको बिवाह दर्ताको अभिलेख प्रमाणित गरि पठाईदिनुहुन सिफारिस साथ अनुरोध छ ।
+            </div>
+
+            <!-- ── Tapsil Section (Birth) ── -->
+            <div class="tapsil-container" id="tapsilSectionJanma">
+                <div class="tapsil-title">तपसिल:</div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">नाम:</span>
+                    <span class="tapsil-val" id="lblTapsilName">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">जन्म मिति:</span>
+                    <span class="tapsil-val" id="lblTapsilBirthDate">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">जन्म दर्ता नं.:</span>
+                    <span class="tapsil-val" id="lblTapsilBirthRegNo">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">जन्म दर्ता मिति:</span>
+                    <span class="tapsil-val" id="lblTapsilBirthRegDate">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">बुवाको नाम:</span>
+                    <span class="tapsil-val" id="lblTapsilFather">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">आमाको नाम:</span>
+                    <span class="tapsil-val" id="lblTapsilMother">..................</span>
+                </div>
+                <div class="tapsil-item" id="lblRegistrarRow" style="display:none;">
+                    <span class="tapsil-label">स्थानीय पञ्जिकाधिकारी:</span>
+                    <span class="tapsil-val" id="lblTapsilRegistrar">..................</span>
+                </div>
+            </div>
+
+            <!-- ── Tapsil Section (Marriage) ── -->
+            <div class="tapsil-container" id="tapsilSectionBibaha" style="display:none;">
+                <div class="tapsil-title">तपसिल:</div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">नाम:</span>
+                    <span class="tapsil-val" id="lblTapsilMarriageName">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">बिवाह दर्ता मिति:</span>
+                    <span class="tapsil-val" id="lblTapsilMarriageRegDate">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">बिवाह भएको मिति:</span>
+                    <span class="tapsil-val" id="lblTapsilMarriageDate">..................</span>
+                </div>
+                <div class="tapsil-item">
+                    <span class="tapsil-label">बिवाह दर्ता नं.:</span>
+                    <span class="tapsil-val" id="lblTapsilMarriageRegNo">..................</span>
+                </div>
+                <div class="tapsil-item" id="lblRegistrarRowBibaha" style="display:none;">
+                    <span class="tapsil-label">स्थानीय पञ्जिकाधिकारी:</span>
+                    <span class="tapsil-val" id="lblTapsilRegistrarBibaha">..................</span>
+                </div>
+            </div>
+
+            <!-- ── Signature ── -->
+            <div class="doc-footer" id="docFooterSection">
+                <div class="signature-block">
+                    <div class="sig-name" id="lblSigName">अनिता अधिकारी</div>
+                    <div class="sig-title" id="lblSigTitle" style="font-weight: normal; font-size: 12pt;">स्थानीय पञ्जिकाधिकारी</div>
+                </div>
+            </div>
+
+        </div><!-- /a4-page -->
+    </div><!-- /preview-panel -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="font-settings.js"></script>
+    <script src="script-abhilekh-pramanit.js"></script>
+</body>
+
+</html>
