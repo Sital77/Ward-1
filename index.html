@@ -289,6 +289,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script>
         function openModal(id) { const modal = document.getElementById(id); modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 10); }
         function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300); }
@@ -542,6 +543,18 @@
             'अन्य': '📄'
         };
 
+        const defaultBuiltInList = [
+            { id: 'gharbato', title: 'घर बाटो प्रमाणित', category: 'जग्गा सम्बन्धि', status: 'Active' },
+            { id: 'charkilla', title: 'चारकिल्ला प्रमाणित', category: 'जग्गा सम्बन्धि', status: 'Active' },
+            { id: 'bato-pramanit', title: 'बाटो प्रमाणित', category: 'जग्गा सम्बन्धि', status: 'Active' },
+            { id: 'pariwarik-bibaran', title: 'पारिवारिक विवरण प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'suchana-tans', title: 'सूचना टाँस सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
+            { id: 'ghar-kayam', title: 'घर कायम सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' },
+            { id: 'pan-sifarish', title: 'प्यान (PAN) सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
+            { id: 'abibahit-pramanit', title: 'अविवाहित प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'apangata-sifarish', title: 'अपाङ्गता सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
+        ];
+
         function renderSifarishGrid(remoteList) {
             const container = document.getElementById('sifarishGridContainer');
             if (!container) return;
@@ -550,6 +563,7 @@
             let localList = [];
             try { localList = JSON.parse(localStorage.getItem('custom_sifarish_templates') || '[]'); } catch(e){}
             const mergedMap = new Map();
+            defaultBuiltInList.forEach(item => mergedMap.set(item.id, item));
             (remoteList || []).forEach(item => mergedMap.set(item.id, item));
             localList.forEach(item => {
                 if (mergedMap.has(item.id)) mergedMap.set(item.id, { ...mergedMap.get(item.id), ...item });
@@ -610,6 +624,9 @@
         renderSifarishGrid([]);
         window.addEventListener('storage', () => renderSifarishGrid([]));
         window.addEventListener('sifarish_templates_updated', () => renderSifarishGrid([]));
+        window.addEventListener('pageshow', (e) => {
+            renderSifarishGrid([]);
+        });
 
         // Automatic Nepali Date Calculation and Display
         function initPortalNepaliDate() {
@@ -645,10 +662,11 @@
             } catch(e) {}
         }
 
-        window.onload = function() {
+        document.addEventListener('DOMContentLoaded', initPortalNepaliDate);
+        window.addEventListener('load', function() {
             initPortalNepaliDate();
             fetchLandData().catch(e=>console.log("No initial JSON"));
-        };
+        });
     </script>
 </body>
 </html>

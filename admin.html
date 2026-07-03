@@ -15,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
 </head>
 <body>
 
@@ -1753,6 +1754,7 @@
         } catch(e) {}
     }
     initAdminNepaliDate();
+    document.addEventListener('DOMContentLoaded', initAdminNepaliDate);
     initOfflineProtection();
     if (localStorage.getItem(DRAFT_KEY)) {
         checkDraftRecovery();
