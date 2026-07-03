@@ -583,8 +583,11 @@ function initializeAutomaticDate() {
             else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
             bsYearVal  = bsY;
             bsMonthVal = bsM;
+            let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
+            if (bsD > 32) bsD = 30;
             const bsMStr = String(bsMonthVal).padStart(2, '0');
-            nepaliBSDateStr = window.toNepaliDigit(`${bsYearVal}/${bsMStr}/`);
+            const bsDStr = String(bsD).padStart(2, '0');
+            nepaliBSDateStr = (typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : toNepaliDigit)(`${bsYearVal}/${bsMStr}/${bsDStr}`);
         }
 
         initializeFiscalYear(bsYearVal, bsMonthVal);

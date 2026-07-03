@@ -87,6 +87,17 @@
                 }
                 db = firebase.firestore();
 
+                // First check local sync cache for instant render of admin edits
+                let localOverride = null;
+                try {
+                    const localList = JSON.parse(localStorage.getItem('custom_sifarish_templates') || '[]');
+                    localOverride = localList.find(t => t.id === templateId);
+                } catch(e) {}
+
+                if (localOverride && (localOverride.status === 'Active' || localOverride.status === 'Published' || !localOverride.status) && localOverride.template_content) {
+                    injectTemplateHTML(localOverride.template_content);
+                }
+
                 // Fetch dynamic template content from Firestore database
                 db.collection('sifarish_templates').doc(templateId).get().then((doc) => {
                     if (doc.exists) {
@@ -95,11 +106,13 @@
                             injectTemplateHTML(data.template_content);
                         }
                         resolveTemplatePromise();
-                    } else {
+                    } else if (!localOverride) {
                         // Document doesn't exist yet, so automatically seed it from local HTML
                         seedLocalContent(db, templateId)
                             .then(resolveTemplatePromise)
                             .catch(resolveTemplatePromise);
+                    } else {
+                        resolveTemplatePromise();
                     }
                 }).catch((err) => {
                     console.error("Firestore template loading error:", err);
@@ -589,6 +602,42 @@
                 applyStyles(slider.value, italicCheckbox.checked, col);
             });
         });
+
+        // 7. Automatic Nepali Date Banner Badge Display
+        try {
+            const nepaliMonths = ["बैशाख", "जेठ", "असार", "साउन", "भदौ", "असोज", "कार्तिक", "मंसिर", "पुष", "माघ", "फागुन", "चैत"];
+            const nepaliDays = ["आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
+            const today = new Date();
+            const dayName = nepaliDays[today.getDay()];
+            let bsY = today.getFullYear() + 57;
+            let bsM = 3;
+            let bsD = today.getDate() >= 16 ? today.getDate() - 15 : today.getDate() + 16;
+            if (bsD > 32) bsD = 30;
+            const converter = window["@sbmdkl/nepali-date-converter"];
+            if (converter && typeof converter.adToBs === 'function') {
+                try {
+                    const yyyy = today.getFullYear();
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+                    if (typeof bsDate === 'string') {
+                        const pts = bsDate.split(/[-/]/);
+                        bsY = parseInt(pts[0], 10); bsM = parseInt(pts[1], 10); bsD = parseInt(pts[2], 10);
+                    } else if (bsDate && typeof bsDate === 'object') {
+                        bsY = bsDate.bsYear || bsY; bsM = bsDate.bsMonth || bsM; bsD = bsDate.bsDay || bsD;
+                    }
+                } catch(e){}
+            }
+            const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
+            const dateStr = `मिति : ${toNep(bsY)} ${nepaliMonths[bsM - 1] || 'असार'} ${toNep(bsD)} गते, ${dayName}`;
+            
+            const badge = document.createElement('div');
+            badge.style.cssText = 'background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(30,58,138,0.25); border: 1px solid rgba(255,255,255,0.25); font-family: inherit;';
+            badge.innerHTML = `<span>🗓️ <strong>स्वचालित नेपाली मिति:</strong></span> <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; letter-spacing: 0.5px;">${dateStr}</span>`;
+            if (card && card.parentNode) {
+                card.parentNode.insertBefore(badge, card);
+            }
+        } catch(e) {}
     }
 
     if (document.readyState === 'loading') {

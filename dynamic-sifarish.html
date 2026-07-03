@@ -179,20 +179,33 @@
         let currentRecordId = '';
 
         // 1. Load template content
-        db.collection('sifarish_templates').doc(templateId).get().then(doc => {
-            if (!doc.exists) {
+        async function loadTemplateConfig() {
+            let tData = null;
+            try {
+                const doc = await db.collection('sifarish_templates').doc(templateId).get();
+                if (doc.exists) tData = doc.data();
+            } catch(e) { console.warn("Firestore load error:", e); }
+            
+            if (!tData) {
+                try {
+                    const localList = JSON.parse(localStorage.getItem('custom_sifarish_templates') || '[]');
+                    tData = localList.find(t => t.id === templateId);
+                } catch(e) {}
+            }
+
+            if (!tData) {
                 alert('⚠️ सिफारिस फेला परेन !');
                 window.location.replace('index.html');
                 return;
             }
             
-            templateData = doc.data();
+            templateData = tData;
             document.title = `${templateData.title} - गौरादह नगरपालिका`;
             document.getElementById('formMainTitle').innerText = `📝 ${templateData.title}`;
 
             // Inject the content
             const contentContainer = document.getElementById('dynamicPageContentContainer');
-            contentContainer.innerHTML = templateData.template_content;
+            contentContainer.innerHTML = templateData.template_content || '';
 
             // Process the template to find variables and placeholders
             parsePlaceholders();
@@ -207,11 +220,8 @@
 
             // Load records
             loadRecords();
-
-        }).catch(err => {
-            console.error("Failed to load dynamic template:", err);
-            alert("डेटाबेस त्रुटि: " + err.message);
-        });
+        }
+        loadTemplateConfig();
 
         // 2. Extract variable placeholders (either double curly braces or elements with lbl id)
         function parsePlaceholders() {
@@ -465,8 +475,11 @@
                     else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
                     bsYearVal  = bsY;
                     bsMonthVal = bsM;
+                    let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
+                    if (bsD > 32) bsD = 30;
                     const bsMStr = String(bsMonthVal).padStart(2, '0');
-                    nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsMStr}/`);
+                    const bsDStr = String(bsD).padStart(2, '0');
+                    nepaliBSDateStr = (typeof toNepaliDigit === 'function' ? toNepaliDigit : window.toNepaliDigit)(`${bsYearVal}/${bsMStr}/${bsDStr}`);
                 }
 
                 // Initialize fiscal year dropdown

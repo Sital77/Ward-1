@@ -137,6 +137,7 @@
             <div class="muni-title">गौरादह नगरपालिका</div>
             <div class="wada-title">१ नं. वडा कार्यालय</div>
             <div class="sub-title">डिजिटल सेवा तथा सिफारिस व्यवस्थापन पोर्टल</div>
+            <div><div id="indexNepaliDate" style="display:inline-block; margin-top:14px; background:linear-gradient(135deg, #1e3a8a, #3b82f6); color:#fff; padding:6px 20px; border-radius:30px; font-weight:600; font-size:14px; box-shadow:0 4px 10px rgba(30,58,138,0.25); border:1px solid rgba(255,255,255,0.2);">🗓️ आजको मिति लोड हुँदैछ...</div></div>
         </div>
 
         <!-- Unified 3x2 Grid -->
@@ -541,14 +542,21 @@
             'अन्य': '📄'
         };
 
-        db.collection('sifarish_templates').where('status', 'in', ['Active', 'Published']).onSnapshot((snapshot) => {
+        function renderSifarishGrid(remoteList) {
             const container = document.getElementById('sifarishGridContainer');
+            if (!container) return;
             container.innerHTML = '';
             
-            const templates = [];
-            snapshot.forEach(doc => {
-                templates.push({ id: doc.id, ...doc.data() });
+            let localList = [];
+            try { localList = JSON.parse(localStorage.getItem('custom_sifarish_templates') || '[]'); } catch(e){}
+            const mergedMap = new Map();
+            (remoteList || []).forEach(item => mergedMap.set(item.id, item));
+            localList.forEach(item => {
+                if (mergedMap.has(item.id)) mergedMap.set(item.id, { ...mergedMap.get(item.id), ...item });
+                else mergedMap.set(item.id, item);
             });
+            
+            let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
             
             // Sort list
             const order = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish'];
@@ -558,32 +566,89 @@
                 if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                 if (idxA !== -1) return -1;
                 if (idxB !== -1) return 1;
-                return a.title.localeCompare(b.title);
+                return (a.title || '').localeCompare(b.title || '');
             });
 
             if (templates.length === 0) {
                 container.innerHTML = `<div style="text-align: center; padding: 20px; color: #a0aec0; grid-column: span 2;">कुनै सिफारिसहरू उपलब्ध छैनन्।</div>`;
-                return;
+            } else {
+                templates.forEach(t => {
+                    const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
+                    const borderColor = borderMap[t.id] || '#e2e8f0';
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish'];
+                    const targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
+                    
+                    const card = document.createElement('a');
+                    card.className = 'sifarish-link-card';
+                    card.style.borderColor = borderColor;
+                    card.href = 'javascript:void(0)';
+                    card.onclick = () => openSifarishLink(targetUrl);
+                    card.innerHTML = `<span class="emoji">${emoji}</span> ${t.title}`;
+                    container.appendChild(card);
+                });
             }
 
-            templates.forEach(t => {
-                const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
-                const borderColor = borderMap[t.id] || '#e2e8f0';
-                
-                const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish'];
-                const targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
-                
-                const card = document.createElement('a');
-                card.className = 'sifarish-link-card';
-                card.style.borderColor = borderColor;
-                card.href = 'javascript:void(0)';
-                card.onclick = () => openSifarishLink(targetUrl);
-                card.innerHTML = `<span class="emoji">${emoji}</span> ${t.title}`;
-                container.appendChild(card);
-            });
-        });
+            // Show admin quick add button if admin logged in
+            if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
+                const addCard = document.createElement('a');
+                addCard.className = 'sifarish-link-card';
+                addCard.style.cssText = 'border-color: #3182ce; background: linear-gradient(135deg, #ebf8ff, #bee3f8); border-style: dashed; border-width: 2px; font-weight: bold; color: #2b6cb0;';
+                addCard.href = 'admin.html?action=create';
+                addCard.innerHTML = `<span class="emoji">➕</span> नयाँ सिफारिस थप्नुहोस् (Admin Panel)`;
+                container.appendChild(addCard);
+            }
+        }
 
-        window.onload = function() { fetchLandData().catch(e=>console.log("No initial JSON")); }
+        db.collection('sifarish_templates').where('status', 'in', ['Active', 'Published']).onSnapshot((snapshot) => {
+            const templates = [];
+            snapshot.forEach(doc => templates.push({ id: doc.id, ...doc.data() }));
+            renderSifarishGrid(templates);
+        }, err => {
+            console.warn('Firestore grid load issue, rendering local sync cache:', err);
+            renderSifarishGrid([]);
+        });
+        renderSifarishGrid([]);
+        window.addEventListener('storage', () => renderSifarishGrid([]));
+        window.addEventListener('sifarish_templates_updated', () => renderSifarishGrid([]));
+
+        // Automatic Nepali Date Calculation and Display
+        function initPortalNepaliDate() {
+            try {
+                const nepaliMonths = ["बैशाख", "जेठ", "असार", "साउन", "भदौ", "असोज", "कार्तिक", "मंसिर", "पुष", "माघ", "फागुन", "चैत"];
+                const nepaliDays = ["आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
+                const today = new Date();
+                const dayName = nepaliDays[today.getDay()];
+                let bsY = today.getFullYear() + 57;
+                let bsM = 3;
+                let bsD = today.getDate() >= 16 ? today.getDate() - 15 : today.getDate() + 16;
+                if (bsD > 32) bsD = 30;
+                const converter = window["@sbmdkl/nepali-date-converter"];
+                if (converter && typeof converter.adToBs === 'function') {
+                    try {
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0');
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+                        if (typeof bsDate === 'string') {
+                            const pts = bsDate.split(/[-/]/);
+                            bsY = parseInt(pts[0], 10); bsM = parseInt(pts[1], 10); bsD = parseInt(pts[2], 10);
+                        } else if (bsDate && typeof bsDate === 'object') {
+                            bsY = bsDate.bsYear || bsY; bsM = bsDate.bsMonth || bsM; bsD = bsDate.bsDay || bsD;
+                        }
+                    } catch(e){}
+                }
+                const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
+                const dateEl = document.getElementById('indexNepaliDate');
+                if (dateEl) {
+                    dateEl.innerHTML = `🗓️ <strong>आजको नेपाली मिति:</strong> ${toNep(bsY)} ${nepaliMonths[bsM - 1] || 'असार'} ${toNep(bsD)} गते, ${dayName}`;
+                }
+            } catch(e) {}
+        }
+
+        window.onload = function() {
+            initPortalNepaliDate();
+            fetchLandData().catch(e=>console.log("No initial JSON"));
+        };
     </script>
 </body>
 </html>
