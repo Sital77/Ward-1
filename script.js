@@ -412,6 +412,7 @@ function initializeFiscalYear(bsYear, bsMonth) {
             fySelect.insertAdjacentHTML('beforeend', `<option value="${prevFY}">${prevFY}</option>`);
             fySelect.insertAdjacentHTML('beforeend', `<option value="${currFY}" selected>${currFY}</option>`);
             fySelect.insertAdjacentHTML('beforeend', `<option value="${nextFY}">${nextFY}</option>`);
+            fySelect.value = currFY;
         }
     } catch (error) {
         console.error("Error initializing fiscal year:", error);
@@ -558,56 +559,55 @@ function updateNepalSambatFromMiti() {
 }
 
 async function fetchCurrentNepalSambat() {
-    try {
-        const url = 'https://corsproxy.io/?' + encodeURIComponent('https://www.nepalsambat.com/widget/nsstandard.php');
-        const res = await fetch(url);
-        if (!res.ok) return;
-        const html = await res.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const rows = doc.querySelectorAll('.row');
-        if (rows.length >= 2) {
-            const nsYear = rows[0].innerText.trim();
-            const nsTithi = rows[1].innerText.trim();
-            
-            const tithiMap = {
-                'पारु': '१', 'प्रतिपदा': '१',
-                'दुतिया': '२', 'द्वितीया': '२',
-                'तृतिया': '३', 'तृतीया': '३',
-                'चौथि': '४', 'चतुर्थी': '४',
-                'पञ्चमी': '५',
-                'खस्थि': '६', 'षष्ठी': '६',
-                'सप्तमी': '७',
-                'अष्टमी': '८',
-                'नवमी': '९',
-                'दशमी': '१०',
-                'एकादशी': '११',
-                'दुवादशी': '१२', 'द्वादशी': '१२',
-                'त्रयोदशी': '१३',
-                'चह्रे': '१४', 'चतुर्दशी': '१४',
-                'पुन्ही': '१५', 'पूर्णिमा': '१५',
-                'आमाइ': '१५', 'औंसी': '१५'
-            };
-            
-            let dayDigit = '';
-            for (const key in tithiMap) {
-                if (nsTithi.includes(key)) {
-                    dayDigit = ' ' + tithiMap[key];
-                    break;
+    const targetUrl = 'https://www.nepalsambat.com/widget/nsstandard.php';
+    const proxyUrls = [
+        'https://corsproxy.io/?' + encodeURIComponent(targetUrl),
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl),
+        'https://thingproxy.freeboard.io/fetch/' + targetUrl
+    ];
+    for (const url of proxyUrls) {
+        try {
+            const res = await fetch(url);
+            if (!res.ok) continue;
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const rows = doc.querySelectorAll('.row');
+            if (rows.length >= 2) {
+                const nsYear = rows[0].innerText.trim();
+                const nsTithi = rows[1].innerText.trim();
+                
+                const tithiMap = {
+                    'पारु': '१', 'प्रतिपदा': '१', 'दुतिया': '२', 'द्वितीया': '२',
+                    'तृतिया': '३', 'तृतीया': '३', 'चौथि': '४', 'चतुर्थी': '४',
+                    'पञ्चमी': '५', 'खस्थि': '६', 'षष्ठी': '६', 'सप्तमी': '७',
+                    'अष्टमी': '८', 'नवमी': '९', 'दशमी': '१०', 'एकादशी': '११',
+                    'दुवादशी': '१२', 'द्वादशी': '१२', 'त्रयोदशी': '१३',
+                    'चह्रे': '१४', 'चतुर्दशी': '१४', 'पुन्ही': '१५', 'पूर्णिमा': '१५',
+                    'आमाइ': '१५', 'औंसी': '१५'
+                };
+                
+                let dayDigit = '';
+                for (const key in tithiMap) {
+                    if (nsTithi.includes(key)) {
+                        dayDigit = ' ' + tithiMap[key];
+                        break;
+                    }
+                }
+                
+                const fullNepalSambat = `${nsYear} ${nsTithi}${dayDigit}`.trim();
+                const inNS = document.getElementById('inNepalSamvat');
+                if (inNS && fullNepalSambat.length > 3) {
+                    inNS.value = fullNepalSambat;
+                    if (typeof updateDoc === 'function') {
+                        updateDoc();
+                    }
+                    return;
                 }
             }
-            
-            const fullNepalSambat = `${nsYear} ${nsTithi}${dayDigit}`;
-            const inNS = document.getElementById('inNepalSamvat');
-            if (inNS) {
-                inNS.value = fullNepalSambat;
-                if (typeof updateDoc === 'function') {
-                    updateDoc();
-                }
-            }
+        } catch (err) {
+            console.warn("Proxy attempt failed:", url, err);
         }
-    } catch (e) {
-        console.error("Error fetching Nepal Sambat widget:", e);
     }
 }
 
