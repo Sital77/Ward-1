@@ -84,7 +84,10 @@
         Object.defineProperty(window, 'onload', {
             get: function () { return originalOnload; },
             set: function (fn) {
-                originalOnload = async function () {
+                let executed = false;
+                const runOnce = async () => {
+                    if (executed) return;
+                    executed = true;
                     try {
                         await loadTemplatePromise;
                     } catch (e) {
@@ -92,6 +95,14 @@
                     }
                     fn();
                 };
+
+                originalOnload = runOnce;
+                
+                if (document.readyState === 'complete') {
+                    runOnce();
+                } else {
+                    window.addEventListener('load', runOnce);
+                }
             },
             configurable: true
         });
