@@ -227,15 +227,21 @@ function initializeAutomaticDate() {
     }
 }
 
-function getNepalSambatYear(date) {
-    const y = date.getFullYear();
-    const m = date.getMonth() + 1;
-    const d = date.getDate();
-    let nsYear = y - 937;
-    if (m > 11 || (m === 11 && d >= 12)) {
-        nsYear = y - 936;
-    }
-    return nsYear;
+function getNepalSambatYear(adDate) {
+    const year = adDate.getFullYear();
+    const newYearDates = {
+        2020: new Date(2020,10,15), 2021: new Date(2021,10,5),
+        2022: new Date(2022, 9,26), 2023: new Date(2023,10,14),
+        2024: new Date(2024,10, 2), 2025: new Date(2025, 9,22),
+        2026: new Date(2026,10,10), 2027: new Date(2027, 9,30),
+        2028: new Date(2028, 9,19), 2029: new Date(2029,10, 7),
+        2030: new Date(2030, 9,27), 2031: new Date(2031,10,15),
+        2032: new Date(2032,10, 3), 2033: new Date(2033, 9,23),
+        2034: new Date(2034,10,12), 2035: new Date(2035,10, 1)
+    };
+    const ny = newYearDates[year];
+    if (ny) return adDate >= ny ? year - 879 : year - 880;
+    return adDate.getMonth() > 9 ? year - 879 : year - 880;
 }
 
 function formatFiscalYear(startYear) {
