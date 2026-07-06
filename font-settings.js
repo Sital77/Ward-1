@@ -22,7 +22,9 @@
         'ghar-kayam': { collection: 'gharKayamRecords', title: 'घर कायम सिफारिस' },
         'pan-sifarish': { collection: 'panRecords', title: 'स्थायी लेखा नं. सिफारिस' },
         'abibahit-pramanit': { collection: 'abibahitRecords', title: 'अविवाहित प्रमाणित' },
-        'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' }
+        'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' },
+        'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
+        'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' }
     };
 
     // Intercept firebase initializeApp to prevent duplicate app errors
@@ -50,6 +52,8 @@
     else if (path.includes('pan-sifarish.html')) templateId = 'pan-sifarish';
     else if (path.includes('pariwarik-bibaran.html')) templateId = 'pariwarik-bibaran';
     else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
+    else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
+    else if (path.includes('arko-bibaha-nagareko.html')) templateId = 'arko-bibaha-nagareko';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
         isDynamic = true;

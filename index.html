@@ -446,7 +446,8 @@
                 'pan-sifarish': 'स्थायी लेखा नं. सिफारिस',
                 'abibahit-pramanit': 'अविवाहित प्रमाणित',
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
-                'abhilekh-pramanit': 'अभिलेख प्रमाणित'
+                'abhilekh-pramanit': 'अभिलेख प्रमाणित',
+                'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित'
             };
             const categories = {
                 'gharbato': 'जग्गा सम्बन्धि',
@@ -458,7 +459,8 @@
                 'pan-sifarish': 'कार्यालय/प्रशासन',
                 'abibahit-pramanit': 'व्यक्तिगत प्रमाणित',
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
-                'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित'
+                'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
+                'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित'
             };
 
             try {
@@ -503,7 +505,7 @@
             }
         }
 
-        const defaultTemplateIds = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit'];
+        const defaultTemplateIds = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko'];
         db.collection('sifarish_templates').get().then(snapshot => {
             const existingIds = [];
             snapshot.forEach(doc => {
@@ -530,7 +532,8 @@
             'pan-sifarish': '💳',
             'abibahit-pramanit': '💍',
             'apangata-sifarish': '♿',
-            'abhilekh-pramanit': '🗄️'
+            'abhilekh-pramanit': '🗄️',
+            'arko-bibaha-nagareko': '👰'
         };
         const borderMap = {
             'suchana-tans': '#d6bcfa',
@@ -538,7 +541,8 @@
             'pan-sifarish': '#b2f5ea',
             'abibahit-pramanit': '#fed7d7',
             'apangata-sifarish': '#fbd38d',
-            'abhilekh-pramanit': '#b2f5ea'
+            'abhilekh-pramanit': '#b2f5ea',
+            'arko-bibaha-nagareko': '#fed7d7'
         };
         const categoryEmojis = {
             'जग्गा सम्बन्धि': '🗺️',
@@ -557,7 +561,8 @@
             { id: 'pan-sifarish', title: 'प्यान (PAN) सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
             { id: 'abibahit-pramanit', title: 'अविवाहित प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'apangata-sifarish', title: 'अपाङ्गता सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
-            { id: 'abhilekh-pramanit', title: 'अभिलेख प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
+            { id: 'abhilekh-pramanit', title: 'अभिलेख प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'arko-bibaha-nagareko', title: 'अर्को विवाह नगरेको प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
         ];
 
         function renderSifarishGrid(remoteList) {
@@ -578,7 +583,7 @@
             let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
             
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -594,7 +599,7 @@
                 templates.forEach(t => {
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko'];
                     const targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
                     
                     const card = document.createElement('a');
