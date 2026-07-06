@@ -108,6 +108,7 @@ function clearSession() {
     localStorage.removeItem(AUTH_CONFIG.AUTH_KEY);
     localStorage.removeItem(AUTH_CONFIG.ADMIN_KEY);
     localStorage.removeItem(AUTH_CONFIG.REDIRECT_KEY);
+    localStorage.removeItem('sifarish_ward');
     sessionStorage.removeItem(AUTH_CONFIG.SESSION_KEY);
 }
 

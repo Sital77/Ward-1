@@ -409,7 +409,7 @@
                 alt="Nepal Emblem">
             <div class="gov-label">नेपाल सरकार</div>
             <div class="divider"></div>
-            <div class="system-name">गौरादह नगरपालिका<br>वडा नं. १<br>सिफारिस प्रणाली</div>
+            <div class="system-name">गौरादह नगरपालिका<br>वडा कार्यालय<br>सिफारिस प्रणाली</div>
             <div class="welcome-text" style="margin-top: 12px;">मा तपाईंलाई स्वागत छ</div>
             <div class="footer-label">© गौरादह नगरपालिका वडा कार्यालय</div>
         </div>
@@ -418,6 +418,15 @@
         <div class="login-right">
             <h2>लग-इन</h2>
             <div class="login-subtitle">सिफारिस प्रणालीमा प्रवेश गर्नुहोस्</div>
+
+            <label class="form-label" for="inWard">वडा विवरण (Select Ward)</label>
+            <div class="form-input-wrap">
+                <span class="input-icon">🏢</span>
+                <select class="form-input" id="inWard" style="cursor: pointer; height: auto;">
+                    <option value="1">गौरादह वडा नं. १ (Ward 1)</option>
+                    <option value="3">गौरादह वडा नं. ३ (Ward 3)</option>
+                </select>
+            </div>
 
             <label class="form-label" for="inUsername">प्रयोगकर्ता आईडी</label>
             <div class="form-input-wrap">
@@ -602,8 +611,12 @@
             setTimeout(() => {
                 let authenticated = false;
                 let isAdmin = false;
+                const selectedWard = document.getElementById('inWard').value;
 
-                if (username === 'wada1' && password === 'wada1') {
+                if (selectedWard === '1' && username === 'wada1' && password === 'wada1') {
+                    authenticated = true;
+                    isAdmin = false;
+                } else if (selectedWard === '3' && username === 'wada3' && password === 'wada3') {
                     authenticated = true;
                     isAdmin = false;
                 } else if (username === 'admin' && password === 'admin') {
@@ -612,6 +625,9 @@
                 }
 
                 if (authenticated) {
+                    // Save selected ward to localStorage
+                    localStorage.setItem('sifarish_ward', selectedWard);
+                    
                     // Create secure session
                     createSession(isAdmin, rememberMe);
 

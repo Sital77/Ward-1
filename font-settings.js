@@ -36,6 +36,18 @@
             }
             return originalInitializeApp.apply(this, arguments);
         };
+
+        // Dynamically redirect all Firestore collection queries to ward-specific collections for other wards
+        if (firebase.firestore) {
+            const originalCollection = firebase.firestore.Firestore.prototype.collection;
+            firebase.firestore.Firestore.prototype.collection = function (name) {
+                const ward = localStorage.getItem('sifarish_ward') || '1';
+                if (ward !== '1') {
+                    return originalCollection.call(this, name + "_w" + ward);
+                }
+                return originalCollection.call(this, name);
+            };
+        }
     }
 
     // 1. Detect which sifarish template page we are on
@@ -155,6 +167,8 @@
 
         // Immediately trigger live synchronization of dates and form fields into newly injected DOM
         setTimeout(() => {
+            localizePageForWard();
+            setupDynamicSignatures();
             if (typeof initializeAutomaticDate === 'function') {
                 initializeAutomaticDate();
             }
@@ -163,6 +177,80 @@
             }
             window.dispatchEvent(new Event('templateInjected'));
         }, 30);
+    }
+
+    function localizePageForWard() {
+        const ward = localStorage.getItem('sifarish_ward') || '1';
+        if (ward === '1') return; // Default is Ward 1, no replace needed
+        
+        const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
+        const wardNep = toNep(ward);
+
+        // Replace wada-title (e.g. "१ नं. वडा कार्यालय" -> "३ नं. वडा कार्यालय")
+        document.querySelectorAll('.wada-title').forEach(el => {
+            el.innerText = `${wardNep} नं. वडा कार्यालय`;
+        });
+        
+        // Replace wada-title (e.g. "१ नं वडा कार्यालय" -> "३ नं वडा कार्यालय")
+        document.querySelectorAll('.wada-title').forEach(el => {
+            if (el.innerText.includes('१ नं वडा')) {
+                el.innerText = `${wardNep} नं वडा कार्यालय`;
+            }
+        });
+
+        // Replace muni-wada-line
+        document.querySelectorAll('.muni-wada-line').forEach(el => {
+            el.innerText = `वडा नं. ${wardNep}`;
+        });
+
+        // Replace ward numbers inside preview letter paragraph text
+        const selectors = ['.letter-body-para', '.letter-body', '#bodyText', '#bodyTextJanma', '#bodyTextBibaha', '#bodyTextTransfer'];
+        selectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                el.innerHTML = el.innerHTML
+                    .replace(/वडा नं\.\s*१/g, `वडा नं. ${wardNep}`)
+                    .replace(/वडा नं\.\s*१/g, `वडा नं. ${wardNep}`);
+            });
+        });
+    }
+
+    function setupDynamicSignatures() {
+        const ward = localStorage.getItem('sifarish_ward') || '1';
+        const select = document.getElementById('inSignAuthority');
+        if (!select) return;
+
+        const signatures = {
+            '1': [
+                { value: "नगेन्द्र भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - नगेन्द्र भण्डारी" },
+                { value: "अन्जु निरौला|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - अन्जु निरौला" },
+                { value: "लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा" },
+                { value: "केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल" },
+                { value: "जमुन राई|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - जमुन राई" }
+            ],
+            '3': [
+                { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
+                { value: "हेमराज थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - हेमराज थापा" },
+                { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
+            ]
+        };
+
+        const wardSigns = signatures[ward];
+        if (wardSigns) {
+            const originalOptions = Array.from(select.options);
+            const customOpt = originalOptions.find(o => o.value === 'CUSTOM');
+            const blankOpt = originalOptions.find(o => o.value === 'BLANK');
+
+            select.innerHTML = '';
+            wardSigns.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.value;
+                opt.textContent = s.text;
+                select.appendChild(opt);
+            });
+
+            if (customOpt) select.appendChild(customOpt);
+            if (blankOpt) select.appendChild(blankOpt);
+        }
     }
 
     // Helper: Seeds local HTML into Firestore for first-time migration
@@ -189,7 +277,8 @@
                 'pan-sifarish': 'स्थायी लेखा नं. सिफारिस',
                 'abibahit-pramanit': 'अविवाहित प्रमाणित',
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
-                'abhilekh-pramanit': 'अभिलेख प्रमाणित'
+                'abhilekh-pramanit': 'अभिलेख प्रमाणित',
+                'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित'
             };
 
             const categories = {
@@ -202,7 +291,8 @@
                 'pan-sifarish': 'कार्यालय/प्रशासन',
                 'abibahit-pramanit': 'व्यक्तिगत प्रमाणित',
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
-                'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित'
+                'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
+                'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित'
             };
 
             await db.collection('sifarish_templates').doc(id).set({
@@ -224,6 +314,8 @@
 
     // 2. Setup dynamic Font & Styling options card in the input panel
     function initFontSettings() {
+        localizePageForWard();
+        setupDynamicSignatures();
         const btnPrint = document.querySelector('.btn-print');
         if (!btnPrint) return;
 
