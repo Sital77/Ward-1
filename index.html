@@ -300,8 +300,8 @@
             if (localStorage.getItem('sifarish_auth') === 'true') {
                 openModal('modal-sifarish');
             } else {
-                openModal('modal-sif-login');
-                setTimeout(() => document.getElementById('sifUser').focus(), 350);
+                localStorage.setItem('sifarish_redirect', 'index.html?open=sifarish');
+                window.location.href = 'login.html';
             }
         }
 
@@ -310,64 +310,16 @@
                 window.location.href = url;
             } else {
                 localStorage.setItem('sifarish_redirect', url);
-                openModal('modal-sif-login');
-                setTimeout(() => document.getElementById('sifUser').focus(), 350);
-            }
-        }
-
-        function doSifLogin() {
-            const u = document.getElementById('sifUser').value.trim();
-            const p = document.getElementById('sifPass').value.trim();
-            const errEl = document.getElementById('sifErr');
-            const rightPanel = document.querySelector('.sif-login-right');
-            
-            let authenticated = false;
-            let isAdmin = false;
-            
-            if (u === 'wada1' && p === 'wada1') {
-                authenticated = true;
-                isAdmin = false;
-            } else if (u === 'admin' && p === 'admin') {
-                authenticated = true;
-                isAdmin = true;
-            }
-            
-            if (authenticated) {
-                localStorage.setItem('sifarish_auth', 'true');
-                localStorage.setItem('sifarish_admin', isAdmin ? 'true' : 'false');
-                updateTopBarButtons();
-                
-                const btn = document.getElementById('sifLoginBtn');
-                btn.textContent = '✅ प्रवेश हुँदैछ...';
-                btn.style.background = 'linear-gradient(135deg,#276749,#38a169)';
-                setTimeout(() => {
-                    closeModal('modal-sif-login');
-                    document.getElementById('sifUser').value = '';
-                    document.getElementById('sifPass').value = '';
-                    btn.textContent = 'लग-इन';
-                    btn.style.background = '';
-                    errEl.classList.remove('show');
-                    
-                    const redirect = localStorage.getItem('sifarish_redirect');
-                    if (redirect) {
-                        localStorage.removeItem('sifarish_redirect');
-                        window.location.href = redirect;
-                    } else {
-                        openModal('modal-sifarish');
-                    }
-                }, 700);
-            } else {
-                errEl.classList.add('show');
-                rightPanel.classList.add('sif-shake');
-                setTimeout(() => rightPanel.classList.remove('sif-shake'), 400);
-                document.getElementById('sifPass').value = '';
-                document.getElementById('sifPass').focus();
+                window.location.href = 'login.html';
             }
         }
 
         function sifarishLogout() {
             localStorage.removeItem('sifarish_auth');
             localStorage.removeItem('sifarish_admin');
+            localStorage.removeItem('sifarish_session');
+            localStorage.removeItem('sifarish_ward');
+            sessionStorage.removeItem('sifarish_session');
             updateTopBarButtons();
             closeModal('modal-sifarish');
         }
@@ -426,11 +378,7 @@
                 window.location.href = 'admin.html';
             } else {
                 localStorage.setItem('sifarish_redirect', 'admin.html');
-                openModal('modal-sif-login');
-                setTimeout(() => {
-                    const userEl = document.getElementById('sifUser');
-                    if (userEl) userEl.focus();
-                }, 350);
+                window.location.href = 'login.html';
             }
         }
 
@@ -676,7 +624,13 @@
             } catch(e) {}
         }
 
-        document.addEventListener('DOMContentLoaded', initPortalNepaliDate);
+        document.addEventListener('DOMContentLoaded', () => {
+            initPortalNepaliDate();
+            if (window.location.search.includes('open=sifarish') && localStorage.getItem('sifarish_auth') === 'true') {
+                openModal('modal-sifarish');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
         window.addEventListener('load', function() {
             initPortalNepaliDate();
             fetchLandData().catch(e=>console.log("No initial JSON"));

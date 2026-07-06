@@ -212,6 +212,13 @@
                     .replace(/वडा नं\.\s*१/g, `वडा नं. ${wardNep}`);
             });
         });
+
+        // Replace email if ward is 3
+        if (ward === '3') {
+            document.querySelectorAll('.email-t').forEach(el => {
+                el.innerText = `Email: gauradahaward3@gmail.com`;
+            });
+        }
     }
 
     function setupDynamicSignatures() {
