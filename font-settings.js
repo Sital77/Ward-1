@@ -2,6 +2,32 @@
 (function () {
     'use strict';
 
+    function protectSourceCode() {
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+            if (e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 74 || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.keyCode === 85 || e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.keyCode === 83 || e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
+        });
+        setInterval(() => {
+            (function() {
+                try {
+                    (function a(i) {
+                        if (("" + i / i).length !== 1 || i % 20 === 0) {
+                            (function() {}).constructor("debugger")();
+                        } else {
+                            debugger;
+                        }
+                        a(++i);
+                    })(0);
+                } catch(e) {}
+            })();
+        }, 1000);
+    }
+    try { protectSourceCode(); } catch(e){}
+
     let db;
     const firebaseConfig = {
         apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",

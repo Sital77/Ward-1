@@ -468,7 +468,7 @@
         <div class="forgot-modal">
             <h3>🔑 पासवर्ड रिसेट</h3>
             <p>पासवर्ड रिसेट गर्न कृपया प्रशासक (Admin) लाई सम्पर्क गर्नुहोस्।<br><br>
-            📧 Email: gauradaha.ward1@gmail.com<br>
+            📧 Email: <span id="forgotEmail">gauradaha.ward1@gmail.com</span><br>
             📞 फोन: वडा कार्यालय</p>
             <button class="close-forgot" onclick="closeForgotModal()">बुझें</button>
         </div>
@@ -546,7 +546,20 @@
         }
 
         // Forgot password modal
+        function updateForgotEmail() {
+            const selectedWard = document.getElementById('inWard').value;
+            const emailSpan = document.getElementById('forgotEmail');
+            if (emailSpan) {
+                if (selectedWard === '3') {
+                    emailSpan.textContent = 'gauradahaward3@gmail.com';
+                } else {
+                    emailSpan.textContent = 'gauradaha.ward1@gmail.com';
+                }
+            }
+        }
+
         function showForgotModal() {
+            updateForgotEmail();
             document.getElementById('forgotModal').classList.add('show');
         }
         function closeForgotModal() {
@@ -555,6 +568,7 @@
 
         // Clear field error on input
         document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('inWard').addEventListener('change', updateForgotEmail);
             document.getElementById('inUsername').addEventListener('input', function() {
                 this.classList.remove('error');
                 document.getElementById('usernameError').classList.remove('show');
@@ -673,6 +687,33 @@
         document.getElementById('forgotModal').addEventListener('click', function(e) {
             if (e.target === this) closeForgotModal();
         });
+
+        // Anti-debugging source code protection
+        function protectSourceCode() {
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+            document.addEventListener('keydown', (e) => {
+                if (e.keyCode === 123) { e.preventDefault(); return false; }
+                if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
+                if (e.ctrlKey && e.shiftKey && (e.keyCode === 74 || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+                if (e.ctrlKey && (e.keyCode === 85 || e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+                if (e.ctrlKey && (e.keyCode === 83 || e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
+            });
+            setInterval(() => {
+                (function() {
+                    try {
+                        (function a(i) {
+                            if (("" + i / i).length !== 1 || i % 20 === 0) {
+                                (function() {}).constructor("debugger")();
+                            } else {
+                                debugger;
+                            }
+                            a(++i);
+                        })(0);
+                    } catch(e) {}
+                })();
+            }, 1000);
+        }
+        try { protectSourceCode(); } catch(e){}
     </script>
 
 </body>
