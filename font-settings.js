@@ -218,44 +218,43 @@
 
     function localizePageForWard() {
         const ward = localStorage.getItem('sifarish_ward') || '1';
-        if (ward === '1') return; // Default is Ward 1, no replace needed
-        
         const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
         const wardNep = toNep(ward);
 
+        const searchDigit = (ward === '1') ? '३' : '१';
+        const replaceDigit = wardNep;
+
+        const titleRegex = new RegExp(`${searchDigit}\\s*न[ं]?\\s*[\\.\\-]*\\s*वडा`, 'g');
+        const wardRegex = new RegExp(`वडा\\s*न[ं]?\\s*[\\.\\-]*\\s*${searchDigit}`, 'g');
+
+        // Document Title
+        document.title = document.title.replace(new RegExp(`वडा\\s*न[ं]?\\s*[\\.\\-]*\\s*${searchDigit}`, 'g'), "वडा नं. " + replaceDigit);
+
         // Replace wada-title (e.g. "१ नं. वडा कार्यालय" -> "३ नं. वडा कार्यालय")
         document.querySelectorAll('.wada-title').forEach(el => {
-            el.innerText = `${wardNep} नं. वडा कार्यालय`;
-        });
-        
-        // Replace wada-title (e.g. "१ नं वडा कार्यालय" -> "३ नं वडा कार्यालय")
-        document.querySelectorAll('.wada-title').forEach(el => {
-            if (el.innerText.includes('१ नं वडा')) {
-                el.innerText = `${wardNep} नं वडा कार्यालय`;
-            }
+            el.innerHTML = el.innerHTML
+                .replace(titleRegex, `${replaceDigit} नं. वडा`)
+                .replace(new RegExp(`${searchDigit} नं वडा`, 'g'), `${replaceDigit} नं वडा`);
         });
 
         // Replace muni-wada-line
         document.querySelectorAll('.muni-wada-line').forEach(el => {
-            el.innerText = `वडा नं. ${wardNep}`;
+            el.innerHTML = el.innerHTML.replace(wardRegex, `वडा नं. ${replaceDigit}`);
         });
 
         // Replace ward numbers inside preview letter paragraph text
         const selectors = ['.letter-body-para', '.letter-body', '#bodyText', '#bodyTextJanma', '#bodyTextBibaha', '#bodyTextTransfer'];
         selectors.forEach(sel => {
             document.querySelectorAll(sel).forEach(el => {
-                el.innerHTML = el.innerHTML
-                    .replace(/वडा नं\.\s*१/g, `वडा नं. ${wardNep}`)
-                    .replace(/वडा नं\.\s*१/g, `वडा नं. ${wardNep}`);
+                el.innerHTML = el.innerHTML.replace(wardRegex, `वडा नं. ${replaceDigit}`);
             });
         });
 
-        // Replace email if ward is 3
-        if (ward === '3') {
-            document.querySelectorAll('.email-t').forEach(el => {
-                el.innerText = `Email: gauradahaward3@gmail.com`;
-            });
-        }
+        // Replace email
+        const email = (ward === '3') ? 'gauradahaward3@gmail.com' : 'ward1.gauradaha@gmail.com';
+        document.querySelectorAll('.email-t').forEach(el => {
+            el.innerText = `Email: ${email}`;
+        });
     }
 
     function setupDynamicSignatures() {
