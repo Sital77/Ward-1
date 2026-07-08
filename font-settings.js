@@ -3,28 +3,7 @@
     'use strict';
 
     function protectSourceCode() {
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
-        document.addEventListener('keydown', (e) => {
-            if (e.keyCode === 123) { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && (e.keyCode === 74 || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
-            if (e.ctrlKey && (e.keyCode === 85 || e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
-            if (e.ctrlKey && (e.keyCode === 83 || e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
-        });
-        setInterval(() => {
-            (function() {
-                try {
-                    (function a(i) {
-                        if (("" + i / i).length !== 1 || i % 20 === 0) {
-                            (function() {}).constructor("debugger")();
-                        } else {
-                            debugger;
-                        }
-                        a(++i);
-                    })(0);
-                } catch(e) {}
-            })();
-        }, 1000);
+        // Safe inspection enabled: devtools and right-click allowed
     }
     try { protectSourceCode(); } catch(e){}
 
@@ -684,32 +663,12 @@
                     --doc-text-color: ${col};
                 }
                 
-                /* Apply Font size, Font style and color to document body elements */
-                .a4-page {
-                    font-size: var(--doc-font-size) !important;
-                }
-                
-                .letter-body,
-                .letter-body-para,
-                .letter-body p,
-                .letter-body-para p,
-                .details-table td,
-                .details-table th,
-                .land-table td,
-                .land-table th,
-                .landuse-container,
-                .address-to,
-                .address-to span,
-                .subject-container,
-                .subject-title,
-                .sig-name,
-                .sig-title {
+                /* Apply Font size, line spacing (1.15) and color to all document body elements EXCEPT letterhead */
+                .a4-page,
+                .a4-page *:not(.letterhead-container):not(.letterhead-container *):not(.doc-header-wrapper):not(.doc-header-wrapper *):not(.meta-line):not(.meta-line *):not(.lh-right):not(.lh-right *):not(.lh-center):not(.lh-center *):not(.lh-left):not(.lh-left *):not(.header-section):not(.header-section *):not(.doc-header):not(.doc-header *):not(.patra-chalani-row):not(.patra-chalani-row *):not(.qr-code-box):not(.qr-code-box *) {
                     font-size: var(--doc-font-size) !important;
                     color: var(--doc-text-color) !important;
-                }
-                
-                .subject-title span {
-                    font-size: var(--doc-font-size) !important;
+                    line-height: 1.15 !important;
                 }
                 
                 .letter-body,
@@ -726,7 +685,7 @@
                     font-style: var(--doc-font-style) !important;
                 }
                 
-                /* Explicit exclusions to protect standard styles */
+                /* Explicit exclusions to protect standard letterhead & signature normal styles */
                 .letterhead-container,
                 .letterhead-container *,
                 .doc-header-wrapper,
@@ -739,6 +698,12 @@
                 .lh-center *,
                 .lh-left,
                 .lh-left *,
+                .header-section,
+                .header-section *,
+                .doc-header,
+                .doc-header *,
+                .patra-chalani-row,
+                .patra-chalani-row *,
                 .subject-title,
                 .subject-title *,
                 .signature-block,

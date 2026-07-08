@@ -142,55 +142,29 @@
         }
 
         /* Bank Radio Selector Styles */
-        .bank-radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .bank-select-dropdown {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2d3748;
+            background-color: #fff;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
             margin-top: 4px;
         }
 
-        .bank-radio-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            padding: 10px 12px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #fff;
-        }
-
-        .bank-radio-item:hover {
-            border-color: #4299e1;
-            background: #ebf8ff;
-        }
-
-        .bank-radio-item input[type="radio"] {
-            margin-top: 3px;
-            cursor: pointer;
-        }
-
-        .bank-radio-item.active {
+        .bank-select-dropdown:hover {
             border-color: #3182ce;
-            background: #ebf8ff;
-            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.15);
         }
 
-        .bank-radio-label {
-            line-height: 1.5;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .bank-radio-label .bank-name {
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .bank-radio-label .bank-branch {
-            font-size: 0.82rem;
-            color: #718096;
+        .bank-select-dropdown:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
         }
 
         /* Trimester Radio Styles */
@@ -308,36 +282,12 @@
             <!-- Receiver Bank Details -->
             <div class="form-group">
                 <label>🏦 बैङ्कको नाम छान्नुहोस्:</label>
-                <div class="bank-radio-group" id="bankRadioGroup">
-                    <label class="bank-radio-item active">
-                        <input type="radio" name="bankRadio" value="krishi" checked onchange="selectBank(this)">
-                        <div class="bank-radio-label">
-                            <div class="bank-name">श्री कृषि विकास बैङ्क लिमिटेड</div>
-                            <div class="bank-branch">गौरादह शाखा, गौरादह, झापा</div>
-                        </div>
-                    </label>
-                    <label class="bank-radio-item">
-                        <input type="radio" name="bankRadio" value="nic" onchange="selectBank(this)">
-                        <div class="bank-radio-label">
-                            <div class="bank-name">श्री एन.आई.सी. एसिया बैंक लिमिटेड</div>
-                            <div class="bank-branch">गौरादह शाखा, गौरादह, झापा</div>
-                        </div>
-                    </label>
-                    <label class="bank-radio-item">
-                        <input type="radio" name="bankRadio" value="prime" onchange="selectBank(this)">
-                        <div class="bank-radio-label">
-                            <div class="bank-name">श्री प्राईम कमर्सियल बैंक लिमिटेड</div>
-                            <div class="bank-branch">गौरादह शाखा, गौरादह, झापा</div>
-                        </div>
-                    </label>
-                    <label class="bank-radio-item">
-                        <input type="radio" name="bankRadio" value="siddhartha" onchange="selectBank(this)">
-                        <div class="bank-radio-label">
-                            <div class="bank-name">श्री सिद्धार्थ बैंक लिमिटेड</div>
-                            <div class="bank-branch">गौरादह शाखा, गौरादह, झापा</div>
-                        </div>
-                    </label>
-                </div>
+                <select id="inBankSelect" class="bank-select-dropdown" onchange="selectBank(this.value)">
+                    <option value="krishi" selected>श्री कृषि विकास बैङ्क लिमिटेड (गौरादह शाखा)</option>
+                    <option value="nic">श्री एन.आई.सी. एसिया बैंक लिमिटेड (गौरादह शाखा)</option>
+                    <option value="prime">श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)</option>
+                    <option value="siddhartha">श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)</option>
+                </select>
                 <input type="hidden" id="inReceiverName" value="श्री कृषि विकास बैङ्क लिमिटेड">
                 <input type="hidden" id="inReceiverOffice" value="गौरादह शाखा">
                 <input type="hidden" id="inReceiverLocation" value="गौरादह, झापा">
@@ -622,18 +572,18 @@
             'siddhartha': { name: 'श्री सिद्धार्थ बैंक लिमिटेड',        office: 'गौरादह शाखा', location: 'गौरादह, झापा' }
         };
 
-        function selectBank(radio) {
-            const key = radio.value;
+        function selectBank(valOrElem) {
+            const key = typeof valOrElem === 'string' ? valOrElem : (valOrElem.value || 'krishi');
             const bank = bankData[key];
             if (bank) {
                 document.getElementById('inReceiverName').value = bank.name;
                 document.getElementById('inReceiverOffice').value = bank.office;
                 document.getElementById('inReceiverLocation').value = bank.location;
             }
-            // Toggle active class on parent labels
-            document.querySelectorAll('.bank-radio-item').forEach(item => {
-                item.classList.toggle('active', item.querySelector('input').checked);
-            });
+            const sel = document.getElementById('inBankSelect');
+            if (sel && sel.value !== key && bankData[key]) {
+                sel.value = key;
+            }
             updateDoc();
         }
 
@@ -825,7 +775,7 @@
                 receiverName:    document.getElementById('inReceiverName').value.trim()  || '',
                 receiverOffice:  document.getElementById('inReceiverOffice').value.trim()|| '',
                 receiverLocation:document.getElementById('inReceiverLocation').value.trim()|| '',
-                bankKey:         (document.querySelector('input[name="bankRadio"]:checked') || {}).value || 'krishi',
+                bankKey:         (document.getElementById('inBankSelect') || {}).value || 'krishi',
                 name:            name,
                 cardNo:          document.getElementById('inCardNo').value.trim()        || '',
                 targetGroup:     document.getElementById('inTargetGroup').value.trim()   || '',
@@ -912,13 +862,12 @@
                 document.getElementById('inPatraSankhya').value = rec.ay;
             }
 
-            // Restore bank radio selection
+            // Restore bank dropdown selection
             const bankKey = rec.bankKey || 'krishi';
-            const bankRadios = document.querySelectorAll('input[name="bankRadio"]');
-            bankRadios.forEach(r => { r.checked = (r.value === bankKey); });
-            document.querySelectorAll('.bank-radio-item').forEach(item => {
-                item.classList.toggle('active', item.querySelector('input').checked);
-            });
+            const bankSelect = document.getElementById('inBankSelect');
+            if (bankSelect) {
+                bankSelect.value = bankKey;
+            }
             const bank = bankData[bankKey];
             if (bank) {
                 document.getElementById('inReceiverName').value = rec.receiverName || bank.name;
