@@ -50,7 +50,8 @@
         'abibahit-pramanit': { collection: 'abibahitRecords', title: 'अविवाहित प्रमाणित' },
         'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' },
         'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
-        'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' }
+        'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' },
+        'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' }
     };
 
     // Intercept firebase initializeApp to prevent duplicate app errors
@@ -92,6 +93,7 @@
     else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
     else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
     else if (path.includes('arko-bibaha-nagareko.html')) templateId = 'arko-bibaha-nagareko';
+    else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
         isDynamic = true;
@@ -262,7 +264,12 @@
         const select = document.getElementById('inSignAuthority');
         if (!select) return;
 
-        const signatures = {
+        // Page-specific signature configurations
+        const isAbhilekh = templateId === 'abhilekh-pramanit';
+        const isBankSifarish = templateId === 'bank-sifarish';
+
+        // Default signatures (वडा अध्यक्ष) for most pages
+        const defaultSignatures = {
             '1': [
                 { value: "नगेन्द्र भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - नगेन्द्र भण्डारी" },
                 { value: "अन्जु निरौला|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - अन्जु निरौला" },
@@ -276,6 +283,41 @@
                 { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
             ]
         };
+
+        // अभिलेख प्रमाणित — स्थानीय पञ्जिकाधिकारी signatures
+        const abhilekhSignatures = {
+            '1': [
+                { value: "अनिता अधिकारी|स्थानीय पञ्जिकाधिकारी", text: "स्थानीय पञ्जिकाधिकारी - अनिता अधिकारी" }
+            ],
+            '3': [
+                { value: "मेनुका बस्नेत|स्थानीय पञ्जिकाधिकारी", text: "स्थानीय पञ्जिकाधिकारी - मेनुका बस्नेत" }
+            ]
+        };
+
+        // बैंक सिफारिस — वडा सचिव + वडा अध्यक्ष signatures
+        const bankSignatures = {
+            '1': [
+                { value: "अनिता अधिकारी|वडा सचिव", text: "वडा सचिव - अनिता अधिकारी" },
+                { value: "नगेन्द्र भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - नगेन्द्र भण्डारी" },
+                { value: "अन्जु निरौला|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - अन्जु निरौला" },
+                { value: "लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा" }
+            ],
+            '3': [
+                { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
+                { value: "होमनाथ थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - होमनाथ थापा" },
+                { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
+            ]
+        };
+
+        // Choose the right signature set based on page
+        let signatures;
+        if (isAbhilekh) {
+            signatures = abhilekhSignatures;
+        } else if (isBankSifarish) {
+            signatures = bankSignatures;
+        } else {
+            signatures = defaultSignatures;
+        }
 
         const wardSigns = signatures[ward];
         if (wardSigns) {
@@ -321,7 +363,8 @@
                 'abibahit-pramanit': 'अविवाहित प्रमाणित',
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
                 'abhilekh-pramanit': 'अभिलेख प्रमाणित',
-                'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित'
+                'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
+                'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस'
             };
 
             const categories = {
@@ -335,7 +378,8 @@
                 'abibahit-pramanit': 'व्यक्तिगत प्रमाणित',
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
-                'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित'
+                'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',
+                'bank-sifarish': 'व्यक्तिगत प्रमाणित'
             };
 
             await db.collection('sifarish_templates').doc(id).set({
