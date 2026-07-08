@@ -663,12 +663,12 @@
                     --doc-text-color: ${col};
                 }
                 
-                /* Apply Font size, line spacing (1.15) and color to all document body elements EXCEPT letterhead */
+                /* Apply Font size, line spacing (1.5) and color to all document body elements EXCEPT letterhead */
                 .a4-page,
                 .a4-page *:not(.letterhead-container):not(.letterhead-container *):not(.doc-header-wrapper):not(.doc-header-wrapper *):not(.meta-line):not(.meta-line *):not(.lh-right):not(.lh-right *):not(.lh-center):not(.lh-center *):not(.lh-left):not(.lh-left *):not(.header-section):not(.header-section *):not(.doc-header):not(.doc-header *):not(.patra-chalani-row):not(.patra-chalani-row *):not(.qr-code-box):not(.qr-code-box *) {
                     font-size: var(--doc-font-size) !important;
                     color: var(--doc-text-color) !important;
-                    line-height: 1.15 !important;
+                    line-height: 1.5 !important;
                 }
                 
                 .letter-body,
