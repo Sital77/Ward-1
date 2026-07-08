@@ -112,9 +112,9 @@
         }
 
         .tapasil-table {
-            width: 100%;
+            width: auto;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 12px;
             font-size: 13.5pt;
         }
 
@@ -125,13 +125,20 @@
         }
 
         .tapasil-table td.label-col {
-            width: 250px;
+            width: 220px;
             font-weight: bold;
             padding-right: 10px;
         }
 
+        .tapasil-table td.sep-col {
+            width: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
         .tapasil-table td.val-col {
             font-weight: bold;
+            text-align: left;
         }
 
         /* Bank Radio Selector Styles */
@@ -267,7 +274,13 @@
 
             <div class="form-group">
                 <label>पत्र संख्या (प.सं.):</label>
-                <select id="inPatraSankhya" onchange="updateDoc()"></select>
+                <select id="inPatraSankhya" onchange="updateDoc()">
+                    <option value="२०८०/०८१">२०८०/०८१</option>
+                    <option value="२०८१/०८२">२०८१/०८२</option>
+                    <option value="२०८२/०८३" selected>२०८२/०८३</option>
+                    <option value="२०८३/०८४">२०८३/०८४</option>
+                    <option value="२०८४/०८५">२०८४/०८५</option>
+                </select>
             </div>
 
             <div class="row-grid">
@@ -492,26 +505,31 @@
             </div>
 
             <!-- ── Tapasil ── -->
-            <div style="margin-top:20px; font-weight:700; font-size:13.5pt;">तपसिल:</div>
+            <div style="margin-top:20px; font-weight:700; font-size:13.5pt; text-align: left;">तपसिल:</div>
             <table class="tapasil-table">
                 <tr>
                     <td class="label-col">नाम, थर</td>
+                    <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilName">..................</span></td>
                 </tr>
                 <tr>
                     <td class="label-col">नागरिकता नं.</td>
+                    <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilCitNo">..................</span></td>
                 </tr>
                 <tr>
                     <td class="label-col">लक्षित समूह</td>
+                    <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilGroup">..................</span></td>
                 </tr>
                 <tr>
                     <td class="label-col">राष्ट्रिय परिचय पत्र नं.</td>
+                    <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilNid">..................</span></td>
                 </tr>
                 <tr>
                     <td class="label-col">परिचय पत्र नम्बर</td>
+                    <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilCardNo">..................</span></td>
                 </tr>
             </table>
@@ -890,6 +908,9 @@
             document.getElementById('inChalani').value      = rec.chalani === '-' ? '' : (rec.chalani || '');
             document.getElementById('inMiti').value         = rec.miti || '';
             document.getElementById('inNepalSamvat').value  = rec.ns || '';
+            if (rec.ay && document.getElementById('inPatraSankhya')) {
+                document.getElementById('inPatraSankhya').value = rec.ay;
+            }
 
             // Restore bank radio selection
             const bankKey = rec.bankKey || 'krishi';
@@ -980,8 +1001,20 @@
             try {
                 let startYear = bsYear;
                 if (bsMonth < 4) startYear = bsYear - 1;
-                const suffix = String(startYear + 1).slice(-3);
-                const fyStr = toNepaliDigit(`${startYear}/0${suffix}`);
+                const endSfx = String(startYear + 1).slice(-2);
+                const fyStr = toNepaliDigit(`${startYear}/0${endSfx}`);
+
+                const fySelect = document.getElementById('inPatraSankhya');
+                if (fySelect) {
+                    fySelect.innerHTML = '';
+                    for (let y = startYear - 2; y <= startYear + 2; y++) {
+                        const sfx = String(y + 1).slice(-2);
+                        const optVal = toNepaliDigit(`${y}/0${sfx}`);
+                        const sel = (y === startYear) ? 'selected' : '';
+                        fySelect.insertAdjacentHTML('beforeend', `<option value="${optVal}" ${sel}>${optVal}</option>`);
+                    }
+                    fySelect.value = fyStr;
+                }
 
                 const fyInput = document.getElementById('inFiscalYear');
                 if (fyInput) fyInput.value = fyStr;
