@@ -40,6 +40,34 @@ function getSelectedAY() {
 }
 
 // ── Mode toggle ─────────────────────────────────────
+function toggleBandaDocType() {
+    const mode = document.getElementById('currentMode').value;
+    
+    let docType = 'sifarish';
+    const docTypeRadios = document.getElementsByName('bandaDocTypeRadio');
+    for (const r of docTypeRadios) {
+        if (r.checked) { docType = r.value; break; }
+    }
+
+    const isBanda = (mode === 'banda');
+    const isNissa = (isBanda && docType === 'nissa');
+
+    // Form elements visibility
+    document.getElementById('bandaDocTypeSection').style.display = isBanda ? 'block' : 'none';
+    document.getElementById('bandaMitiSection').style.display = isNissa ? 'block' : 'none';
+    document.getElementById('receiverOfficeSection').style.display = isNissa ? 'none' : 'block';
+
+    // Preview elements visibility
+    document.getElementById('receiverBlock').style.display = isNissa ? 'none' : 'block';
+    document.getElementById('bodyKholne').style.display = (mode === 'kholne') ? 'block' : 'none';
+    document.getElementById('bodyBanda').style.display = (isBanda && docType === 'sifarish') ? 'block' : 'none';
+    document.getElementById('bodyNissa').style.display = isNissa ? 'block' : 'none';
+
+    // Signature blocks visibility
+    document.getElementById('docFooterSection').style.display = isNissa ? 'none' : 'block';
+    document.getElementById('dualSignatureSection').style.display = isNissa ? 'flex' : 'none';
+}
+
 function setMode(mode) {
     document.getElementById('currentMode').value = mode;
 
@@ -49,36 +77,19 @@ function setMode(mode) {
     const sifarisNamaSection = document.getElementById('sifarisNamaSection');
     const panSection         = document.getElementById('panSection');
 
-    const bodyKholne = document.getElementById('bodyKholne');
-    const bodyBanda  = document.getElementById('bodyBanda');
-
     if (mode === 'kholne') {
-        // Toggle buttons
         btnKholne.className = "mode-btn active-kholne";
         btnBanda.className  = "mode-btn";
-
-        // Form Fields
         sifarisNamaSection.style.display = "block";
         panSection.style.display         = "none";
-
-        // Preview Letters
-        bodyKholne.style.display = "block";
-        bodyBanda.style.display  = "none";
     } else {
-        // Toggle buttons
         btnKholne.className = "mode-btn";
         btnBanda.className  = "mode-btn active-banda";
-
-        // Form Fields
         sifarisNamaSection.style.display = "block";
         panSection.style.display         = "block";
-
-        // Preview Letters
-        bodyKholne.style.display = "none";
-        bodyBanda.style.display  = "block";
     }
     
-    // Sync initial name if needed
+    toggleBandaDocType();
     syncNivedakName();
     toggleSifarisNama();
     updateDoc();
@@ -182,16 +193,41 @@ function updateDoc() {
     document.getElementById('lblMiti').innerText        = miti;
     document.getElementById('lblNepalSamvat').innerText = ns;
 
+    // Recipient Address update
+    let receiverOffice = 'gauradaha';
+    const receiverRadios = document.getElementsByName('receiverOfficeRadio');
+    for (const r of receiverRadios) {
+        if (r.checked) { receiverOffice = r.value; break; }
+    }
+    const lblReceiverAddress = document.getElementById('lblReceiverAddress');
+    if (lblReceiverAddress) {
+        if (receiverOffice === 'damak') {
+            lblReceiverAddress.innerHTML = 'श्री आन्तरिक राजश्व कार्यालय<br>दमक, झापा ।';
+        } else {
+            lblReceiverAddress.innerHTML = 'श्री करदाता सेवा कार्यालय<br>गौरादह नगरपालिका<br>गौरादह, झापा ।';
+        }
+    }
+
     // Darta details
     const hasDarta = document.getElementById('chkDarta').checked;
     const dartaNo  = document.getElementById('inDartaNo').value  || '';
     const dartaMiti= document.getElementById('inDartaMiti').value|| '';
 
+    let docType = 'sifarish';
+    const docTypeRadios = document.getElementsByName('bandaDocTypeRadio');
+    for (const r of docTypeRadios) {
+        if (r.checked) { docType = r.value; break; }
+    }
+
     // Subject dynamic update based on mode
     if (mode === 'kholne') {
-        document.getElementById('lblSubject').innerText = "स्थायी लेखा नम्बर सिफारिस सम्बन्धमा ।";
+        document.getElementById('lblSubject').innerHTML = "स्थायी लेखा नम्बर सिफारिस सम्बन्धमा ।";
     } else {
-        document.getElementById('lblSubject').innerText = "स्थायी लेखा नम्बर बन्द गरिदिने सम्बन्धमा ।";
+        if (docType === 'nissa') {
+            document.getElementById('lblSubject').innerHTML = "<u>व्यवसाय बन्द गरेको निस्सा/प्रमाण पत्र ।</u>";
+        } else {
+            document.getElementById('lblSubject').innerHTML = "स्थायी लेखा नम्बर बन्द गरिदिने सम्बन्धमा ।";
+        }
     }
 
     // sifarisNama resolution for preview
@@ -241,6 +277,27 @@ function updateDoc() {
 
         const panVal = document.getElementById('inPAN').value || '';
         document.getElementById('lblPAN').innerText = panVal;
+
+        // Nissa dynamic preview updating
+        const bandaMiti = document.getElementById('inBandaMiti').value || '................';
+        document.getElementById('lblNissaPalika').innerText = palikaVal || '................';
+        document.getElementById('lblNissaWada').innerText = wada;
+        document.getElementById('lblNissaNivedakPalika').innerText = palikaVal || '................';
+        document.getElementById('lblNissaNivedakWada').innerText = wada;
+        
+        let nameWithShree = name || '................';
+        if (name && !name.startsWith('श्री')) {
+            nameWithShree = 'श्री ' + name;
+        }
+        if (nameWithShree && !nameWithShree.endsWith('ले')) {
+            nameWithShree = nameWithShree + 'ले';
+        }
+        document.getElementById('lblNissaNivedakName').innerText = nameWithShree;
+        
+        document.getElementById('lblNissaBusinessPalika').innerText = palikaVal || '................';
+        document.getElementById('lblNissaBusinessWada').innerText = wada;
+        document.getElementById('lblNissaBusinessName').innerText = business || '....................';
+        document.getElementById('lblNissaBandaMiti').innerText = bandaMiti;
     }
 
     // Signature
@@ -264,6 +321,27 @@ function updateDoc() {
     }
     lblSigName.innerText = sigName;
     document.getElementById('lblSigTitle').innerText = sigTitle;
+
+    // Update Dual signature for Nissa
+    const lblDualSigName = document.getElementById('lblDualSigName');
+    const lblDualSigTitle = document.getElementById('lblDualSigTitle');
+    if (lblDualSigName && lblDualSigTitle) {
+        let certSigName = "";
+        let certSigTitle = "प्रमाणित गर्ने";
+        if (signSelect === 'BLANK') {
+            certSigName = "";
+            certSigTitle = "प्रमाणित गर्ने";
+        } else if (signSelect === 'CUSTOM') {
+            certSigName = document.getElementById('inCustomSignName').value || '....................';
+            certSigTitle = "प्रमाणित गर्ने (" + (document.getElementById('inCustomSignTitle').value || '....................') + ")";
+        } else {
+            const parts = signSelect.split('|');
+            certSigName = parts[0];
+            certSigTitle = "प्रमाणित गर्ने (" + parts[1] + ")";
+        }
+        lblDualSigName.innerText = certSigName;
+        lblDualSigTitle.innerText = certSigTitle;
+    }
 }
 
 // ── Print & Save ──────────────────────────────────────
@@ -289,6 +367,18 @@ async function printAndSaveSystem() {
         if (r.checked) { sifarisNamaType = r.value; break; }
     }
 
+    let receiverOfficeVal = 'gauradaha';
+    const receiverRadios = document.getElementsByName('receiverOfficeRadio');
+    for (const r of receiverRadios) {
+        if (r.checked) { receiverOfficeVal = r.value; break; }
+    }
+
+    let docTypeVal = 'sifarish';
+    const docTypeRadios = document.getElementsByName('bandaDocTypeRadio');
+    for (const r of docTypeRadios) {
+        if (r.checked) { docTypeVal = r.value; break; }
+    }
+
     const obj = {
         mode,
         ay:              getSelectedAY(),
@@ -306,7 +396,10 @@ async function printAndSaveSystem() {
         dartaNo:         document.getElementById('inDartaNo').value.trim()      || '',
         dartaMiti:       document.getElementById('inDartaMiti').value.trim()    || '',
         panVal:          document.getElementById('inPAN').value.trim()          || '',
-        subject:         mode === 'kholne' ? "स्थायी लेखा नं. सिफारिस (खोल्ने)" : "स्थायी लेखा नं. सिफारिस (बन्द)",
+        receiverOfficeRadio: receiverOfficeVal,
+        bandaDocTypeRadio: docTypeVal,
+        bandaMiti:       document.getElementById('inBandaMiti').value.trim()    || '',
+        subject:         mode === 'kholne' ? "स्थायी लेखा नं. सिफारिस (खोल्ने)" : (docTypeVal === 'nissa' ? "व्यवसाय बन्द गरेको निस्सा/प्रमाण पत्र" : "स्थायी लेखा नं. सिफारिस (बन्द)"),
         signAuth:        document.getElementById('inSignAuthority').value,
         customSignName:  document.getElementById('inCustomSignName').value.trim(),
         customSignTitle: document.getElementById('inCustomSignTitle').value.trim(),
@@ -401,24 +494,35 @@ function editFromDB(id) {
     const mode = rec.mode || 'kholne';
     document.getElementById('currentMode').value = mode;
 
+    // Recipient office
+    const roVal = rec.receiverOfficeRadio || 'gauradaha';
+    const receiverRadios = document.getElementsByName('receiverOfficeRadio');
+    receiverRadios.forEach(r => { r.checked = (r.value === roVal); });
+
+    // Banda doc type
+    const dtVal = rec.bandaDocTypeRadio || 'sifarish';
+    const docTypeRadios = document.getElementsByName('bandaDocTypeRadio');
+    docTypeRadios.forEach(r => { r.checked = (r.value === dtVal); });
+    
+    // Banda miti
+    document.getElementById('inBandaMiti').value = rec.bandaMiti || '';
+
     // Toggle active state manually
     const btnKholne = document.getElementById('btnKholne');
     const btnBanda  = document.getElementById('btnBanda');
     if (mode === 'kholne') {
         btnKholne.className = "mode-btn active-kholne";
         btnBanda.className  = "mode-btn";
-        document.getElementById('sifarisNamaSection').style.display = "none";
+        document.getElementById('sifarisNamaSection').style.display = "block";
         document.getElementById('panSection').style.display         = "none";
-        document.getElementById('bodyKholne').style.display = "block";
-        document.getElementById('bodyBanda').style.display  = "none";
     } else {
         btnKholne.className = "mode-btn";
         btnBanda.className  = "mode-btn active-banda";
         document.getElementById('sifarisNamaSection').style.display = "block";
         document.getElementById('panSection').style.display         = "block";
-        document.getElementById('bodyKholne').style.display = "none";
-        document.getElementById('bodyBanda').style.display  = "block";
     }
+
+    toggleBandaDocType();
 
     // Fiscal Year radio
     const radios = document.querySelectorAll('input[name="ayRadio"]');

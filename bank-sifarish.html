@@ -251,8 +251,8 @@
                 <select id="inPatraSankhya" onchange="updateDoc()">
                     <option value="२०८०/०८१">२०८०/०८१</option>
                     <option value="२०८१/०८२">२०८१/०८२</option>
-                    <option value="२०८२/०८३" selected>२०८२/०८३</option>
-                    <option value="२०८३/०८४">२०८३/०८४</option>
+                    <option value="२०८२/०८३">२०८२/०८३</option>
+                    <option value="२०८३/०८४" selected>२०८३/०८४</option>
                     <option value="२०८४/०८५">२०८४/०८५</option>
                 </select>
             </div>
@@ -327,7 +327,7 @@
 
             <div class="form-group">
                 <label>आर्थिक वर्ष (आ.व.):</label>
-                <input type="text" id="inFiscalYear" placeholder="उदा: २०८२/०८३" oninput="updateDoc()">
+                <input type="text" id="inFiscalYear" placeholder="उदा: २०८३/०८४" value="२०८३/०८४" oninput="updateDoc()">
             </div>
 
             <div class="form-group">
@@ -948,8 +948,8 @@
 
         function initializeFiscalYear(bsYear, bsMonth) {
             try {
-                let startYear = bsYear;
-                if (bsMonth < 4) startYear = bsYear - 1;
+                // Default to 2083 (२०८३/०८४) as requested by user
+                let startYear = 2083;
                 const endSfx = String(startYear + 1).slice(-2);
                 const fyStr = toNepaliDigit(`${startYear}/0${endSfx}`);
 
