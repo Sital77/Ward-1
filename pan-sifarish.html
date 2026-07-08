@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>स्थायी लेखा नं. सिफारिस - गौरादह नगरपालिका वडा नं.१</title>
-    <link rel="stylesheet" href="charkilla.css">
+    <link rel="stylesheet" href="charkilla.css?v=1.2">
     <style>
         .preview-panel .a4-page,
         .preview-panel .a4-page * {
@@ -226,14 +226,8 @@
             <div class="form-group" id="receiverOfficeSection">
                 <label>🏢 कार्यालय (सिफारिस पठाउने):</label>
                 <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:3px;">
-                    <div class="radio-option">
-                        <input type="radio" id="ro1" name="receiverOfficeRadio" value="gauradaha" checked onchange="updateDoc()">
-                        <label for="ro1" class="radio-label" style="font-size:0.82rem;">करदाता कार्यालय गौरादह</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="ro2" name="receiverOfficeRadio" value="damak" onchange="updateDoc()">
-                        <label for="ro2" class="radio-label" style="font-size:0.82rem;">श्री आन्तरिक राजश्व कार्यालय दमक, झापा ।</label>
-                    </div>
+                    <div class="radio-option"><input type="radio" id="ro1" name="receiverOfficeRadio" value="gauradaha" checked onchange="updateDoc()"><label for="ro1" class="radio-label" style="font-size:0.82rem;">करदाता कार्यालय गौरादह</label></div>
+                    <div class="radio-option"><input type="radio" id="ro2" name="receiverOfficeRadio" value="damak" onchange="updateDoc()"><label for="ro2" class="radio-label" style="font-size:0.82rem;">श्री आन्तरिक राजश्व कार्यालय दमक, झापा ।</label></div>
                 </div>
             </div>
 
@@ -242,10 +236,10 @@
                 <label>पालिका:</label>
                 <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:3px;" id="palikaRadioGroup">
                     <div class="radio-option"><input type="radio" id="p1" name="palikaRadio" value="कमल गाउँपालिका"
-                            onchange="updateDoc()" checked><label for="p1" class="radio-label"
+                            onchange="updateDoc()"><label for="p1" class="radio-label"
                             style="font-size:0.82rem;">कमल गाउँपालिका</label></div>
                     <div class="radio-option"><input type="radio" id="p2" name="palikaRadio" value="गौरादह नगरपालिका"
-                            onchange="updateDoc()"><label for="p2" class="radio-label" style="font-size:0.82rem;">गौरादह
+                            onchange="updateDoc()" checked><label for="p2" class="radio-label" style="font-size:0.82rem;">गौरादह
                             न.पा.</label></div>
                     <div class="radio-option"><input type="radio" id="p3" name="palikaRadio" value="दमक नगरपालिका"
                             onchange="updateDoc()"><label for="p3" class="radio-label" style="font-size:0.82rem;">दमक
@@ -324,14 +318,8 @@
                 <div class="form-group">
                     <label>📄 प्रिन्ट गर्ने कागजात:</label>
                     <div class="radio-container">
-                        <div class="radio-option">
-                            <input type="radio" id="dt1" name="bandaDocTypeRadio" value="sifarish" checked onchange="toggleBandaDocType(); updateDoc()">
-                            <label for="dt1" class="radio-label">सिफारिस पत्र</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="dt2" name="bandaDocTypeRadio" value="nissa" onchange="toggleBandaDocType(); updateDoc()">
-                            <label for="dt2" class="radio-label">व्यवसाय बन्द गरेको निस्सा/प्रमाण पत्र</label>
-                        </div>
+                        <div class="radio-option"><input type="radio" id="dt1" name="bandaDocTypeRadio" value="sifarish" onchange="toggleBandaDocType(); updateDoc()" checked><label for="dt1" class="radio-label">सिफारिस पत्र</label></div>
+                        <div class="radio-option"><input type="radio" id="dt2" name="bandaDocTypeRadio" value="nissa" onchange="toggleBandaDocType(); updateDoc()"><label for="dt2" class="radio-label">व्यवसाय बन्द गरेको निस्सा/प्रमाण पत्र</label></div>
                     </div>
                 </div>
                 
@@ -509,7 +497,7 @@
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="font-settings.js"></script>
-    <script src="script-pan-sifarish.js"></script>
+    <script src="script-pan-sifarish.js?v=1.2"></script>
 </body>
 
 </html>
