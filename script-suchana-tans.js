@@ -314,187 +314,46 @@ function initializeFiscalYear(bsYear, bsMonth) {
 // ── Auto-fill date on page load ─────────────────────
 function initializeAutomaticDate() {
     try {
-        let nepaliBSDateStr = '';
-        let bsYearVal  = 2083;
-        let bsMonthVal = 2;
-
-        const converter = window["@sbmdkl/nepali-date-converter"];
-        if (!converter && (window._dateInitRetries || 0) < 5) {
-            window._dateInitRetries = (window._dateInitRetries || 0) + 1;
-            setTimeout(initializeAutomaticDate, 400);
-        }
-        if (converter && typeof converter.adToBs === 'function') {
-            const today = new Date();
-            const yyyy  = today.getFullYear();
-            const mm    = String(today.getMonth() + 1).padStart(2, '0');
-            const dd    = String(today.getDate()).padStart(2, '0');
-            const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
-
-            let bsDayVal = 1;
-            if (typeof bsDate === 'string') {
-                const parts = bsDate.split(/[-/]/);
-                bsYearVal  = parseInt(parts[0], 10);
-                bsMonthVal = parseInt(parts[1], 10);
-                bsDayVal   = parseInt(parts[2], 10);
-            } else if (bsDate && typeof bsDate === 'object') {
-                bsYearVal  = bsDate.bsYear  || bsDate.year  || bsDate.currentYear  || 2083;
-                bsMonthVal = bsDate.bsMonth || bsDate.month || bsDate.currentMonth || 2;
-                bsDayVal   = bsDate.bsDay   || bsDate.day   || bsDate.currentDay   || 1;
-            }
-            const bsM = String(bsMonthVal).padStart(2, '0');
-            const bsD = String(bsDayVal).padStart(2, '0');
-            nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsM}/${bsD}`);
-        } else {
-            const today = new Date();
-            const adYear  = today.getFullYear();
-            const adMonth = today.getMonth() + 1;
-            const adDay   = today.getDate();
-            let bsY = adYear + 57;
-            let bsM = 1;
-            if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
-            else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
-            else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
-            else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
-            else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
-            else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
-            else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
-            else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
-            else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
-            else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
-            else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
-            else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
-            bsYearVal  = bsY;
-            bsMonthVal = bsM;
-            let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
-            if (bsD > 32) bsD = 30;
-            const bsMStr = String(bsMonthVal).padStart(2, '0');
-            const bsDStr = String(bsD).padStart(2, '0');
-            nepaliBSDateStr = (typeof toNepaliDigit === 'function' ? toNepaliDigit : window.toNepaliDigit)(`${bsYearVal}/${bsMStr}/${bsDStr}`);
-        }
-
-        initializeFiscalYear(bsYearVal, bsMonthVal);
-
         const today = new Date();
-        const nsYear = getNepalSambatYear(today);
+        let bsYear = 2083, bsMonth = 2, bsDay = 18;
+        if (typeof adToBs === 'function') {
+            const bsDate = adToBs(today);
+            if (bsDate) {
+                bsYear = bsDate.year || bsYear;
+                bsMonth = bsDate.month || bsMonth;
+                bsDay = bsDate.day || bsDay;
+            }
+        }
+        
+        initializeFiscalYear(bsYear, bsMonth);
 
+        const bsDateStr = `${toNepaliDigit(bsYear)}/${toNepaliDigit(String(bsMonth).padStart(2,'0'))}/${toNepaliDigit(String(bsDay).padStart(2,'0'))}`;
+        
         const inMiti = document.getElementById('inMiti');
-        if (inMiti) inMiti.value = nepaliBSDateStr;
-
-        const inPraaptaMiti = document.getElementById('inPraaptaMiti');
-        if (inPraaptaMiti) inPraaptaMiti.value = nepaliBSDateStr;
-
-        const inNS = document.getElementById('inNepalSamvat');
-        if (inNS) inNS.value = toNepaliDigit(nsYear);
-
-        if (typeof updateDoc === 'function') updateDoc();
+        if (inMiti) inMiti.value = bsDateStr;
+        
+        const nsYear = getNepalSambatYear(today);
+        const nepaliNSYearStr = toNepaliDigit(nsYear);
+        const inNepalSamvat = document.getElementById('inNepalSamvat');
+        if (inNepalSamvat) inNepalSamvat.value = nepaliNSYearStr;
+        
         fetchCurrentNepalSambat();
     } catch (e) { console.error("Date init error:", e); }
 }
 
 function updateNepalSambatFromMiti() {
-    const inMiti = document.getElementById('inMiti');
     const inNS = document.getElementById('inNepalSamvat');
-    if (!inMiti || !inNS) return;
-
-    const bsDateStr = inMiti.value.trim();
-    if (!bsDateStr) return;
-
-    const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
-    let engMiti = bsDateStr.split('').map(char => {
-        const index = nepaliDigits.indexOf(char);
-        return index !== -1 ? index : char;
-    }).join('');
-
-    const parts = engMiti.split(/[-/.]/);
-    if (parts.length >= 3) {
-        const y = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10);
-        const d = parseInt(parts[2], 10);
-        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-            const converter = window["@sbmdkl/nepali-date-converter"];
-            if (converter && typeof converter.bsToAd === 'function') {
-                try {
-                    const formattedBsStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                    const adResult = converter.bsToAd(formattedBsStr);
-                    let adDate = null;
-                    if (typeof adResult === 'string') {
-                        adDate = new Date(adResult);
-                    } else if (adResult && typeof adResult === 'object') {
-                        const adY = adResult.year || adResult.adYear;
-                        const adM = adResult.month || adResult.adMonth;
-                        const adD = adResult.day || adResult.adDay;
-                        if (adY && adM && adD) {
-                            adDate = new Date(adY, adM - 1, adD);
-                        }
-                    }
-                    if (adDate && !isNaN(adDate.getTime())) {
-                        const nsYear = getNepalSambatYear(adDate);
-                        inNS.value = toNepaliDigit(nsYear);
-                    }
-                } catch (e) {
-                    console.error("Error converting BS to AD:", e);
-                }
-            } else {
-                let nsYear = y - 937;
-                if (m > 7 || (m === 7 && d >= 15)) {
-                    nsYear = y - 936;
-                }
-                inNS.value = toNepaliDigit(nsYear);
-            }
-        }
+    if (inNS) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 
 async function fetchCurrentNepalSambat() {
-    const targetUrl = 'https://www.nepalsambat.com/widget/nsstandard.php';
-    const proxyUrls = [
-        'https://corsproxy.io/?' + encodeURIComponent(targetUrl),
-        'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl),
-        'https://thingproxy.freeboard.io/fetch/' + targetUrl
-    ];
-    for (const url of proxyUrls) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) continue;
-            const html = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const rows = doc.querySelectorAll('.row');
-            if (rows.length >= 2) {
-                const nsYear = rows[0].innerText.trim();
-                const nsTithi = rows[1].innerText.trim();
-                
-                const tithiMap = {
-                    'पारु': '१', 'प्रतिपदा': '१', 'दुतिया': '२', 'द्वितीया': '२',
-                    'तृतिया': '३', 'तृतीया': '३', 'चौथि': '४', 'चतुर्थी': '४',
-                    'पञ्चमी': '५', 'खस्थि': '६', 'षष्ठी': '६', 'सप्तमी': '७',
-                    'अष्टमी': '८', 'नवमी': '९', 'दशमी': '१०', 'एकादशी': '११',
-                    'दुवादशी': '१२', 'द्वादशी': '१२', 'त्रयोदशी': '१३',
-                    'चह्रे': '१४', 'चतुर्दशी': '१४', 'पुन्ही': '१५', 'पूर्णिमा': '१५',
-                    'आमाइ': '१५', 'औंसी': '१५'
-                };
-                
-                let dayDigit = '';
-                for (const key in tithiMap) {
-                    if (nsTithi.includes(key)) {
-                        dayDigit = ' ' + tithiMap[key];
-                        break;
-                    }
-                }
-                
-                const fullNepalSambat = `${nsYear} ${nsTithi}${dayDigit}`.trim();
-                const inNS = document.getElementById('inNepalSamvat');
-                if (inNS && fullNepalSambat.length > 3) {
-                    inNS.value = fullNepalSambat;
-                    if (typeof updateDoc === 'function') {
-                        updateDoc();
-                    }
-                    return;
-                }
-            }
-        } catch (err) {
-            console.warn("Proxy attempt failed:", url, err);
-        }
+    const inNS = document.getElementById('inNepalSamvat');
+    if (inNS) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 

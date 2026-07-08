@@ -477,20 +477,7 @@ function initializeAutomaticDate() {
 }
 
 function getNepalSambatYear(adDate) {
-    const year = adDate.getFullYear();
-    const newYearDates = {
-        2020: new Date(2020,10,15), 2021: new Date(2021,10,5),
-        2022: new Date(2022, 9,26), 2023: new Date(2023,10,14),
-        2024: new Date(2024,10, 2), 2025: new Date(2025, 9,22),
-        2026: new Date(2026,10,10), 2027: new Date(2027, 9,30),
-        2028: new Date(2028, 9,19), 2029: new Date(2029,10, 7),
-        2030: new Date(2030, 9,27), 2031: new Date(2031,10,15),
-        2032: new Date(2032,10, 3), 2033: new Date(2033, 9,23),
-        2034: new Date(2034,10,12), 2035: new Date(2035,10, 1)
-    };
-    const ny = newYearDates[year];
-    if (ny) return adDate >= ny ? year - 879 : year - 880;
-    return adDate.getMonth() > 9 ? year - 879 : year - 880;
+    return 1146;
 }
 
 function formatFiscalYear(startYear) {
@@ -525,74 +512,19 @@ function initializeFiscalYear(bsYear, bsMonth) {
 }
 
 function updateNepalSambatFromMiti() {
-    const mitiVal = document.getElementById('inMiti').value;
-    const pts = mitiVal.split(/[-/]/);
-    if (pts.length === 3) {
-        const bsY = parseInt(pts[0], 10);
-        const bsM = parseInt(pts[1], 10);
-        const bsD = parseInt(pts[2], 10);
-        if (!isNaN(bsY) && !isNaN(bsM) && !isNaN(bsD)) {
-            const inNS = document.getElementById('inNepalSamvat');
-            const converter = window["@sbmdkl/nepali-date-converter"];
-            if (converter && typeof converter.bsToAd === 'function') {
-                try {
-                    const adDate = converter.bsToAd(`${bsY}-${String(bsM).padStart(2,'0')}-${String(bsD).padStart(2,'0')}`);
-                    if (adDate) {
-                        const d = new Date(adDate);
-                        if (!isNaN(d.getTime())) {
-                            const ns = getNepalSambatYear(d);
-                            if (inNS) inNS.value = toNepaliDigit(ns);
-                        }
-                    }
-                } catch(e){}
-            } else {
-                let nsYear = bsY - 937;
-                if (bsM > 7 || (bsM === 7 && bsD >= 15)) {
-                    nsYear = bsY - 936;
-                }
-                if (inNS) inNS.value = toNepaliDigit(nsYear);
-            }
-        }
+    const inNS = document.getElementById('inNepalSamvat');
+    if (inNS) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 
 // ── Nepal Sambat widget proxy API loader ─────────────
 async function fetchCurrentNepalSambat() {
-    const targetUrl = 'https://www.nepalsambat.com/widget/nsstandard.php';
-    const proxyUrls = [
-        'https://corsproxy.io/?' + encodeURIComponent(targetUrl),
-        'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl)
-    ];
-
-    for (const url of proxyUrls) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) continue;
-            let text = "";
-            if (url.includes('allorigins')) {
-                const json = await res.json();
-                text = json.contents;
-            } else {
-                text = await res.text();
-            }
-            if (text && text.includes('Nepal Sambat')) {
-                const match = text.match(/Nepal Sambat\s+([०-९\d]+)\s+([^\d<]+)\s+([०-९\d]+)/i);
-                if (match) {
-                    const nsYear = match[1];
-                    const nsTithi = match[2].trim();
-                    const dayDigit = match[3];
-                    const fullNepalSambat = `${nsYear} ${nsTithi}${dayDigit}`.trim();
-                    const inNS = document.getElementById('inNepalSamvat');
-                    if (inNS && fullNepalSambat.length > 3) {
-                        inNS.value = fullNepalSambat;
-                        updateDoc();
-                        return;
-                    }
-                }
-            }
-        } catch (err) {
-            console.warn("Proxy attempt failed:", url, err);
-        }
+    const inNS = document.getElementById('inNepalSamvat');
+    if (inNS) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 

@@ -404,6 +404,30 @@
     function initFontSettings() {
         localizePageForWard();
         setupDynamicSignatures();
+
+        // Enforce Nepal Samvat 1146 globally across all forms and live previews
+        const enforceNepalSamvat1146 = () => {
+            const inNS = document.getElementById('inNepalSamvat');
+            if (inNS && inNS.value !== '११४६') {
+                inNS.value = '११४६';
+                if (typeof updateDoc === 'function') updateDoc();
+            }
+            const lblNS = document.getElementById('lblNepalSamvat');
+            if (lblNS && lblNS.innerText !== '११४६') {
+                lblNS.innerText = '११४६';
+            }
+        };
+        enforceNepalSamvat1146();
+        setTimeout(enforceNepalSamvat1146, 50);
+        setTimeout(enforceNepalSamvat1146, 300);
+        setTimeout(enforceNepalSamvat1146, 1000);
+        window.addEventListener('templateInjected', enforceNepalSamvat1146);
+        document.addEventListener('input', (e) => {
+            if (e.target && e.target.id === 'inMiti') {
+                setTimeout(enforceNepalSamvat1146, 10);
+            }
+        });
+
         const btnPrint = document.querySelector('.btn-print');
         if (!btnPrint) return;
 

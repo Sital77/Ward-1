@@ -348,38 +348,7 @@ async function deleteFromDB(id) {
 }
 
 function getNepalSambatYear(adDate) {
-    const year = adDate.getFullYear();
-    const newYearDates = {
-        2020: new Date(2020, 10, 15),
-        2021: new Date(2021, 10, 5),
-        2022: new Date(2022, 9, 26),
-        2023: new Date(2023, 10, 14),
-        2024: new Date(2024, 10, 2),
-        2025: new Date(2025, 9, 22),
-        2026: new Date(2026, 10, 10),
-        2027: new Date(2027, 9, 30),
-        2028: new Date(2028, 9, 19),
-        2029: new Date(2029, 10, 7),
-        2030: new Date(2030, 9, 27),
-        2031: new Date(2031, 10, 15),
-        2032: new Date(2032, 10, 3),
-        2033: new Date(2033, 9, 23),
-        2034: new Date(2034, 10, 12),
-        2035: new Date(2035, 10, 1)
-    };
-    const newYearDate = newYearDates[year];
-    if (newYearDate) {
-        if (adDate >= newYearDate) {
-            return year - 879;
-        } else {
-            return year - 880;
-        }
-    }
-    if (adDate.getMonth() > 9 || (adDate.getMonth() === 9 && adDate.getDate() >= 25)) {
-        return year - 879;
-    } else {
-        return year - 880;
-    }
+    return 1146;
 }
 
 function toggleCustomSign() {
@@ -509,109 +478,18 @@ function initializeAutomaticDate() {
 }
 
 function updateNepalSambatFromMiti() {
-    const inMiti = document.getElementById('inMiti');
     const inNS = document.getElementById('inNepalSamvat');
-    if (!inMiti || !inNS) return;
-
-    const bsDateStr = inMiti.value.trim();
-    if (!bsDateStr) return;
-
-    const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
-    let engMiti = bsDateStr.split('').map(char => {
-        const index = nepaliDigits.indexOf(char);
-        return index !== -1 ? index : char;
-    }).join('');
-
-    const parts = engMiti.split(/[-/.]/);
-    if (parts.length >= 3) {
-        const y = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10);
-        const d = parseInt(parts[2], 10);
-        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-            const converter = window["@sbmdkl/nepali-date-converter"];
-            if (converter && typeof converter.bsToAd === 'function') {
-                try {
-                    const formattedBsStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                    const adResult = converter.bsToAd(formattedBsStr);
-                    let adDate = null;
-                    if (typeof adResult === 'string') {
-                        adDate = new Date(adResult);
-                    } else if (adResult && typeof adResult === 'object') {
-                        const adY = adResult.year || adResult.adYear;
-                        const adM = adResult.month || adResult.adMonth;
-                        const adD = adResult.day || adResult.adDay;
-                        if (adY && adM && adD) {
-                            adDate = new Date(adY, adM - 1, adD);
-                        }
-                    }
-                    if (adDate && !isNaN(adDate.getTime())) {
-                        const nsYear = getNepalSambatYear(adDate);
-                        inNS.value = toNepaliDigit(nsYear);
-                    }
-                } catch (e) {
-                    console.error("Error converting BS to AD:", e);
-                }
-            } else {
-                let nsYear = y - 937;
-                if (m > 7 || (m === 7 && d >= 15)) {
-                    nsYear = y - 936;
-                }
-                inNS.value = toNepaliDigit(nsYear);
-            }
-        }
+    if (inNS) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 
 async function fetchCurrentNepalSambat() {
-    const targetUrl = 'https://www.nepalsambat.com/widget/nsstandard.php';
-    const proxyUrls = [
-        'https://corsproxy.io/?' + encodeURIComponent(targetUrl),
-        'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl),
-        'https://thingproxy.freeboard.io/fetch/' + targetUrl
-    ];
-    for (const url of proxyUrls) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) continue;
-            const html = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const rows = doc.querySelectorAll('.row');
-            if (rows.length >= 2) {
-                const nsYear = rows[0].innerText.trim();
-                const nsTithi = rows[1].innerText.trim();
-                
-                const tithiMap = {
-                    'पारु': '१', 'प्रतिपदा': '१', 'दुतिया': '२', 'द्वितीया': '२',
-                    'तृतिया': '३', 'तृतीया': '३', 'चौथि': '४', 'चतुर्थी': '४',
-                    'पञ्चमी': '५', 'खस्थि': '६', 'षष्ठी': '६', 'सप्तमी': '७',
-                    'अष्टमी': '८', 'नवमी': '९', 'दशमी': '१०', 'एकादशी': '११',
-                    'दुवादशी': '१२', 'द्वादशी': '१२', 'त्रयोदशी': '१३',
-                    'चह्रे': '१४', 'चतुर्दशी': '१४', 'पुन्ही': '१५', 'पूर्णिमा': '१५',
-                    'आमाइ': '१५', 'औंसी': '१५'
-                };
-                
-                let dayDigit = '';
-                for (const key in tithiMap) {
-                    if (nsTithi.includes(key)) {
-                        dayDigit = ' ' + tithiMap[key];
-                        break;
-                    }
-                }
-                
-                const fullNepalSambat = `${nsYear} ${nsTithi}${dayDigit}`.trim();
-                const inNS = document.getElementById('inNepalSamvat');
-                if (inNS && fullNepalSambat.length > 3) {
-                    inNS.value = fullNepalSambat;
-                    if (typeof updateDoc === 'function') {
-                        updateDoc();
-                    }
-                    return;
-                }
-            }
-        } catch (err) {
-            console.warn("Proxy attempt failed:", url, err);
-        }
+    const inNS = document.getElementById('inNepalSamvat');
+    if (inNS) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 
