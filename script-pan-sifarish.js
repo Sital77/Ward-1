@@ -620,12 +620,20 @@ async function fetchCurrentNepalSambat() {
 }
 
 // ── Bootstrap ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[name="receiverOfficeRadio"]').forEach(radio => {
+        radio.addEventListener('change', updateDoc);
+        radio.addEventListener('click', updateDoc);
+    });
+});
+
 window.onload = function () {
     initializeAutomaticDate();
     adjustSignaturePosition(40);
     setMode('kholne'); // start with kholne mode
     document.querySelectorAll('input[name="receiverOfficeRadio"]').forEach(radio => {
         radio.addEventListener('change', updateDoc);
+        radio.addEventListener('click', updateDoc);
     });
 };
 
