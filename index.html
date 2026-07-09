@@ -876,8 +876,8 @@
                 <button onclick="sifarishLogout()"
                     style="background:linear-gradient(135deg,#c53030,#9b2c2c);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">🚪
                     लग-आउट</button>
-                <button id="modalAdminBtn" onclick="window.location.href='admin.html'"
-                    style="display:none; background:linear-gradient(135deg,#3182ce,#2b6cb0);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">⚙️
+                <button id="modalAdminBtn" onclick="openAdminPanel()"
+                    style="display:inline-block; background:linear-gradient(135deg,#3182ce,#2b6cb0);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">⚙️
                     Admin व्यवस्थापन</button>
                 <h2 style="color:#e51a23; font-size:1.6rem; font-weight:800; margin:0;">🗂️ सिफारिस प्रणाली भित्र स्वागत
                     छ</h2>
@@ -987,10 +987,9 @@
         // Show/hide logout buttons initially on load (Admin button is always visible)
         function updateTopBarButtons() {
             const isAuth = localStorage.getItem('sifarish_auth') === 'true';
-            const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
             document.getElementById('logoutBtn').style.display = isAuth ? 'inline-block' : 'none';
             const modalAdminBtn = document.getElementById('modalAdminBtn');
-            if (modalAdminBtn) modalAdminBtn.style.display = (isAuth && isAdmin) ? 'inline-block' : 'none';
+            if (modalAdminBtn) modalAdminBtn.style.display = 'inline-block';
         }
         updateTopBarButtons();
 
