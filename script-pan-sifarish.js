@@ -185,7 +185,7 @@ function updateDoc() {
     const lblReceiverAddress = document.getElementById('lblReceiverAddress');
     if (lblReceiverAddress) {
         if (receiverOffice === 'damak') {
-            lblReceiverAddress.innerHTML = 'श्री आन्तरिक राजश्व कार्यालय<br>दमक, झापा ।';
+            lblReceiverAddress.innerHTML = 'श्री आन्तरिक राजश्व कार्यालय, दमक, झापा ।';
         } else {
             lblReceiverAddress.innerHTML = 'श्री करदाता सेवा कार्यालय<br>गौरादह नगरपालिका<br>गौरादह, झापा ।';
         }
@@ -639,4 +639,9 @@ window.onload = function () {
 
 window.addEventListener('templateInjected', function() {
     initializeAutomaticDate();
+    updateDoc();
+    document.querySelectorAll('input[name="receiverOfficeRadio"]').forEach(radio => {
+        radio.addEventListener('change', updateDoc);
+        radio.addEventListener('click', updateDoc);
+    });
 });
