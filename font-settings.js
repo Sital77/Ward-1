@@ -179,6 +179,17 @@
         // Insert new database-managed HTML elements
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
+        if (!tempDiv.querySelector('#lblReceiverAddress')) {
+            const firstChild = tempDiv.firstElementChild;
+            if (firstChild) {
+                firstChild.id = 'receiverBlock';
+                if (firstChild.children && firstChild.children.length > 0) {
+                    firstChild.children[0].id = 'lblReceiverAddress';
+                } else {
+                    firstChild.id = 'lblReceiverAddress';
+                }
+            }
+        }
         while (tempDiv.firstChild) {
             redLine.parentNode.insertBefore(tempDiv.firstChild, null);
         }

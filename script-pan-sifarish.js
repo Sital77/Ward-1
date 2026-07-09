@@ -182,7 +182,20 @@ function updateDoc() {
     for (const r of receiverRadios) {
         if (r.checked) { receiverOffice = r.value; break; }
     }
-    const lblReceiverAddress = document.getElementById('lblReceiverAddress');
+    let lblReceiverAddress = document.getElementById('lblReceiverAddress');
+    if (!lblReceiverAddress) {
+        const redLine = document.querySelector('.header-red-line');
+        if (redLine && redLine.nextElementSibling) {
+            const firstBlock = redLine.nextElementSibling;
+            if (firstBlock.children && firstBlock.children.length > 0) {
+                lblReceiverAddress = firstBlock.children[0];
+            } else {
+                lblReceiverAddress = firstBlock;
+            }
+            if (lblReceiverAddress) lblReceiverAddress.id = 'lblReceiverAddress';
+            firstBlock.id = 'receiverBlock';
+        }
+    }
     if (lblReceiverAddress) {
         if (receiverOffice === 'damak') {
             lblReceiverAddress.innerHTML = 'श्री आन्तरिक राजश्व कार्यालय<br>दमक, झापा ।';
