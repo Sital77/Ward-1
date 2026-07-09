@@ -185,8 +185,6 @@ function toggleRegistrarSection() {
     document.getElementById('registrarSection').style.display = chk.checked ? 'block' : 'none';
     document.getElementById('lblRegistrarRow').style.display = chk.checked ? 'flex' : 'none';
     document.getElementById('lblRegistrarRowBibaha').style.display = chk.checked ? 'flex' : 'none';
-    const rowTr = document.getElementById('lblRegistrarRowTransfer');
-    if (rowTr) rowTr.style.display = chk.checked ? 'flex' : 'none';
 }
 
 function toggleCustomSign() {
@@ -354,11 +352,6 @@ function updateDoc() {
         if (lblTapsilTransferBirthDate) lblTapsilTransferBirthDate.innerText = birthDate;
         const lblTapsilTransferBirthRegNo = document.getElementById('lblTapsilTransferBirthRegNo');
         if (lblTapsilTransferBirthRegNo) lblTapsilTransferBirthRegNo.innerText = birthRegNo;
-
-        // Registrar option
-        const regName = document.getElementById('inRegistrarName').value || '..................';
-        const lblTapsilRegistrarTransfer = document.getElementById('lblTapsilRegistrarTransfer');
-        if (lblTapsilRegistrarTransfer) lblTapsilRegistrarTransfer.innerText = regName;
     }
 
     // Signature Block updates

@@ -653,8 +653,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .doc-footer {
     padding-bottom: 15px;
-    display: flex;
-    justify-content: flex-end;
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: 100%;
 }
 
 .signature-block {

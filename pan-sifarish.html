@@ -227,7 +227,7 @@
                 <label>🏢 कार्यालय (सिफारिस पठाउने):</label>
                 <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:3px;">
                     <div class="radio-option"><input type="radio" id="ro1" name="receiverOfficeRadio" value="gauradaha" checked onchange="updateDoc()"><label for="ro1" class="radio-label" style="font-size:0.82rem;">करदाता कार्यालय गौरादह</label></div>
-                    <div class="radio-option"><input type="radio" id="ro2" name="receiverOfficeRadio" value="damak" onchange="updateDoc()"><label for="ro2" class="radio-label" style="font-size:0.82rem;">श्री आन्तरिक राजश्व कार्यालय दमक, झापा ।</label></div>
+                    <div class="radio-option"><input type="radio" id="ro2" name="receiverOfficeRadio" value="damak" onchange="updateDoc()"><label for="ro2" class="radio-label" style="font-size:0.82rem;">आन्तरिक राजश्व कार्यालय, दमक, झापा</label></div>
                 </div>
             </div>
 
@@ -313,21 +313,7 @@
                 </div>
             </div>
 
-            <!-- बन्द mode only: कागजात प्रकार -->
-            <div id="bandaDocTypeSection" style="display:none; margin-top:12px; border-top:1px dashed #cbd5e0; padding-top:12px;">
-                <div class="form-group">
-                    <label>📄 प्रिन्ट गर्ने कागजात:</label>
-                    <div class="radio-container">
-                        <div class="radio-option"><input type="radio" id="dt1" name="bandaDocTypeRadio" value="sifarish" onchange="toggleBandaDocType(); updateDoc()" checked><label for="dt1" class="radio-label">सिफारिस पत्र</label></div>
-                        <div class="radio-option"><input type="radio" id="dt2" name="bandaDocTypeRadio" value="nissa" onchange="toggleBandaDocType(); updateDoc()"><label for="dt2" class="radio-label">व्यवसाय बन्द गरेको निस्सा/प्रमाण पत्र</label></div>
-                    </div>
-                </div>
-                
-                <div class="form-group" id="bandaMitiSection" style="display:none;">
-                    <label>📅 व्यवसाय बन्द भएको मिति (वि.सं.):</label>
-                    <input type="text" id="inBandaMiti" placeholder="उदा: २०८३-०२-२८" oninput="updateDoc()">
-                </div>
-            </div>
+
         </div>
 
         <!-- हस्ताक्षर अधिकारी -->
@@ -462,10 +448,7 @@
                 को तहाँ कार्यालयको नियमानुसार बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>
 
-            <!-- ── Body (निस्सा) ── -->
-            <div class="letter-body-para" id="bodyNissa" style="display:none; text-indent: 50px;">
-                यस झापा जिल्ला <span id="lblNissaPalika">गौरादह नगरपालिका</span> वडा नं. <span id="lblNissaWada">१</span> मा दर्ता रहेको व्यवसाय बन्दको सिफारिस गरि पाऊँ भनि झापा <span id="lblNissaNivedakPalika">गौरादह नगरपालिका</span> वडा नं. <span id="lblNissaNivedakWada">१</span> बस्ने <span id="lblNissaNivedakName" style="font-weight: bold;">................</span>ले दिनुभएको निवेदन बमोजिम यस कार्यालयमा भएको अभिलेख लगतकट्टा गरि <span id="lblNissaBusinessPalika">गौरादह नगरपालिका</span> वडा नं. <span id="lblNissaBusinessWada">१</span> मा दर्ता रहेको <span id="lblNissaBusinessName" style="font-weight: bold;">....................</span> नामको व्यवसाय मिति: <span id="lblNissaBandaMiti" style="font-weight: bold;">................</span> गते देखि व्यवसाय बन्द भएको व्यहोरा जानकारी गराईन्छ ।
-            </div>
+
 
             <!-- ── Signature ── -->
             <div class="doc-footer" id="docFooterSection">
@@ -476,18 +459,7 @@
                 </div>
             </div>
 
-            <!-- ── Dual Signature for Nissa ── -->
-            <div id="dualSignatureSection" style="display:none; margin-top: 40px; width: 100%; justify-content: space-between; align-items: flex-end;">
-                <div style="text-align: center; width: 220px; font-family: 'Mukta', sans-serif;">
-                    <div style="font-size: 13pt;">-----------------------</div>
-                    <div style="font-weight: bold; font-size: 13pt;">तयार गर्ने</div>
-                </div>
-                <div style="text-align: center; width: 220px; font-family: 'Mukta', sans-serif;">
-                    <div id="lblDualSigName" style="font-weight: bold; font-size: 13pt;">नगेन्द्र भण्डारी</div>
-                    <div style="font-size: 13pt;">-----------------------</div>
-                    <div style="font-weight: bold; font-size: 13pt;" id="lblDualSigTitle">प्रमाणित गर्ने</div>
-                </div>
-            </div>
+
 
         </div><!-- /a4-page -->
     </div><!-- /preview-panel -->
@@ -497,7 +469,7 @@
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="font-settings.js"></script>
-    <script src="script-pan-sifarish.js?v=2.0"></script>
+    <script src="script-pan-sifarish.js?v=2.5"></script>
 </body>
 
 </html>

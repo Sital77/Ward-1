@@ -948,8 +948,9 @@
 
         function initializeFiscalYear(bsYear, bsMonth) {
             try {
-                // Default to 2083 (२०८३/०८४) as requested by user
-                let startYear = 2083;
+                // Nepal fiscal year: Shrawan 1 (month 4) to Ashar end (month 3)
+                let startYear = bsYear;
+                if (bsMonth < 4) startYear = bsYear - 1;
                 const endSfx = String(startYear + 1).slice(-2);
                 const fyStr = toNepaliDigit(`${startYear}/0${endSfx}`);
 
