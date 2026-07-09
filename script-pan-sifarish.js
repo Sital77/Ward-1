@@ -185,7 +185,7 @@ function updateDoc() {
     const lblReceiverAddress = document.getElementById('lblReceiverAddress');
     if (lblReceiverAddress) {
         if (receiverOffice === 'damak') {
-            lblReceiverAddress.innerHTML = 'श्री आन्तरिक राजश्व कार्यालय, दमक, झापा ।';
+            lblReceiverAddress.innerHTML = 'श्री आन्तरिक राजश्व कार्यालय<br>दमक, झापा ।';
         } else {
             lblReceiverAddress.innerHTML = 'श्री करदाता सेवा कार्यालय<br>गौरादह नगरपालिका<br>गौरादह, झापा ।';
         }
