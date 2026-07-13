@@ -336,16 +336,52 @@
 
         <input type="hidden" id="editRecordIndex" value="">
 
-        <!-- ══ AUTO-FILL FROM BIRTH CERTIFICATE HTML ══ -->
+        <!-- ══ AUTO-FILL FROM BIRTH CERTIFICATE HTML & COPY-PASTE ══ -->
         <div class="section-card" style="background: #ebf8ff; border: 1.5px dashed #3182ce;">
-            <div class="section-label" style="color: #2b6cb0;">⚡ जन्म दर्ता फाइलबाट स्वतः भर्नुहोस् (Auto-Fill)</div>
+            <div class="section-label" style="color: #2b6cb0;">⚡ स्मार्ट अटो-फिल र कपी/पेस्ट सुविधा (Unique Features)</div>
             <div style="font-size: 0.82rem; color: #4a5568; margin-bottom: 8px;">
-                अनलाइन जन्म दर्ता प्रणालीबाट डाउनलोड गरिएको <b>.html</b> वा <b>.htm</b> फाइल अपलोड गरी सम्पूर्ण विवरण स्वतः भर्नुहोस्:
+                अनलाइन जन्म दर्ताबाट फाइल अपलोड गरी वा टेक्स्ट/HTML पेस्ट गरी विवरण स्वतः भर्नुहोस्, वा फारमको डाटा कपी/पेस्ट गर्नुहोस्:
             </div>
+            
             <input type="file" id="certFileUploader" accept=".html,.htm" style="display: none;" onchange="handleBirthCertUpload(event)">
-            <button type="button" class="photo-upload-btn" style="background: #3182ce; color: #fff; border-color: #2b6cb0; width: 100%; font-weight: 600; padding: 8px; border-radius: 6px; cursor: pointer;" onclick="document.getElementById('certFileUploader').click()">
-                📂 जन्म दर्ता फाइल (HTML) छान्नुहोस्
-            </button>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+                <button type="button" class="photo-upload-btn" style="background: #3182ce; color: #fff; border-color: #2b6cb0; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;" onclick="document.getElementById('certFileUploader').click()">
+                    📂 फाइल अपलोड (.html)
+                </button>
+                <button type="button" class="photo-upload-btn" style="background: #2b6cb0; color: #fff; border-color: #2c5282; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;" onclick="toggleSmartPasteBox(true)">
+                    📋 स्मार्ट पेस्ट (Text/HTML)
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <button type="button" class="photo-upload-btn" style="background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;" onclick="copyFormDataToClipboard()">
+                    📑 फारम डाटा कपी (Copy)
+                </button>
+                <button type="button" class="photo-upload-btn" style="background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;" onclick="toggleFormPasteBox(true)">
+                    📥 फारम डाटा पेस्ट (Paste)
+                </button>
+            </div>
+
+            <!-- Inline Smart Paste Box (Hidden by default) -->
+            <div id="smartPasteContainer" style="display: none; margin-top: 10px; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #bee3f8;">
+                <div style="font-size: 0.78rem; font-weight: 600; color: #2b6cb0; margin-bottom: 4px;"> जन्म दर्ताको टेक्स्ट वा HTML कोड यहाँ पेस्ट (Ctrl+V) गर्नुहोस्:</div>
+                <textarea id="smartPasteInput" rows="4" placeholder="यहाँ जन्म दर्ता प्रमाणपत्रको विवरण वा HTML पेस्ट गर्नुहोस्..." style="width: 100%; font-size: 0.8rem; padding: 6px; border: 1px solid #cbd5e0; border-radius: 4px; box-sizing: border-box;"></textarea>
+                <div style="display: flex; gap: 6px; margin-top: 6px;">
+                    <button type="button" onclick="executeSmartPaste()" style="flex: 1; background: #38a169; color: #fff; border: none; padding: 6px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.8rem;">⚡ स्वतः भर्नुहोस् (Auto-Fill)</button>
+                    <button type="button" onclick="toggleSmartPasteBox(false)" style="background: #e2e8f0; color: #4a5568; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">❌ बन्द</button>
+                </div>
+            </div>
+
+            <!-- Inline Form Data Paste Box (Hidden by default) -->
+            <div id="formPasteContainer" style="display: none; margin-top: 10px; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #bee3f8;">
+                <div style="font-size: 0.78rem; font-weight: 600; color: #2b6cb0; margin-bottom: 4px;"> कपी गरिएको फारम विवरण (JSON) यहाँ पेस्ट गर्नुहोस्:</div>
+                <textarea id="formPasteInput" rows="3" placeholder="यहाँ पहिले कपी गरिएको JSON डाटा पेस्ट गर्नुहोस्..." style="width: 100%; font-size: 0.8rem; padding: 6px; border: 1px solid #cbd5e0; border-radius: 4px; box-sizing: border-box;"></textarea>
+                <div style="display: flex; gap: 6px; margin-top: 6px;">
+                    <button type="button" onclick="executeFormPaste()" style="flex: 1; background: #3182ce; color: #fff; border: none; padding: 6px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.8rem;">📥 फारममा भर्नुहोस् (Restore)</button>
+                    <button type="button" onclick="toggleFormPasteBox(false)" style="background: #e2e8f0; color: #4a5568; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">❌ बन्द</button>
+                </div>
+            </div>
         </div>
 
         <!-- ══ 1. LETTERHEAD & REGISTRATION DETAILS ══ -->

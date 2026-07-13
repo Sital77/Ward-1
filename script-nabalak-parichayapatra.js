@@ -922,6 +922,353 @@ function handleBirthCertUpload(event) {
 }
 window.handleBirthCertUpload = handleBirthCertUpload;
 
+// ── Smart Copy & Paste Features ───────────────────────────────
+
+function toggleSmartPasteBox(show) {
+    const box = document.getElementById('smartPasteContainer');
+    const formBox = document.getElementById('formPasteContainer');
+    if (box) {
+        box.style.display = show ? 'block' : 'none';
+        if (show && formBox) formBox.style.display = 'none';
+        if (show) {
+            const inp = document.getElementById('smartPasteInput');
+            if (inp) {
+                inp.value = '';
+                inp.focus();
+            }
+        }
+    }
+}
+window.toggleSmartPasteBox = toggleSmartPasteBox;
+
+function toggleFormPasteBox(show) {
+    const formBox = document.getElementById('formPasteContainer');
+    const smartBox = document.getElementById('smartPasteContainer');
+    if (formBox) {
+        formBox.style.display = show ? 'block' : 'none';
+        if (show && smartBox) smartBox.style.display = 'none';
+        if (show) {
+            const inp = document.getElementById('formPasteInput');
+            if (inp) {
+                inp.value = '';
+                inp.focus();
+            }
+        }
+    }
+}
+window.toggleFormPasteBox = toggleFormPasteBox;
+
+function executeSmartPaste() {
+    const inp = document.getElementById('smartPasteInput');
+    if (!inp || !inp.value.trim()) {
+        alert("कृपया पहिले जन्म दर्ताको विवरण (Text वा HTML) पेस्ट गर्नुहोस्!");
+        return;
+    }
+    const content = inp.value.trim();
+
+    if (content.includes('<table') || content.includes('<p') || content.includes('<strong') || content.includes('<div') || content.includes('<tr')) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, "text/html");
+
+        function getTextByStrongLabel(doc, labelPart) {
+            const strongs = doc.querySelectorAll('strong, b');
+            for (let s of strongs) {
+                let sText = s.innerText || s.textContent || '';
+                if (sText.includes(labelPart)) {
+                    let p = s.parentElement;
+                    let fullText = p.innerText || p.textContent || '';
+                    let idx = fullText.indexOf(sText);
+                    if (idx !== -1) {
+                        let remainder = fullText.substring(idx + sText.length).trim();
+                        remainder = remainder.replace(/^[:\s-]+/, '').trim();
+                        if (remainder) return remainder;
+                    }
+                }
+            }
+            return "";
+        }
+
+        const regNoRaw = getTextByStrongLabel(doc, "दर्ता नम्बर (Registration No.):") || getTextByStrongLabel(doc, "दर्ता नम्बर");
+        if (regNoRaw && document.getElementById('inBirthRegNo')) {
+            document.getElementById('inBirthRegNo').value = regNoRaw.split(/\s|\(/)[0] || regNoRaw;
+        }
+
+        const nameNpRaw = getTextByStrongLabel(doc, "पूरा नाम :");
+        if (nameNpRaw && document.getElementById('inNameFirstNP')) {
+            let names = nameNpRaw.split(/\s+/);
+            if (names.length === 1) {
+                document.getElementById('inNameFirstNP').value = names[0];
+                document.getElementById('inNameMidNP').value = '';
+                document.getElementById('inNameLastNP').value = '';
+            } else if (names.length === 2) {
+                document.getElementById('inNameFirstNP').value = names[0];
+                document.getElementById('inNameMidNP').value = '';
+                document.getElementById('inNameLastNP').value = names[1];
+            } else if (names.length >= 3) {
+                document.getElementById('inNameFirstNP').value = names[0];
+                document.getElementById('inNameLastNP').value = names[names.length - 1];
+                document.getElementById('inNameMidNP').value = names.slice(1, names.length - 1).join(' ');
+            }
+        }
+
+        const nameEnRaw = getTextByStrongLabel(doc, "Full Name :");
+        if (nameEnRaw && document.getElementById('inNameFirstEN')) {
+            let names = nameEnRaw.split(/\s+/);
+            if (names.length === 1) {
+                document.getElementById('inNameFirstEN').value = names[0];
+                document.getElementById('inNameMidEN').value = '';
+                document.getElementById('inNameLastEN').value = '';
+            } else if (names.length === 2) {
+                document.getElementById('inNameFirstEN').value = names[0];
+                document.getElementById('inNameMidEN').value = '';
+                document.getElementById('inNameLastEN').value = names[1];
+            } else if (names.length >= 3) {
+                document.getElementById('inNameFirstEN').value = names[0];
+                document.getElementById('inNameLastEN').value = names[names.length - 1];
+                document.getElementById('inNameMidEN').value = names.slice(1, names.length - 1).join(' ');
+            }
+        }
+
+        const genderRaw = getTextByStrongLabel(doc, "लिङ्ग/Sex:") || getTextByStrongLabel(doc, "लिङ्ग");
+        if (genderRaw && document.getElementById('inGender')) {
+            if (genderRaw.includes("पुरूष") || genderRaw.includes("पुरुष") || genderRaw.toUpperCase().includes("MALE")) {
+                document.getElementById('inGender').value = "पुरुष|Male";
+            } else if (genderRaw.includes("महिला") || genderRaw.toUpperCase().includes("FEMALE")) {
+                document.getElementById('inGender').value = "महिला|Female";
+            } else {
+                document.getElementById('inGender').value = "अन्य|Other";
+            }
+        }
+
+        const dobRaw = getTextByStrongLabel(doc, "जन्म मिति /Date of Birth:") || getTextByStrongLabel(doc, "जन्म मिति");
+        if (dobRaw && document.getElementById('inDOB_BS')) {
+            let bsMatch = dobRaw.match(/([०-९]{4}[/-][०-९]{1,2}[/-][०-९]{1,2})/);
+            if (bsMatch) {
+                document.getElementById('inDOB_BS').value = bsMatch[1].replace(/-/g, '/');
+                if (typeof autoConvertBsToAd === 'function') autoConvertBsToAd();
+            } else {
+                let bsMatchEn = dobRaw.match(/(\d{4}[/-]\d{1,2}[/-]\d{1,2})/);
+                if (bsMatchEn) {
+                    document.getElementById('inDOB_BS').value = bsMatchEn[1].replace(/-/g, '/');
+                    if (typeof autoConvertBsToAd === 'function') autoConvertBsToAd();
+                }
+            }
+        }
+
+        const birthPlaceRaw = getTextByStrongLabel(doc, "जन्म स्थान/Birth Place:") || getTextByStrongLabel(doc, "जन्म स्थान");
+        if (birthPlaceRaw) {
+            let npPart = birthPlaceRaw.split('(')[0].trim();
+            let wardMatch = npPart.match(/वडा\s*नं\.?\s*([०-९0-9]+)/);
+            if (wardMatch && document.getElementById('inBirthWard')) document.getElementById('inBirthWard').value = wardMatch[1];
+            let rmMatch = npPart.match(/([^,]+(?:नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/);
+            if (rmMatch && document.getElementById('inBirthRM')) {
+                document.getElementById('inBirthRM').value = rmMatch[1].replace(/-.*$/, '').trim();
+            }
+            let distMatch = npPart.match(/([^,\s]+)\s*जिल्ला/);
+            if (distMatch && document.getElementById('inBirthDistrict')) {
+                document.getElementById('inBirthDistrict').value = distMatch[1];
+            }
+        }
+
+        const permPlaceRaw = getTextByStrongLabel(doc, "स्थायी ठेगाना:");
+        if (permPlaceRaw) {
+            let wardMatch = permPlaceRaw.match(/वडा\s*नं\.?\s*([०-९0-9]+)/);
+            if (wardMatch && document.getElementById('inPermWard')) document.getElementById('inPermWard').value = wardMatch[1];
+            let rmMatch = permPlaceRaw.match(/([^,]+(?:नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/);
+            if (rmMatch && document.getElementById('inPermRM')) {
+                document.getElementById('inPermRM').value = rmMatch[1].replace(/-.*$/, '').trim();
+            }
+            let distMatch = permPlaceRaw.match(/([^,\s]+)\s*जिल्ला/);
+            if (distMatch && document.getElementById('inPermDistrict')) {
+                document.getElementById('inPermDistrict').value = distMatch[1];
+            }
+            let provMatch = permPlaceRaw.match(/([^,\s]+)\s*प्रदेश/);
+            if (provMatch && document.getElementById('inPermProvince')) {
+                document.getElementById('inPermProvince').value = provMatch[1];
+            }
+        }
+
+        const gfRaw = getTextByStrongLabel(doc, "बाजेको पूरा नाम:");
+        if (gfRaw && document.getElementById('inGrandfatherName')) document.getElementById('inGrandfatherName').value = gfRaw;
+
+        function getParentInfo(doc, headerText) {
+            let strongs = doc.querySelectorAll('strong, b');
+            for (let s of strongs) {
+                if (s.innerText && s.innerText.includes(headerText)) {
+                    let tr = s.closest('tr');
+                    if (!tr) continue;
+                    let curr = tr.nextElementSibling;
+                    let name = "";
+                    let cit = "";
+                    for (let i = 0; i < 6 && curr; i++) {
+                        let text = curr.innerText || curr.textContent || "";
+                        if (text.includes("पूरा नाम:")) {
+                            name = text.split("पूरा नाम:")[1].trim();
+                        } else if (text.includes("नागरिकता प्रमाणपत्र नं.") || text.includes("राष्ट्रिय परिचय नं.")) {
+                            let rawCit = text.split(/Passport No\.:|:/).pop().trim();
+                            cit = rawCit.split(/\s|\(/)[0];
+                        }
+                        curr = curr.nextElementSibling;
+                    }
+                    return { name, cit };
+                }
+            }
+            return { name: "", cit: "" };
+        }
+
+        const fatherInfo = getParentInfo(doc, "बाबुको विवरण");
+        if (fatherInfo.name && document.getElementById('inFatherNameNP')) document.getElementById('inFatherNameNP').value = fatherInfo.name;
+        if (fatherInfo.cit && document.getElementById('inFatherCitNo')) document.getElementById('inFatherCitNo').value = fatherInfo.cit;
+
+        const motherInfo = getParentInfo(doc, "आमाको विवरण");
+        if (motherInfo.name && document.getElementById('inMotherNameNP')) document.getElementById('inMotherNameNP').value = motherInfo.name;
+        if (motherInfo.cit && document.getElementById('inMotherCitNo')) document.getElementById('inMotherCitNo').value = motherInfo.cit;
+
+    } else {
+        const lines = content.split(/\r?\n/);
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            if ((line.includes("दर्ता नम्बर") || line.includes("Registration No")) && document.getElementById('inBirthRegNo')) {
+                let parts = line.split(/[:\s(]+/);
+                for (let p of parts) {
+                    if (/[०-९0-9]{10,}/.test(p)) {
+                        document.getElementById('inBirthRegNo').value = p.replace(/\)/g, '');
+                        break;
+                    }
+                }
+            } else if (line.includes("पूरा नाम") && !line.includes("बाजेको") && !line.includes("बाबुको") && !line.includes("आमाको") && document.getElementById('inNameFirstNP')) {
+                let val = line.split(/[:\-–]+/).pop().trim();
+                let names = val.split(/\s+/);
+                if (names.length === 1) {
+                    document.getElementById('inNameFirstNP').value = names[0];
+                } else if (names.length === 2) {
+                    document.getElementById('inNameFirstNP').value = names[0];
+                    document.getElementById('inNameLastNP').value = names[1];
+                } else if (names.length >= 3) {
+                    document.getElementById('inNameFirstNP').value = names[0];
+                    document.getElementById('inNameLastNP').value = names[names.length - 1];
+                    document.getElementById('inNameMidNP').value = names.slice(1, names.length - 1).join(' ');
+                }
+            } else if ((line.includes("जन्म मिति") || line.includes("Date of Birth")) && document.getElementById('inDOB_BS')) {
+                let bsMatch = line.match(/([०-९0-9]{4}[/-][०-९0-9]{1,2}[/-][०-९0-9]{1,2})/);
+                if (bsMatch) {
+                    document.getElementById('inDOB_BS').value = bsMatch[1].replace(/-/g, '/');
+                    if (typeof autoConvertBsToAd === 'function') autoConvertBsToAd();
+                }
+            } else if ((line.includes("लिङ्ग") || line.includes("Sex")) && document.getElementById('inGender')) {
+                if (line.includes("पुरूष") || line.includes("पुरुष") || line.toUpperCase().includes("MALE")) {
+                    document.getElementById('inGender').value = "पुरुष|Male";
+                } else if (line.includes("महिला") || line.toUpperCase().includes("FEMALE")) {
+                    document.getElementById('inGender').value = "महिला|Female";
+                }
+            } else if (line.includes("बाजेको पूरा नाम") && document.getElementById('inGrandfatherName')) {
+                document.getElementById('inGrandfatherName').value = line.split(/[:\-–]+/).pop().trim();
+            }
+        }
+    }
+
+    if (typeof updateDoc === 'function') updateDoc();
+    alert("पेस्ट गरिएको डाटाबाट विवरणहरू सफलतापूर्वक भरिएको छ!");
+    toggleSmartPasteBox(false);
+}
+window.executeSmartPaste = executeSmartPaste;
+
+function copyFormDataToClipboard() {
+    const dataObj = {
+        chalani: document.getElementById('inChalani').value.trim(),
+        miti: document.getElementById('inMiti').value.trim(),
+        birthRegNo: document.getElementById('inBirthRegNo').value.trim(),
+        dobBS: document.getElementById('inDOB_BS').value.trim(),
+        dobAD: document.getElementById('inDOB_AD').value.trim(),
+        nameFirstNP: document.getElementById('inNameFirstNP').value.trim(),
+        nameMidNP: document.getElementById('inNameMidNP').value.trim(),
+        nameLastNP: document.getElementById('inNameLastNP').value.trim(),
+        nameFirstEN: document.getElementById('inNameFirstEN').value.trim(),
+        nameMidEN: document.getElementById('inNameMidEN').value.trim(),
+        nameLastEN: document.getElementById('inNameLastEN').value.trim(),
+        gender: document.getElementById('inGender').value,
+        religion: document.getElementById('inReligion').value,
+        caste: document.getElementById('inCaste').value.trim(),
+        contactNo: document.getElementById('inContactNo').value.trim(),
+        birthDistrict: document.getElementById('inBirthDistrict').value.trim(),
+        birthRM: document.getElementById('inBirthRM').value.trim(),
+        birthWard: document.getElementById('inBirthWard').value.trim(),
+        permProvince: document.getElementById('inPermProvince').value.trim(),
+        permDistrict: document.getElementById('inPermDistrict').value.trim(),
+        permRM: document.getElementById('inPermRM').value.trim(),
+        permWard: document.getElementById('inPermWard').value.trim(),
+        permToleNP: document.getElementById('inPermToleNP').value.trim(),
+        fatherNameNP: document.getElementById('inFatherNameNP').value.trim(),
+        fatherCitNo: document.getElementById('inFatherCitNo').value.trim(),
+        motherNameNP: document.getElementById('inMotherNameNP').value.trim(),
+        motherCitNo: document.getElementById('inMotherCitNo').value.trim(),
+        grandfatherName: document.getElementById('inGrandfatherName') ? document.getElementById('inGrandfatherName').value.trim() : ''
+    };
+
+    const jsonText = JSON.stringify(dataObj, null, 2);
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonText).then(() => {
+            alert("✅ फारमको सम्पूर्ण डाटा (JSON) क्लिपबोर्डमा सफलतापूर्वक कपी भयो!\nतपाईँले यसलाई कतै सेभ गर्न वा पछि पेस्ट गरेर भर्न सक्नुहुन्छ।");
+        }).catch(err => {
+            console.error("Copy failed", err);
+            prompt("फारम विवरण कपी गर्न तलको टेक्स्ट कपी (Ctrl+C) गर्नुहोस्:", jsonText);
+        });
+    } else {
+        prompt("फारम विवरण कपी गर्न तलको टेक्स्ट कपी (Ctrl+C) गर्नुहोस्:", jsonText);
+    }
+}
+window.copyFormDataToClipboard = copyFormDataToClipboard;
+
+function executeFormPaste() {
+    const inp = document.getElementById('formPasteInput');
+    if (!inp || !inp.value.trim()) {
+        alert("कृपया कपी गरिएको JSON डाटा यहाँ पेस्ट गर्नुहोस्!");
+        return;
+    }
+    try {
+        const d = JSON.parse(inp.value.trim());
+        if (d.chalani !== undefined) document.getElementById('inChalani').value = d.chalani;
+        if (d.miti !== undefined) document.getElementById('inMiti').value = d.miti;
+        if (d.birthRegNo !== undefined) document.getElementById('inBirthRegNo').value = d.birthRegNo;
+        if (d.dobBS !== undefined) document.getElementById('inDOB_BS').value = d.dobBS;
+        if (d.dobAD !== undefined) document.getElementById('inDOB_AD').value = d.dobAD;
+        if (d.nameFirstNP !== undefined) document.getElementById('inNameFirstNP').value = d.nameFirstNP;
+        if (d.nameMidNP !== undefined) document.getElementById('inNameMidNP').value = d.nameMidNP;
+        if (d.nameLastNP !== undefined) document.getElementById('inNameLastNP').value = d.nameLastNP;
+        if (d.nameFirstEN !== undefined) document.getElementById('inNameFirstEN').value = d.nameFirstEN;
+        if (d.nameMidEN !== undefined) document.getElementById('inNameMidEN').value = d.nameMidEN;
+        if (d.nameLastEN !== undefined) document.getElementById('inNameLastEN').value = d.nameLastEN;
+        if (d.gender !== undefined) document.getElementById('inGender').value = d.gender;
+        if (d.religion !== undefined) document.getElementById('inReligion').value = d.religion;
+        if (d.caste !== undefined) document.getElementById('inCaste').value = d.caste;
+        if (d.contactNo !== undefined) document.getElementById('inContactNo').value = d.contactNo;
+        if (d.birthDistrict !== undefined) document.getElementById('inBirthDistrict').value = d.birthDistrict;
+        if (d.birthRM !== undefined) document.getElementById('inBirthRM').value = d.birthRM;
+        if (d.birthWard !== undefined) document.getElementById('inBirthWard').value = d.birthWard;
+        if (d.permProvince !== undefined) document.getElementById('inPermProvince').value = d.permProvince;
+        if (d.permDistrict !== undefined) document.getElementById('inPermDistrict').value = d.permDistrict;
+        if (d.permRM !== undefined) document.getElementById('inPermRM').value = d.permRM;
+        if (d.permWard !== undefined) document.getElementById('inPermWard').value = d.permWard;
+        if (d.permToleNP !== undefined) document.getElementById('inPermToleNP').value = d.permToleNP;
+        if (d.fatherNameNP !== undefined) document.getElementById('inFatherNameNP').value = d.fatherNameNP;
+        if (d.fatherCitNo !== undefined) document.getElementById('inFatherCitNo').value = d.fatherCitNo;
+        if (d.motherNameNP !== undefined) document.getElementById('inMotherNameNP').value = d.motherNameNP;
+        if (d.motherCitNo !== undefined) document.getElementById('inMotherCitNo').value = d.motherCitNo;
+        if (d.grandfatherName !== undefined && document.getElementById('inGrandfatherName')) document.getElementById('inGrandfatherName').value = d.grandfatherName;
+
+        if (typeof updateDoc === 'function') updateDoc();
+        alert("✅ कपी गरिएको डाटाबाट फारम सफलतापूर्वक भरिएको छ!");
+        toggleFormPasteBox(false);
+    } catch (e) {
+        console.error("Paste parse error:", e);
+        alert("डाटा פורम्याट मिलेन! कृपया सही JSON डाटा पेस्ट गर्नुहोस्।");
+    }
+}
+window.executeFormPaste = executeFormPaste;
+
 // ── Bootstrap ─────────────────────────────────────────
 window.onload = function () {
     initializeAutomaticDate();
