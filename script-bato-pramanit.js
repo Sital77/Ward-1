@@ -470,7 +470,7 @@ function getNepalSambatYear(adDate) {
 function formatFiscalYear(startYear) {
     const endYear = startYear + 1;
     const endYearSuffix = String(endYear).slice(-2);
-    const englishFY = `${startYear}/${endYearSuffix}`;
+    const englishFY = `${startYear}/0${endYearSuffix}`;
     return window.toNepaliDigit(englishFY);
 }
 

@@ -481,9 +481,9 @@
                     const prevSuffix = String(startYear).slice(-2);
                     const currSuffix = String(startYear + 1).slice(-2);
                     const nextSuffix = String(startYear + 2).slice(-2);
-                    const prevFY = toNepaliDigit(`${startYear - 1}/${prevSuffix}`);
-                    const currFY = toNepaliDigit(`${startYear}/${currSuffix}`);
-                    const nextFY = toNepaliDigit(`${startYear + 1}/${nextSuffix}`);
+                    const prevFY = toNepaliDigit(`${startYear - 1}/0${prevSuffix}`);
+                    const currFY = toNepaliDigit(`${startYear}/0${currSuffix}`);
+                    const nextFY = toNepaliDigit(`${startYear + 1}/0${nextSuffix}`);
                     fySelect.innerHTML = '';
                     fySelect.insertAdjacentHTML('beforeend', `<option value="${prevFY}">${prevFY}</option>`);
                     fySelect.insertAdjacentHTML('beforeend', `<option value="${currFY}" selected>${currFY}</option>`);

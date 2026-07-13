@@ -1,4 +1,4 @@
-// ══════════════════════════════════════════════════════
+garda // ══════════════════════════════════════════════════════
 //  script-suchana-tans.js
 //  सूचना टाँस सम्बन्धमा पत्र — Firebase Firestore Logic
 // ══════════════════════════════════════════════════════
@@ -13,7 +13,7 @@ const firebaseConfig = {
 };
 
 const app = firebase.initializeApp(firebaseConfig);
-const db  = firebase.firestore();
+const db = firebase.firestore();
 
 let globalDatabase = [];
 
@@ -29,7 +29,7 @@ db.collection("suchanaTansRecords").onSnapshot((snapshot) => {
 
 // ── Helper: English digits → Nepali digits ──────────
 function toNepaliDigit(num) {
-    const nd = ['०','१','२','३','४','५','६','७','८','९'];
+    const nd = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
     return num.toString().split('').map(d => nd[d] || d).join('');
 }
 
@@ -61,26 +61,26 @@ function getSelectedAY() {
 
 // ── Live preview updater ────────────────────────────
 function updateDoc() {
-    const ay          = getSelectedAY();
-    const bodyAY      = document.getElementById('inBodyAY').value;
-    const chalani     = document.getElementById('inChalani').value       || '';
-    const bodyChalani = document.getElementById('inBodyChalani').value   || '';
-    const miti        = document.getElementById('inMiti').value           || '........';
-    const ns          = document.getElementById('inNepalSamvat').value    || '........';
-    const wada        = document.getElementById('inWadaNo').value;
-    const praaptaMiti = document.getElementById('inPraaptaMiti').value   || '........';
+    const ay = getSelectedAY();
+    const bodyAY = document.getElementById('inBodyAY').value;
+    const chalani = document.getElementById('inChalani').value || '';
+    const bodyChalani = document.getElementById('inBodyChalani').value || '';
+    const miti = document.getElementById('inMiti').value || '........';
+    const ns = document.getElementById('inNepalSamvat').value || '........';
+    const wada = document.getElementById('inWadaNo').value;
+    const praaptaMiti = document.getElementById('inPraaptaMiti').value || '........';
 
     // Header
-    document.getElementById('lblAY').innerText          = ay;
-    document.getElementById('lblChalani').innerText     = chalani;
-    document.getElementById('lblMiti').innerText        = miti;
+    document.getElementById('lblAY').innerText = ay;
+    document.getElementById('lblChalani').innerText = chalani;
+    document.getElementById('lblMiti').innerText = miti;
     document.getElementById('lblNepalSamvat').innerText = ns;
 
     // Body
-    document.getElementById('lblBodyAY').innerText       = bodyAY;
-    document.getElementById('lblBodyChalani').innerText  = bodyChalani;
-    document.getElementById('lblBodyWada').innerText     = wada;
-    document.getElementById('lblPraaptaMiti').innerText  = praaptaMiti;
+    document.getElementById('lblBodyAY').innerText = bodyAY;
+    document.getElementById('lblBodyChalani').innerText = bodyChalani;
+    document.getElementById('lblBodyWada').innerText = wada;
+    document.getElementById('lblPraaptaMiti').innerText = praaptaMiti;
 
     // Signature
     const signSelect = document.getElementById('inSignAuthority').value;
@@ -113,18 +113,18 @@ async function printAndSaveSystem() {
         return;
     }
 
-    const ay          = getSelectedAY();
-    const bodyAY      = document.getElementById('inBodyAY').value;
-    const chalani     = document.getElementById('inChalani').value.trim()        || '-';
-    const bodyChalani = document.getElementById('inBodyChalani').value.trim()    || '-';
-    const miti        = document.getElementById('inMiti').value.trim()            || '-';
-    const ns          = document.getElementById('inNepalSamvat').value.trim()     || '-';
-    const wada        = document.getElementById('inWadaNo').value;
-    const praaptaMiti = document.getElementById('inPraaptaMiti').value.trim()    || '-';
-    const signAuth    = document.getElementById('inSignAuthority').value;
-    const customSignName  = document.getElementById('inCustomSignName').value;
+    const ay = getSelectedAY();
+    const bodyAY = document.getElementById('inBodyAY').value;
+    const chalani = document.getElementById('inChalani').value.trim() || '-';
+    const bodyChalani = document.getElementById('inBodyChalani').value.trim() || '-';
+    const miti = document.getElementById('inMiti').value.trim() || '-';
+    const ns = document.getElementById('inNepalSamvat').value.trim() || '-';
+    const wada = document.getElementById('inWadaNo').value;
+    const praaptaMiti = document.getElementById('inPraaptaMiti').value.trim() || '-';
+    const signAuth = document.getElementById('inSignAuthority').value;
+    const customSignName = document.getElementById('inCustomSignName').value;
     const customSignTitle = document.getElementById('inCustomSignTitle').value;
-    const sigMargin   = document.getElementById('inSigMargin').value;
+    const sigMargin = document.getElementById('inSigMargin').value;
 
     const recordId = document.getElementById('editRecordIndex').value;
 
@@ -180,7 +180,7 @@ function formatTimestamp(ts) {
 
 // ── Render abhilekh table ───────────────────────────
 function renderDatabaseTable() {
-    const tbody  = document.getElementById('dbTableBody');
+    const tbody = document.getElementById('dbTableBody');
     const search = document.getElementById('searchField').value.trim().toLowerCase();
     tbody.innerHTML = '';
     let counter = 0;
@@ -223,17 +223,17 @@ function editFromDB(id) {
     // पत्रमा उल्लेख आ.व. dropdown
     document.getElementById('inBodyAY').value = rec.bodyAY || rec.ay || '२०८०/०८१';
 
-    document.getElementById('inChalani').value        = rec.chalani === '-' ? '' : rec.chalani;
-    document.getElementById('inBodyChalani').value     = rec.bodyChalani === '-' ? '' : (rec.bodyChalani || rec.chalani || '');
-    document.getElementById('inMiti').value           = rec.miti;
-    document.getElementById('inNepalSamvat').value    = rec.ns;
-    document.getElementById('inWadaNo').value         = rec.wada;
-    document.getElementById('inPraaptaMiti').value    = rec.praaptaMiti;
-    document.getElementById('inSignAuthority').value  = rec.signAuth;
+    document.getElementById('inChalani').value = rec.chalani === '-' ? '' : rec.chalani;
+    document.getElementById('inBodyChalani').value = rec.bodyChalani === '-' ? '' : (rec.bodyChalani || rec.chalani || '');
+    document.getElementById('inMiti').value = rec.miti;
+    document.getElementById('inNepalSamvat').value = rec.ns;
+    document.getElementById('inWadaNo').value = rec.wada;
+    document.getElementById('inPraaptaMiti').value = rec.praaptaMiti;
+    document.getElementById('inSignAuthority').value = rec.signAuth;
 
     if (rec.signAuth === 'CUSTOM') {
         document.getElementById('customSignBox').style.display = 'grid';
-        document.getElementById('inCustomSignName').value  = rec.customSignName  || '';
+        document.getElementById('inCustomSignName').value = rec.customSignName || '';
         document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
     } else {
         document.getElementById('customSignBox').style.display = 'none';
@@ -264,14 +264,14 @@ async function deleteFromDB(id) {
 function getNepalSambatYear(adDate) {
     const year = adDate.getFullYear();
     const newYearDates = {
-        2020: new Date(2020,10,15), 2021: new Date(2021,10,5),
-        2022: new Date(2022, 9,26), 2023: new Date(2023,10,14),
-        2024: new Date(2024,10, 2), 2025: new Date(2025, 9,22),
-        2026: new Date(2026,10,10), 2027: new Date(2027, 9,30),
-        2028: new Date(2028, 9,19), 2029: new Date(2029,10, 7),
-        2030: new Date(2030, 9,27), 2031: new Date(2031,10,15),
-        2032: new Date(2032,10, 3), 2033: new Date(2033, 9,23),
-        2034: new Date(2034,10,12), 2035: new Date(2035,10, 1)
+        2020: new Date(2020, 10, 15), 2021: new Date(2021, 10, 5),
+        2022: new Date(2022, 9, 26), 2023: new Date(2023, 10, 14),
+        2024: new Date(2024, 10, 2), 2025: new Date(2025, 9, 22),
+        2026: new Date(2026, 10, 10), 2027: new Date(2027, 9, 30),
+        2028: new Date(2028, 9, 19), 2029: new Date(2029, 10, 7),
+        2030: new Date(2030, 9, 27), 2031: new Date(2031, 10, 15),
+        2032: new Date(2032, 10, 3), 2033: new Date(2033, 9, 23),
+        2034: new Date(2034, 10, 12), 2035: new Date(2035, 10, 1)
     };
     const ny = newYearDates[year];
     if (ny) return adDate >= ny ? year - 879 : year - 880;
@@ -293,7 +293,7 @@ function initializeFiscalYear(bsYear, bsMonth) {
         const suffix = String(startYear + 1).slice(-2);
         const currFY1 = toNepaliDigit(`${startYear}/${suffix}`);
         const currFY2 = toNepaliDigit(`${startYear}/0${suffix}`);
-        
+
         // Select letterhead FY radio
         const radios = document.querySelectorAll('input[name="ayRadio"]');
         let matched = false;
@@ -324,19 +324,19 @@ function initializeAutomaticDate() {
                 bsDay = bsDate.day || bsDay;
             }
         }
-        
+
         initializeFiscalYear(bsYear, bsMonth);
 
-        const bsDateStr = `${toNepaliDigit(bsYear)}/${toNepaliDigit(String(bsMonth).padStart(2,'0'))}/${toNepaliDigit(String(bsDay).padStart(2,'0'))}`;
-        
+        const bsDateStr = `${toNepaliDigit(bsYear)}/${toNepaliDigit(String(bsMonth).padStart(2, '0'))}/${toNepaliDigit(String(bsDay).padStart(2, '0'))}`;
+
         const inMiti = document.getElementById('inMiti');
         if (inMiti) inMiti.value = bsDateStr;
-        
+
         const nsYear = getNepalSambatYear(today);
         const nepaliNSYearStr = toNepaliDigit(nsYear);
         const inNepalSamvat = document.getElementById('inNepalSamvat');
         if (inNepalSamvat) inNepalSamvat.value = nepaliNSYearStr;
-        
+
         fetchCurrentNepalSambat();
     } catch (e) { console.error("Date init error:", e); }
 }
@@ -364,6 +364,6 @@ window.onload = function () {
     updateDoc();
 };
 
-window.addEventListener('templateInjected', function() {
+window.addEventListener('templateInjected', function () {
     initializeAutomaticDate();
 });

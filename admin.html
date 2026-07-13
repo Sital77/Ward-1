@@ -82,6 +82,9 @@
             <div class="sidebar-nav-item" data-section="categories" onclick="switchSection('categories')">
                 <span class="nav-icon">📂</span> श्रेणी व्यवस्थापन
             </div>
+            <div class="sidebar-nav-item" data-section="signatures" onclick="switchSection('signatures')">
+                <span class="nav-icon">🖋️</span> हस्ताक्षर अधिकारी
+            </div>
             <div class="sidebar-nav-item" data-section="activity" onclick="switchSection('activity')">
                 <span class="nav-icon">📝</span> गतिविधि लग
             </div>
@@ -308,6 +311,40 @@
                 </div>
             </div>
 
+            <!-- ===== SECTION: SIGNATURES ===== -->
+            <div class="dashboard-section" id="section-signatures">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">🖋️ हस्ताक्षर अधिकारी व्यवस्थापन (Signing Authorities)</div>
+                        <div class="section-subtitle">सम्पूर्ण सिफारिस पत्रहरूमा देखिने वडा अध्यक्ष, कार्यवाहक वडा अध्यक्ष, र वडा सचिवहरूको नाम तथा पद व्यवस्थापन</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddSignatureModal()">➕ नयाँ हस्ताक्षर अधिकारी</button>
+                </div>
+
+                <div style="display:flex; gap:12px; margin-bottom:18px;">
+                    <button type="button" class="btn btn-secondary sig-ward-btn active" id="btnSigWard1" onclick="filterSigByWard('1')" style="font-weight:700; border-color:#3182ce; background:#ebf8ff; color:#2b6cb0;">🏢 वडा नं. १ का अधिकारीहरू</button>
+                    <button type="button" class="btn btn-secondary sig-ward-btn" id="btnSigWard3" onclick="filterSigByWard('3')" style="font-weight:700;">🏢 वडा नं. ३ का अधिकारीहरू</button>
+                </div>
+
+                <div class="table-card" style="padding:20px;">
+                    <table class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>क्र.सं.</th>
+                                <th>नाम (Name)</th>
+                                <th>पद (Designation)</th>
+                                <th>वडा (Ward)</th>
+                                <th>लागू हुने सिफारिस (Applicable Category)</th>
+                                <th style="text-align:center;">कार्य (Actions)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="signatureTableBody">
+                            <tr><td colspan="6" class="empty-state">🌀 लोड हुँदैछ...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- ===== SECTION: ACTIVITY LOG ===== -->
             <div class="dashboard-section" id="section-activity">
                 <div class="section-header">
@@ -377,6 +414,18 @@
                     <input type="hidden" id="formMode" value="create">
 
                     <div class="form-grid">
+                        <!-- Quick Starter Presets -->
+                        <div class="form-group form-full" style="background:rgba(49,130,206,0.06); border:1px solid rgba(49,130,206,0.25); border-radius:12px; padding:14px; margin-bottom:6px;">
+                            <div style="font-weight:700; color:#2b6cb0; font-size:0.92rem; margin-bottom:8px;">⚡ एक-क्लिक तयार नमुना ढाँचाहरू (Quick Starter Presets):</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                                <button type="button" class="btn btn-secondary" style="font-size:0.82rem; padding:6px 12px; background:#fff; border:1px solid #cbd5e0; border-radius:6px; cursor:pointer;" onclick="applyQuickStarter('gharbato')">🏠 घर बाटो प्रमाणित</button>
+                                <button type="button" class="btn btn-secondary" style="font-size:0.82rem; padding:6px 12px; background:#fff; border:1px solid #cbd5e0; border-radius:6px; cursor:pointer;" onclick="applyQuickStarter('charkilla')">🗺️ चार किल्ला प्रमाणित</button>
+                                <button type="button" class="btn btn-secondary" style="font-size:0.82rem; padding:6px 12px; background:#fff; border:1px solid #cbd5e0; border-radius:6px; cursor:pointer;" onclick="applyQuickStarter('nata')">👨‍👩‍👧‍👦 नाता प्रमाणित</button>
+                                <button type="button" class="btn btn-secondary" style="font-size:0.82rem; padding:6px 12px; background:#fff; border:1px solid #cbd5e0; border-radius:6px; cursor:pointer;" onclick="applyQuickStarter('business')">🏪 व्यापार व्यवसाय सिफारिस</button>
+                                <button type="button" class="btn btn-secondary" style="font-size:0.82rem; padding:6px 12px; background:#fff; border:1px solid #cbd5e0; border-radius:6px; cursor:pointer;" onclick="applyQuickStarter('blank')">📄 सामान्य सिफारिस पत्र (खाली)</button>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label">📝 शीर्षक <span class="required">*</span></label>
                             <input type="text" class="form-input" id="formTitle" placeholder="सिफारिसको शीर्षक" required>
@@ -447,18 +496,30 @@
                             </div>
                         </div>
                         <div class="form-group form-full">
-                            <label class="form-label">📄 टेम्प्लेट सामग्री (HTML) <span class="required">*</span></label>
-                            <textarea class="form-textarea tall" id="formContent" placeholder="HTML र variables थप्नुहोस्..." required></textarea>
-                            <div class="form-hint">
-                                <strong>सुझाव:</strong> सिफारिसको पत्र बडीको HTML भाग पेस्ट गर्नुहोस्।
-                                <div class="placeholder-tag-group">
-                                    <span class="placeholder-tag" onclick="insertAtCursor('{{निवेदकको नाम}}')">{{निवेदकको नाम}}</span>
-                                    <span class="placeholder-tag" onclick="insertAtCursor('{{नागरिकता नं}}')">{{नागरिकता नं}}</span>
-                                    <span class="placeholder-tag" onclick="insertAtCursor('{{वडा नं}}')">{{वडा नं}}</span>
-                                    <span class="placeholder-tag" onclick="insertAtCursor('{{मिति}}')">{{मिति}}</span>
-                                    <span class="placeholder-tag" onclick="insertAtCursor('<span id=\'lblOwnerName\'>.......</span>')">lblOwnerName</span>
-                                    <span class="placeholder-tag" onclick="insertAtCursor('<span id=\'lblWadaBody\'>.......</span>')">lblWadaBody</span>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                                <label class="form-label" style="margin:0; font-weight:700; color:#2d3748;" id="contentLabelDisplay">📄 सिफारिस पत्रको व्यहोरा (Letter Body Text) <span class="required">*</span></label>
+                                <div style="background:#edf2f7; padding:4px; border-radius:8px; display:inline-flex; border:1px solid #cbd5e0;">
+                                    <button type="button" class="btn-mode-tab" id="btnModeEasy" onclick="setTemplateEditorMode('easy')" style="padding:6px 14px; border-radius:6px; font-size:0.85rem; font-weight:700; border:none; cursor:pointer; background:#3182ce; color:#fff;">🌸 सहज मोड (Easy Text)</button>
+                                    <button type="button" class="btn-mode-tab" id="btnModeHtml" onclick="setTemplateEditorMode('html')" style="padding:6px 14px; border-radius:6px; font-size:0.85rem; font-weight:700; border:none; cursor:pointer; background:transparent; color:#4a5568;">⚙️ HTML मोड (Code)</button>
                                 </div>
+                            </div>
+
+                            <div id="easyInsertChips" style="background:#fffaf0; border:1px solid #fbd38d; border-radius:8px; padding:12px; margin-bottom:10px; font-size:0.88rem;">
+                                <strong style="color:#c05621;">✨ खाली ठाउँ तथा विवरणहरू एक क्लिकमा थप्नुहोस् (Click to insert at cursor):</strong>
+                                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+                                    <span class="placeholder-tag" style="background:#feebc8; border:1px solid #fbd38d; color:#7b341e; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="insertAtCursor('{{निवेदकको नाम}}')">➕ निवेदकको नाम</span>
+                                    <span class="placeholder-tag" style="background:#feebc8; border:1px solid #fbd38d; color:#7b341e; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="insertAtCursor('{{नागरिकता नं}}')">➕ नागरिकता नं</span>
+                                    <span class="placeholder-tag" style="background:#feebc8; border:1px solid #fbd38d; color:#7b341e; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="insertAtCursor('{{वडा नं}}')">➕ वडा नं</span>
+                                    <span class="placeholder-tag" style="background:#feebc8; border:1px solid #fbd38d; color:#7b341e; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="insertAtCursor('{{मिति}}')">➕ मिति</span>
+                                    <span class="placeholder-tag" style="background:#feebc8; border:1px solid #fbd38d; color:#7b341e; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="insertAtCursor('{{ठेगाना}}')">➕ ठेगाना</span>
+                                    <span class="placeholder-tag" style="background:#feebc8; border:1px solid #fbd38d; color:#7b341e; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="insertAtCursor('[.......]')">➕ खाली ठाउँ [.......]</span>
+                                </div>
+                            </div>
+
+                            <textarea class="form-textarea tall" id="formContent" placeholder="सिफारिस पत्रको व्यहोरा (जस्तै: उपरोक्त सम्बन्धमा निवेदक... ले यस कार्यालयमा...)" style="min-height:220px; font-size:1rem; line-height:1.7; padding:14px;" required></textarea>
+                            
+                            <div class="form-hint" id="htmlHintBox" style="display:none; margin-top:6px;">
+                                <strong>💡 HTML सुझाव:</strong> तपाईंले HTML ट्यागहरू (जस्तै `&lt;div class="letter-body-para"&gt;`, `&lt;table&gt;`) प्रयोग गरेर आफू अनुकूल ढाँचा राख्न सक्नुहुन्छ।
                             </div>
                         </div>
                     </div>
@@ -519,6 +580,58 @@
             <div class="modal-foot">
                 <button class="btn btn-secondary" onclick="closeCategoryModal()">रद्द</button>
                 <button class="btn btn-primary" onclick="saveCategory()">सुरक्षित</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SIGNATURE ADD/EDIT MODAL ===== -->
+    <div class="modal-overlay" id="signatureModal">
+        <div class="modal-content modal-md">
+            <div class="modal-head">
+                <h3 class="modal-head-title" id="sigModalTitleDisplay">➕ नयाँ हस्ताक्षर अधिकारी थप्नुहोस्</h3>
+                <button class="modal-head-close" onclick="closeModalEl('signatureModal')">×</button>
+            </div>
+            <div class="modal-body" style="padding:24px;">
+                <form id="signatureForm" onsubmit="saveSignatureForm(event)">
+                    <input type="hidden" id="formSigId">
+                    <div class="form-group">
+                        <label class="form-label">👤 अधिकारीको नाम <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="formSigName" placeholder="उदा: नगेन्द्र भण्डारी" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🏷️ पद (Designation) <span class="required">*</span></label>
+                        <select class="form-select" id="formSigTitle" onchange="document.getElementById('customSigTitleGroup').style.display = this.value === 'अन्य' ? 'block' : 'none'" required>
+                            <option value="वडा अध्यक्ष">वडा अध्यक्ष</option>
+                            <option value="कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष</option>
+                            <option value="वडा सचिव">वडा सचिव</option>
+                            <option value="स्थानीय पञ्जिकाधिकारी">स्थानीय पञ्जिकाधिकारी</option>
+                            <option value="अन्य">अन्य (Custom Post)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customSigTitleGroup" style="display:none;">
+                        <label class="form-label">अन्य पद लेख्नुहोस्:</label>
+                        <input type="text" class="form-input" id="formCustomSigTitle" placeholder="पदको नाम लेख्नुहोस्">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🏢 सम्बन्धित वडा <span class="required">*</span></label>
+                        <select class="form-select" id="formSigWard" required>
+                            <option value="1">वडा नं. १</option>
+                            <option value="3">वडा नं. ३</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📋 कुन सिफारिसमा लागू हुने? (Template Category)</label>
+                        <select class="form-select" id="formSigCategory">
+                            <option value="default">साधारण तथा सबै सिफारिस (General / All)</option>
+                            <option value="bank-sifarish">बैंक सिफारिस (Bank Recommendation)</option>
+                            <option value="abhilekh-pramanit">अभिलेख प्रमाणित (Local Registrar only)</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:20px; text-align:right;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModalEl('signatureModal')">रद्द गर्नुहोस्</button>
+                        <button type="submit" class="btn btn-success">✅ सुरक्षित गर्नुहोस्</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -859,7 +972,222 @@
         document.getElementById('draftRecoveryBanner').style.display = 'none';
         showToast('हटाइयो', 'ड्राफ्ट हटाइयो', 'info');
     }
+    let currentEditorMode = 'easy';
+    function setTemplateEditorMode(mode) {
+        currentEditorMode = mode;
+        const btnEasy = document.getElementById('btnModeEasy');
+        const btnHtml = document.getElementById('btnModeHtml');
+        const chips = document.getElementById('easyInsertChips');
+        const hintBox = document.getElementById('htmlHintBox');
+        if (mode === 'easy') {
+            if (btnEasy) { btnEasy.style.background = '#3182ce'; btnEasy.style.color = '#fff'; }
+            if (btnHtml) { btnHtml.style.background = 'transparent'; btnHtml.style.color = '#4a5568'; }
+            if (chips) chips.style.display = 'block';
+            if (hintBox) hintBox.style.display = 'none';
+        } else {
+            if (btnEasy) { btnEasy.style.background = 'transparent'; btnEasy.style.color = '#4a5568'; }
+            if (btnHtml) { btnHtml.style.background = '#3182ce'; btnHtml.style.color = '#fff'; }
+            if (chips) chips.style.display = 'none';
+            if (hintBox) hintBox.style.display = 'block';
+        }
+    }
+
+    function applyQuickStarter(type) {
+        const titleEl = document.getElementById('formTitle');
+        const catEl = document.getElementById('formCategory');
+        const iconEl = document.getElementById('formIcon');
+        const contentEl = document.getElementById('formContent');
+        
+        setTemplateEditorMode('easy');
+        if (type === 'gharbato') {
+            if (titleEl) titleEl.value = 'घर बाटो प्रमाणित';
+            if (catEl) catEl.value = 'जग्गा सम्बन्धि';
+            if (iconEl) iconEl.value = '🏠';
+            if (contentEl) contentEl.value = `विषय:- घर बाटो सिफारिस सम्बन्धमा ।\n\nश्री जो जससँग सम्बन्ध राख्दछ,\n\nउपरोक्त सम्बन्धमा जिल्ला झापा, गौरादह नगरपालिका वडा नं. १ निवासी निवेदक {{निवेदकको नाम}} ले यस कार्यालयमा दिनुभएको निवेदन अनुसार निजको नाममा दर्ता कायम रहेको साविक गौरादह... हाल गौरादह नगरपालिका वडा नं. १ स्थित कित्ता नं. [.......] को क्षेत्रफल [.......] जग्गामा बनेको घर सम्म पुग्ने बाटो [.......] फिट चौडा भएको व्यहोरा प्रमाणित गरिन्छ ।`;
+        } else if (type === 'charkilla') {
+            if (titleEl) titleEl.value = 'चार किल्ला प्रमाणित';
+            if (catEl) catEl.value = 'जग्गा सम्बन्धि';
+            if (iconEl) iconEl.value = '🗺️';
+            if (contentEl) contentEl.value = `विषय:- चार किल्ला प्रमाणित सम्बन्धमा ।\n\nश्री जो जससँग सम्बन्ध राख्दछ,\n\nउपरोक्त सम्बन्धमा जिल्ला झापा, गौरादह नगरपालिका वडा नं. १ निवासी निवेदक {{निवेदकको नाम}} ले यस कार्यालयमा दिनुभएको निवेदन अनुसार निजको नाममा दर्ता रहेको कित्ता नं. [.......] जग्गाको चार किल्ला तपसिल बमोजिम रहेको व्यहोरा सिफारिस गरिन्छ ।\n\nतपसिल:\nपूर्व: [.......]\nपश्चिम: [.......]\nउत्तर: [.......]\nदक्षिण: [.......]`;
+        } else if (type === 'nata') {
+            if (titleEl) titleEl.value = 'नाता प्रमाणित सिफारिस';
+            if (catEl) catEl.value = 'व्यक्तिगत प्रमाणित';
+            if (iconEl) iconEl.value = '👨‍👩‍👧‍👦';
+            if (contentEl) contentEl.value = `विषय:- नाता प्रमाणित सिफारिस सम्बन्धमा ।\n\nश्री जो जससँग सम्बन्ध राख्दछ,\n\nउपरोक्त सम्बन्धमा जिल्ला झापा, गौरादह नगरपालिका वडा नं. १ निवासी निवेदक {{निवेदकको नाम}} र तपसिलमा उल्लेखित व्यक्तिहरू बीच तपसिल बमोजिमको नाता सम्बन्ध रहेको व्यहोरा प्रमाणित गरिन्छ ।\n\nतपसिल:\n१. नाम: [.......] नाता: [.......]\n२. नाम: [.......] नाता: [.......]`;
+        } else if (type === 'business') {
+            if (titleEl) titleEl.value = 'व्यापार व्यवसाय सिफारिस';
+            if (catEl) catEl.value = 'कार्यालय/प्रशासन';
+            if (iconEl) iconEl.value = '🏪';
+            if (contentEl) contentEl.value = `विषय:- व्यापार व्यवसाय सञ्चालन सिफारिस सम्बन्धमा ।\n\nश्री जो जससँग सम्बन्ध राख्दछ,\n\nउपरोक्त सम्बन्धमा जिल्ला झापा, गौरादह नगरपालिका वडा नं. १ निवासी निवेदक {{निवेदकको नाम}} ले यस वडा कार्यालय क्षेत्रभित्र [.......] नामक व्यवसाय सञ्चालन गर्नका लागि सिफारिस माग गर्नुभएकोले नियमानुसार व्यवसाय सञ्चालन सिफारिस गरिएको व्यहोरा अनुरोध छ ।`;
+        } else if (type === 'blank') {
+            if (titleEl) titleEl.value = 'सामान्य सिफारिस';
+            if (catEl) catEl.value = 'अन्य';
+            if (iconEl) iconEl.value = '📄';
+            if (contentEl) contentEl.value = `विषय:- सिफारिस सम्बन्धमा ।\n\nश्री जो जससँग सम्बन्ध राख्दछ,\n\nउपरोक्त सम्बन्धमा जिल्ला झापा, गौरादह नगरपालिका वडा नं. १ निवासी निवेदक {{निवेदकको नाम}} ले यस कार्यालयमा दिनुभएको निवेदन अनुसार आवश्यक विवरण प्रमाणित गरी सिफारिस गरिएको व्यहोरा अनुरोध छ ।\n\n[.......]`;
+        }
+        showToast('नमुना लोड भयो', 'तयार नमुना व्यहोरा लोड गरियो, अब आवश्यक संशोधन गर्नुहोस्', 'info');
+    }
+
+    // ===== SIGNING AUTHORITIES MANAGEMENT =====
+    let signaturesList = [];
+    let currentSigWardFilter = '1';
+
+    function initSignaturesList() {
+        try {
+            signaturesList = JSON.parse(localStorage.getItem('custom_signing_authorities') || '[]');
+        } catch(e) { signaturesList = []; }
+
+        if (signaturesList.length === 0) {
+            signaturesList = [
+                { id: 'sig_1', name: 'नगेन्द्र भण्डारी', title: 'वडा अध्यक्ष', ward: '1', category: 'default' },
+                { id: 'sig_2', name: 'अन्जु निरौला', title: 'कार्यवाहक वडा अध्यक्ष', ward: '1', category: 'default' },
+                { id: 'sig_3', name: 'लक्ष्मीदेवी विश्वकर्मा', title: 'कार्यवाहक वडा अध्यक्ष', ward: '1', category: 'default' },
+                { id: 'sig_4', name: 'केशर बहादुर खवास भुजेल', title: 'कार्यवाहक वडा अध्यक्ष', ward: '1', category: 'default' },
+                { id: 'sig_5', name: 'जमुन राई', title: 'कार्यवाहक वडा अध्यक्ष', ward: '1', category: 'default' },
+                { id: 'sig_6', name: 'अनिता अधिकारी', title: 'वडा सचिव', ward: '1', category: 'bank-sifarish' },
+                { id: 'sig_7', name: 'अनिता अधिकारी', title: 'स्थानीय पञ्जिकाधिकारी', ward: '1', category: 'abhilekh-pramanit' },
+                { id: 'sig_8', name: 'दिलिप कुमार भण्डारी', title: 'वडा अध्यक्ष', ward: '3', category: 'default' },
+                { id: 'sig_9', name: 'होमनाथ थापा', title: 'कार्यवाहक वडा अध्यक्ष', ward: '3', category: 'default' },
+                { id: 'sig_10', name: 'कल्पना अधिकारी', title: 'कार्यवाहक वडा अध्यक्ष', ward: '3', category: 'default' },
+                { id: 'sig_11', name: 'मेनुका बस्नेत', title: 'वडा सचिव', ward: '3', category: 'bank-sifarish' },
+                { id: 'sig_12', name: 'मेनुका बस्नेत', title: 'स्थानीय पञ्जिकाधिकारी', ward: '3', category: 'abhilekh-pramanit' }
+            ];
+            localStorage.setItem('custom_signing_authorities', JSON.stringify(signaturesList));
+            signaturesList.forEach(item => {
+                db.collection('signing_authorities').doc(item.id).set(item, { merge: true }).catch(e => {});
+            });
+        }
+        renderSignaturesTable();
+    }
+
+    function filterSigByWard(ward) {
+        currentSigWardFilter = ward;
+        const b1 = document.getElementById('btnSigWard1');
+        const b3 = document.getElementById('btnSigWard3');
+        if (b1) { b1.style.background = ward === '1' ? '#ebf8ff' : '#fff'; b1.style.borderColor = ward === '1' ? '#3182ce' : '#cbd5e0'; b1.style.color = ward === '1' ? '#2b6cb0' : '#4a5568'; }
+        if (b3) { b3.style.background = ward === '3' ? '#ebf8ff' : '#fff'; b3.style.borderColor = ward === '3' ? '#3182ce' : '#cbd5e0'; b3.style.color = ward === '3' ? '#2b6cb0' : '#4a5568'; }
+        renderSignaturesTable();
+    }
+
+    function renderSignaturesTable() {
+        const tbody = document.getElementById('signatureTableBody');
+        if (!tbody) return;
+        const filtered = signaturesList.filter(s => s.ward === currentSigWardFilter);
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">वडा नं. ${currentSigWardFilter} का लागि कुनै हस्ताक्षर अधिकारी भेटिएन।</td></tr>`;
+            return;
+        }
+        let html = '';
+        filtered.forEach((item, idx) => {
+            let catBadge = 'साधारण तथा सबै';
+            if (item.category === 'bank-sifarish') catBadge = 'बैंक सिफारिस मात्र';
+            else if (item.category === 'abhilekh-pramanit') catBadge = 'अभिलेख प्रमाणित मात्र';
+            html += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td style="font-weight:700; color:#2d3748;">${item.name}</td>
+                    <td><span class="status-badge status-active">${item.title}</span></td>
+                    <td>वडा नं. ${item.ward}</td>
+                    <td>${catBadge}</td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-secondary btn-sm" onclick="openEditSignatureModal('${item.id}')">✏️ सम्पादन</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSignature('${item.id}')">🗑️ हटाउनुहोस्</button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function openAddSignatureModal() {
+        document.getElementById('sigModalTitleDisplay').textContent = '➕ नयाँ हस्ताक्षर अधिकारी थप्नुहोस्';
+        document.getElementById('signatureForm').reset();
+        document.getElementById('formSigId').value = '';
+        document.getElementById('formSigWard').value = currentSigWardFilter;
+        document.getElementById('customSigTitleGroup').style.display = 'none';
+        openModalEl('signatureModal');
+    }
+
+    function openEditSignatureModal(id) {
+        const item = signaturesList.find(s => s.id === id);
+        if (!item) return;
+        document.getElementById('sigModalTitleDisplay').textContent = '✏️ हस्ताक्षर अधिकारी सम्पादन';
+        document.getElementById('formSigId').value = item.id;
+        document.getElementById('formSigName').value = item.name;
+        document.getElementById('formSigWard').value = item.ward;
+        document.getElementById('formSigCategory').value = item.category || 'default';
+        
+        const selectTitle = document.getElementById('formSigTitle');
+        const standardOptions = ['वडा अध्यक्ष', 'कार्यवाहक वडा अध्यक्ष', 'वडा सचिव', 'स्थानीय पञ्जिकाधिकारी'];
+        if (standardOptions.includes(item.title)) {
+            selectTitle.value = item.title;
+            document.getElementById('customSigTitleGroup').style.display = 'none';
+        } else {
+            selectTitle.value = 'अन्य';
+            document.getElementById('customSigTitleGroup').style.display = 'block';
+            document.getElementById('formCustomSigTitle').value = item.title;
+        }
+        openModalEl('signatureModal');
+    }
+
+    function saveSignatureForm(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const idVal = document.getElementById('formSigId').value;
+        const nameVal = document.getElementById('formSigName').value.trim();
+        let titleVal = document.getElementById('formSigTitle').value;
+        if (titleVal === 'अन्य') {
+            titleVal = document.getElementById('formCustomSigTitle').value.trim();
+            if (!titleVal) { showToast('त्रुटि', 'कृपया अन्य पदको नाम लेख्नुहोस्', 'error'); return; }
+        }
+        const wardVal = document.getElementById('formSigWard').value;
+        const catVal = document.getElementById('formSigCategory').value;
+
+        const docId = idVal || 'sig_' + Date.now();
+        const docData = {
+            id: docId,
+            name: nameVal,
+            title: titleVal,
+            ward: wardVal,
+            category: catVal,
+            updated_at: Date.now()
+        };
+
+        const idx = signaturesList.findIndex(s => s.id === docId);
+        if (idx !== -1) signaturesList[idx] = docData;
+        else signaturesList.push(docData);
+
+        localStorage.setItem('custom_signing_authorities', JSON.stringify(signaturesList));
+        db.collection('signing_authorities').doc(docId).set(docData, { merge: true }).catch(err => {});
+        window.dispatchEvent(new CustomEvent('signing_authorities_updated'));
+
+        closeModalEl('signatureModal');
+        renderSignaturesTable();
+        showToast('सफल 🎉', 'हस्ताक्षर अधिकारी सफलतापूर्वक सुरक्षित भयो (सबैतिर लागू भयो)', 'success');
+    }
+
+    function deleteSignature(id) {
+        if (!confirm('के तपाईं यो हस्ताक्षर अधिकारी हटाउन चाहनुहुन्छ?')) return;
+        signaturesList = signaturesList.filter(s => s.id !== id);
+        localStorage.setItem('custom_signing_authorities', JSON.stringify(signaturesList));
+        db.collection('signing_authorities').doc(id).delete().catch(err => {});
+        window.dispatchEvent(new CustomEvent('signing_authorities_updated'));
+        renderSignaturesTable();
+        showToast('हटाइयो', 'हस्ताक्षर अधिकारी हटाइयो', 'info');
+    }
+
     function getFormData() {
+        let contentVal = document.getElementById('formContent').value;
+        if (typeof currentEditorMode !== 'undefined' && currentEditorMode === 'easy') {
+            if (contentVal && !contentVal.trim().startsWith('<')) {
+                let paras = contentVal.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+                if (paras.length === 0) paras = [contentVal];
+                contentVal = paras.map(p => {
+                    let formatted = p.replace(/\n/g, '<br>');
+                    formatted = formatted.replace(/\[\.\.\.\.\.\.\.\]/g, '<span style="font-weight:bold;">.......</span>');
+                    return `<div class="letter-body-para">${formatted}</div>`;
+                }).join('\n');
+            }
+        }
         return {
             title: document.getElementById('formTitle').value.trim(),
             category: document.getElementById('formCategory').value,
@@ -867,7 +1195,7 @@
             priority: document.getElementById('formPriority').value,
             status: document.getElementById('formStatus').value,
             icon: document.getElementById('formIcon').value,
-            content: document.getElementById('formContent').value,
+            content: contentVal,
             tags: currentTags,
             description: quillEditor ? quillEditor.root.innerHTML : '',
             image_url: currentImageUrl
@@ -1724,6 +2052,22 @@
         renderActivityLog();
         renderDashboardActivity();
     }, err => console.error('Activity log listener failed:', err));
+
+    // Signing authorities - real-time
+    db.collection('signing_authorities').onSnapshot(snap => {
+        const remote = [];
+        snap.forEach(doc => remote.push({ id: doc.id, ...doc.data() }));
+        if (remote.length > 0) {
+            signaturesList = remote;
+            localStorage.setItem('custom_signing_authorities', JSON.stringify(signaturesList));
+            renderSignaturesTable();
+        } else {
+            initSignaturesList();
+        }
+    }, err => {
+        initSignaturesList();
+    });
+    initSignaturesList();
 
     // ===== Init =====
     function initAdminNepaliDate() {

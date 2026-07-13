@@ -73,6 +73,7 @@
     else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
     else if (path.includes('arko-bibaha-nagareko.html')) templateId = 'arko-bibaha-nagareko';
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
+    else if (path.includes('nabalak-parichayapatra.html')) templateId = 'nabalak-parichayapatra';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
         isDynamic = true;
@@ -258,60 +259,77 @@
         const isAbhilekh = templateId === 'abhilekh-pramanit';
         const isBankSifarish = templateId === 'bank-sifarish';
 
-        // Default signatures (वडा अध्यक्ष) for most pages
-        const defaultSignatures = {
-            '1': [
-                { value: "नगेन्द्र भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - नगेन्द्र भण्डारी" },
-                { value: "अन्जु निरौला|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - अन्जु निरौला" },
-                { value: "लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा" },
-                { value: "केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल" },
-                { value: "जमुन राई|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - जमुन राई" }
-            ],
-            '3': [
-                { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
-                { value: "होमनाथ थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - होमनाथ थापा" },
-                { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
-            ]
-        };
+        let customSigList = null;
+        try {
+            customSigList = JSON.parse(localStorage.getItem('custom_signing_authorities') || '[]');
+        } catch(e) {}
 
-        // अभिलेख प्रमाणित — स्थानीय पञ्जिकाधिकारी signatures
-        const abhilekhSignatures = {
-            '1': [
-                { value: "अनिता अधिकारी|स्थानीय पञ्जिकाधिकारी", text: "स्थानीय पञ्जिकाधिकारी - अनिता अधिकारी" }
-            ],
-            '3': [
-                { value: "मेनुका बस्नेत|स्थानीय पञ्जिकाधिकारी", text: "स्थानीय पञ्जिकाधिकारी - मेनुका बस्नेत" }
-            ]
-        };
+        let wardSigns = [];
+        if (customSigList && customSigList.length > 0) {
+            let filterCat = 'default';
+            if (isAbhilekh) filterCat = 'abhilekh-pramanit';
+            else if (isBankSifarish) filterCat = 'bank-sifarish';
 
-        // बैंक सिफारिस — वडा सचिव + वडा अध्यक्ष signatures
-        const bankSignatures = {
-            '1': [
-                { value: "अनिता अधिकारी|वडा सचिव", text: "वडा सचिव - अनिता अधिकारी" },
-                { value: "नगेन्द्र भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - नगेन्द्र भण्डारी" },
-                { value: "अन्जु निरौला|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - अन्जु निरौला" },
-                { value: "लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा" }
-            ],
-            '3': [
-                { value: "मेनुका बस्नेत|वडा सचिव", text: "वडा सचिव - मेनुका बस्नेत" },
-                { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
-                { value: "होमनाथ थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - होमनाथ थापा" },
-                { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
-            ]
-        };
-
-        // Choose the right signature set based on page
-        let signatures;
-        if (isAbhilekh) {
-            signatures = abhilekhSignatures;
-        } else if (isBankSifarish) {
-            signatures = bankSignatures;
-        } else {
-            signatures = defaultSignatures;
+            const matched = customSigList.filter(s => s.ward === ward && (s.category === filterCat || s.category === 'default' || !s.category));
+            if (matched.length > 0) {
+                wardSigns = matched.map(m => ({
+                    value: `${m.name}|${m.title}`,
+                    text: `${m.title} - ${m.name}`
+                }));
+            }
         }
 
-        const wardSigns = signatures[ward];
-        if (wardSigns) {
+        if (wardSigns.length === 0) {
+            // Default signatures (वडा अध्यक्ष) for most pages
+            const defaultSignatures = {
+                '1': [
+                    { value: "नगेन्द्र भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - नगेन्द्र भण्डारी" },
+                    { value: "अन्जु निरौला|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - अन्जु निरौला" },
+                    { value: "लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा" },
+                    { value: "केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल" },
+                    { value: "जमुन राई|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - जमुन राई" }
+                ],
+                '3': [
+                    { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
+                    { value: "होमनाथ थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - होमनाथ थापा" },
+                    { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
+                ]
+            };
+
+            // अभिलेख प्रमाणित — स्थानीय पञ्जिकाधिकारी signatures
+            const abhilekhSignatures = {
+                '1': [
+                    { value: "अनिता अधिकारी|स्थानीय पञ्जिकाधिकारी", text: "स्थानीय पञ्जिकाधिकारी - अनिता अधिकारी" }
+                ],
+                '3': [
+                    { value: "मेनुका बस्नेत|स्थानीय पञ्जिकाधिकारी", text: "स्थानीय पञ्जिकाधिकारी - मेनुका बस्नेत" }
+                ]
+            };
+
+            // बैंक सिफारिस — वडा सचिव + वडा अध्यक्ष signatures
+            const bankSignatures = {
+                '1': [
+                    { value: "अनिता अधिकारी|वडा सचिव", text: "वडा सचिव - अनिता अधिकारी" },
+                    { value: "नगेन्द्र भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - नगेन्द्र भण्डारी" },
+                    { value: "अन्जु निरौला|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - अन्जु निरौला" },
+                    { value: "लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा" }
+                ],
+                '3': [
+                    { value: "मेनुका बस्नेत|वडा सचिव", text: "वडा सचिव - मेनुका बस्नेत" },
+                    { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
+                    { value: "होमनाथ थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - होमनाथ थापा" },
+                    { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
+                ]
+            };
+
+            let signatures;
+            if (isAbhilekh) signatures = abhilekhSignatures;
+            else if (isBankSifarish) signatures = bankSignatures;
+            else signatures = defaultSignatures;
+            wardSigns = signatures[ward] || [];
+        }
+
+        if (wardSigns && wardSigns.length > 0) {
             const originalOptions = Array.from(select.options);
             const customOpt = originalOptions.find(o => o.value === 'CUSTOM');
             const blankOpt = originalOptions.find(o => o.value === 'BLANK');
@@ -390,10 +408,28 @@
         }
     }
 
-    // 2. Setup dynamic Font & Styling options card in the input panel
     function initFontSettings() {
         localizePageForWard();
         setupDynamicSignatures();
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'custom_signing_authorities' || e.key === 'sifarish_ward') {
+                setupDynamicSignatures();
+            }
+        });
+        window.addEventListener('signing_authorities_updated', setupDynamicSignatures);
+        if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+            try {
+                firebase.firestore().collection('signing_authorities').onSnapshot(snap => {
+                    const list = [];
+                    snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+                    if (list.length > 0) {
+                        localStorage.setItem('custom_signing_authorities', JSON.stringify(list));
+                        setupDynamicSignatures();
+                    }
+                }, err => {});
+            } catch(e) {}
+        }
 
         // Enforce Nepal Samvat 1146 globally across all forms and live previews
         const enforceNepalSamvat1146 = () => {

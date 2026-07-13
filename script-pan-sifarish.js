@@ -521,7 +521,7 @@ function getNepalSambatYear(adDate) {
 
 function formatFiscalYear(startYear) {
     const suffix = String(startYear + 1).slice(-2);
-    return toNepaliDigit(`${startYear}/${suffix}`);
+    return toNepaliDigit(`${startYear}/0${suffix}`);
 }
 
 function initializeFiscalYear(bsYear, bsMonth) {

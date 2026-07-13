@@ -690,11 +690,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* 🖨️ PRINT FIX */
+@page {
+    size: A4 portrait;
+    margin: 8mm 12mm 8mm 12mm;
+}
+
 @media print {
-    @page {
-        size: A4;
-        margin: 0.58in 0.69in 0.31in 0.69in;
-    }
 
     .input-panel,
     .modal-overlay {
@@ -706,17 +707,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
         padding: 0 !important;
         background-color: #ffffff !important;
         display: block !important;
+        overflow: visible !important;
     }
 
     .a4-page {
         box-shadow: none !important;
+        margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
+        max-width: 100% !important;
         min-height: unset !important;
         height: auto !important;
         max-height: none !important;
-        overflow: hidden !important;
-        page-break-after: avoid !important;
+        overflow: visible !important;
         page-break-inside: avoid !important;
     }
 }
