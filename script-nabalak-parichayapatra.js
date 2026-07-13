@@ -13,7 +13,7 @@ const firebaseConfig = {
 };
 
 const app = firebase.initializeApp(firebaseConfig);
-const db  = firebase.firestore();
+const db = firebase.firestore();
 
 let globalDatabase = [];
 let currentUploadedPhotoData = null;
@@ -30,12 +30,12 @@ db.collection("nabalakRecords").onSnapshot((snapshot) => {
 
 // ── Helpers ─────────────────────────────────────────
 function toNepaliDigit(num) {
-    const nd = ['०','१','२','३','४','५','६','७','८','९'];
+    const nd = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
     return (num || '').toString().split('').map(d => nd[d] || d).join('');
 }
 
 function toEnglishDigit(num) {
-    const ndMap = {'०':'0','१':'1','२':'2','३':'3','४':'4','५':'5','६':'6','७':'7','८':'8','९':'9'};
+    const ndMap = { '०': '0', '१': '1', '२': '2', '३': '3', '४': '4', '५': '5', '६': '6', '७': '7', '८': '8', '९': '9' };
     return (num || '').toString().split('').map(d => ndMap[d] || d).join('');
 }
 
@@ -49,10 +49,10 @@ function getSelectedAY() {
 function switchTab(tabId, btnElement) {
     const allTabs = document.querySelectorAll('.custom-tab-content');
     const allBtns = document.querySelectorAll('.custom-tab-btn');
-    
+
     allTabs.forEach(t => t.classList.remove('active'));
     allBtns.forEach(b => b.classList.remove('active'));
-    
+
     const targetTab = document.getElementById(tabId);
     if (targetTab) targetTab.classList.add('active');
     if (btnElement) btnElement.classList.add('active');
@@ -62,21 +62,21 @@ function switchTab(tabId, btnElement) {
 function handlePhotoUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         currentUploadedPhotoData = e.target.result;
-        
+
         // Update input side preview
         const container = document.getElementById('photoPreviewContainer');
         if (container) {
             container.innerHTML = `<img src="${currentUploadedPhotoData}" alt="Uploaded Photo">`;
         }
-        
+
         // Update remove button
         const btnRemove = document.getElementById('btnRemovePhoto');
         if (btnRemove) btnRemove.style.display = 'inline-block';
-        
+
         // Update print preview side
         const printBox = document.getElementById('lblPhotoBox');
         if (printBox) {
@@ -96,7 +96,7 @@ function removePhoto() {
     if (btnRemove) btnRemove.style.display = 'none';
     const photoInput = document.getElementById('inPhotoUpload');
     if (photoInput) photoInput.value = '';
-    
+
     const printBox = document.getElementById('lblPhotoBox');
     if (printBox) {
         printBox.innerHTML = `फोटो`;
@@ -107,13 +107,13 @@ function removePhoto() {
 function copyBirthToPermanent() {
     const chk = document.getElementById('chkSameAsBirth');
     if (!chk || !chk.checked) return;
-    
+
     const dist = document.getElementById('inBirthDistrict').value.trim();
-    const rm   = document.getElementById('inBirthRM').value.trim();
+    const rm = document.getElementById('inBirthRM').value.trim();
     const ward = document.getElementById('inBirthWard').value.trim();
-    
+
     if (dist) document.getElementById('inPermDistrict').value = dist;
-    if (rm)   document.getElementById('inPermRM').value = rm;
+    if (rm) document.getElementById('inPermRM').value = rm;
     if (ward) {
         const wardSelect = document.getElementById('inPermWard');
         for (let i = 0; i < wardSelect.options.length; i++) {
@@ -136,7 +136,7 @@ function autoConvertBsToAd() {
                 document.getElementById('inDOB_AD').value = adDate;
             }
         }
-    } catch(e) {}
+    } catch (e) { }
 }
 
 function calculateApproxAge(bsDateStr) {
@@ -156,7 +156,7 @@ function autoFillGuardian(type) {
     const permRM = document.getElementById('inPermRM').value.trim();
     const permWard = document.getElementById('inPermWard').value;
     const permDist = document.getElementById('inPermDistrict').value.trim();
-    
+
     if (type === 'father') {
         const fatherNP = document.getElementById('inFatherNameNP').value.trim();
         const fatherAddr = document.getElementById('inFatherAddress').value.trim();
@@ -247,14 +247,14 @@ function updateDoc() {
 
     // 1. Names
     const firstNP = document.getElementById('inNameFirstNP').value.trim();
-    const midNP   = document.getElementById('inNameMidNP').value.trim();
-    const lastNP  = document.getElementById('inNameLastNP').value.trim();
-    const fullNP  = [firstNP, midNP, lastNP].filter(Boolean).join(' ') || '................';
+    const midNP = document.getElementById('inNameMidNP').value.trim();
+    const lastNP = document.getElementById('inNameLastNP').value.trim();
+    const fullNP = [firstNP, midNP, lastNP].filter(Boolean).join(' ') || '................';
 
     const firstEN = document.getElementById('inNameFirstEN').value.trim();
-    const midEN   = document.getElementById('inNameMidEN').value.trim();
-    const lastEN  = document.getElementById('inNameLastEN').value.trim();
-    const fullEN  = [firstEN, midEN, lastEN].filter(Boolean).join(' ').toUpperCase() || '................';
+    const midEN = document.getElementById('inNameMidEN').value.trim();
+    const lastEN = document.getElementById('inNameLastEN').value.trim();
+    const fullEN = [firstEN, midEN, lastEN].filter(Boolean).join(' ').toUpperCase() || '................';
 
     document.getElementById('lblNameNP_tbl').innerText = fullNP;
     if (document.getElementById('lblNameEN_tbl')) document.getElementById('lblNameEN_tbl').innerText = fullEN;
@@ -272,7 +272,7 @@ function updateDoc() {
 
     const dobBS = document.getElementById('inDOB_BS').value.trim();
     const dobAD = document.getElementById('inDOB_AD').value.trim();
-    
+
     // Split DOB BS
     const bsParts = dobBS.split(/[-/]/);
     if (document.getElementById('lblDOB_BS_Year')) document.getElementById('lblDOB_BS_Year').innerText = bsParts[0] || '.........';
@@ -310,9 +310,9 @@ function updateDoc() {
 
     // 4. Addresses
     const birthDist = document.getElementById('inBirthDistrict').value.trim() || '................';
-    const birthRM   = document.getElementById('inBirthRM').value.trim() || '................';
+    const birthRM = document.getElementById('inBirthRM').value.trim() || '................';
     const birthWard = document.getElementById('inBirthWard').value.trim() || '....';
-    
+
     let birthPlaceNP = '................';
     if (birthDist !== '................' || birthRM !== '................') {
         birthPlaceNP = `${birthRM} - ${birthWard}, ${birthDist}`;
@@ -324,12 +324,12 @@ function updateDoc() {
     const birthPlaceEN = document.getElementById('inBirthPlaceEN').value.trim() || (birthRM !== '................' ? `${birthRM.toUpperCase()}-${birthWard}, ${birthDist.toUpperCase()}` : '................');
     if (document.getElementById('lblBirthPlaceEN_tbl')) document.getElementById('lblBirthPlaceEN_tbl').innerText = birthPlaceEN;
 
-    const permProv   = document.getElementById('inPermProvince').value.trim() || '................';
-    const permDist   = document.getElementById('inPermDistrict').value.trim() || '................';
-    const permRM     = document.getElementById('inPermRM').value.trim() || '................';
-    const permWard   = document.getElementById('inPermWard').value || '....';
+    const permProv = document.getElementById('inPermProvince').value.trim() || '................';
+    const permDist = document.getElementById('inPermDistrict').value.trim() || '................';
+    const permRM = document.getElementById('inPermRM').value.trim() || '................';
+    const permWard = document.getElementById('inPermWard').value || '....';
     const permToleNP = document.getElementById('inPermToleNP').value.trim() || '................';
-    
+
     if (document.getElementById('lblPermProv_tbl')) document.getElementById('lblPermProv_tbl').innerText = permProv;
     if (document.getElementById('lblPermDist_tbl')) document.getElementById('lblPermDist_tbl').innerText = permDist;
     if (document.getElementById('lblPermRM_tbl')) document.getElementById('lblPermRM_tbl').innerText = permRM;
@@ -347,12 +347,12 @@ function updateDoc() {
     if (document.getElementById('lblPermToleEN_tbl')) document.getElementById('lblPermToleEN_tbl').innerText = permToleNP !== '................' ? permToleNP.toUpperCase() : '................';
 
     // 5. Family Tabs Details
-    const fatherNP   = document.getElementById('inFatherNameNP').value.trim() || '................';
+    const fatherNP = document.getElementById('inFatherNameNP').value.trim() || '................';
     const fatherAddr = document.getElementById('inFatherAddress').value.trim() || (permRM !== '................' ? `${permRM} - ${permWard}, ${permDist}` : '................');
-    const fatherCit  = document.getElementById('inFatherCitNo').value.trim() || '................';
+    const fatherCit = document.getElementById('inFatherCitNo').value.trim() || '................';
     const fatherType = (document.getElementById('inFatherCitType') ? document.getElementById('inFatherCitType').value.trim() : '') || '................';
     const fatherDist = (document.getElementById('inFatherCitDist') ? document.getElementById('inFatherCitDist').value.trim() : '') || '................';
-    const fatherNid  = (document.getElementById('inFatherNidNo') ? document.getElementById('inFatherNidNo').value.trim() : '') || '................';
+    const fatherNid = (document.getElementById('inFatherNidNo') ? document.getElementById('inFatherNidNo').value.trim() : '') || '................';
 
     if (document.getElementById('lblFatherName_tbl')) document.getElementById('lblFatherName_tbl').innerText = fatherNP;
     if (document.getElementById('lblFatherAddr_tbl')) document.getElementById('lblFatherAddr_tbl').innerText = fatherAddr;
@@ -363,12 +363,12 @@ function updateDoc() {
     if (document.getElementById('lblFatherCitDist_tbl')) document.getElementById('lblFatherCitDist_tbl').innerText = fatherDist;
     if (document.getElementById('lblFatherNid_tbl')) document.getElementById('lblFatherNid_tbl').innerText = fatherNid;
 
-    const motherNP   = document.getElementById('inMotherNameNP').value.trim() || '................';
+    const motherNP = document.getElementById('inMotherNameNP').value.trim() || '................';
     const motherAddr = document.getElementById('inMotherAddress').value.trim() || (permRM !== '................' ? `${permRM} - ${permWard}, ${permDist}` : '................');
-    const motherCit  = document.getElementById('inMotherCitNo').value.trim() || '................';
+    const motherCit = document.getElementById('inMotherCitNo').value.trim() || '................';
     const motherType = (document.getElementById('inMotherCitType') ? document.getElementById('inMotherCitType').value.trim() : '') || '................';
     const motherDist = (document.getElementById('inMotherCitDist') ? document.getElementById('inMotherCitDist').value.trim() : '') || '................';
-    const motherNid  = (document.getElementById('inMotherNidNo') ? document.getElementById('inMotherNidNo').value.trim() : '') || '................';
+    const motherNid = (document.getElementById('inMotherNidNo') ? document.getElementById('inMotherNidNo').value.trim() : '') || '................';
 
     if (document.getElementById('lblMotherName_tbl')) document.getElementById('lblMotherName_tbl').innerText = motherNP;
     if (document.getElementById('lblMotherAddr_tbl')) document.getElementById('lblMotherAddr_tbl').innerText = motherAddr;
@@ -380,10 +380,10 @@ function updateDoc() {
     if (document.getElementById('lblMotherNid_tbl')) document.getElementById('lblMotherNid_tbl').innerText = motherNid;
 
     const guardianNP = document.getElementById('inGuardianNameAddr').value.trim() || '................';
-    const guardCit   = document.getElementById('inGuardianCitNo').value.trim() || '................';
-    const guardType  = (document.getElementById('inGuardianCitType') ? document.getElementById('inGuardianCitType').value.trim() : '') || '................';
-    const guardDist  = (document.getElementById('inGuardianCitDist') ? document.getElementById('inGuardianCitDist').value.trim() : '') || '................';
-    const guardNid   = (document.getElementById('inGuardianNidNo') ? document.getElementById('inGuardianNidNo').value.trim() : '') || '................';
+    const guardCit = document.getElementById('inGuardianCitNo').value.trim() || '................';
+    const guardType = (document.getElementById('inGuardianCitType') ? document.getElementById('inGuardianCitType').value.trim() : '') || '................';
+    const guardDist = (document.getElementById('inGuardianCitDist') ? document.getElementById('inGuardianCitDist').value.trim() : '') || '................';
+    const guardNid = (document.getElementById('inGuardianNidNo') ? document.getElementById('inGuardianNidNo').value.trim() : '') || '................';
 
     if (document.getElementById('lblGuardian_tbl')) document.getElementById('lblGuardian_tbl').innerText = guardianNP;
     if (document.getElementById('lblGuardianCit_tbl')) document.getElementById('lblGuardianCit_tbl').innerText = guardCit;
@@ -403,20 +403,20 @@ function updateDoc() {
     // Page 1 Submit Box Bindings (Nivedak ko Namthar, Thegana, Nata)
     const activeTabFather = document.getElementById('tabFather') && document.getElementById('tabFather').classList.contains('active');
     const activeTabMother = document.getElementById('tabMother') && document.getElementById('tabMother').classList.contains('active');
-    const activeTabGuard  = document.getElementById('tabGuardian') && document.getElementById('tabGuardian').classList.contains('active');
+    const activeTabGuard = document.getElementById('tabGuardian') && document.getElementById('tabGuardian').classList.contains('active');
 
     let submitName = fatherNP;
     let submitAddr = fatherAddr;
-    let submitRel  = 'बाबु';
+    let submitRel = 'बाबु';
 
     if (activeTabMother) {
         submitName = motherNP;
         submitAddr = motherAddr;
-        submitRel  = 'आमा';
+        submitRel = 'आमा';
     } else if (activeTabGuard) {
         submitName = guardianNP;
         submitAddr = (permRM !== '................') ? `${permRM} - ${permWard}, ${permDist}` : '................';
-        submitRel  = 'संरक्षक';
+        submitRel = 'संरक्षक';
     }
 
     if (document.getElementById('lblSubmitName_P1')) document.getElementById('lblSubmitName_P1').innerText = submitName;
@@ -461,7 +461,7 @@ function toggleCustomSign() {
 
     if (sel === 'CUSTOM') {
         if (box) box.style.display = 'grid';
-        const cName  = document.getElementById('inCustomSignName').value.trim() || '........';
+        const cName = document.getElementById('inCustomSignName').value.trim() || '........';
         const cTitle = document.getElementById('inCustomSignTitle').value.trim() || '........';
         if (document.getElementById('lblSigName')) document.getElementById('lblSigName').innerText = cName;
         if (document.getElementById('lblSigTitle')) document.getElementById('lblSigTitle').innerText = cTitle;
@@ -501,9 +501,9 @@ function initializeAutomaticDate() {
         const converter = window["@sbmdkl/nepali-date-converter"];
         if (converter && typeof converter.adToBs === 'function') {
             const today = new Date();
-            const yyyy  = today.getFullYear();
-            const mm    = String(today.getMonth() + 1).padStart(2, '0');
-            const dd    = String(today.getDate()).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
             const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
             if (typeof bsDate === 'string') {
                 nepaliBSDateStr = toNepaliDigit(bsDate.replace(/-/g, '/'));
@@ -514,7 +514,7 @@ function initializeAutomaticDate() {
         const inNS = document.getElementById('inNepalSamvat');
         if (inNS && !inNS.value) inNS.value = '११४६';
         updateDoc();
-    } catch(e) {}
+    } catch (e) { }
 }
 
 // ── Database & Modal Handlers ───────────────────────
@@ -534,8 +534,8 @@ function renderDatabaseTable() {
     const filtered = globalDatabase.filter(r => {
         if (!query) return true;
         return (r.nameFirstNP || '').toLowerCase().includes(query) ||
-               (r.birthRegNo || '').toLowerCase().includes(query) ||
-               (r.fatherNP || '').toLowerCase().includes(query);
+            (r.birthRegNo || '').toLowerCase().includes(query) ||
+            (r.fatherNP || '').toLowerCase().includes(query);
     });
 
     if (filtered.length === 0) {
@@ -546,7 +546,7 @@ function renderDatabaseTable() {
     filtered.forEach((r, idx) => {
         const tr = document.createElement('tr');
         const fullName = [r.nameFirstNP, r.nameMidNP, r.nameLastNP].filter(Boolean).join(' ') || r.nameNP || '-';
-        const father   = r.fatherNP || '-';
+        const father = r.fatherNP || '-';
         tr.innerHTML = `
             <td style="text-align:center;">${toNepaliDigit(idx + 1)}</td>
             <td style="font-weight:600; color:#2b6cb0;">${fullName}</td>
@@ -568,24 +568,24 @@ function populateFormForEdit(recordId) {
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड (नाबालक परिचय पत्र)";
 
     if (r.chalani) document.getElementById('inChalani').value = r.chalani;
-    if (r.miti)    document.getElementById('inMiti').value    = r.miti;
-    if (r.ns)      document.getElementById('inNepalSamvat').value = r.ns;
-    if (r.idType)  document.getElementById('inIdType').value  = r.idType;
+    if (r.miti) document.getElementById('inMiti').value = r.miti;
+    if (r.ns) document.getElementById('inNepalSamvat').value = r.ns;
+    if (r.idType) document.getElementById('inIdType').value = r.idType;
     if (r.birthRegNo) document.getElementById('inBirthRegNo').value = r.birthRegNo;
-    if (r.dobBS)   document.getElementById('inDOB_BS').value  = r.dobBS;
-    if (r.dobAD)   document.getElementById('inDOB_AD').value  = r.dobAD;
+    if (r.dobBS) document.getElementById('inDOB_BS').value = r.dobBS;
+    if (r.dobAD) document.getElementById('inDOB_AD').value = r.dobAD;
 
     if (r.nameFirstNP) document.getElementById('inNameFirstNP').value = r.nameFirstNP;
-    if (r.nameMidNP)   document.getElementById('inNameMidNP').value   = r.nameMidNP;
-    if (r.nameLastNP)  document.getElementById('inNameLastNP').value  = r.nameLastNP;
+    if (r.nameMidNP) document.getElementById('inNameMidNP').value = r.nameMidNP;
+    if (r.nameLastNP) document.getElementById('inNameLastNP').value = r.nameLastNP;
     if (r.nameFirstEN) document.getElementById('inNameFirstEN').value = r.nameFirstEN;
-    if (r.nameMidEN)   document.getElementById('inNameMidEN').value   = r.nameMidEN;
-    if (r.nameLastEN)  document.getElementById('inNameLastEN').value  = r.nameLastEN;
+    if (r.nameMidEN) document.getElementById('inNameMidEN').value = r.nameMidEN;
+    if (r.nameLastEN) document.getElementById('inNameLastEN').value = r.nameLastEN;
 
-    if (r.gender)   document.getElementById('inGender').value = r.gender;
+    if (r.gender) document.getElementById('inGender').value = r.gender;
     if (r.religion) document.getElementById('inReligion').value = r.religion;
-    if (r.caste)    document.getElementById('inCaste').value    = r.caste;
-    if (r.contactNo)document.getElementById('inContactNo').value= r.contactNo;
+    if (r.caste) document.getElementById('inCaste').value = r.caste;
+    if (r.contactNo) document.getElementById('inContactNo').value = r.contactNo;
 
     if (r.photoData) {
         currentUploadedPhotoData = r.photoData;
@@ -595,24 +595,24 @@ function populateFormForEdit(recordId) {
     }
 
     if (r.fatherNP) document.getElementById('inFatherNameNP').value = r.fatherNP;
-    if (r.fatherCit)document.getElementById('inFatherCitNo').value  = r.fatherCit;
-    if (r.fatherNid)document.getElementById('inFatherNidNo').value  = r.fatherNid;
+    if (r.fatherCit) document.getElementById('inFatherCitNo').value = r.fatherCit;
+    if (r.fatherNid) document.getElementById('inFatherNidNo').value = r.fatherNid;
 
     if (r.motherNP) document.getElementById('inMotherNameNP').value = r.motherNP;
-    if (r.motherCit)document.getElementById('inMotherCitNo').value  = r.motherCit;
-    if (r.motherNid)document.getElementById('inMotherNidNo').value  = r.motherNid;
+    if (r.motherCit) document.getElementById('inMotherCitNo').value = r.motherCit;
+    if (r.motherNid) document.getElementById('inMotherNidNo').value = r.motherNid;
 
-    if (r.spouseNP)  document.getElementById('inSpouseNameNP').value  = r.spouseNP;
-    if (r.spouseAddr)document.getElementById('inSpouseAddress').value = r.spouseAddr;
-    if (r.spouseCit) document.getElementById('inSpouseCitNo').value   = r.spouseCit;
+    if (r.spouseNP) document.getElementById('inSpouseNameNP').value = r.spouseNP;
+    if (r.spouseAddr) document.getElementById('inSpouseAddress').value = r.spouseAddr;
+    if (r.spouseCit) document.getElementById('inSpouseCitNo').value = r.spouseCit;
     if (r.spouseCitType) document.getElementById('inSpouseCitType').value = r.spouseCitType;
-    if (r.spouseNid) document.getElementById('inSpouseNidNo').value   = r.spouseNid;
+    if (r.spouseNid) document.getElementById('inSpouseNidNo').value = r.spouseNid;
 
-    if (r.guardianNid)document.getElementById('inGuardianNidNo').value = r.guardianNid;
+    if (r.guardianNid) document.getElementById('inGuardianNidNo').value = r.guardianNid;
 
-    if (r.grandfatherNP)  document.getElementById('inGrandfatherName').value = r.grandfatherNP;
+    if (r.grandfatherNP) document.getElementById('inGrandfatherName').value = r.grandfatherNP;
     if (r.grandfatherNid) document.getElementById('inGrandfatherNidNo').value = r.grandfatherNid;
-    if (r.grandmotherNP)  document.getElementById('inGrandmotherName').value = r.grandmotherNP;
+    if (r.grandmotherNP) document.getElementById('inGrandmotherName').value = r.grandmotherNP;
     if (r.grandmotherNid) document.getElementById('inGrandmotherNidNo').value = r.grandmotherNid;
 
     toggleModal(false);
@@ -631,11 +631,11 @@ async function printAndSaveSystem() {
     const motherNP = document.getElementById('inMotherNameNP').value.trim();
     const birthReg = document.getElementById('inBirthRegNo').value.trim();
     const dobBS = document.getElementById('inDOB_BS').value.trim();
-    
+
     const birthDist = document.getElementById('inBirthDistrict').value.trim();
     const birthRM = document.getElementById('inBirthRM').value.trim();
     const birthWard = document.getElementById('inBirthWard').value.trim();
-    
+
     const permDist = document.getElementById('inPermDistrict').value.trim();
     const permRM = document.getElementById('inPermRM').value.trim();
     const permWard = document.getElementById('inPermWard').value;
@@ -665,44 +665,44 @@ async function printAndSaveSystem() {
     const recordId = document.getElementById('editRecordIndex').value;
 
     const obj = {
-        ay:              getSelectedAY(),
-        chalani:         document.getElementById('inChalani').value.trim()     || '-',
-        miti:            document.getElementById('inMiti').value.trim()         || '-',
-        ns:              document.getElementById('inNepalSamvat').value.trim()  || '-',
-        idType:          document.getElementById('inIdType').value,
-        birthRegNo:      document.getElementById('inBirthRegNo').value.trim()   || '',
-        dobBS:           document.getElementById('inDOB_BS').value.trim()       || '',
-        dobAD:           document.getElementById('inDOB_AD').value.trim()       || '',
-        nameFirstNP:     document.getElementById('inNameFirstNP').value.trim()  || '',
-        nameMidNP:       document.getElementById('inNameMidNP').value.trim()    || '',
-        nameLastNP:      document.getElementById('inNameLastNP').value.trim()   || '',
-        nameFirstEN:     document.getElementById('inNameFirstEN').value.trim()  || '',
-        nameMidEN:       document.getElementById('inNameMidEN').value.trim()    || '',
-        nameLastEN:      document.getElementById('inNameLastEN').value.trim()   || '',
-        gender:          document.getElementById('inGender').value,
-        religion:        document.getElementById('inReligion').value,
-        caste:           document.getElementById('inCaste').value.trim()        || '',
-        contactNo:       document.getElementById('inContactNo').value.trim()    || '',
-        photoData:       currentUploadedPhotoData || null,
-        fatherNP:        document.getElementById('inFatherNameNP').value.trim() || '',
-        fatherCit:       document.getElementById('inFatherCitNo').value.trim()  || '',
-        fatherNid:       (document.getElementById('inFatherNidNo') ? document.getElementById('inFatherNidNo').value.trim() : ''),
-        motherNP:        document.getElementById('inMotherNameNP').value.trim() || '',
-        motherCit:       document.getElementById('inMotherCitNo').value.trim()  || '',
-        motherNid:       (document.getElementById('inMotherNidNo') ? document.getElementById('inMotherNidNo').value.trim() : ''),
-        spouseNP:        (document.getElementById('inSpouseNameNP') ? document.getElementById('inSpouseNameNP').value.trim() : ''),
-        spouseAddr:      (document.getElementById('inSpouseAddress') ? document.getElementById('inSpouseAddress').value.trim() : ''),
-        spouseCit:       (document.getElementById('inSpouseCitNo') ? document.getElementById('inSpouseCitNo').value.trim() : ''),
-        spouseCitType:   (document.getElementById('inSpouseCitType') ? document.getElementById('inSpouseCitType').value : ''),
-        spouseNid:       (document.getElementById('inSpouseNidNo') ? document.getElementById('inSpouseNidNo').value.trim() : ''),
-        guardianNid:     (document.getElementById('inGuardianNidNo') ? document.getElementById('inGuardianNidNo').value.trim() : ''),
-        grandfatherNP:   document.getElementById('inGrandfatherName').value.trim() || '',
-        grandfatherNid:  (document.getElementById('inGrandfatherNidNo') ? document.getElementById('inGrandfatherNidNo').value.trim() : ''),
-        grandmotherNP:   (document.getElementById('inGrandmotherName') ? document.getElementById('inGrandmotherName').value.trim() : ''),
-        grandmotherNid:  (document.getElementById('inGrandmotherNidNo') ? document.getElementById('inGrandmotherNidNo').value.trim() : ''),
-        signAuth:        document.getElementById('inSignAuthority').value,
-        sigMargin:       document.getElementById('inSigMargin').value,
-        timestamp:       Date.now()
+        ay: getSelectedAY(),
+        chalani: document.getElementById('inChalani').value.trim() || '-',
+        miti: document.getElementById('inMiti').value.trim() || '-',
+        ns: document.getElementById('inNepalSamvat').value.trim() || '-',
+        idType: document.getElementById('inIdType').value,
+        birthRegNo: document.getElementById('inBirthRegNo').value.trim() || '',
+        dobBS: document.getElementById('inDOB_BS').value.trim() || '',
+        dobAD: document.getElementById('inDOB_AD').value.trim() || '',
+        nameFirstNP: document.getElementById('inNameFirstNP').value.trim() || '',
+        nameMidNP: document.getElementById('inNameMidNP').value.trim() || '',
+        nameLastNP: document.getElementById('inNameLastNP').value.trim() || '',
+        nameFirstEN: document.getElementById('inNameFirstEN').value.trim() || '',
+        nameMidEN: document.getElementById('inNameMidEN').value.trim() || '',
+        nameLastEN: document.getElementById('inNameLastEN').value.trim() || '',
+        gender: document.getElementById('inGender').value,
+        religion: document.getElementById('inReligion').value,
+        caste: document.getElementById('inCaste').value.trim() || '',
+        contactNo: document.getElementById('inContactNo').value.trim() || '',
+        photoData: currentUploadedPhotoData || null,
+        fatherNP: document.getElementById('inFatherNameNP').value.trim() || '',
+        fatherCit: document.getElementById('inFatherCitNo').value.trim() || '',
+        fatherNid: (document.getElementById('inFatherNidNo') ? document.getElementById('inFatherNidNo').value.trim() : ''),
+        motherNP: document.getElementById('inMotherNameNP').value.trim() || '',
+        motherCit: document.getElementById('inMotherCitNo').value.trim() || '',
+        motherNid: (document.getElementById('inMotherNidNo') ? document.getElementById('inMotherNidNo').value.trim() : ''),
+        spouseNP: (document.getElementById('inSpouseNameNP') ? document.getElementById('inSpouseNameNP').value.trim() : ''),
+        spouseAddr: (document.getElementById('inSpouseAddress') ? document.getElementById('inSpouseAddress').value.trim() : ''),
+        spouseCit: (document.getElementById('inSpouseCitNo') ? document.getElementById('inSpouseCitNo').value.trim() : ''),
+        spouseCitType: (document.getElementById('inSpouseCitType') ? document.getElementById('inSpouseCitType').value : ''),
+        spouseNid: (document.getElementById('inSpouseNidNo') ? document.getElementById('inSpouseNidNo').value.trim() : ''),
+        guardianNid: (document.getElementById('inGuardianNidNo') ? document.getElementById('inGuardianNidNo').value.trim() : ''),
+        grandfatherNP: document.getElementById('inGrandfatherName').value.trim() || '',
+        grandfatherNid: (document.getElementById('inGrandfatherNidNo') ? document.getElementById('inGrandfatherNidNo').value.trim() : ''),
+        grandmotherNP: (document.getElementById('inGrandmotherName') ? document.getElementById('inGrandmotherName').value.trim() : ''),
+        grandmotherNid: (document.getElementById('inGrandmotherNidNo') ? document.getElementById('inGrandmotherNidNo').value.trim() : ''),
+        signAuth: document.getElementById('inSignAuthority').value,
+        sigMargin: document.getElementById('inSigMargin').value,
+        timestamp: Date.now()
     };
 
     const btn = document.querySelector('.btn-print');
