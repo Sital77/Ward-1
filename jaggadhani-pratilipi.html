@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>जग्गाधनी पूर्जा प्रतिलिपि सिफारिस - गौरादह नगरपालिका वडा नं.१</title>
+    <link rel="stylesheet" href="charkilla.css">
+    <style>
+        .preview-panel .a4-page,
+        .preview-panel .a4-page * {
+            font-family: 'Mukta', sans-serif;
+        }
+
+        .letter-body-para {
+            font-size: 13pt;
+            line-height: 1.9;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .fill-space {
+            display: inline;
+            text-indent: 0;
+            padding: 0 2px;
+        }
+
+        /* Section Cards */
+        .section-card {
+            border-radius: 10px;
+            padding: 14px 14px 6px 14px;
+            margin-bottom: 18px;
+        }
+
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lh-section {
+            background: #f7fafc;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .lh-section .section-label {
+            color: #4a5568;
+        }
+
+        .body-section {
+            background: rgba(43, 108, 176, 0.07);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
+        }
+
+        .body-section .section-label {
+            color: #2b6cb0;
+        }
+
+        .body-section label {
+            color: #2c5282;
+        }
+
+        /* Land details table in preview */
+        .land-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11.5pt;
+            margin-top: 10px;
+        }
+
+        .land-table th,
+        .land-table td {
+            border: 1px solid #000;
+            padding: 5px 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .land-table th {
+            background: #f3f4f6;
+            font-weight: bold;
+        }
+
+        .land-table td:first-child {
+            width: 10%;
+        }
+
+        .land-table td:nth-child(2) {
+            width: 22%;
+        }
+
+        .land-table td:nth-child(3) {
+            width: 20%;
+        }
+
+        .land-table td:nth-child(4) {
+            width: 28%;
+        }
+
+        .land-table td:nth-child(5) {
+            width: 20%;
+        }
+
+        /* Kitta row builder */
+        .house-row-block {
+            background: #ffffff;
+            border: 1px solid #cbd5e0;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        @media print {
+            .input-panel {
+                display: none !important;
+            }
+
+            .preview-panel {
+                width: 100% !important;
+            }
+
+            .modal-overlay {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="auth.js"></script>
+
+    <!-- ══════════════ INPUT PANEL ══════════════ -->
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">📜 जग्गाधनी पूर्जा प्रतिलिपि सिफारिस प्रविष्टि</h2>
+            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+
+        <!-- ══ LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 लेटर हेड विवरण</div>
+
+            <div class="form-group">
+                <label>पत्र संख्या (प.सं.):</label>
+                <div class="radio-container" id="ayRadioGroup">
+                    <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८०/०८१"
+                            onchange="updateDoc()"><label for="ay1" class="radio-label">२०८०/०८१</label></div>
+                    <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८१/०८२"
+                            onchange="updateDoc()"><label for="ay2" class="radio-label">२०८१/०८२</label></div>
+                    <div class="radio-option"><input type="radio" id="ay3" name="ayRadio" value="२०८२/०८३" checked
+                            onchange="updateDoc()"><label for="ay3" class="radio-label">२०८२/०८३</label></div>
+                    <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८३/०८४"
+                            onchange="updateDoc()"><label for="ay4" class="radio-label">२०८३/०८४</label></div>
+                    <div class="radio-option"><input type="radio" id="ay5" name="ayRadio" value="२०८४/०८५"
+                            onchange="updateDoc()"><label for="ay5" class="radio-label">२०८४/०८५</label></div>
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="२०८३/०२/१८"
+                        oninput="updateNepalSambatFromMiti(); updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ने.स. :</label>
+                <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ BODY SECTION ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">👤 निवेदक र बसोबास विवरण</div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>जिल्ला:</label>
+                    <input type="text" id="inDistrict" value="झापा" placeholder="उदा: झापा" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>पालिकाको प्रकार:</label>
+                    <select id="inPalikaType" onchange="updateDoc()">
+                        <option value="नगरपालिका" selected>नगरपालिका</option>
+                        <option value="गाउँपालिका">गाउँपालिका</option>
+                        <option value="उपमहानगरपालिका">उपमहानगरपालिका</option>
+                        <option value="महानगरपालिका">महानगरपालिका</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>पालिकाको नाम:</label>
+                    <input type="text" id="inPalikaName" value="गौरादह" placeholder="उदा: गौरादह" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>वडा नं.:</label>
+                    <input type="text" id="inResidentWada" value="१" placeholder="उदा: १" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>निवेदक / जग्गा धनीको नाम:</label>
+                <input type="text" id="inApplicantName" placeholder="उदा: राम बहादुर कार्की" oninput="updateDoc()">
+            </div>
+
+            <div class="section-label" style="margin-top: 15px;">🪪 नागरिकता विवरण (वैकल्पिक)</div>
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>ना.प्र.नं.:</label>
+                    <input type="text" id="inCitNo" placeholder="३०४४" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>जारी मिति:</label>
+                    <input type="text" id="inCitDate" placeholder="२०५३/०२/३०" oninput="updateDoc()">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>जारी जिल्ला:</label>
+                <input type="text" id="inCitDistrict" placeholder="झापा" oninput="updateDoc()">
+            </div>
+
+            <div class="section-label" style="margin-top: 15px;">👨‍👩‍👧 पारिवारिक विवरण (वैकल्पिक)</div>
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>बुवाको नाम:</label>
+                    <input type="text" id="inFatherName" placeholder="बुवाको नाम (वैकल्पिक)" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>बाजेको नाम:</label>
+                    <input type="text" id="inGrandfatherName" placeholder="बाजेको नाम (वैकल्पिक)" oninput="updateDoc()">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>पतिको नाम:</label>
+                <input type="text" id="inHusbandName" placeholder="पतिको नाम (वैकल्पिक)" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ KITTA ROWS BUILDER ══ -->
+        <div class="table-builder">
+            <h3>🗺️ जग्गाको विवरण (कित्ता थप्नुस्)</h3>
+            <div id="kittaRowsContainer"></div>
+            <button class="btn-add-row" onclick="addKittaRow()">+ कित्ता थप्नुस्</button>
+        </div>
+
+        <!-- हस्ताक्षर अधिकारी -->
+        <div class="form-group"
+            style="margin-top: 15px; background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
+            <label style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
+                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40"
+                    oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र सुरक्षित गर्नुस्</button>
+    </div>
+
+    <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ जग्गाधनी पूर्जा प्रतिलिपि सिफारिस अभिलेख</h3>
+            <div class="search-container">
+                <label>🔍 नामबाट खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..."
+                    oninput="renderDatabaseTable()">
+            </div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">क्रम</th>
+                        <th style="width: 35%;">निवेदकको नाम</th>
+                        <th style="width: 27%;">विषय</th>
+                        <th style="width: 17%;">मिति</th>
+                        <th style="width: 13%;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ══════════════ PREVIEW PANEL (A4 Letter) ══════════════ -->
+    <div class="preview-panel">
+        <div class="a4-page">
+
+            <!-- ── Letterhead ── -->
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg"
+                        alt="Nepal Emblem">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblAY" class="fill-space" style="min-width:80px;"></span></div>
+                        <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width:60px;"></span></div>
+                    </div>
+                </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title">१ नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width:90px;"></span>
+                    </div>
+                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space"
+                            style="min-width:50px;"></span></div>
+                </div>
+            </div>
+
+            <div class="header-red-line"></div>
+
+            <!-- ── Receiver ── -->
+            <div style="margin-top:10px; margin-bottom:16px;">
+                <div style="font-weight:700; font-size:13.5pt; line-height:1.7;">
+                    श्री भूमी प्रशासन कार्यालय<br>
+                    दमक, झापा l
+                </div>
+            </div>
+
+            <!-- ── Subject ── -->
+            <div class="subject-container" style="text-align: center; margin: 15px 0 20px 0;">
+                <div class="subject-title"
+                    style="font-size: 16pt; font-weight: bold; text-decoration: underline; display: inline-block;">
+                    <span style="color: #e51a23;">विषय:</span> जग्गाधनी पूर्जा उपलब्ध गराईदिने सम्बन्धमा ।
+                </div>
+            </div>
+
+            <!-- ── Body ── -->
+            <div class="letter-body-para">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा <span id="lblDistrict" class="fill-space"></span> जिल्ला <span id="lblPalikaName" class="fill-space"></span> <span id="lblPalikaType" class="fill-space"></span> वडा नं. <span id="lblResidentWada" class="fill-space"></span> बसोबास गर्ने <span id="lblApplicantName" class="fill-space" style="font-weight:700;"></span> <span id="lblCitDetailsSpan"></span> ले यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निजको नाममा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा दर्ता कायम रहेको <span id="lblLandSummarySpan"></span> भएको जग्गा धनी पुर्जा-प्रमाण पत्र हराएको हुँदा तहाँ कार्यालयबाट नियमानुसार निज निवेदकको जग्गाधनी पूर्जाको प्रतिलिपि उपलब्ध गराईदिनुहुन स्थानीय सरकार सञ्चालन ऐन, २०७४ को दफा १२(२) ङ (१७) बमोजिम सिफारिस गरिन्छ ।
+            </div>
+
+            <!-- ── Land/Kitta Table ── -->
+            <div style="margin-top:16px;">
+                <table class="land-table">
+                    <thead>
+                        <tr>
+                            <th>क्रम</th>
+                            <th>सिट नं.</th>
+                            <th>कित्ता नं.</th>
+                            <th>जग्गाको क्षेत्रफल</th>
+                            <th>कैफियत</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lblKittaTableBody">
+                        <tr>
+                            <td>१</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ── Details Block ── -->
+            <div style="margin-top: 18px; font-size: 13pt; line-height: 1.85;">
+                <div style="font-weight: bold; text-decoration: underline; margin-bottom: 4px;">विवरण:</div>
+                <div>• जग्गा धनीको नाम: <span id="lblDetailName" style="font-weight: bold;"></span></div>
+                <div id="divDetailCit" style="display: none;">• ना.प्र.नं.: <span id="lblDetailCitNo"></span>, जारी मिति: <span id="lblDetailCitDate"></span>, <span id="lblDetailCitDistrict"></span></div>
+                <div id="divDetailFather" style="display: none;">• बुवा: <span id="lblDetailFather"></span></div>
+                <div id="divDetailGrandfather" style="display: none;">• बाजे: <span id="lblDetailGrandfather"></span></div>
+                <div id="divDetailHusband" style="display: none;">• पति: <span id="lblDetailHusband"></span></div>
+            </div>
+
+            <!-- ── Signature ── -->
+            <div class="doc-footer" id="docFooterSection">
+                <div class="signature-block">
+                    <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
+                    <div class="sig-title" id="lblSigTitle" style="font-weight: normal; font-size: 12pt;">वडा अध्यक्ष
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /a4-page -->
+    </div><!-- /preview-panel -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="font-settings.js"></script>
+    <script src="script-jaggadhani-pratilipi.js"></script>
+</body>
+
+</html>

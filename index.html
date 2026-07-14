@@ -1110,7 +1110,8 @@
             'abhilekh-pramanit': '🗄️',
             'arko-bibaha-nagareko': '👰',
             'bank-sifarish': '🏦',
-            'nabalak-parichayapatra': '👶'
+            'nabalak-parichayapatra': '👶',
+            'jaggadhani-pratilipi': '📜'
         };
         const borderMap = {
             'suchana-tans': '#d6bcfa',
@@ -1121,7 +1122,8 @@
             'abhilekh-pramanit': '#b2f5ea',
             'arko-bibaha-nagareko': '#fed7d7',
             'bank-sifarish': '#cbd5e0',
-            'nabalak-parichayapatra': '#feb2b2'
+            'nabalak-parichayapatra': '#feb2b2',
+            'jaggadhani-pratilipi': '#fbd38d'
         };
         const categoryEmojis = {
             'जग्गा सम्बन्धि': '🗺️',
@@ -1143,7 +1145,8 @@
             { id: 'abhilekh-pramanit', title: 'अभिलेख प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'arko-bibaha-nagareko', title: 'अर्को विवाह नगरेको प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'bank-sifarish', title: 'सामाजिक सुरक्षा बैंक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
-            { id: 'nabalak-parichayapatra', title: 'नाबालक परिचय पत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
+            { id: 'nabalak-parichayapatra', title: 'नाबालक परिचय पत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'jaggadhani-pratilipi', title: 'जग्गाधनी पूर्जा प्रतिलिपि सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' }
         ];
 
         function renderSifarishGrid(remoteList) {
@@ -1164,7 +1167,7 @@
             let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -1180,7 +1183,7 @@
                 templates.forEach(t => {
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
                     const targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
 
                     const card = document.createElement('a');

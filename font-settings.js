@@ -237,6 +237,7 @@
     else if (path.includes('arko-bibaha-nagareko.html')) templateId = 'arko-bibaha-nagareko';
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
     else if (path.includes('nabalak-parichayapatra.html')) templateId = 'nabalak-parichayapatra';
+    else if (path.includes('jaggadhani-pratilipi.html')) templateId = 'jaggadhani-pratilipi';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
         isDynamic = true;
