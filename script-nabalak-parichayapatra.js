@@ -18,15 +18,18 @@ const db = firebase.firestore();
 let globalDatabase = [];
 let currentUploadedPhotoData = null;
 
-// Real-time listener for nabalakRecords
-db.collection("nabalakRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// Auth ready भएपछि मात्र snapshot listener start गर्ने
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("nabalakRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        renderDatabaseTable();
     });
-    globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    renderDatabaseTable();
-});
+}).catch(() => {});
+
 
 // ── Helpers ─────────────────────────────────────────
 function toNepaliDigit(num) {
@@ -554,10 +557,22 @@ function renderDatabaseTable() {
             <td>${father}</td>
             <td style="text-align:center;">
                 <button onclick="populateFormForEdit('${r.id}')" style="background:#3182ce; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✏️ खोल्नुहोस्</button>
+                <button onclick="deleteFromDB('${r.id}')" style="background:#e53e3e; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; margin-left: 4px;">🗑️ हटाउनुहोस्</button>
             </td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+async function deleteFromDB(id) {
+    if (confirm("के तपाईं यो रेकर्ड क्लाउड डेटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
+        try {
+            await db.collection("nabalakRecords").doc(id).delete();
+        } catch (e) {
+            console.error(e);
+            alert("डिलिट गर्न समस्या भयो ।");
+        }
+    }
 }
 
 function populateFormForEdit(recordId) {

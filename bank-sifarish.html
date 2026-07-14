@@ -496,6 +496,7 @@
     </div><!-- /preview-panel -->
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="font-settings.js"></script>
@@ -518,17 +519,19 @@
 
         let globalDatabase = [];
 
-        // Real-time listener for bankRecords
-        db.collection("bankRecords").onSnapshot((snapshot) => {
-            globalDatabase = [];
-            snapshot.forEach((doc) => {
-                globalDatabase.push({ id: doc.id, ...doc.data() });
+        // Auth ready भएपछि मात्र snapshot listener start गर्ने
+        (window._firebaseAuthReady || Promise.resolve()).then(() => {
+            db.collection("bankRecords").onSnapshot((snapshot) => {
+                globalDatabase = [];
+                snapshot.forEach((doc) => {
+                    globalDatabase.push({ id: doc.id, ...doc.data() });
+                });
+                globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+                renderDatabaseTable();
+            }, err => {
+                console.warn("Firestore snapshot listener issue:", err);
             });
-            globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-            renderDatabaseTable();
-        }, err => {
-            console.warn("Firestore snapshot listener issue:", err);
-        });
+        }).catch(() => {});
 
         // ── Helpers ─────────────────────────────────────────
         function toNepaliDigit(num) {

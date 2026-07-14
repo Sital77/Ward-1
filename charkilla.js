@@ -14,14 +14,18 @@ let rowCounter = 0;
 let activeRowIds = [];
 let globalDatabase = [];
 
-db.collection("charKillaRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// Auth ready भएपछि मात्र snapshot listener start गर्ने
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("charKillaRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        renderDatabaseTable();
     });
-    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-    renderDatabaseTable();
-});
+}).catch(() => {});
+
 
 function toNepaliDigit(num) {
     const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];

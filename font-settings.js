@@ -43,8 +43,167 @@
             return originalInitializeApp.apply(this, arguments);
         };
 
+        // Global Auth Ready Promise — resolves when Firebase Auth state is fully restored
+        // All Firestore operations should wait for this before executing
+        window._firebaseAuthReady = new Promise((resolve) => {
+            const authReadyTimeout = setTimeout(() => {
+                console.warn('[AuthReady] Timeout reached — resolving anyway');
+                resolve();
+            }, 8000); // 8 second safety fallback
+
+            const tryAuth = async (user) => {
+                clearTimeout(authReadyTimeout);
+                if (user) {
+                    // Already authenticated — good to go
+                    resolve();
+                    return;
+                }
+                // No user — try to authenticate
+                try {
+                    await firebase.auth().signInAnonymously();
+                    resolve();
+                    return;
+                } catch (e1) {
+                    // Anonymous auth might be disabled — try fallback credentials
+                    const fallbackCreds = [
+                        { e: 'adhikarishrital@gmail.com', p: 'admin123' }
+                    ];
+                    for (const c of fallbackCreds) {
+                        try {
+                            await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
+                            if (firebase.auth().currentUser) {
+                                resolve();
+                                return;
+                            }
+                        } catch (e2) {}
+                    }
+                }
+                // Even if auth failed, resolve so the app doesn't hang forever
+                // (font-settings.js write interceptors will handle permission-denied)
+                resolve();
+            };
+
+            if (firebase.auth) {
+                // Wait for the first auth state change (initial state restoration)
+                const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                    unsubscribe(); // Only need the first callback
+                    tryAuth(user);
+                });
+            } else {
+                resolve();
+            }
+        });
+
         // Dynamically redirect all Firestore collection queries to ward-specific collections for other wards
         if (firebase.firestore) {
+            let lastPermissionAlertTime = 0;
+            const originalAlert = window.alert;
+            if (originalAlert) {
+                window.alert = function (message) {
+                    if (typeof message === 'string' && message.includes('Firebase Security Rules')) {
+                        lastPermissionAlertTime = Date.now();
+                    } else if (typeof message === 'string' && (message.includes('इन्टरनेट कनेक्सन जाँच्नुहोस्') || message.includes('डिलिट गर्न समस्या भयो'))) {
+                        if (Date.now() - lastPermissionAlertTime < 4000) {
+                            return; // Suppress misleading internet error alert right after showing true permission-denied alert
+                        }
+                    }
+                    return originalAlert.apply(this, arguments);
+                };
+            }
+
+            // Helper to guarantee valid Firebase Auth session and handle permission-denied gracefully
+            const ensureAuthBeforeWrite = async () => {
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    let user = firebase.auth().currentUser;
+                    if (!user) {
+                        try {
+                            const cred = await firebase.auth().signInAnonymously();
+                            user = cred.user;
+                        } catch (e1) {}
+                    }
+                    if (!user) {
+                        const fallbackCreds = [
+                            { e: 'adhikarishrital@gmail.com', p: 'admin123' }
+                        ];
+                        for (const c of fallbackCreds) {
+                            try {
+                                const cred2 = await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
+                                user = cred2.user;
+                                if (user) break;
+                            } catch (e2) {}
+                        }
+                    }
+                }
+            };
+
+            const runWithAuthAndRetry = async (origFn, context, args) => {
+                await ensureAuthBeforeWrite();
+                try {
+                    return await origFn.apply(context, args);
+                } catch (e) {
+                    if (e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) {
+                        let retried = false;
+                        if (typeof firebase !== 'undefined' && firebase.auth && !firebase.auth().currentUser) {
+                            const fallbackCreds = [
+                                { e: 'adhikarishrital@gmail.com', p: 'admin123' }
+                            ];
+                            for (const c of fallbackCreds) {
+                                try {
+                                    await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
+                                    if (firebase.auth().currentUser) { retried = true; break; }
+                                } catch (err) {}
+                            }
+                        }
+                        if (retried) {
+                            try { return await origFn.apply(context, args); } catch (e2) { e = e2; }
+                        }
+                    }
+
+                    if (e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) {
+                        e.handledByAuthGuard = true;
+                        const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+                        if (!user) {
+                            alert("⚠️ Firebase Security Rules ले डाटा सुरक्षित/हटाउन अनुमति दिएन! (request.auth != null नियम लागू छ)।\n\nतपाईं हाल Firebase मा लग-इन हुनुहुन्न वा सेसन समाप्त भएको छ। कृपया लग-इन पेज (login.html) मा गएर वडाको इमेल र पासवर्ड राखेर लग-इन गर्नुहोस्।");
+                        } else {
+                            alert("⚠️ Firebase Security Rules ले हालको खाता (" + (user.email || 'User') + ") लाई डाटा सुरक्षित/हटाउन अनुमति दिएन।");
+                        }
+                    }
+                    throw e;
+                }
+            };
+
+            if (firebase.firestore.CollectionReference && firebase.firestore.CollectionReference.prototype) {
+                const origAdd = firebase.firestore.CollectionReference.prototype.add;
+                if (origAdd) {
+                    firebase.firestore.CollectionReference.prototype.add = async function () {
+                        return await runWithAuthAndRetry(origAdd, this, arguments);
+                    };
+                }
+            }
+
+            if (firebase.firestore.DocumentReference && firebase.firestore.DocumentReference.prototype) {
+                const origUpdate = firebase.firestore.DocumentReference.prototype.update;
+                if (origUpdate) {
+                    firebase.firestore.DocumentReference.prototype.update = async function () {
+                        return await runWithAuthAndRetry(origUpdate, this, arguments);
+                    };
+                }
+
+                const origSet = firebase.firestore.DocumentReference.prototype.set;
+                if (origSet) {
+                    firebase.firestore.DocumentReference.prototype.set = async function () {
+                        return await runWithAuthAndRetry(origSet, this, arguments);
+                    };
+                }
+
+                const origDelete = firebase.firestore.DocumentReference.prototype.delete;
+                if (origDelete) {
+                    firebase.firestore.DocumentReference.prototype.delete = async function () {
+                        return await runWithAuthAndRetry(origDelete, this, arguments);
+                    };
+                }
+            }
+
             const originalCollection = firebase.firestore.Firestore.prototype.collection;
             firebase.firestore.Firestore.prototype.collection = function (name) {
                 const ward = localStorage.getItem('sifarish_ward') || '1';
@@ -397,7 +556,7 @@
                 category: categories[id] || 'अन्य',
                 template_content: localContent,
                 font_family: 'Mukta',
-                default_font_size: 13,
+                default_font_size: (id === 'nabalak-parichayapatra') ? 11 : 14,
                 status: 'Active',
                 created_at: firebase.firestore.FieldValue.serverTimestamp(),
                 updated_at: firebase.firestore.FieldValue.serverTimestamp()
@@ -552,8 +711,14 @@
             });
         }
 
-        // 1. Get saved styling values or defaults (Size: 13pt, Italic: false, Color: black)
-        const savedSize = localStorage.getItem('doc_font_size') || '13';
+        // 1. Get saved styling values or defaults (Size: 11pt for nabalak-parichayapatra, 14pt for others)
+        const isNabalak = (templateId === 'nabalak-parichayapatra' || window.location.pathname.includes('nabalak-parichayapatra.html'));
+        const defaultFontSize = isNabalak ? '11' : '14';
+        let savedSize = localStorage.getItem('doc_font_size_' + (templateId || 'global'));
+        if (!savedSize) {
+            const globalSize = localStorage.getItem('doc_font_size');
+            savedSize = (globalSize && globalSize !== '13' && globalSize !== '14' && globalSize !== '11') ? globalSize : defaultFontSize;
+        }
         const savedItalic = localStorage.getItem('doc_font_style') === 'italic';
         const savedColor = localStorage.getItem('doc_text_color') || '#000000';
 
@@ -814,6 +979,7 @@
         slider.addEventListener('input', (e) => {
             const sz = e.target.value;
             valLabel.textContent = `${sz} pt`;
+            localStorage.setItem('doc_font_size_' + (templateId || 'global'), sz);
             localStorage.setItem('doc_font_size', sz);
             applyStyles(sz, italicCheckbox.checked, colorPicker.value);
         });

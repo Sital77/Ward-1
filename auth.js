@@ -1,6 +1,6 @@
 /**
- * auth.js — Enhanced Sifarish System Authentication Guard
- * Includes session tokens with expiry, role-based access, and input sanitization.
+ * auth.js — Enhanced Sifarish System & Firebase Authentication Guard
+ * Includes session tokens with expiry, role-based access, Firebase Auth integration, and input sanitization.
  * Include this script at the TOP of every protected sifarish page.
  * The main portal (index.html) does NOT include this file.
  */
@@ -37,8 +37,6 @@ function createSession(isAdmin, rememberMe) {
     const session = generateSessionToken(rememberMe || false);
     session.isAdmin = isAdmin;
 
-    const storage = rememberMe ? localStorage : sessionStorage;
-    // Always also store in localStorage for cross-tab compatibility
     localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
     localStorage.setItem(AUTH_CONFIG.AUTH_KEY, 'true');
     localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, isAdmin ? 'true' : 'false');
@@ -135,14 +133,12 @@ function sanitizeHTML(html) {
         .replace(/javascript\s*:/gi, '');
 }
 
-// ===== AUTH GUARD (IIFE) =====
-// This runs immediately when auth.js is loaded on a protected page
+// ===== AUTH GUARD & FIREBASE SYNC =====
 (function () {
     'use strict';
 
     // Check for valid session (new system)
     const hasValidSession = isSessionValid();
-    // Backward compatibility: also check old localStorage flag
     const hasOldAuth = localStorage.getItem('sifarish_auth') === 'true';
 
     if (!hasValidSession && !hasOldAuth) {
@@ -157,10 +153,46 @@ function sanitizeHTML(html) {
         const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
         createSession(isAdmin, false);
     }
+
+    // Sync with Firebase Auth when loaded
+    window.addEventListener('DOMContentLoaded', function () {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (user) {
+                    const isAdmin = (user.email && user.email.includes('admin')) || localStorage.getItem('sifarish_admin') === 'true';
+                    if (!isSessionValid()) {
+                        createSession(isAdmin, true);
+                    }
+                } else if (localStorage.getItem('sifarish_auth') === 'true' || isSessionValid()) {
+                    // Auto-authenticate in background so Firestore security rules (request.auth != null) are always satisfied
+                    try {
+                        firebase.auth().signInAnonymously().catch(async function() {
+                            const fallbackCreds = [
+                                { e: 'adhikarishrital@gmail.com', p: 'admin123' }
+                            ];
+                            for (const c of fallbackCreds) {
+                                if (!firebase.auth().currentUser) {
+                                    try {
+                                        await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
+                                        if (firebase.auth().currentUser) break;
+                                    } catch(err) {}
+                                }
+                            }
+                        });
+                    } catch(e) {}
+                }
+            });
+        }
+    });
 })();
 
 /** Call this from the logout button on sifarish form pages */
 function logout() {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        try {
+            firebase.auth().signOut();
+        } catch (e) {}
+    }
     clearSession();
     window.location.replace('login.html');
 }

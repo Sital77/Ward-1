@@ -17,16 +17,19 @@ const db  = firebase.firestore();
 
 let globalDatabase = [];
 
-// Real-time listener for abhilekhRecords
-db.collection("abhilekhRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// Auth ready भएपछि मात्र snapshot listener start गर्ने
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("abhilekhRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        renderDatabaseTable();
+        populateBirthRecordsDropdown();
     });
-    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-    renderDatabaseTable();
-    populateBirthRecordsDropdown();
-});
+}).catch(() => {});
+
 
 function populateBirthRecordsDropdown() {
     const select = document.getElementById('inPullBirthRecord');

@@ -19,15 +19,18 @@ let globalDatabase = [];
 let rowCounter = 0;
 let activeRowIds = [];
 
-// Real-time listener
-db.collection("gharKayamRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// Auth ready भएपछि मात्र snapshot listener start गर्ने
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("gharKayamRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        renderDatabaseTable();
     });
-    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-    renderDatabaseTable();
-});
+}).catch(() => {});
+
 
 // ── Helpers ─────────────────────────────────────────
 function toNepaliDigit(num) {

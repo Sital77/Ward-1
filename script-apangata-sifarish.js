@@ -17,15 +17,18 @@ const db  = firebase.firestore();
 
 let globalDatabase = [];
 
-// Real-time listener for apangataRecords
-db.collection("apangataRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// Auth ready भएपछि मात्र snapshot listener start गर्ने
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("apangataRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        renderDatabaseTable();
     });
-    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-    renderDatabaseTable();
-});
+}).catch(() => {});
+
 
 // ── Helpers ─────────────────────────────────────────
 function toNepaliDigit(num) {

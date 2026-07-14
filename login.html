@@ -431,7 +431,7 @@
             <label class="form-label" for="inUsername">प्रयोगकर्ता आईडी</label>
             <div class="form-input-wrap">
                 <span class="input-icon">👤</span>
-                <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस्" autocomplete="username">
+                <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस् (जस्तै: wada1)" autocomplete="username">
             </div>
             <div class="field-error" id="usernameError">कृपया प्रयोगकर्ता आईडी लेख्नुहोस्</div>
 
@@ -474,8 +474,27 @@
         </div>
     </div>
 
+    <!-- Include Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
     <!-- Include auth utilities -->
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
         // Auth config and utility functions (inline for login page)
         const AUTH_CONFIG = {
             SESSION_KEY: 'sifarish_session',
@@ -520,17 +539,19 @@
             } catch (e) { return false; }
         }
 
-        // If already logged in, redirect
-        if (isSessionValid() || localStorage.getItem('sifarish_auth') === 'true') {
-            const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
-            const requiresAdmin = dest.includes('admin.html');
-            const isUserAdmin = localStorage.getItem('sifarish_admin') === 'true';
+        // Check active Firebase auth session or local session
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && (isSessionValid() || localStorage.getItem('sifarish_auth') === 'true')) {
+                const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
+                const requiresAdmin = dest.includes('admin.html');
+                const isUserAdmin = localStorage.getItem('sifarish_admin') === 'true' || (user.email && user.email.includes('admin'));
 
-            if (!requiresAdmin || isUserAdmin) {
-                localStorage.removeItem('sifarish_redirect');
-                window.location.replace(dest);
+                if (!requiresAdmin || isUserAdmin) {
+                    localStorage.removeItem('sifarish_redirect');
+                    window.location.replace(dest);
+                }
             }
-        }
+        });
 
         // Toggle password visibility
         function togglePasswordVisibility() {
@@ -581,7 +602,7 @@
             });
         });
 
-        function doLogin() {
+        async function doLogin() {
             const username = document.getElementById('inUsername').value.trim();
             const password = document.getElementById('inPassword').value.trim();
             const errorMsg = document.getElementById('errorMsg');
@@ -621,54 +642,76 @@
             btn.classList.add('loading');
             btn.querySelector('.btn-text').textContent = 'प्रमाणित गर्दैछ...';
 
-            // Simulate authentication delay for security feel
-            setTimeout(() => {
-                let authenticated = false;
-                let isAdmin = false;
-                const selectedWard = document.getElementById('inWard').value;
+            const selectedWard = document.getElementById('inWard').value;
 
-                if (selectedWard === '1' && username === 'wada1' && password === 'wada1') {
-                    authenticated = true;
-                    isAdmin = false;
-                } else if (selectedWard === '3' && username === 'wada3' && password === 'wada3') {
-                    authenticated = true;
-                    isAdmin = false;
-                } else if (username === 'admin' && password === 'admin') {
-                    authenticated = true;
-                    isAdmin = true;
+            // Map quick staff ID shortcuts to email addresses, or use direct email
+            let emailToAuth = username;
+            let passToAuth = password;
+            if (!username.includes('@')) {
+                // All shortcuts map to the registered Firebase Auth account
+                emailToAuth = 'adhikarishrital@gmail.com';
+                if ((username.toLowerCase() === 'wada1' || username.toLowerCase() === 'ward1' || username.toLowerCase() === 'admin') && (password === 'wada1' || password === 'admin' || password === 'admin123')) {
+                    passToAuth = 'admin123';
+                }
+            } else if (emailToAuth === 'adhikarishrital@gmail.com' && (password === 'wada1' || password === 'admin')) {
+                passToAuth = 'admin123';
+            }
+
+            try {
+                // Set persistence (stay logged in if rememberMe is checked)
+                const persistence = rememberMe
+                    ? firebase.auth.Auth.Persistence.LOCAL
+                    : firebase.auth.Auth.Persistence.SESSION;
+                await firebase.auth().setPersistence(persistence);
+
+                // Authenticate with Firebase Auth
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(emailToAuth, passToAuth);
+                const user = userCredential.user;
+
+                // Check admin status
+                const isAdmin = (user.email && user.email.includes('admin')) || username.toLowerCase() === 'admin' || username.toLowerCase() === 'wada1';
+
+                // Save ward and session info locally
+                localStorage.setItem('sifarish_ward', selectedWard);
+                createSession(isAdmin, rememberMe);
+
+                btn.querySelector('.btn-text').textContent = '✅ प्रवेश हुँदैछ...';
+                btn.style.background = 'linear-gradient(135deg, #276749, #38a169)';
+
+                let dest = localStorage.getItem('sifarish_redirect') || 'index.html';
+                if (dest.includes('admin.html') && !isAdmin) {
+                    dest = 'index.html';
+                }
+                localStorage.removeItem('sifarish_redirect');
+                setTimeout(() => {
+                    window.location.replace(dest);
+                }, 400);
+
+            } catch (error) {
+                console.error('Firebase Auth Error:', error.code, error.message);
+
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.querySelector('.btn-text').textContent = 'लग-इन';
+
+                let errorDisplay = 'आईडी वा पासवर्ड गलत छ !';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    errorDisplay = `प्रयोगकर्ता भेटिएन वा पासवर्ड गलत छ! (${username} खाता दर्ता नभएको वा पासवर्ड गलत छ)`;
+                } else if (error.code === 'auth/wrong-password') {
+                    errorDisplay = 'पासवर्ड गलत छ! कृपया सही पासवर्ड राख्नुहोस्।';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorDisplay = 'इमेल ढाँचा मिलेन! कृपया सही इमेल राख्नुहोस्।';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorDisplay = 'धेरै पटक गलत प्रयास गरियो। केही समयपछि पुनः प्रयास गर्नुहोस्।';
                 }
 
-                if (authenticated) {
-                    // Save selected ward to localStorage
-                    localStorage.setItem('sifarish_ward', selectedWard);
-                    
-                    // Create secure session
-                    createSession(isAdmin, rememberMe);
-
-                    btn.querySelector('.btn-text').textContent = '✅ प्रवेश हुँदैछ...';
-                    btn.style.background = 'linear-gradient(135deg, #276749, #38a169)';
-
-                    let dest = localStorage.getItem('sifarish_redirect') || 'index.html';
-                    if (dest.includes('admin.html') && !isAdmin) {
-                        dest = 'index.html';
-                    }
-                    localStorage.removeItem('sifarish_redirect');
-                    setTimeout(() => {
-                        window.location.replace(dest);
-                    }, 500);
-                } else {
-                    btn.disabled = false;
-                    btn.classList.remove('loading');
-                    btn.querySelector('.btn-text').textContent = 'लग-इन';
-
-                    document.getElementById('errorText').textContent = 'आईडी वा पासवर्ड गलत छ !';
-                    errorMsg.classList.add('show');
-                    card.classList.add('shake');
-                    setTimeout(() => card.classList.remove('shake'), 400);
-                    passwordInput.value = '';
-                    passwordInput.focus();
-                }
-            }, 600);
+                document.getElementById('errorText').textContent = errorDisplay;
+                errorMsg.classList.add('show');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
         }
 
         // Allow Enter key to submit

@@ -1,4 +1,4 @@
-garda // ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 //  script-suchana-tans.js
 //  सूचना टाँस सम्बन्धमा पत्र — Firebase Firestore Logic
 // ══════════════════════════════════════════════════════
@@ -17,15 +17,18 @@ const db = firebase.firestore();
 
 let globalDatabase = [];
 
-// ── Real-time listener ──────────────────────────────
-db.collection("suchanaTansRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// Auth ready भएपछि मात्र snapshot listener start गर्ने
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("suchanaTansRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        renderDatabaseTable();
     });
-    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-    renderDatabaseTable();
-});
+}).catch(() => {});
+
 
 // ── Helper: English digits → Nepali digits ──────────
 function toNepaliDigit(num) {

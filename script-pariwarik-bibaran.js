@@ -17,15 +17,18 @@ let rowCounter = 0;
 let activeRowIds = [];
 let isFirstRowSynced = true;
 
-// ३. रियल-टाइम डाटाबेस सिङ्क
-db.collection("pariwarikRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// ३. रियल-टाइम डाटाबेस सिङ्क — Auth ready भएपछि मात्र
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("pariwarikRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        renderDatabaseTable();
     });
-    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-    renderDatabaseTable();
-});
+}).catch(() => {});
+
 
 // =========================================================================
 // फङ्सनहरूलाई 'window' मा जोड्नुपर्छ (किनकि यो मोड्युल हो)

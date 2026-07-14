@@ -16,16 +16,19 @@ let globalDatabase = [];
 let rowCounter = 0;
 let activeRowIds = [];
 
-// ३. रियल-टाइम डाटाबेस सिङ्क (कुनै कम्प्युटरमा डाटा थपिँदा आफैं अपडेट हुने)
-db.collection("batoPramanitRecords").onSnapshot((snapshot) => {
-    globalDatabase = [];
-    snapshot.forEach((doc) => {
-        globalDatabase.push({ id: doc.id, ...doc.data() });
+// ३. रियल-टाइम डाटाबेस सिङ्क — Auth ready भएपछि मात्र
+(window._firebaseAuthReady || Promise.resolve()).then(() => {
+    db.collection("batoPramanitRecords").onSnapshot((snapshot) => {
+        globalDatabase = [];
+        snapshot.forEach((doc) => {
+            globalDatabase.push({ id: doc.id, ...doc.data() });
+        });
+        // नयाँ सिफारिस माथि देखिने गरी समय (Timestamp) अनुसार मिलाउने
+        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        renderDatabaseTable();
     });
-    // नयाँ सिफारिस माथि देखिने गरी समय (Timestamp) अनुसार मिलाउने
-    globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
-    renderDatabaseTable();
-});
+}).catch(() => {});
+
 
 // =========================================================================
 // ५. HTML सँग काम गर्न फङ्सनहरूलाई 'window' मा जोड्नुपर्छ (किनकि यो मोड्युल हो)
