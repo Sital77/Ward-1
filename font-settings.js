@@ -35,64 +35,68 @@
 
     // Intercept firebase initializeApp to prevent duplicate app errors
     if (window.firebase) {
-        const originalInitializeApp = firebase.initializeApp;
-        firebase.initializeApp = function (config, name) {
-            if (!name && firebase.apps.length > 0) {
-                return firebase.apps[0];
-            }
-            return originalInitializeApp.apply(this, arguments);
+        const initAuthReadyPromise = () => {
+            if (window._firebaseAuthReady) return window._firebaseAuthReady;
+            window._firebaseAuthReady = new Promise((resolve) => {
+                const authReadyTimeout = setTimeout(() => {
+                    console.warn('[AuthReady] Timeout reached — resolving anyway');
+                    resolve();
+                }, 8000); // 8 second safety fallback
+
+                const tryAuth = async (user) => {
+                    clearTimeout(authReadyTimeout);
+                    if (user) {
+                        resolve();
+                        return;
+                    }
+                    try {
+                        await firebase.auth().signInAnonymously();
+                        resolve();
+                        return;
+                    } catch (e1) {
+                        const fallbackCreds = [
+                            { e: 'adhikarishrital@gmail.com', p: 'admin123' }
+                        ];
+                        for (const c of fallbackCreds) {
+                            try {
+                                await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
+                                if (firebase.auth().currentUser) {
+                                    resolve();
+                                    return;
+                                }
+                            } catch (e2) {}
+                        }
+                    }
+                    resolve();
+                };
+
+                if (firebase.auth && firebase.apps.length > 0) {
+                    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                        unsubscribe();
+                        tryAuth(user);
+                    });
+                } else {
+                    resolve();
+                }
+            });
+            return window._firebaseAuthReady;
         };
 
-        // Global Auth Ready Promise — resolves when Firebase Auth state is fully restored
-        // All Firestore operations should wait for this before executing
-        window._firebaseAuthReady = new Promise((resolve) => {
-            const authReadyTimeout = setTimeout(() => {
-                console.warn('[AuthReady] Timeout reached — resolving anyway');
-                resolve();
-            }, 8000); // 8 second safety fallback
-
-            const tryAuth = async (user) => {
-                clearTimeout(authReadyTimeout);
-                if (user) {
-                    // Already authenticated — good to go
-                    resolve();
-                    return;
-                }
-                // No user — try to authenticate
-                try {
-                    await firebase.auth().signInAnonymously();
-                    resolve();
-                    return;
-                } catch (e1) {
-                    // Anonymous auth might be disabled — try fallback credentials
-                    const fallbackCreds = [
-                        { e: 'adhikarishrital@gmail.com', p: 'admin123' }
-                    ];
-                    for (const c of fallbackCreds) {
-                        try {
-                            await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
-                            if (firebase.auth().currentUser) {
-                                resolve();
-                                return;
-                            }
-                        } catch (e2) {}
-                    }
-                }
-                // Even if auth failed, resolve so the app doesn't hang forever
-                // (font-settings.js write interceptors will handle permission-denied)
-                resolve();
-            };
-
-            if (firebase.auth) {
-                // Wait for the first auth state change (initial state restoration)
-                const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-                    unsubscribe(); // Only need the first callback
-                    tryAuth(user);
-                });
+        const originalInitializeApp = firebase.initializeApp;
+        firebase.initializeApp = function (config, name) {
+            let appResult;
+            if (!name && firebase.apps.length > 0) {
+                appResult = firebase.apps[0];
             } else {
-                resolve();
+                appResult = originalInitializeApp.apply(this, arguments);
             }
-        });
+            initAuthReadyPromise();
+            return appResult;
+        };
+
+        if (firebase.apps.length > 0) {
+            initAuthReadyPromise();
+        }
 
         // Dynamically redirect all Firestore collection queries to ward-specific collections for other wards
         if (firebase.firestore) {
