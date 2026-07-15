@@ -680,13 +680,7 @@
                 }
             }
 
-            const chkChildEl = document.getElementById('chkIsChild');
-            if (chkChildEl) {
-                const isChildAllowance = /बालबालिका|बच्चा|पोषण|जन्म\s*दर्ता/i.test(pastedText + " " + (targetGroupMatch ? targetGroupMatch[1] : ''));
-                if (isChildAllowance) {
-                    chkChildEl.checked = true;
-                }
-            }
+            // बालबालिका चेकबक्स प्रयोगकर्ताले आफै क्लिक गरेमा मात्र सक्रिय हुने (पूर्वनिर्धारित बन्द)
 
             if (extractCount > 0) {
                 showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू सफलतापूर्वक छानिए (Parsed) ।`);
@@ -764,9 +758,9 @@
             document.getElementById('lblFiscalYear').innerText = fiscalYear || '.................';
             document.getElementById('lblTrimester').innerText = trimester || '..................';
 
-            // Check child allowance / birth reg status instantly
+            // बालबालिका चेकबक्स प्रयोगकर्ताले आफै क्लिक गरेमा मात्र सक्रिय हुने (पूर्वनिर्धारित बन्द)
             const chkChildEl = document.getElementById('chkIsChild');
-            const isChild = (chkChildEl && chkChildEl.checked) || /बालबालिका|बच्चा|पोषण|जन्म\s*दर्ता/i.test(targetGroup);
+            const isChild = !!(chkChildEl && chkChildEl.checked);
 
             const lblInputCitLabelSpan = document.getElementById('lblInputCitLabelSpan');
             if (lblInputCitLabelSpan) {
