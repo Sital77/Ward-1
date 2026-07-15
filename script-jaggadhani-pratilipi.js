@@ -250,8 +250,11 @@ function updateDoc() {
             const sheetStr = r.sheet ? `सिट नं. ${r.sheet}, ` : '';
             summaryText = `(${sheetStr}कित्ता नं. ${r.kitta || '...'} को क्षेत्रफल: ${r.area || '...'})`;
         } else {
-            const sheetStr = sheetsList.length ? `सिट नं. ${sheetsList.join(', ')}, ` : '';
-            summaryText = `(${sheetStr}कित्ता नं. ${kittasList.join(', ' || '...')} को क्षेत्रफल: ${areasList.join(', ' || '...')})`;
+            const parts = rows.map(r => {
+                const sheetStr = (r.sheet && r.sheet !== '-') ? `सिट नं. ${r.sheet}, ` : '';
+                return `${sheetStr}कित्ता नं. ${r.kitta || '...'} को क्षेत्रफल: ${r.area || '...'}`;
+            });
+            summaryText = `(${parts.join(' तथा ')})`;
         }
         document.getElementById('lblLandSummarySpan').innerText = summaryText;
     }
