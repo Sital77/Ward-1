@@ -301,10 +301,22 @@
                 db.collection('sifarish_templates').doc(templateId).get().then((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
-                        if ((data.status === 'Active' || data.status === 'Published') && data.template_content) {
-                            injectTemplateHTML(data.template_content);
+                        let isOutdated = false;
+                        if (templateId === 'bank-sifarish' && (!data.template_content || !data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
+                            isOutdated = true;
                         }
-                        resolveTemplatePromise();
+
+                        if (isOutdated && !localOverride) {
+                            console.warn(`Template ${templateId} in Firestore is outdated. Re-seeding with updated local HTML...`);
+                            seedLocalContent(db, templateId)
+                                .then(resolveTemplatePromise)
+                                .catch(resolveTemplatePromise);
+                        } else if ((data.status === 'Active' || data.status === 'Published') && data.template_content) {
+                            injectTemplateHTML(data.template_content);
+                            resolveTemplatePromise();
+                        } else {
+                            resolveTemplatePromise();
+                        }
                     } else if (!localOverride) {
                         // Document doesn't exist yet, so automatically seed it from local HTML
                         seedLocalContent(db, templateId)
@@ -565,7 +577,7 @@
                 status: 'Active',
                 created_at: firebase.firestore.FieldValue.serverTimestamp(),
                 updated_at: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            }, { merge: true });
             console.log(`Successfully seeded sifarish template for ${id} in Firestore.`);
         } catch (e) {
             console.error("Self-seeding template failed:", e);
