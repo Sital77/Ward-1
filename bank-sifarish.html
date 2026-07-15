@@ -301,27 +301,34 @@
 
             <div class="row-grid">
                 <div class="form-group">
-                    <label>नागरिकता नं.:</label>
-                    <input type="text" id="inCitNo" placeholder="उदा: ०९३००२०-१९८" oninput="updateDoc()">
+                    <label id="lblInputCitLabel" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <span id="lblInputCitLabelSpan">नागरिकता नं. / जन्म दर्ता नं. (वैकल्पिक):</span>
+                    </label>
+                    <input type="text" id="inCitNo" placeholder="उदा: ०९३००२०-१९८ वा २०७९०५१२३४५" oninput="updateDoc()">
+                    <div style="margin-top: 4px; font-size: 0.85rem; color: #2b6cb0;">
+                        <label style="cursor:pointer; font-weight: normal; display: inline-flex; align-items: center; gap: 4px;">
+                            <input type="checkbox" id="chkIsChild" onchange="updateDoc()"> बालबालिका (जन्म दर्ता नं. देखाउनुहोस्)
+                        </label>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>नागरिकता जारी जिल्ला:</label>
-                    <input type="text" id="inCitDistrict" placeholder="झापा" oninput="updateDoc()">
+                    <label id="lblInputCitDistLabel">नागरिकता जारी जिल्ला (वैकल्पिक):</label>
+                    <input type="text" id="inCitDistrict" placeholder="उदा: झापा" oninput="updateDoc()">
                 </div>
             </div>
 
             <div class="form-group">
-                <label>लक्षित समूह:</label>
-                <input type="text" id="inTargetGroup" placeholder="उदा: विधवा" oninput="updateDoc()">
+                <label>लक्षित समूह (वैकल्पिक):</label>
+                <input type="text" id="inTargetGroup" placeholder="उदा: दलित बालबालिका वा विधवा" oninput="updateDoc()">
             </div>
 
             <div class="form-group">
-                <label>राष्ट्रिय परिचय पत्र नं.:</label>
+                <label>राष्ट्रिय परिचय पत्र नं. (वैकल्पिक):</label>
                 <input type="text" id="inNid" placeholder="उदा: १८७४५१९३८३" oninput="updateDoc()">
             </div>
 
             <div class="form-group">
-                <label>परिचय पत्र नम्बर (भत्ता कार्ड नं):</label>
+                <label>परिचय पत्र नम्बर (भत्ता कार्ड नं) (वैकल्पिक):</label>
                 <input type="text" id="inCardNo" placeholder="उदा: २०३८०९०८०२५०३" oninput="updateDoc()">
             </div>
 
@@ -455,29 +462,29 @@
             </div>
 
             <!-- ── Tapasil ── -->
-            <div style="margin-top:20px; font-weight:700; font-size:13.5pt; text-align: left;">तपसिल:</div>
-            <table class="tapasil-table">
-                <tr>
+            <div style="margin-top:20px; font-weight:700; font-size:13.5pt; text-align: left;" id="tapasilHeaderBlock">तपसिल:</div>
+            <table class="tapasil-table" id="tapasilTable">
+                <tr id="rowTapasilName">
                     <td class="label-col">नाम, थर</td>
                     <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilName">..................</span></td>
                 </tr>
-                <tr>
-                    <td class="label-col">नागरिकता नं.</td>
+                <tr id="rowTapasilCitNo">
+                    <td class="label-col" id="lblTapasilCitLabel">नागरिकता नं.</td>
                     <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilCitNo">..................</span></td>
                 </tr>
-                <tr>
+                <tr id="rowTapasilGroup">
                     <td class="label-col">लक्षित समूह</td>
                     <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilGroup">..................</span></td>
                 </tr>
-                <tr>
+                <tr id="rowTapasilNid">
                     <td class="label-col">राष्ट्रिय परिचय पत्र नं.</td>
                     <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilNid">..................</span></td>
                 </tr>
-                <tr>
+                <tr id="rowTapasilCardNo">
                     <td class="label-col">परिचय पत्र नम्बर</td>
                     <td class="sep-col">:</td>
                     <td class="val-col"><span id="lblTapasilCardNo">..................</span></td>
@@ -628,7 +635,7 @@
             const nameRegex = /देवनागरीमा\s*:\s*([^\r\n]+)/i;
             const cardNoRegex = /परिचयपत्र\s*नम्बर\s*:\s*([^\r\n]+)/i;
             const targetGroupRegex = /लक्षित\s*समूह\s*:\s*([^\r\n]+)/i;
-            const citizenRegex = /(?:नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर)\s*:\s*([^\r\n,]+)(?:,\s*([^\r\n]+))?/i;
+            const citizenRegex = /(?:नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर|जन्मदर्ता\s*नम्बर|जन्म\s*दर्ता\s*नम्बर|जन्म\s*दर्ता\s*नं\.?|नागरीकता\s*नम्बर)\s*:\s*([^\r\n,]+)(?:,\s*([^\r\n]+))?/i;
             const nidRegex = /राष्ट्रिय\s*परिचय\s*नम्बर(?:\s*लिएको\s*भए\s*सो\s*नम्बर)?\s*:\s*([^\r\n]+)/i;
 
             const nameMatch = pastedText.match(nameRegex);
@@ -661,6 +668,14 @@
             if (nidMatch) {
                 document.getElementById('inNid').value = nidMatch[1].trim();
                 extractCount++;
+            }
+
+            const chkChildEl = document.getElementById('chkIsChild');
+            if (chkChildEl) {
+                const isChildAllowance = /बालबालिका|बच्चा|पोषण|जन्म\s*दर्ता/i.test(pastedText + " " + (targetGroupMatch ? targetGroupMatch[1] : ''));
+                if (isChildAllowance) {
+                    chkChildEl.checked = true;
+                }
             }
 
             if (extractCount > 0) {
@@ -726,16 +741,83 @@
             document.getElementById('lblFiscalYear').innerText = fiscalYear || '.................';
             document.getElementById('lblTrimester').innerText = trimester || '..................';
 
-            // Tapasil details updating
-            document.getElementById('lblTapasilName').innerText = name || '..................';
+            // Check child allowance / birth reg status
+            const chkChildEl = document.getElementById('chkIsChild');
+            const isChild = (chkChildEl && chkChildEl.checked) || /बालबालिका|बच्चा|पोषण|जन्म\s*दर्ता/i.test(targetGroup);
+            if (chkChildEl && /बालबालिका|बच्चा|पोषण|जन्म\s*दर्ता/i.test(targetGroup) && !chkChildEl.checked) {
+                chkChildEl.checked = true;
+            }
+
+            const lblInputCitLabelSpan = document.getElementById('lblInputCitLabelSpan');
+            if (lblInputCitLabelSpan) {
+                lblInputCitLabelSpan.innerText = isChild ? "जन्म दर्ता नं. (वैकल्पिक):" : "नागरिकता नं. / जन्म दर्ता नं. (वैकल्पिक):";
+            }
+            const lblTapasilCitLabel = document.getElementById('lblTapasilCitLabel');
+            if (lblTapasilCitLabel) {
+                lblTapasilCitLabel.innerText = isChild ? "जन्म दर्ता नं." : "नागरिकता नं.";
+            }
+
+            // Tapasil details updating & conditional row visibility
+            const rowTapasilName = document.getElementById('rowTapasilName');
+            const rowTapasilCitNo = document.getElementById('rowTapasilCitNo');
+            const rowTapasilGroup = document.getElementById('rowTapasilGroup');
+            const rowTapasilNid = document.getElementById('rowTapasilNid');
+            const rowTapasilCardNo = document.getElementById('rowTapasilCardNo');
+
+            if (rowTapasilName) {
+                if (name.trim()) {
+                    rowTapasilName.style.display = '';
+                    document.getElementById('lblTapasilName').innerText = name.trim();
+                } else {
+                    rowTapasilName.style.display = 'none';
+                }
+            }
             
-            let citString = citNo;
-            if (citDistrict) citString += `, ${citDistrict}`;
-            document.getElementById('lblTapasilCitNo').innerText = citString || '..................';
+            let citString = citNo.trim();
+            if (citString && citDistrict.trim()) citString += `, ${citDistrict.trim()}`;
+            if (rowTapasilCitNo) {
+                if (citString) {
+                    rowTapasilCitNo.style.display = '';
+                    document.getElementById('lblTapasilCitNo').innerText = citString;
+                } else {
+                    rowTapasilCitNo.style.display = 'none';
+                }
+            }
             
-            document.getElementById('lblTapasilGroup').innerText = targetGroup || '..................';
-            document.getElementById('lblTapasilNid').innerText = nid || '......................';
-            document.getElementById('lblTapasilCardNo').innerText = cardNo || '..................';
+            if (rowTapasilGroup) {
+                if (targetGroup.trim()) {
+                    rowTapasilGroup.style.display = '';
+                    document.getElementById('lblTapasilGroup').innerText = targetGroup.trim();
+                } else {
+                    rowTapasilGroup.style.display = 'none';
+                }
+            }
+
+            if (rowTapasilNid) {
+                if (nid.trim()) {
+                    rowTapasilNid.style.display = '';
+                    document.getElementById('lblTapasilNid').innerText = nid.trim();
+                } else {
+                    rowTapasilNid.style.display = 'none';
+                }
+            }
+
+            if (rowTapasilCardNo) {
+                if (cardNo.trim()) {
+                    rowTapasilCardNo.style.display = '';
+                    document.getElementById('lblTapasilCardNo').innerText = cardNo.trim();
+                } else {
+                    rowTapasilCardNo.style.display = 'none';
+                }
+            }
+
+            const tapasilHeaderBlock = document.getElementById('tapasilHeaderBlock');
+            const tapasilTable = document.getElementById('tapasilTable');
+            const hasAnyVisibleRow = Boolean(name.trim() || citString || targetGroup.trim() || nid.trim() || cardNo.trim());
+            if (tapasilHeaderBlock && tapasilTable) {
+                tapasilHeaderBlock.style.display = hasAnyVisibleRow ? '' : 'none';
+                tapasilTable.style.display = hasAnyVisibleRow ? '' : 'none';
+            }
 
             // Signature
             const signSelect = document.getElementById('inSignAuthority').value;
