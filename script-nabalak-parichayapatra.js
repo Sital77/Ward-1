@@ -131,12 +131,50 @@ function copyBirthToPermanent() {
 // ── DOB & Age Converter ─────────────────────────────
 function autoConvertBsToAd() {
     try {
-        const bsDateStr = document.getElementById('inDOB_BS').value.trim();
-        const converter = window["@sbmdkl/nepali-date-converter"];
-        if (converter && typeof converter.bsToAd === 'function' && bsDateStr.includes('/')) {
-            const adDate = converter.bsToAd(bsDateStr);
-            if (adDate) {
-                document.getElementById('inDOB_AD').value = adDate;
+        const bsInputElem = document.getElementById('inDOB_BS');
+        if (!bsInputElem) return;
+        const bsDateStr = bsInputElem.value.trim();
+        if (!bsDateStr) return;
+
+        // Convert any Nepali digits (`०-९`) to English digits (`0-9`)
+        const engDateStr = toEnglishDigit(bsDateStr).replace(/[.-]/g, '/').trim();
+        const parts = engDateStr.split('/');
+        if (parts.length === 3) {
+            const yr = parseInt(parts[0], 10);
+            const mo = parseInt(parts[1], 10);
+            const da = parseInt(parts[2], 10);
+            if (!isNaN(yr) && !isNaN(mo) && !isNaN(da) && yr >= 1970 && yr <= 2100 && mo >= 1 && mo <= 12 && da >= 1 && da <= 32) {
+                const converter = window["@sbmdkl/nepali-date-converter"];
+                if (converter && typeof converter.bsToAd === 'function') {
+                    let adResult = null;
+                    const strDash = `${yr}-${String(mo).padStart(2, '0')}-${String(da).padStart(2, '0')}`;
+                    const strSlash = `${yr}/${String(mo).padStart(2, '0')}/${String(da).padStart(2, '0')}`;
+                    try {
+                        adResult = converter.bsToAd(strDash);
+                    } catch (err1) {
+                        try {
+                            adResult = converter.bsToAd(strSlash);
+                        } catch (err2) { }
+                    }
+
+                    let adFormatted = '';
+                    if (adResult instanceof Date || (typeof adResult === 'object' && adResult !== null && typeof adResult.getFullYear === 'function')) {
+                        const adYr = adResult.getFullYear();
+                        const adMo = String(adResult.getMonth() + 1).padStart(2, '0');
+                        const adDa = String(adResult.getDate()).padStart(2, '0');
+                        adFormatted = `${adYr}-${adMo}-${adDa}`;
+                    } else if (typeof adResult === 'string' && adResult.trim() !== '') {
+                        adFormatted = adResult.trim().replace(/\//g, '-');
+                    }
+
+                    if (adFormatted) {
+                        const adElem = document.getElementById('inDOB_AD');
+                        if (adElem && adElem.value !== adFormatted) {
+                            adElem.value = adFormatted;
+                            if (typeof updateDoc === 'function') updateDoc();
+                        }
+                    }
+                }
             }
         }
     } catch (e) { }
@@ -144,11 +182,24 @@ function autoConvertBsToAd() {
 
 function calculateApproxAge(bsDateStr) {
     if (!bsDateStr) return '....';
-    const parts = bsDateStr.split(/[-/]/);
+    const engDateStr = toEnglishDigit(bsDateStr);
+    const parts = engDateStr.split(/[-/.]/);
     if (parts.length > 0) {
         const yr = parseInt(parts[0], 10);
         if (!isNaN(yr) && yr > 2000) {
-            const age = 2083 - yr;
+            let currBsYr = 2083;
+            try {
+                const converter = window["@sbmdkl/nepali-date-converter"];
+                if (converter && typeof converter.adToBs === 'function') {
+                    const today = new Date();
+                    const bsToday = converter.adToBs(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
+                    if (typeof bsToday === 'string') {
+                        const todayYr = parseInt(bsToday.split(/[-/.]/)[0], 10);
+                        if (!isNaN(todayYr) && todayYr > 2000) currBsYr = todayYr;
+                    }
+                }
+            } catch (e) { }
+            const age = currBsYr - yr;
             return age > 0 ? toNepaliDigit(age) : '०';
         }
     }
@@ -277,18 +328,20 @@ function updateDoc() {
     const dobAD = document.getElementById('inDOB_AD').value.trim();
 
     // Split DOB BS
-    const bsParts = dobBS.split(/[-/]/);
-    if (document.getElementById('lblDOB_BS_Year')) document.getElementById('lblDOB_BS_Year').innerText = bsParts[0] || '.........';
-    if (document.getElementById('lblDOB_BS_Month')) document.getElementById('lblDOB_BS_Month').innerText = bsParts[1] || '...............';
-    if (document.getElementById('lblDOB_BS_Day')) document.getElementById('lblDOB_BS_Day').innerText = bsParts[2] || '................';
+    const engDobBS = toEnglishDigit(dobBS);
+    const bsParts = engDobBS.split(/[-/.]/);
+    if (document.getElementById('lblDOB_BS_Year')) document.getElementById('lblDOB_BS_Year').innerText = bsParts[0] ? toNepaliDigit(bsParts[0]) : '.........';
+    if (document.getElementById('lblDOB_BS_Month')) document.getElementById('lblDOB_BS_Month').innerText = bsParts[1] ? toNepaliDigit(bsParts[1].padStart(2, '0')) : '...............';
+    if (document.getElementById('lblDOB_BS_Day')) document.getElementById('lblDOB_BS_Day').innerText = bsParts[2] ? toNepaliDigit(bsParts[2].padStart(2, '0')) : '................';
 
     // Split DOB AD
-    const adParts = dobAD.split(/[-/]/);
+    const engDobAD = toEnglishDigit(dobAD);
+    const adParts = engDobAD.split(/[-/.]/);
     if (document.getElementById('lblDOB_AD_Year')) document.getElementById('lblDOB_AD_Year').innerText = adParts[0] || '.........';
-    if (document.getElementById('lblDOB_AD_Month')) document.getElementById('lblDOB_AD_Month').innerText = adParts[1] || '...............';
-    if (document.getElementById('lblDOB_AD_Day')) document.getElementById('lblDOB_AD_Day').innerText = adParts[2] || '................';
+    if (document.getElementById('lblDOB_AD_Month')) document.getElementById('lblDOB_AD_Month').innerText = adParts[1] ? adParts[1].padStart(2, '0') : '...............';
+    if (document.getElementById('lblDOB_AD_Day')) document.getElementById('lblDOB_AD_Day').innerText = adParts[2] ? adParts[2].padStart(2, '0') : '................';
 
-    if (document.getElementById('lblDOB_Sif')) document.getElementById('lblDOB_Sif').innerText = dobBS || '................';
+    if (document.getElementById('lblDOB_Sif')) document.getElementById('lblDOB_Sif').innerText = dobBS ? toNepaliDigit(engDobBS.replace(/[.-]/g, '/')) : '................';
     if (document.getElementById('lblAge_Sif')) document.getElementById('lblAge_Sif').innerText = calculateApproxAge(dobBS);
 
     // 3. Gender, Religion, Caste, Contact

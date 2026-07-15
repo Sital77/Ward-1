@@ -459,11 +459,11 @@
                 <div class="form-group">
                     <label>जन्म मिति (वि.सं.) * :</label>
                     <input type="text" id="inDOB_BS" placeholder="२०६६/०१/०१"
-                        oninput="autoConvertBsToAd(); updateDoc()">
+                        oninput="autoConvertBsToAd(); updateDoc()" onchange="autoConvertBsToAd(); updateDoc()">
                 </div>
                 <div class="form-group">
                     <label>Date of Birth (AD) * :</label>
-                    <input type="text" id="inDOB_AD" placeholder="2009-04-14" oninput="updateDoc()">
+                    <input type="text" id="inDOB_AD" placeholder="2009-04-14" oninput="updateDoc()" onchange="updateDoc()">
                 </div>
             </div>
         </div>
