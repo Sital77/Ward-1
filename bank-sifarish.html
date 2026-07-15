@@ -631,12 +631,12 @@
                 return;
             }
 
-            // Regex definition based on target formats
-            const nameRegex = /देवनागरीमा\s*:\s*([^\r\n]+)/i;
-            const cardNoRegex = /परिचयपत्र\s*नम्बर\s*:\s*([^\r\n]+)/i;
-            const targetGroupRegex = /लक्षित\s*समूह\s*:\s*([^\r\n]+)/i;
-            const citizenRegex = /(?:नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर|जन्मदर्ता\s*नम्बर|जन्म\s*दर्ता\s*नम्बर|जन्म\s*दर्ता\s*नं\.?|नागरीकता\s*नम्बर)\s*:\s*([^\r\n,]+)(?:,\s*([^\r\n]+))?/i;
-            const nidRegex = /राष्ट्रिय\s*परिचय\s*नम्बर(?:\s*लिएको\s*भए\s*सो\s*नम्बर)?\s*:\s*([^\r\n]+)/i;
+            // Comprehensive Regex definitions for Smart Copy Paste
+            const nameRegex = /(?:देवनागरीमा|नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|Name)\s*[:\-]\s*([^\r\n]+)/i;
+            const cardNoRegex = /(?:परिचयपत्र|परिचय\s*पत्र|भत्ता\s*कार्ड|कार्ड)\s*(?:नम्बर|नं\.?|No\.?)\s*[:\-]\s*([^\r\n]+)/i;
+            const targetGroupRegex = /(?:लक्षित\s*समूह|लक्षित\s*वर्ग|समूह|Target\s*Group)\s*[:\-]\s*([^\r\n]+)/i;
+            const citizenRegex = /(?:नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर|नागरिकता\s*नं\.?|जन्मदर्ता\s*नम्बर|जन्म\s*दर्ता\s*नम्बर|जन्म\s*दर्ता\s*नं\.?|नागरीकता\s*नम्बर|जन्मदर्ता\s*नं\.?|Citizenship\/Birth\s*Reg\.?\s*No\.?)\s*[:\-]\s*([^\r\n,]+)(?:,\s*([^\r\n]+))?/i;
+            const nidRegex = /(?:राष्ट्रिय\s*परिचय\s*नम्बर|राष्ट्रिय\s*परिचयपत्र\s*नम्बर|राष्ट्रिय\s*परिचय\s*पत्र\s*नम्बर|राष्ट्रिय\s*परिचय\s*पत्र\s*नं\.?|NID)(?:\s*लिएको\s*भए\s*सो\s*नम्बर)?\s*[:\-]\s*([^\r\n]+)/i;
 
             const nameMatch = pastedText.match(nameRegex);
             const cardNoMatch = pastedText.match(cardNoRegex);
@@ -680,10 +680,10 @@
 
             if (extractCount > 0) {
                 showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू सफलतापूर्वक छानिए (Parsed) ।`);
-                updateDoc();
             } else {
                 showBadge(false, `❌ मिल्ने विवरण फेला परेन । ढाँचा जाँच गर्नुहोस् ।`);
             }
+            updateDoc();
         }
 
         function showBadge(success, message) {
@@ -741,12 +741,9 @@
             document.getElementById('lblFiscalYear').innerText = fiscalYear || '.................';
             document.getElementById('lblTrimester').innerText = trimester || '..................';
 
-            // Check child allowance / birth reg status
+            // Check child allowance / birth reg status instantly
             const chkChildEl = document.getElementById('chkIsChild');
             const isChild = (chkChildEl && chkChildEl.checked) || /बालबालिका|बच्चा|पोषण|जन्म\s*दर्ता/i.test(targetGroup);
-            if (chkChildEl && /बालबालिका|बच्चा|पोषण|जन्म\s*दर्ता/i.test(targetGroup) && !chkChildEl.checked) {
-                chkChildEl.checked = true;
-            }
 
             const lblInputCitLabelSpan = document.getElementById('lblInputCitLabelSpan');
             if (lblInputCitLabelSpan) {
@@ -765,32 +762,20 @@
             const rowTapasilCardNo = document.getElementById('rowTapasilCardNo');
 
             if (rowTapasilName) {
-                if (name.trim()) {
-                    rowTapasilName.style.display = '';
-                    document.getElementById('lblTapasilName').innerText = name.trim();
-                } else {
-                    rowTapasilName.style.display = 'none';
-                }
+                rowTapasilName.style.display = '';
+                document.getElementById('lblTapasilName').innerText = name.trim() ? name.trim() : '..................';
             }
             
             let citString = citNo.trim();
             if (citString && citDistrict.trim()) citString += `, ${citDistrict.trim()}`;
             if (rowTapasilCitNo) {
-                if (citString) {
-                    rowTapasilCitNo.style.display = '';
-                    document.getElementById('lblTapasilCitNo').innerText = citString;
-                } else {
-                    rowTapasilCitNo.style.display = 'none';
-                }
+                rowTapasilCitNo.style.display = '';
+                document.getElementById('lblTapasilCitNo').innerText = citString ? citString : '..................';
             }
             
             if (rowTapasilGroup) {
-                if (targetGroup.trim()) {
-                    rowTapasilGroup.style.display = '';
-                    document.getElementById('lblTapasilGroup').innerText = targetGroup.trim();
-                } else {
-                    rowTapasilGroup.style.display = 'none';
-                }
+                rowTapasilGroup.style.display = '';
+                document.getElementById('lblTapasilGroup').innerText = targetGroup.trim() ? targetGroup.trim() : '..................';
             }
 
             if (rowTapasilNid) {
@@ -813,10 +798,9 @@
 
             const tapasilHeaderBlock = document.getElementById('tapasilHeaderBlock');
             const tapasilTable = document.getElementById('tapasilTable');
-            const hasAnyVisibleRow = Boolean(name.trim() || citString || targetGroup.trim() || nid.trim() || cardNo.trim());
             if (tapasilHeaderBlock && tapasilTable) {
-                tapasilHeaderBlock.style.display = hasAnyVisibleRow ? '' : 'none';
-                tapasilTable.style.display = hasAnyVisibleRow ? '' : 'none';
+                tapasilHeaderBlock.style.display = '';
+                tapasilTable.style.display = '';
             }
 
             // Signature
