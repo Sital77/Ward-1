@@ -545,7 +545,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 @media print {
     @page {
         size: A4;
-        margin: 0.58in 0.69in 0.31in 0.69in;
+        margin: 0.32in 0.67in 0.12in 0.67in;
     }
 
     .input-panel,
