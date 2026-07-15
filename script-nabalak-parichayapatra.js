@@ -129,10 +129,48 @@ function copyBirthToPermanent() {
 }
 
 // ── DOB & Age Converter ─────────────────────────────
+function autoFormatDateInput(elem, sep = '/') {
+    if (!elem) return;
+    let val = elem.value.trim();
+    if (!val) return;
+
+    // If pure 8 digits without separators (e.g., 20610202 or २०६१०२०२)
+    if (/^[०-९0-9]{8}$/.test(val)) {
+        elem.value = val.slice(0, 4) + sep + val.slice(4, 6) + sep + val.slice(6, 8);
+        return;
+    }
+    // If pure 5 digits (e.g., 20610 or २०६१०) -> user just typed the 5th digit
+    if (/^[०-९0-9]{5}$/.test(val)) {
+        elem.value = val.slice(0, 4) + sep + val.slice(4);
+        return;
+    }
+    // If pure 6 digits without separator (e.g., 206102 or २०६१०२)
+    if (/^[०-९0-9]{6}$/.test(val)) {
+        elem.value = val.slice(0, 4) + sep + val.slice(4, 6);
+        return;
+    }
+    // If pure 7 digits without separator (e.g., 2061020 or २०६१०२०)
+    if (/^[०-९0-9]{7}$/.test(val)) {
+        elem.value = val.slice(0, 4) + sep + val.slice(4, 6) + sep + val.slice(6);
+        return;
+    }
+    // If 4 digits + separator + 3 digits (e.g., 2061/020 or २०६१/०२० or 2061-020)
+    if (/^[०-९0-9]{4}[/.-][०-९0-9]{3}$/.test(val)) {
+        elem.value = val.slice(0, 7) + sep + val.slice(7);
+        return;
+    }
+    // If 4 digits + separator + 4 digits without second separator (e.g., 2061/0202 or २०६१/०२०२)
+    if (/^[०-९0-9]{4}[/.-][०-९0-9]{4}$/.test(val)) {
+        elem.value = val.slice(0, 7) + sep + val.slice(7, 9);
+        return;
+    }
+}
+
 function autoConvertBsToAd() {
     try {
         const bsInputElem = document.getElementById('inDOB_BS');
         if (!bsInputElem) return;
+        autoFormatDateInput(bsInputElem, '/');
         const bsDateStr = bsInputElem.value.trim();
         if (!bsDateStr) return;
 
@@ -324,6 +362,7 @@ function updateDoc() {
     if (document.getElementById('lblBirthReg_tbl')) document.getElementById('lblBirthReg_tbl').innerText = birthRegNo;
     if (document.getElementById('lblBirthRegEN_tbl')) document.getElementById('lblBirthRegEN_tbl').innerText = birthRegNo !== '................' ? toEnglishDigit(birthRegNo) : '................';
 
+    if (typeof autoFormatDateInput === 'function') autoFormatDateInput(document.getElementById('inDOB_AD'), '-');
     const dobBS = document.getElementById('inDOB_BS').value.trim();
     const dobAD = document.getElementById('inDOB_AD').value.trim();
 
