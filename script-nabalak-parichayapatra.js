@@ -388,8 +388,11 @@ function updateDoc() {
     const [genNP, genEN] = genderVal.split('|');
     if (document.getElementById('lblGenderNP_tbl')) document.getElementById('lblGenderNP_tbl').innerText = genNP || '................';
     if (document.getElementById('lblGenderEN_tbl')) document.getElementById('lblGenderEN_tbl').innerText = genEN || '................';
-    if (document.getElementById('lblRelation_Sif')) document.getElementById('lblRelation_Sif').innerText = (genNP === 'महिला') ? 'छोरी' : 'छोरा';
-    if (document.getElementById('lblRelation_P2_box')) document.getElementById('lblRelation_P2_box').innerText = (genNP === 'महिला') ? 'छोरी' : 'छोरा';
+    const relText = (genNP === 'महिला') ? 'छोरी' : ((genNP === 'अन्य') ? 'छोरा/छोरी' : 'छोरा');
+    const titleText = (genNP === 'महिला') ? 'सुश्री' : ((genNP === 'अन्य') ? 'श्री/सुश्री' : 'श्री');
+    if (document.getElementById('lblRelation_Sif')) document.getElementById('lblRelation_Sif').innerText = relText;
+    if (document.getElementById('lblRelation_P2_box')) document.getElementById('lblRelation_P2_box').innerText = relText;
+    if (document.getElementById('lblTitle_Sif')) document.getElementById('lblTitle_Sif').innerText = titleText;
 
     const relVal = document.getElementById('inReligion').value || '';
     const relENMap = { 'हिन्दू': 'Hindu', 'बौद्ध': 'Buddhist', 'किरात': 'Kirat', 'क्रिश्चियन': 'Christian', 'इस्लाम': 'Islam', 'अन्य': 'Other' };
