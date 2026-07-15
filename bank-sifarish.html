@@ -651,8 +651,13 @@
                 extractCount++;
             }
             if (cardNoMatch) {
-                document.getElementById('inCardNo').value = cardNoMatch[1].trim();
-                extractCount++;
+                let rawCard = cardNoMatch[1].trim();
+                if (/^[0-9०-९\s\-]+$/.test(rawCard) && /[0-9०-९]/.test(rawCard)) {
+                    document.getElementById('inCardNo').value = rawCard;
+                    extractCount++;
+                } else {
+                    document.getElementById('inCardNo').value = '';
+                }
             }
             if (targetGroupMatch) {
                 document.getElementById('inTargetGroup').value = targetGroupMatch[1].trim();
@@ -666,8 +671,13 @@
                 }
             }
             if (nidMatch) {
-                document.getElementById('inNid').value = nidMatch[1].trim();
-                extractCount++;
+                let rawNid = nidMatch[1].trim();
+                if (/^[0-9०-९\s\-]+$/.test(rawNid) && /[0-9०-९]/.test(rawNid)) {
+                    document.getElementById('inNid').value = rawNid;
+                    extractCount++;
+                } else {
+                    document.getElementById('inNid').value = '';
+                }
             }
 
             const chkChildEl = document.getElementById('chkIsChild');
@@ -706,11 +716,24 @@
             const miti    = document.getElementById('inMiti').value         || '';
             const ns      = document.getElementById('inNepalSamvat').value  || '';
             const name    = document.getElementById('inName').value         || '';
-            const cardNo  = document.getElementById('inCardNo').value       || '';
+            let cardNo    = document.getElementById('inCardNo').value       || '';
             const targetGroup = document.getElementById('inTargetGroup').value || '';
             const citNo   = document.getElementById('inCitNo').value        || '';
             const citDistrict = document.getElementById('inCitDistrict').value || '';
-            const nid     = document.getElementById('inNid').value          || '';
+            let nid       = document.getElementById('inNid').value          || '';
+
+            // यदि राष्ट्रिय परिचयपत्र वा भत्ता कार्ड नम्बरमा नम्बर (०-९ वा 0-9) बाहेक अरू शब्द वा अक्षर आएमा वा नम्बर नभएमा खाली गर्ने र नदेखाउने
+            if (nid.trim() && (!/^[0-9०-९\s\-]+$/.test(nid.trim()) || !/[0-9०-९]/.test(nid.trim()))) {
+                nid = '';
+                const inNidEl = document.getElementById('inNid');
+                if (inNidEl && inNidEl.value !== '') inNidEl.value = '';
+            }
+            if (cardNo.trim() && (!/^[0-9०-९\s\-]+$/.test(cardNo.trim()) || !/[0-9०-९]/.test(cardNo.trim()))) {
+                cardNo = '';
+                const inCardNoEl = document.getElementById('inCardNo');
+                if (inCardNoEl && inCardNoEl.value !== '') inCardNoEl.value = '';
+            }
+
             const fiscalYear = getFiscalYear();
             const trimester  = getSelectedTrimester();
 
