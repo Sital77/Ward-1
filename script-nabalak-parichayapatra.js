@@ -712,11 +712,11 @@ function populateFormForEdit(recordId) {
     if (r.motherCit) document.getElementById('inMotherCitNo').value = r.motherCit;
     if (r.motherNid) document.getElementById('inMotherNidNo').value = r.motherNid;
 
-    if (r.spouseNP) document.getElementById('inSpouseNameNP').value = r.spouseNP;
-    if (r.spouseAddr) document.getElementById('inSpouseAddress').value = r.spouseAddr;
-    if (r.spouseCit) document.getElementById('inSpouseCitNo').value = r.spouseCit;
-    if (r.spouseCitType) document.getElementById('inSpouseCitType').value = r.spouseCitType;
-    if (r.spouseNid) document.getElementById('inSpouseNidNo').value = r.spouseNid;
+    if (r.spouseNP && document.getElementById('inSpouseNameNP')) document.getElementById('inSpouseNameNP').value = r.spouseNP;
+    if (r.spouseAddr && document.getElementById('inSpouseAddress')) document.getElementById('inSpouseAddress').value = r.spouseAddr;
+    if (r.spouseCit && document.getElementById('inSpouseCitNo')) document.getElementById('inSpouseCitNo').value = r.spouseCit;
+    if (r.spouseCitType && document.getElementById('inSpouseCitType')) document.getElementById('inSpouseCitType').value = r.spouseCitType;
+    if (r.spouseNid && document.getElementById('inSpouseNidNo')) document.getElementById('inSpouseNidNo').value = r.spouseNid;
 
     if (r.guardianNid) document.getElementById('inGuardianNidNo').value = r.guardianNid;
 

@@ -110,9 +110,9 @@ function updateDoc() {
 
 // ── Print & Save ────────────────────────────────────
 async function printAndSaveSystem() {
-    const sandhiyar = document.getElementById('inSandhiyarName').value.trim();
-    if (!sandhiyar) {
-        alert("कृपया सँधियारको नाम अनिवार्य लेख्नुहोस् ।");
+    const chalaniInput = document.getElementById('inChalani');
+    if (!chalaniInput || !chalaniInput.value.trim()) {
+        alert("कृपया चलानी नं. अनिवार्य लेख्नुहोस् ।");
         return;
     }
 
