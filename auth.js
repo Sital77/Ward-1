@@ -148,6 +148,12 @@ function sanitizeHTML(html) {
         return;
     }
 
+    // If accessing admin page without admin privileges, block access and redirect to index.html
+    if (window.location.pathname.includes('admin.html') && !isAdminSession() && localStorage.getItem('sifarish_admin') !== 'true') {
+        window.location.replace('index.html');
+        return;
+    }
+
     // If old auth exists but no new session, migrate
     if (hasOldAuth && !hasValidSession) {
         const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
@@ -159,7 +165,7 @@ function sanitizeHTML(html) {
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().onAuthStateChanged(function (user) {
                 if (user) {
-                    const isAdmin = (user.email && user.email.includes('admin')) || localStorage.getItem('sifarish_admin') === 'true';
+                    const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
                     if (!isSessionValid()) {
                         createSession(isAdmin, true);
                     }

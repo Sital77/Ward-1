@@ -23,12 +23,12 @@
 
     <!-- Auth Guard -->
     <script>
-        if (window.location.search.includes('admin=true') || window.location.search.includes('bypass=true') || window.location.search.includes('demo=true')) {
-            localStorage.setItem('sifarish_auth', 'true');
-            localStorage.setItem('sifarish_admin', 'true');
-        } else if (localStorage.getItem('sifarish_auth') !== 'true' || localStorage.getItem('sifarish_admin') !== 'true') {
+        if (localStorage.getItem('sifarish_auth') !== 'true') {
             localStorage.setItem('sifarish_redirect', 'admin.html');
             window.location.replace('login.html');
+        } else if (localStorage.getItem('sifarish_admin') !== 'true') {
+            alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin (adhikarishrital@gmail.com) अनुमति आवश्यक छ।');
+            window.location.replace('index.html');
         }
 
         function adminLogout() {
@@ -38,6 +38,7 @@
             localStorage.removeItem('sifarish_auth');
             localStorage.removeItem('sifarish_admin');
             localStorage.removeItem('sifarish_session');
+            localStorage.removeItem('sifarish_user');
             window.location.replace('login.html');
         }
     </script>

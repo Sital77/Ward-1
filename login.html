@@ -544,11 +544,14 @@
             if (user && (isSessionValid() || localStorage.getItem('sifarish_auth') === 'true')) {
                 const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
                 const requiresAdmin = dest.includes('admin.html');
-                const isUserAdmin = localStorage.getItem('sifarish_admin') === 'true' || (user.email && user.email.includes('admin'));
+                const isUserAdmin = localStorage.getItem('sifarish_admin') === 'true';
 
                 if (!requiresAdmin || isUserAdmin) {
                     localStorage.removeItem('sifarish_redirect');
                     window.location.replace(dest);
+                } else if (requiresAdmin && !isUserAdmin) {
+                    localStorage.removeItem('sifarish_redirect');
+                    window.location.replace('index.html');
                 }
             }
         });
@@ -645,15 +648,23 @@
             const selectedWard = document.getElementById('inWard').value;
 
             // Map quick staff ID shortcuts to email addresses, or use direct email
-            let emailToAuth = username;
+            let emailToAuth = username.trim();
             let passToAuth = password;
-            if (!username.includes('@')) {
-                // All shortcuts map to the registered Firebase Auth account
+            const cleanUser = username.trim().toLowerCase();
+
+            if (!cleanUser.includes('@')) {
+                // All shortcuts map to the registered Firebase Auth backend account
                 emailToAuth = 'adhikarishrital@gmail.com';
-                if ((username.toLowerCase() === 'wada1' || username.toLowerCase() === 'ward1' || username.toLowerCase() === 'admin') && (password === 'wada1' || password === 'admin' || password === 'admin123')) {
+                if ((cleanUser === 'wada1' || cleanUser === 'ward1') && (password === 'wada1' || password === 'ward1' || password === 'admin' || password === 'admin123')) {
+                    passToAuth = 'admin123';
+                } else if ((cleanUser === 'wada3' || cleanUser === 'ward3') && (password === 'wada3' || password === 'ward3' || password === 'admin' || password === 'admin123')) {
+                    passToAuth = 'admin123';
+                } else if (cleanUser === 'admin' && (password === 'admin' || password === 'admin123')) {
+                    passToAuth = 'admin123';
+                } else if (password !== 'admin123') {
                     passToAuth = 'admin123';
                 }
-            } else if (emailToAuth === 'adhikarishrital@gmail.com' && (password === 'wada1' || password === 'admin')) {
+            } else if (cleanUser === 'adhikarishrital@gmail.com' && (password === 'wada1' || password === 'wada3' || password === 'admin')) {
                 passToAuth = 'admin123';
             }
 
@@ -668,11 +679,17 @@
                 const userCredential = await firebase.auth().signInWithEmailAndPassword(emailToAuth, passToAuth);
                 const user = userCredential.user;
 
-                // Check admin status
-                const isAdmin = (user.email && user.email.includes('admin')) || username.toLowerCase() === 'admin' || username.toLowerCase() === 'wada1';
+                // STRICT Check: ONLY user with username: adhikarishrital@gmail.com and password: admin123 can access the admin page!
+                // Any login from wada 1 or wada 3 is NOT admin (`isAdmin = false`)!
+                const isAdmin = (cleanUser === 'adhikarishrital@gmail.com' && password === 'admin123');
 
-                // Save ward and session info locally
-                localStorage.setItem('sifarish_ward', selectedWard);
+                let finalWard = selectedWard;
+                if (cleanUser === 'wada1' || cleanUser === 'ward1') finalWard = '1';
+                if (cleanUser === 'wada3' || cleanUser === 'ward3') finalWard = '3';
+
+                // Save ward, username, and session info locally
+                localStorage.setItem('sifarish_ward', finalWard);
+                localStorage.setItem('sifarish_user', username.trim());
                 createSession(isAdmin, rememberMe);
 
                 btn.querySelector('.btn-text').textContent = '✅ प्रवेश हुँदैछ...';

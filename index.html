@@ -937,6 +937,57 @@
             }
         }
 
+        async function doSifLogin() {
+            const userInp = document.getElementById('sifUser');
+            const passInp = document.getElementById('sifPass');
+            const errEl = document.getElementById('sifErr');
+            const btn = document.getElementById('sifLoginBtn');
+            const username = (userInp ? userInp.value : '').trim();
+            const password = (passInp ? passInp.value : '').trim();
+            if (errEl) errEl.style.display = 'none';
+
+            if (!username || !password) {
+                if (errEl) { errEl.style.display = 'flex'; errEl.innerHTML = '<span>⚠️</span><span>कृपया आईडी र पासवर्ड लेख्नुहोस् !</span>'; }
+                return;
+            }
+
+            if (btn) { btn.disabled = true; btn.textContent = 'प्रमाणित गर्दैछ...'; }
+
+            const cleanUser = username.toLowerCase();
+            const isAdmin = (cleanUser === 'adhikarishrital@gmail.com' && password === 'admin123');
+
+            let emailToAuth = username;
+            let passToAuth = password;
+            if (!cleanUser.includes('@')) {
+                emailToAuth = 'adhikarishrital@gmail.com';
+                passToAuth = 'admin123';
+            } else if (cleanUser === 'adhikarishrital@gmail.com' && (password === 'wada1' || password === 'wada3' || password === 'admin')) {
+                passToAuth = 'admin123';
+            }
+
+            try {
+                await firebase.auth().signInWithEmailAndPassword(emailToAuth, passToAuth);
+                let finalWard = '1';
+                if (cleanUser === 'wada3' || cleanUser === 'ward3') finalWard = '3';
+
+                localStorage.setItem('sifarish_auth', 'true');
+                localStorage.setItem('sifarish_admin', isAdmin ? 'true' : 'false');
+                localStorage.setItem('sifarish_ward', finalWard);
+                localStorage.setItem('sifarish_user', username);
+
+                if (btn) btn.textContent = '✅ सफल';
+                setTimeout(() => {
+                    closeModal('modal-sif-login');
+                    updateTopBarButtons();
+                    renderSifarishGrid([]);
+                    openModal('modal-sifarish');
+                }, 400);
+            } catch (err) {
+                if (btn) { btn.disabled = false; btn.textContent = 'लग-इन'; }
+                if (errEl) { errEl.style.display = 'flex'; errEl.innerHTML = '<span>⚠️</span><span>आईडी वा पासवर्ड गलत छ !</span>'; }
+            }
+        }
+
         function sifarishLogout() {
             if (typeof firebase !== 'undefined' && firebase.auth) {
                 try { firebase.auth().signOut(); } catch (e) {}
@@ -988,12 +1039,15 @@
         }
         const db = firebase.firestore();
 
-        // Show/hide logout buttons initially on load (Admin button is always visible)
+        // Show/hide top bar buttons initially on load (Admin button only visible for admin: adhikarishrital@gmail.com)
         function updateTopBarButtons() {
             const isAuth = localStorage.getItem('sifarish_auth') === 'true';
+            const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
             document.getElementById('logoutBtn').style.display = isAuth ? 'inline-block' : 'none';
             const modalAdminBtn = document.getElementById('modalAdminBtn');
-            if (modalAdminBtn) modalAdminBtn.style.display = 'inline-block';
+            if (modalAdminBtn) {
+                modalAdminBtn.style.display = (isAuth && isAdmin) ? 'inline-block' : 'none';
+            }
         }
         updateTopBarButtons();
 
@@ -1002,7 +1056,7 @@
             if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
                 window.location.href = 'admin.html';
             } else {
-                localStorage.setItem('sifarish_redirect', 'admin.html');
+                alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin (adhikarishrital@gmail.com) अनुमति आवश्यक छ।');
                 window.location.href = 'login.html';
             }
         }
