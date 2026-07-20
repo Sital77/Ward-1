@@ -115,29 +115,40 @@ function reindexFormRows() {
     });
 }
 
+// Safely sets innerText on an element by ID (null-safe for cloud template injection)
+function safeSetText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+    return el;
+}
+
 // Core Dynamic Preview Updates Sync Controller Engine
 function updateDoc() {
-    document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
-    document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '';
-    document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value || '........';
-    document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value || '........';
-    document.getElementById('lblOfficeName').innerText = document.getElementById('inOffice').value || '........';
-    document.getElementById('lblOfficeAddress').innerText = document.getElementById('inOfficeAddress').value ? document.getElementById('inOfficeAddress').value + ' ।' : '........ ।';
+    safeSetText('lblPatraSankhya', document.getElementById('inPatraSankhya').value);
+    safeSetText('lblChalani', document.getElementById('inChalani').value || '');
+    safeSetText('lblMiti', document.getElementById('inMiti').value || '........');
+    safeSetText('lblNepalSamvat', document.getElementById('inNepalSamvat').value || '........');
+    safeSetText('lblOfficeName', document.getElementById('inOffice').value || '........');
+
+    const officeAddr = document.getElementById('inOfficeAddress').value;
+    safeSetText('lblOfficeAddress', officeAddr ? officeAddr + ' ।' : '........ ।');
 
     const selectedWada = document.getElementById('inWadaNo').value;
-    document.getElementById('lblWadaBody').innerText = selectedWada;
-    document.getElementById('lblSabikAddress').innerText = 'गौरादह गा.वि.स. वडा नं. ' + (document.getElementById('inSabikWada').value || '...');
+    safeSetText('lblWadaBody', selectedWada);
+    safeSetText('lblSabikAddress', 'गौरादह गा.वि.स. वडा नं. ' + (document.getElementById('inSabikWada').value || '...'));
 
-    document.getElementById('lblOwnerName').innerText = document.getElementById('inName').value || '...........................';
+    safeSetText('lblOwnerName', document.getElementById('inName').value || '...........................');
 
     // Land Use Act Statement Controller
     const selectedZone = document.getElementById('inLandUseZone').value;
     const stmtBox = document.getElementById('lblLandUseStatement');
-    if (selectedZone === 'NONE') {
-        stmtBox.style.display = 'none';
-    } else {
-        stmtBox.style.display = 'block';
-        document.getElementById('lblSelectedZone').innerText = selectedZone;
+    if (stmtBox) {
+        if (selectedZone === 'NONE') {
+            stmtBox.style.display = 'none';
+        } else {
+            stmtBox.style.display = 'block';
+            safeSetText('lblSelectedZone', selectedZone);
+        }
     }
 
     const signSelect = document.getElementById('inSignAuthority').value;
@@ -146,9 +157,9 @@ function updateDoc() {
     if (signSelect === 'BLANK') {
         sigName = "";
         sigTitle = "";
-        lblSigName.style.borderTop = "none";
+        if (lblSigName) lblSigName.style.borderTop = "none";
     } else {
-        lblSigName.style.borderTop = "1.5px dashed #000";
+        if (lblSigName) lblSigName.style.borderTop = "1.5px dashed #000";
         if (signSelect === 'CUSTOM') {
             sigName = document.getElementById('inCustomSignName').value || '....................';
             sigTitle = document.getElementById('inCustomSignTitle').value || '....................';
@@ -158,31 +169,33 @@ function updateDoc() {
             sigTitle = signData[1];
         }
     }
-    lblSigName.innerText = sigName;
-    document.getElementById('lblSigTitle').innerText = sigTitle;
+    if (lblSigName) lblSigName.innerText = sigName;
+    safeSetText('lblSigTitle', sigTitle);
 
     const tbody = document.getElementById('outputTableBody');
-    tbody.innerHTML = '';
+    if (tbody) {
+        tbody.innerHTML = '';
 
-    activeRowIds.forEach((id, index) => {
-        const block = document.getElementById(id);
-        if (block) {
-            const checkedRadio = block.querySelector('input[type="radio"]:checked');
-            const tableRowHtml = `
-                <tr>
-                    <td>${toNepaliDigit(index + 1)}</td>
-                    <td>${selectedWada}</td>
-                    <td>${block.querySelector('.input-sit').value || '-'}</td>
-                    <td>${block.querySelector('.input-kitta').value || '-'}</td>
-                    <td>${block.querySelector('.input-area').value || '-'}</td>
-                    <td>${checkedRadio ? checkedRadio.value : '-'}</td>
-                    <td>${block.querySelector('.input-bato').value}</td>
-                    <td>${block.querySelector('.input-remarks').value || '-'}</td>
-                </tr>
-            `;
-            tbody.insertAdjacentHTML('beforeend', tableRowHtml);
-        }
-    });
+        activeRowIds.forEach((id, index) => {
+            const block = document.getElementById(id);
+            if (block) {
+                const checkedRadio = block.querySelector('input[type="radio"]:checked');
+                const tableRowHtml = `
+                    <tr>
+                        <td>${toNepaliDigit(index + 1)}</td>
+                        <td>${selectedWada}</td>
+                        <td>${block.querySelector('.input-sit').value || '-'}</td>
+                        <td>${block.querySelector('.input-kitta').value || '-'}</td>
+                        <td>${block.querySelector('.input-area').value || '-'}</td>
+                        <td>${checkedRadio ? checkedRadio.value : '-'}</td>
+                        <td>${block.querySelector('.input-bato').value}</td>
+                        <td>${block.querySelector('.input-remarks').value || '-'}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', tableRowHtml);
+            }
+        });
+    }
 }
 
 // Trigger Print Framework and Synchronize State Matrix Into Storage
