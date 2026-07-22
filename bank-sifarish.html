@@ -365,6 +365,31 @@
                 </div>
             </div>
 
+            <!-- ── APPLICANT ADDRESS TOGGLE (OPTIONAL) ── -->
+            <div style="margin-top: 2px; margin-bottom: 12px;">
+                <label style="cursor:pointer; font-size: 0.88rem; color: #2b6cb0; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="chkCustomAddress" onchange="toggleCustomAddress(); updateDoc()">
+                    🏠 निवेदकको ठेगाना फरक छ (वडा १, गौरादह बाहेक अन्य)
+                </label>
+            </div>
+
+            <div id="secCustomAddress" style="display:none; background: #ebf8ff; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #90cdf4; margin-bottom: 14px;">
+                <div class="row-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.8rem; color:#2c5282;">जिल्ला:</label>
+                        <input type="text" id="inApplicantDistrict" value="झापा" placeholder="उदा: झापा" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.8rem; color:#2c5282;">पालिका:</label>
+                        <input type="text" id="inApplicantPalika" value="गौरादह नगरपालिका" placeholder="उदा: गौरादह नगरपालिका" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.8rem; color:#2c5282;">वडा नं.:</label>
+                        <input type="text" id="inApplicantWadaNo" value="१" placeholder="उदा: १" oninput="updateDoc()">
+                    </div>
+                </div>
+            </div>
+
             <!-- ── MODE 1: OPEN ACCOUNT FIELDS ── -->
             <div id="secOpenAccount">
                 <div class="form-group">
@@ -679,6 +704,16 @@
             if (show) renderDatabaseTable();
         }
 
+        // ── Address Toggle Handler ──────────────────────────────
+        function toggleCustomAddress() {
+            const chk = document.getElementById('chkCustomAddress');
+            const sec = document.getElementById('secCustomAddress');
+            if (chk && sec) {
+                sec.style.display = chk.checked ? 'block' : 'none';
+            }
+            updateDoc();
+        }
+
         // ── Relation Custom Input Toggle ────────────────────────
         function toggleCustomRelation() {
             const selEl = document.getElementById('inRelationSelect');
@@ -859,6 +894,18 @@
             document.getElementById('lblReceiverOffice').innerText = recOffice;
             document.getElementById('lblReceiverLocation').innerText = recLoc;
 
+            // Applicant Address Calculation
+            let appDist = "झापा";
+            let appPalika = "गौरादह नगरपालिका";
+            let appWada = "१";
+
+            const chkAddr = document.getElementById('chkCustomAddress');
+            if (chkAddr && chkAddr.checked) {
+                appDist = document.getElementById('inApplicantDistrict').value.trim() || "झापा";
+                appPalika = document.getElementById('inApplicantPalika').value.trim() || "गौरादह नगरपालिका";
+                appWada = document.getElementById('inApplicantWadaNo').value.trim() || "१";
+            }
+
             const bodyTextEl = document.getElementById('bodyText');
 
             if (isDeceased) {
@@ -898,7 +945,7 @@
                 const deceasedCitNo = document.getElementById('inDeceasedCitNo').value.trim() || '..................';
 
                 bodyTextEl.innerHTML = `
-                    प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं.१ मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ l
+                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ l
                 `;
 
                 document.getElementById('tapasilHeaderBlock').innerText = "मृतकको विवरण:";
@@ -949,7 +996,7 @@
                 const trimester  = getSelectedTrimester();
 
                 bodyTextEl.innerHTML = `
-                    प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं.१ मा बसोबास गर्ने
+                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने
                     <span id="lblName" style="font-weight:bold;">${name ? name : '.....................'}</span>को
                     लक्षित समूह <span id="lblTargetGroup" style="font-weight:bold;">${targetGroup ? targetGroup : '...........'}</span> को
                     आ.व. <span id="lblFiscalYear" style="font-weight:bold;">${fiscalYear ? fiscalYear : '.................'}</span> को
@@ -1041,6 +1088,12 @@
                 relation = document.getElementById('inRelation').value.trim();
             }
 
+            const chkAddr = document.getElementById('chkCustomAddress');
+            const isCustomAddress = !!(chkAddr && chkAddr.checked);
+            const applicantDistrict = isCustomAddress ? (document.getElementById('inApplicantDistrict').value.trim() || 'झापा') : 'झापा';
+            const applicantPalika   = isCustomAddress ? (document.getElementById('inApplicantPalika').value.trim() || 'गौरादह नगरपालिका') : 'गौरादह नगरपालिका';
+            const applicantWadaNo   = isCustomAddress ? (document.getElementById('inApplicantWadaNo').value.trim() || '१') : '१';
+
             const obj = {
                 sifarishMode:        mode,
                 ay:                  (document.getElementById('inPatraSankhya') || {}).value || '',
@@ -1054,6 +1107,12 @@
                 name:                name,
                 citNo:               document.getElementById('inCitNo').value.trim()        || '',
                 citDistrict:         document.getElementById('inCitDistrict').value.trim()  || '',
+
+                // Address fields
+                isCustomAddress:     isCustomAddress,
+                applicantDistrict:   applicantDistrict,
+                applicantPalika:     applicantPalika,
+                applicantWadaNo:     applicantWadaNo,
                 
                 // Account Opening specific
                 cardNo:              document.getElementById('inCardNo').value.trim()        || '',
@@ -1171,6 +1230,17 @@
             document.getElementById('inName').value               = rec.name || '';
             document.getElementById('inCitNo').value              = rec.citNo || '';
             document.getElementById('inCitDistrict').value         = rec.citDistrict || '';
+
+            // Restore Address
+            const chkAddr = document.getElementById('chkCustomAddress');
+            const isCustomAddr = !!(rec.isCustomAddress || (rec.applicantDistrict && rec.applicantDistrict !== 'झापा') || (rec.applicantPalika && rec.applicantPalika !== 'गौरादह नगरपालिका') || (rec.applicantWadaNo && rec.applicantWadaNo !== '१'));
+            if (chkAddr) {
+                chkAddr.checked = isCustomAddr;
+                toggleCustomAddress();
+            }
+            document.getElementById('inApplicantDistrict').value = rec.applicantDistrict || 'झापा';
+            document.getElementById('inApplicantPalika').value   = rec.applicantPalika   || 'गौरादह नगरपालिका';
+            document.getElementById('inApplicantWadaNo').value   = rec.applicantWadaNo   || '१';
 
             document.getElementById('inCardNo').value             = rec.cardNo || '';
             document.getElementById('inTargetGroup').value        = rec.targetGroup || '';
