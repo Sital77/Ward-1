@@ -25,6 +25,43 @@
             text-align: center;
         }
 
+        /* Mode Toggle Tabs - PAN Sifarish Style */
+        .mode-toggle-wrap {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            background: #edf2f7;
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e0;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 11px 8px;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4a5568;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .mode-btn.active-kholne {
+            background: linear-gradient(135deg, #2b6cb0, #3182ce);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
+        }
+
+        .mode-btn.active-banda {
+            background: linear-gradient(135deg, #c53030, #9b2c2c);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
+        }
+
         .section-card {
             border-radius: 10px;
             padding: 14px 14px 6px 14px;
@@ -230,20 +267,20 @@
         </div>
 
         <input type="hidden" id="editRecordIndex" value="">
+        <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
 
-        <!-- ══ SIFARISH MODE SELECTION CARD ══ -->
-        <div class="section-card" style="background: #edf2f7; border: 1.5px solid #cbd5e0;">
-            <div class="section-label" style="color: #2d3748;">📌 सिफारिसको प्रकार छान्नुहोस्:</div>
-            <div class="form-group">
-                <select id="inSifarishMode" class="bank-select-dropdown" onchange="toggleSifarishMode(); updateDoc()">
-                    <option value="OPEN_ACCOUNT" selected>🏦 १. सामाजिक सुरक्षा बैंक खाता खोल्ने सिफारिस</option>
-                    <option value="CLOSE_ACCOUNT_DECEASED">⚰️ २. मृतकको बैंक खाता बन्द तथा रकम निकासा सिफारिस</option>
-                </select>
-            </div>
+        <!-- ── MODE TOGGLE (PAN Sifarish Style Tabs) ── -->
+        <div class="mode-toggle-wrap">
+            <button id="btnKholne" class="mode-btn active-kholne" onclick="setMode('OPEN_ACCOUNT')">
+                📂 बैंक खाता खोल्ने सिफारिस
+            </button>
+            <button id="btnBanda" class="mode-btn" onclick="setMode('CLOSE_ACCOUNT_DECEASED')">
+                🔒 मृतकको बैंक खाता बन्द सिफारिस
+            </button>
         </div>
 
         <!-- ══ AUTO EXTRACT / PASTE SECTION ══ -->
-        <div class="section-card paste-section">
+        <div class="section-card paste-section" id="secPasteBox">
             <div class="section-label">📋 कपी-पेस्ट बक्स (Auto-Extract)</div>
             <div class="form-group">
                 <textarea id="pasteTextarea" class="paste-textarea" 
@@ -306,7 +343,7 @@
 
             <!-- Beneficiary / Applicant Details -->
             <div class="form-group">
-                <label id="lblInputNameTitle">निवेदक / हकदारको पुरा नाम:</label>
+                <label id="lblInputNameTitle">लाभग्राही / निवेदकको पुरा नाम:</label>
                 <input type="text" id="inName" placeholder="उदा: राम बहादुर श्रेष्ठ" oninput="updateDoc()">
             </div>
 
@@ -627,18 +664,30 @@
             if (show) renderDatabaseTable();
         }
 
-        // ── Sifarish Mode Toggle ──────────────────────────────
-        function toggleSifarishMode() {
-            const mode = (document.getElementById('inSifarishMode') || {}).value || 'OPEN_ACCOUNT';
+        // ── Mode Toggle Button Tabs (PAN Style) ────────────────
+        function setMode(mode) {
+            const btnKholne = document.getElementById('btnKholne');
+            const btnBanda  = document.getElementById('btnBanda');
             const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
+
+            if (isDeceased) {
+                btnKholne.className = 'mode-btn';
+                btnBanda.className = 'mode-btn active-banda';
+            } else {
+                btnKholne.className = 'mode-btn active-kholne';
+                btnBanda.className = 'mode-btn';
+            }
+
+            document.getElementById('currentMode').value = mode;
 
             document.getElementById('secOpenAccount').style.display = isDeceased ? 'none' : 'block';
             document.getElementById('secDeceasedAccount').style.display = isDeceased ? 'block' : 'none';
             document.getElementById('childChkBoxWrapper').style.display = isDeceased ? 'none' : 'block';
+            document.getElementById('secPasteBox').style.display = isDeceased ? 'none' : 'block';
 
             document.getElementById('formMainTitle').innerText = isDeceased 
-                ? "🏦 मृतकको बैंक खाता बन्द सिफारिस" 
-                : "🏦 बैंक सिफारिस (सा. सु. भत्ता)";
+                ? "🔒 मृतकको बैंक खाता बन्द सिफारिस" 
+                : "📂 बैंक खाता खोल्ने सिफारिस";
 
             document.getElementById('lblInputNameTitle').innerText = isDeceased 
                 ? "निवेदक / हकदारको पुरा नाम:" 
@@ -757,7 +806,7 @@
 
         // ── Live Preview Updater ──────────────────────────────
         function updateDoc() {
-            const mode    = (document.getElementById('inSifarishMode') || {}).value || 'OPEN_ACCOUNT';
+            const mode    = (document.getElementById('currentMode') || {}).value || 'OPEN_ACCOUNT';
             const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
 
             const ay      = (document.getElementById('inPatraSankhya') || {}).value || '';
@@ -938,7 +987,7 @@
             }
 
             const recordId = document.getElementById('editRecordIndex').value;
-            const mode = (document.getElementById('inSifarishMode') || {}).value || 'OPEN_ACCOUNT';
+            const mode = (document.getElementById('currentMode') || {}).value || 'OPEN_ACCOUNT';
 
             const obj = {
                 sifarishMode:        mode,
@@ -1044,10 +1093,8 @@
             document.getElementById('editRecordIndex').value = id;
             document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
 
-            if (rec.sifarishMode && document.getElementById('inSifarishMode')) {
-                document.getElementById('inSifarishMode').value = rec.sifarishMode;
-                toggleSifarishMode();
-            }
+            const mode = rec.sifarishMode || 'OPEN_ACCOUNT';
+            setMode(mode);
 
             document.getElementById('inChalani').value      = rec.chalani === '-' ? '' : (rec.chalani || '');
             document.getElementById('inMiti').value         = rec.miti || '';
@@ -1127,14 +1174,13 @@
             }
         }
 
-        // ── Nepal Sambat helper ───────────────────────────────
         function updateNepalSambatFromMiti() {
             // Keeps Sambat sync active
         }
 
         // Initialize on load
         window.onload = function() {
-            updateDoc();
+            setMode('OPEN_ACCOUNT');
         };
     </script>
 </body>
