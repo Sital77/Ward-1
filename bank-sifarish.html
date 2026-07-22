@@ -62,6 +62,58 @@
             box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
         }
 
+        /* Radio Scroll Chip Container */
+        .radio-scroll-container {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 6px;
+            background: #edf2f7;
+            border-radius: 10px;
+            scrollbar-width: thin;
+            white-space: nowrap;
+            border: 1.5px solid #cbd5e0;
+            margin-top: 4px;
+        }
+
+        .radio-scroll-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .radio-scroll-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .radio-chip {
+            flex: 0 0 auto;
+            cursor: pointer;
+        }
+
+        .radio-chip input[type="radio"] {
+            display: none;
+        }
+
+        .radio-chip span {
+            display: inline-block;
+            padding: 6px 13px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #4a5568;
+            background: #ffffff;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .radio-chip input[type="radio"]:checked + span {
+            background: #3182ce;
+            color: #ffffff;
+            border-color: #2b6cb0;
+            box-shadow: 0 2px 6px rgba(49, 130, 206, 0.3);
+        }
+
         .section-card {
             border-radius: 10px;
             padding: 14px 14px 6px 14px;
@@ -414,8 +466,23 @@
                 </div>
 
                 <div class="form-group">
-                    <label>मृतक सँगको नाता:</label>
-                    <input type="text" id="inRelation" placeholder="उदा: छोरा वा श्रीमती वा पति वा छोरी" oninput="updateDoc()">
+                    <label>मृतक सँगको नाता (छान्नुहोस् वा आफैँ लेख्नुहोस्):</label>
+                    <div class="radio-scroll-container" id="relationRadioGroup">
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="छोरा" onchange="selectRelation(this)" checked><span>छोरा</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="छोरी" onchange="selectRelation(this)"><span>छोरी</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="श्रीमती" onchange="selectRelation(this)"><span>श्रीमती</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="श्रीमान" onchange="selectRelation(this)"><span>श्रीमान</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="नाति" onchange="selectRelation(this)"><span>नाति</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="नातिनी" onchange="selectRelation(this)"><span>नातिनी</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="सासू" onchange="selectRelation(this)"><span>सासू</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="ससूरा" onchange="selectRelation(this)"><span>ससूरा</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="आमा" onchange="selectRelation(this)"><span>आमा</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="बाबु" onchange="selectRelation(this)"><span>बाबु</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="दाजु" onchange="selectRelation(this)"><span>दाजु</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="दिदी" onchange="selectRelation(this)"><span>दिदी</span></label>
+                        <label class="radio-chip"><input type="radio" name="relRadio" value="CUSTOM" onchange="selectRelation(this)"><span>✍️ आफैँ लेख्नुहोस्</span></label>
+                    </div>
+                    <input type="text" id="inRelation" placeholder="अन्य नाता लेख्नुहोस् (उदा: बुहारी, भतिज, आदि)..." style="display:none; margin-top:8px;" oninput="updateDoc()">
                 </div>
 
                 <div class="form-group">
@@ -664,6 +731,19 @@
             if (show) renderDatabaseTable();
         }
 
+        // ── Relation Radio Selection Handler ───────────────────
+        function selectRelation(radio) {
+            const customInput = document.getElementById('inRelation');
+            if (radio.value === 'CUSTOM') {
+                customInput.style.display = 'block';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+                customInput.value = radio.value;
+            }
+            updateDoc();
+        }
+
         // ── Mode Toggle Button Tabs (PAN Style) ────────────────
         function setMode(mode) {
             const btnKholne = document.getElementById('btnKholne');
@@ -691,7 +771,7 @@
 
             document.getElementById('lblInputNameTitle').innerText = isDeceased 
                 ? "निवेदक / हकदारको पुरा नाम:" 
-                : "लाभग्राहीको नाम:";
+                : "लाभव्यक्ति / निवेदकको पुरा नाम:";
 
             updateDoc();
         }
@@ -846,7 +926,20 @@
                     citInfoStr = ` (${citParts.join(', ')})`;
                 }
 
-                const relation = document.getElementById('inRelation').value.trim() || '.........';
+                // Get selected relation
+                let relation = "";
+                const selRelRadio = document.querySelector('input[name="relRadio"]:checked');
+                if (selRelRadio) {
+                    if (selRelRadio.value === 'CUSTOM') {
+                        relation = document.getElementById('inRelation').value.trim();
+                    } else {
+                        relation = selRelRadio.value;
+                    }
+                } else {
+                    relation = document.getElementById('inRelation').value.trim();
+                }
+                if (!relation) relation = '.........';
+
                 const deceasedName = document.getElementById('inDeceasedName').value.trim() || '.........................';
                 const deathDate = document.getElementById('inDeathDate').value.trim() || '.....................';
                 const deceasedAccNo = document.getElementById('inDeceasedAccountNo').value.trim() || '..................................';
@@ -989,6 +1082,14 @@
             const recordId = document.getElementById('editRecordIndex').value;
             const mode = (document.getElementById('currentMode') || {}).value || 'OPEN_ACCOUNT';
 
+            let relation = "";
+            const selRelRadio = document.querySelector('input[name="relRadio"]:checked');
+            if (selRelRadio) {
+                relation = (selRelRadio.value === 'CUSTOM') ? document.getElementById('inRelation').value.trim() : selRelRadio.value;
+            } else {
+                relation = document.getElementById('inRelation').value.trim();
+            }
+
             const obj = {
                 sifarishMode:        mode,
                 ay:                  (document.getElementById('inPatraSankhya') || {}).value || '',
@@ -1012,7 +1113,7 @@
 
                 // Deceased Account Closure specific
                 applicantCitDate:    document.getElementById('inApplicantCitDate').value.trim() || '',
-                relation:            document.getElementById('inRelation').value.trim() || '',
+                relation:            relation,
                 deceasedName:        document.getElementById('inDeceasedName').value.trim() || '',
                 deathDate:           document.getElementById('inDeathDate').value.trim() || '',
                 deceasedCitNo:       document.getElementById('inDeceasedCitNo').value.trim() || '',
@@ -1125,7 +1226,32 @@
             document.getElementById('inNid').value                = rec.nid || '';
 
             document.getElementById('inApplicantCitDate').value   = rec.applicantCitDate || '';
-            document.getElementById('inRelation').value           = rec.relation || '';
+            
+            // Restore Relation Radio selection
+            const relVal = rec.relation || '';
+            const relRadios = document.querySelectorAll('input[name="relRadio"]');
+            let foundMatch = false;
+
+            relRadios.forEach(r => {
+                if (r.value === relVal) {
+                    r.checked = true;
+                    foundMatch = true;
+                } else {
+                    r.checked = false;
+                }
+            });
+
+            const customRelInput = document.getElementById('inRelation');
+            if (!foundMatch && relVal) {
+                const customRadio = Array.from(relRadios).find(r => r.value === 'CUSTOM');
+                if (customRadio) customRadio.checked = true;
+                customRelInput.style.display = 'block';
+                customRelInput.value = relVal;
+            } else {
+                customRelInput.style.display = 'none';
+                if (foundMatch) customRelInput.value = relVal;
+            }
+
             document.getElementById('inDeceasedName').value       = rec.deceasedName || '';
             document.getElementById('inDeathDate').value          = rec.deathDate || '';
             document.getElementById('inDeceasedCitNo').value      = rec.deceasedCitNo || '';
