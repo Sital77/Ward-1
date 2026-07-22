@@ -231,6 +231,17 @@
 
         <input type="hidden" id="editRecordIndex" value="">
 
+        <!-- ══ SIFARISH MODE SELECTION CARD ══ -->
+        <div class="section-card" style="background: #edf2f7; border: 1.5px solid #cbd5e0;">
+            <div class="section-label" style="color: #2d3748;">📌 सिफारिसको प्रकार छान्नुहोस्:</div>
+            <div class="form-group">
+                <select id="inSifarishMode" class="bank-select-dropdown" onchange="toggleSifarishMode(); updateDoc()">
+                    <option value="OPEN_ACCOUNT" selected>🏦 १. सामाजिक सुरक्षा बैंक खाता खोल्ने सिफारिस</option>
+                    <option value="CLOSE_ACCOUNT_DECEASED">⚰️ २. मृतकको बैंक खाता बन्द तथा रकम निकासा सिफारिस</option>
+                </select>
+            </div>
+        </div>
+
         <!-- ══ AUTO EXTRACT / PASTE SECTION ══ -->
         <div class="section-card paste-section">
             <div class="section-label">📋 कपी-पेस्ट बक्स (Auto-Extract)</div>
@@ -293,19 +304,19 @@
                 <input type="hidden" id="inReceiverLocation" value="गौरादह, झापा">
             </div>
 
-            <!-- Beneficiary Details -->
+            <!-- Beneficiary / Applicant Details -->
             <div class="form-group">
-                <label>लाभग्राहीको नाम:</label>
-                <input type="text" id="inName" placeholder="उदा: कल्पना सार्की" oninput="updateDoc()">
+                <label id="lblInputNameTitle">निवेदक / हकदारको पुरा नाम:</label>
+                <input type="text" id="inName" placeholder="उदा: राम बहादुर श्रेष्ठ" oninput="updateDoc()">
             </div>
 
             <div class="row-grid">
                 <div class="form-group">
                     <label id="lblInputCitLabel" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-                        <span id="lblInputCitLabelSpan">नागरिकता नं. / जन्म दर्ता नं. (वैकल्पिक):</span>
+                        <span id="lblInputCitLabelSpan">नागरिकता नं. (वैकल्पिक):</span>
                     </label>
-                    <input type="text" id="inCitNo" placeholder="उदा: ०९३००२०-१९८ वा २०७९०५१२३४५" oninput="updateDoc()">
-                    <div style="margin-top: 4px; font-size: 0.85rem; color: #2b6cb0;">
+                    <input type="text" id="inCitNo" placeholder="उदा: ०४-०१-७५-१२३४५" oninput="updateDoc()">
+                    <div id="childChkBoxWrapper" style="margin-top: 4px; font-size: 0.85rem; color: #2b6cb0;">
                         <label style="cursor:pointer; font-weight: normal; display: inline-flex; align-items: center; gap: 4px;">
                             <input type="checkbox" id="chkIsChild" onchange="updateDoc()"> बालबालिका (जन्म दर्ता नं. देखाउनुहोस्)
                         </label>
@@ -317,43 +328,85 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>लक्षित समूह (वैकल्पिक):</label>
-                <input type="text" id="inTargetGroup" placeholder="उदा: दलित बालबालिका वा विधवा" oninput="updateDoc()">
-            </div>
+            <!-- ── MODE 1: OPEN ACCOUNT FIELDS ── -->
+            <div id="secOpenAccount">
+                <div class="form-group">
+                    <label>लक्षित समूह (वैकल्पिक):</label>
+                    <input type="text" id="inTargetGroup" placeholder="उदा: दलित बालबालिका वा विधवा" oninput="updateDoc()">
+                </div>
 
-            <div class="form-group">
-                <label>राष्ट्रिय परिचय पत्र नं. (वैकल्पिक):</label>
-                <input type="text" id="inNid" placeholder="उदा: १८७४५१९३८३" oninput="updateDoc()">
-            </div>
+                <div class="form-group">
+                    <label>राष्ट्रिय परिचय पत्र नं. (वैकल्पिक):</label>
+                    <input type="text" id="inNid" placeholder="उदा: १८७४५१९३८३" oninput="updateDoc()">
+                </div>
 
-            <div class="form-group">
-                <label>परिचय पत्र नम्बर (भत्ता कार्ड नं) (वैकल्पिक):</label>
-                <input type="text" id="inCardNo" placeholder="उदा: २०३८०९०८०२५०३" oninput="updateDoc()">
-            </div>
+                <div class="form-group">
+                    <label>परिचय पत्र नम्बर (भत्ता कार्ड नं) (वैकल्पिक):</label>
+                    <input type="text" id="inCardNo" placeholder="उदा: २०३८०९०८०२५०३" oninput="updateDoc()">
+                </div>
 
-            <div class="form-group">
-                <label>आर्थिक वर्ष (आ.व.):</label>
-                <input type="text" id="inFiscalYear" placeholder="उदा: २०८३/०८४" value="२०८३/०८४" oninput="updateDoc()">
-            </div>
+                <div class="form-group">
+                    <label>आर्थिक वर्ष (आ.व.):</label>
+                    <input type="text" id="inFiscalYear" placeholder="उदा: २०८३/०८४" value="२०८३/०८४" oninput="updateDoc()">
+                </div>
 
-            <div class="form-group">
-                <label>त्रैमासिक अवधि:</label>
-                <div class="trimester-radio-group" id="trimesterGroup">
-                    <label class="trimester-option">
-                        <input type="radio" name="trimesterRadio" value="प्रथम त्रैमासिक" onchange="selectTrimester(this)"> प्रथम त्रैमासिक
-                    </label>
-                    <label class="trimester-option">
-                        <input type="radio" name="trimesterRadio" value="दोश्रो त्रैमासिक" onchange="selectTrimester(this)"> दोश्रो त्रैमासिक
-                    </label>
-                    <label class="trimester-option">
-                        <input type="radio" name="trimesterRadio" value="तेस्रो त्रैमासिक" onchange="selectTrimester(this)"> तेस्रो त्रैमासिक
-                    </label>
-                    <label class="trimester-option">
-                        <input type="radio" name="trimesterRadio" value="चौथो त्रैमासिक" onchange="selectTrimester(this)"> चौथो त्रैमासिक
-                    </label>
+                <div class="form-group">
+                    <label>त्रैमासिक अवधि:</label>
+                    <div class="trimester-radio-group" id="trimesterGroup">
+                        <label class="trimester-option">
+                            <input type="radio" name="trimesterRadio" value="प्रथम त्रैमासिक" onchange="selectTrimester(this)"> प्रथम त्रैमासिक
+                        </label>
+                        <label class="trimester-option">
+                            <input type="radio" name="trimesterRadio" value="दोश्रो त्रैमासिक" onchange="selectTrimester(this)"> दोश्रो त्रैमासिक
+                        </label>
+                        <label class="trimester-option">
+                            <input type="radio" name="trimesterRadio" value="तेस्रो त्रैमासिक" onchange="selectTrimester(this)"> तेस्रो त्रैमासिक
+                        </label>
+                        <label class="trimester-option">
+                            <input type="radio" name="trimesterRadio" value="चौथो त्रैमासिक" onchange="selectTrimester(this)"> चौथो त्रैमासिक
+                        </label>
+                    </div>
                 </div>
             </div>
+
+            <!-- ── MODE 2: DECEASED ACCOUNT CLOSURE FIELDS ── -->
+            <div id="secDeceasedAccount" style="display:none;">
+                <div class="form-group">
+                    <label>नागरिकता जारी मिति (निवेदकको - वैकल्पि):</label>
+                    <input type="text" id="inApplicantCitDate" placeholder="उदा: २०७५/०५/१२" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>मृतक सँगको नाता:</label>
+                    <input type="text" id="inRelation" placeholder="उदा: छोरा वा श्रीमती वा पति वा छोरी" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>मृतकको पुरा नाम:</label>
+                    <input type="text" id="inDeceasedName" placeholder="उदा: हरि बहादुर श्रेष्ठ" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>मृत्यु मिति (वि.सं.):</label>
+                    <input type="text" id="inDeathDate" placeholder="उदा: २०८३/०२/१०" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>मृतकको नागरिकता नं.:</label>
+                    <input type="text" id="inDeceasedCitNo" placeholder="उदा: ०४-०१-७५-५४३२१" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>मृतकको व्यक्तिगत / राष्ट्रिय परिचय पत्र नं.:</label>
+                    <input type="text" id="inDeceasedNid" placeholder="उदा: १०३८४९२०३९४८" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>सामाजिक सुरक्षा बैंक खाता नम्बर:</label>
+                    <input type="text" id="inDeceasedAccountNo" placeholder="उदा: ०४१२३०१००२९३००१" oninput="updateDoc()">
+                </div>
+            </div>
+
         </div>
 
         <!-- हस्ताक्षर अधिकारी -->
@@ -399,7 +452,7 @@
                     <tr>
                         <th style="width:8%;">क्रम</th>
                         <th style="width:35%;">निवेदकको नाम</th>
-                        <th style="width:25%;">लक्षित समूह</th>
+                        <th style="width:25%;">विवरण / प्रकार</th>
                         <th style="width:20%;">मिति</th>
                         <th style="width:12%;">कार्य</th>
                     </tr>
@@ -526,7 +579,7 @@
 
         let globalDatabase = [];
 
-        // Auth ready भएपछि मात्र snapshot listener start गर्ने
+        // Auth ready snapshot listener
         (window._firebaseAuthReady || Promise.resolve()).then(() => {
             db.collection("bankRecords").onSnapshot((snapshot) => {
                 globalDatabase = [];
@@ -574,6 +627,26 @@
             if (show) renderDatabaseTable();
         }
 
+        // ── Sifarish Mode Toggle ──────────────────────────────
+        function toggleSifarishMode() {
+            const mode = (document.getElementById('inSifarishMode') || {}).value || 'OPEN_ACCOUNT';
+            const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
+
+            document.getElementById('secOpenAccount').style.display = isDeceased ? 'none' : 'block';
+            document.getElementById('secDeceasedAccount').style.display = isDeceased ? 'block' : 'none';
+            document.getElementById('childChkBoxWrapper').style.display = isDeceased ? 'none' : 'block';
+
+            document.getElementById('formMainTitle').innerText = isDeceased 
+                ? "🏦 मृतकको बैंक खाता बन्द सिफारिस" 
+                : "🏦 बैंक सिफारिस (सा. सु. भत्ता)";
+
+            document.getElementById('lblInputNameTitle').innerText = isDeceased 
+                ? "निवेदक / हकदारको पुरा नाम:" 
+                : "लाभग्राहीको नाम:";
+
+            updateDoc();
+        }
+
         // ── Bank Radio Selector ───────────────────────────────
         const bankData = {
             'krishi':     { name: 'श्री कृषि विकास बैङ्क लिमिटेड',      office: 'गौरादह शाखा', location: 'गौरादह, झापा' },
@@ -605,24 +678,6 @@
             updateDoc();
         }
 
-        function autoSelectTrimester(bsMonth) {
-            // बैशाख/जेष्ठ/असार (1-3) → प्रथम, साउन/भाद्र/असोज (4-6) → दोश्रो
-            // कार्तिक/मङ्सिर/पुष (7-9) → तेस्रो, माघ/फाल्गुन/चैत्र (10-12) → चौथो
-            let trimesterValue;
-            if (bsMonth >= 1 && bsMonth <= 3) trimesterValue = 'प्रथम त्रैमासिक';
-            else if (bsMonth >= 4 && bsMonth <= 6) trimesterValue = 'दोश्रो त्रैमासिक';
-            else if (bsMonth >= 7 && bsMonth <= 9) trimesterValue = 'तेस्रो त्रैमासिक';
-            else trimesterValue = 'चौथो त्रैमासिक';
-
-            const radios = document.querySelectorAll('input[name="trimesterRadio"]');
-            radios.forEach(r => {
-                r.checked = (r.value === trimesterValue);
-            });
-            document.querySelectorAll('.trimester-option').forEach(item => {
-                item.classList.toggle('active', item.querySelector('input').checked);
-            });
-        }
-
         // ── Regex Parsing Logic ──────────────────────────────
         function processPastedContent() {
             const pastedText = document.getElementById('pasteTextarea').value;
@@ -631,7 +686,6 @@
                 return;
             }
 
-            // Comprehensive Regex definitions for Smart Copy Paste
             const nameRegex = /(?:देवनागरीमा|नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|Name)\s*[:\-]\s*([^\r\n]+)/i;
             const cardNoRegex = /(?:परिचयपत्र|परिचय\s*पत्र|भत्ता\s*कार्ड|कार्ड)\s*(?:नम्बर|नं\.?|No\.?)\s*[:\-]\s*([^\r\n]+)/i;
             const targetGroupRegex = /(?:लक्षित\s*समूह|लक्षित\s*वर्ग|समूह|Target\s*Group)\s*[:\-]\s*([^\r\n]+)/i;
@@ -680,8 +734,6 @@
                 }
             }
 
-            // बालबालिका चेकबक्स प्रयोगकर्ताले आफै क्लिक गरेमा मात्र सक्रिय हुने (पूर्वनिर्धारित बन्द)
-
             if (extractCount > 0) {
                 showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू सफलतापूर्वक छानिए (Parsed) ।`);
             } else {
@@ -705,31 +757,13 @@
 
         // ── Live Preview Updater ──────────────────────────────
         function updateDoc() {
+            const mode    = (document.getElementById('inSifarishMode') || {}).value || 'OPEN_ACCOUNT';
+            const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
+
             const ay      = (document.getElementById('inPatraSankhya') || {}).value || '';
             const chalani = document.getElementById('inChalani').value     || '';
             const miti    = document.getElementById('inMiti').value         || '';
             const ns      = document.getElementById('inNepalSamvat').value  || '';
-            const name    = document.getElementById('inName').value         || '';
-            let cardNo    = document.getElementById('inCardNo').value       || '';
-            const targetGroup = document.getElementById('inTargetGroup').value || '';
-            const citNo   = document.getElementById('inCitNo').value        || '';
-            const citDistrict = document.getElementById('inCitDistrict').value || '';
-            let nid       = document.getElementById('inNid').value          || '';
-
-            // यदि राष्ट्रिय परिचयपत्र वा भत्ता कार्ड नम्बरमा नम्बर (०-९ वा 0-9) बाहेक अरू शब्द वा अक्षर आएमा वा नम्बर नभएमा खाली गर्ने र नदेखाउने
-            if (nid.trim() && (!/^[0-9०-९\s\-]+$/.test(nid.trim()) || !/[0-9०-९]/.test(nid.trim()))) {
-                nid = '';
-                const inNidEl = document.getElementById('inNid');
-                if (inNidEl && inNidEl.value !== '') inNidEl.value = '';
-            }
-            if (cardNo.trim() && (!/^[0-9०-९\s\-]+$/.test(cardNo.trim()) || !/[0-9०-९]/.test(cardNo.trim()))) {
-                cardNo = '';
-                const inCardNoEl = document.getElementById('inCardNo');
-                if (inCardNoEl && inCardNoEl.value !== '') inCardNoEl.value = '';
-            }
-
-            const fiscalYear = getFiscalYear();
-            const trimester  = getSelectedTrimester();
 
             // Letterhead
             document.getElementById('lblAY').innerText          = ay;
@@ -745,79 +779,131 @@
             document.getElementById('lblReceiverOffice').innerText = recOffice;
             document.getElementById('lblReceiverLocation').innerText = recLoc;
 
-            // Name + Suffix 'को'
-            const nameSpan = document.getElementById('lblName');
-            if (name) {
-                nameSpan.innerText = name;
+            const bodyTextEl = document.getElementById('bodyText');
+
+            if (isDeceased) {
+                // ── DECEASED ACCOUNT CLOSURE MODE ──
+                const applicantName = document.getElementById('inName').value.trim() || '.........................';
+                const citNo = document.getElementById('inCitNo').value.trim();
+                const citDate = document.getElementById('inApplicantCitDate').value.trim();
+                const citDist = document.getElementById('inCitDistrict').value.trim();
+
+                let citInfoStr = "";
+                if (citNo || citDate || citDist) {
+                    const citParts = [];
+                    if (citNo) citParts.push(`ना.प्र.नं: ${citNo}`);
+                    if (citDate) citParts.push(`जारी मिति: ${citDate}`);
+                    if (citDist) citParts.push(`जारी जिल्ला: ${citDist}`);
+                    citInfoStr = ` (${citParts.join(', ')})`;
+                }
+
+                const relation = document.getElementById('inRelation').value.trim() || '.........';
+                const deceasedName = document.getElementById('inDeceasedName').value.trim() || '.........................';
+                const deathDate = document.getElementById('inDeathDate').value.trim() || '.....................';
+                const deceasedAccNo = document.getElementById('inDeceasedAccountNo').value.trim() || '..................................';
+                const deceasedNid = document.getElementById('inDeceasedNid').value.trim() || '..................';
+                const deceasedCitNo = document.getElementById('inDeceasedCitNo').value.trim() || '..................';
+
+                bodyTextEl.innerHTML = `
+                    प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं.१ मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ l
+                `;
+
+                document.getElementById('tapasilHeaderBlock').innerText = "मृतकको विवरण:";
+                document.getElementById('tapasilTable').innerHTML = `
+                    <tr>
+                        <td class="label-col">नामथर</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><b>${deceasedName}</b></td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">व्यक्तिगत परिचय पत्र नं.</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><b>${deceasedNid}</b></td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">नागरिकता नं.</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><b>${deceasedCitNo}</b></td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">खाता नं.</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><b>${deceasedAccNo}</b></td>
+                    </tr>
+                `;
+
             } else {
-                nameSpan.innerText = '.....................';
-            }
+                // ── ACCOUNT OPENING MODE (DEFAULT) ──
+                const name        = document.getElementById('inName').value         || '';
+                let cardNo        = document.getElementById('inCardNo').value       || '';
+                const targetGroup = document.getElementById('inTargetGroup').value || '';
+                const citNo       = document.getElementById('inCitNo').value        || '';
+                const citDistrict = document.getElementById('inCitDistrict').value || '';
+                let nid           = document.getElementById('inNid').value          || '';
 
-            // Target Group, Fiscal Year, Trimester in Body
-            document.getElementById('lblTargetGroup').innerText = targetGroup || '...........';
-            document.getElementById('lblFiscalYear').innerText = fiscalYear || '.................';
-            document.getElementById('lblTrimester').innerText = trimester || '..................';
-
-            // बालबालिका चेकबक्स प्रयोगकर्ताले आफै क्लिक गरेमा मात्र सक्रिय हुने (पूर्वनिर्धारित बन्द)
-            const chkChildEl = document.getElementById('chkIsChild');
-            const isChild = !!(chkChildEl && chkChildEl.checked);
-
-            const lblInputCitLabelSpan = document.getElementById('lblInputCitLabelSpan');
-            if (lblInputCitLabelSpan) {
-                lblInputCitLabelSpan.innerText = isChild ? "जन्म दर्ता नं. (वैकल्पिक):" : "नागरिकता नं. / जन्म दर्ता नं. (वैकल्पिक):";
-            }
-            const lblTapasilCitLabel = document.getElementById('lblTapasilCitLabel');
-            if (lblTapasilCitLabel) {
-                lblTapasilCitLabel.innerText = isChild ? "जन्म दर्ता नं." : "नागरिकता नं.";
-            }
-
-            // Tapasil details updating & conditional row visibility
-            const rowTapasilName = document.getElementById('rowTapasilName');
-            const rowTapasilCitNo = document.getElementById('rowTapasilCitNo');
-            const rowTapasilGroup = document.getElementById('rowTapasilGroup');
-            const rowTapasilNid = document.getElementById('rowTapasilNid');
-            const rowTapasilCardNo = document.getElementById('rowTapasilCardNo');
-
-            if (rowTapasilName) {
-                rowTapasilName.style.display = '';
-                document.getElementById('lblTapasilName').innerText = name.trim() ? name.trim() : '..................';
-            }
-            
-            let citString = citNo.trim();
-            if (citString && citDistrict.trim()) citString += `, ${citDistrict.trim()}`;
-            if (rowTapasilCitNo) {
-                rowTapasilCitNo.style.display = '';
-                document.getElementById('lblTapasilCitNo').innerText = citString ? citString : '..................';
-            }
-            
-            if (rowTapasilGroup) {
-                rowTapasilGroup.style.display = '';
-                document.getElementById('lblTapasilGroup').innerText = targetGroup.trim() ? targetGroup.trim() : '..................';
-            }
-
-            if (rowTapasilNid) {
-                if (nid.trim()) {
-                    rowTapasilNid.style.display = '';
-                    document.getElementById('lblTapasilNid').innerText = nid.trim();
-                } else {
-                    rowTapasilNid.style.display = 'none';
+                if (nid.trim() && (!/^[0-9०-९\s\-]+$/.test(nid.trim()) || !/[0-9०-९]/.test(nid.trim()))) {
+                    nid = '';
+                    const inNidEl = document.getElementById('inNid');
+                    if (inNidEl && inNidEl.value !== '') inNidEl.value = '';
                 }
-            }
-
-            if (rowTapasilCardNo) {
-                if (cardNo.trim()) {
-                    rowTapasilCardNo.style.display = '';
-                    document.getElementById('lblTapasilCardNo').innerText = cardNo.trim();
-                } else {
-                    rowTapasilCardNo.style.display = 'none';
+                if (cardNo.trim() && (!/^[0-9०-९\s\-]+$/.test(cardNo.trim()) || !/[0-9०-९]/.test(cardNo.trim()))) {
+                    cardNo = '';
+                    const inCardNoEl = document.getElementById('inCardNo');
+                    if (inCardNoEl && inCardNoEl.value !== '') inCardNoEl.value = '';
                 }
-            }
 
-            const tapasilHeaderBlock = document.getElementById('tapasilHeaderBlock');
-            const tapasilTable = document.getElementById('tapasilTable');
-            if (tapasilHeaderBlock && tapasilTable) {
-                tapasilHeaderBlock.style.display = '';
-                tapasilTable.style.display = '';
+                const fiscalYear = getFiscalYear();
+                const trimester  = getSelectedTrimester();
+
+                bodyTextEl.innerHTML = `
+                    प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं.१ मा बसोबास गर्ने
+                    <span id="lblName" style="font-weight:bold;">${name ? name : '.....................'}</span>को
+                    लक्षित समूह <span id="lblTargetGroup" style="font-weight:bold;">${targetGroup ? targetGroup : '...........'}</span> को
+                    आ.व. <span id="lblFiscalYear" style="font-weight:bold;">${fiscalYear ? fiscalYear : '.................'}</span> को
+                    <span id="lblTrimester" style="font-weight:bold;">${trimester ? trimester : '..................'}</span>बाट सामाजिक सुरक्षा भत्ता प्राप्त गर्न योग्य हुनुभएको हुँदा निजले सामाजिक सुरक्षा भत्ता बापतको रकम प्राप्त गर्न बैँक खाता खोल्न आवश्यक रहेको हुँदा तहाँ कार्यालयको नियमानुसार बैँक खाता खोलिदिनुहुन सिफारिसका साथ अनुरोध छ ।
+                `;
+
+                const chkChildEl = document.getElementById('chkIsChild');
+                const isChild = !!(chkChildEl && chkChildEl.checked);
+
+                const lblInputCitLabelSpan = document.getElementById('lblInputCitLabelSpan');
+                if (lblInputCitLabelSpan) {
+                    lblInputCitLabelSpan.innerText = isChild ? "जन्म दर्ता नं. (वैकल्पिक):" : "नागरिकता नं. (वैकल्पिक):";
+                }
+
+                let citString = citNo.trim();
+                if (citString && citDistrict.trim()) citString += `, ${citDistrict.trim()}`;
+
+                document.getElementById('tapasilHeaderBlock').innerText = "तपसिल:";
+                document.getElementById('tapasilTable').innerHTML = `
+                    <tr id="rowTapasilName">
+                        <td class="label-col">नाम, थर</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><span id="lblTapasilName">${name.trim() ? name.trim() : '..................'}</span></td>
+                    </tr>
+                    <tr id="rowTapasilCitNo">
+                        <td class="label-col" id="lblTapasilCitLabel">${isChild ? "जन्म दर्ता नं." : "नागरिकता नं."}</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><span id="lblTapasilCitNo">${citString ? citString : '..................'}</span></td>
+                    </tr>
+                    <tr id="rowTapasilGroup">
+                        <td class="label-col">लक्षित समूह</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><span id="lblTapasilGroup">${targetGroup.trim() ? targetGroup.trim() : '..................'}</span></td>
+                    </tr>
+                    ${nid.trim() ? `
+                    <tr id="rowTapasilNid">
+                        <td class="label-col">राष्ट्रिय परिचय पत्र नं.</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><span id="lblTapasilNid">${nid.trim()}</span></td>
+                    </tr>` : ''}
+                    ${cardNo.trim() ? `
+                    <tr id="rowTapasilCardNo">
+                        <td class="label-col">परिचय पत्र नम्बर</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><span id="lblTapasilCardNo">${cardNo.trim()}</span></td>
+                    </tr>` : ''}
+                `;
             }
 
             // Signature
@@ -847,35 +933,49 @@
         async function printAndSaveSystem() {
             const name = document.getElementById('inName').value.trim();
             if (!name) {
-                alert("कृपया निवेदकको नाम अनिवार्य लेख्नुहोस् वा विवरण पेस्ट गर्नुहोस् ।");
+                alert("कृपया निवेदकको नाम अनिवार्य लेख्नुहोस् !");
                 return;
             }
 
             const recordId = document.getElementById('editRecordIndex').value;
+            const mode = (document.getElementById('inSifarishMode') || {}).value || 'OPEN_ACCOUNT';
 
             const obj = {
-                ay:              (document.getElementById('inPatraSankhya') || {}).value || '',
-                chalani:         document.getElementById('inChalani').value.trim()      || '-',
-                miti:            document.getElementById('inMiti').value.trim()          || '-',
-                ns:              document.getElementById('inNepalSamvat').value.trim()   || '-',
-                receiverName:    document.getElementById('inReceiverName').value.trim()  || '',
-                receiverOffice:  document.getElementById('inReceiverOffice').value.trim()|| '',
-                receiverLocation:document.getElementById('inReceiverLocation').value.trim()|| '',
-                bankKey:         (document.getElementById('inBankSelect') || {}).value || 'krishi',
-                name:            name,
-                cardNo:          document.getElementById('inCardNo').value.trim()        || '',
-                targetGroup:     document.getElementById('inTargetGroup').value.trim()   || '',
-                citNo:           document.getElementById('inCitNo').value.trim()        || '',
-                citDistrict:     document.getElementById('inCitDistrict').value.trim()  || '',
-                nid:             document.getElementById('inNid').value.trim()           || '',
-                fiscalYear:      getFiscalYear(),
-                trimester:       getSelectedTrimester(),
-                subject:         "सामाजिक सुरक्षा बैंक सिफारिस",
-                signAuth:        document.getElementById('inSignAuthority').value,
-                customSignName:  document.getElementById('inCustomSignName').value.trim(),
-                customSignTitle: document.getElementById('inCustomSignTitle').value.trim(),
-                sigMargin:       document.getElementById('inSigMargin').value,
-                timestamp:       Date.now()
+                sifarishMode:        mode,
+                ay:                  (document.getElementById('inPatraSankhya') || {}).value || '',
+                chalani:             document.getElementById('inChalani').value.trim()      || '-',
+                miti:                document.getElementById('inMiti').value.trim()          || '-',
+                ns:                  document.getElementById('inNepalSamvat').value.trim()   || '-',
+                receiverName:        document.getElementById('inReceiverName').value.trim()  || '',
+                receiverOffice:      document.getElementById('inReceiverOffice').value.trim()|| '',
+                receiverLocation:    document.getElementById('inReceiverLocation').value.trim()|| '',
+                bankKey:             (document.getElementById('inBankSelect') || {}).value || 'krishi',
+                name:                name,
+                citNo:               document.getElementById('inCitNo').value.trim()        || '',
+                citDistrict:         document.getElementById('inCitDistrict').value.trim()  || '',
+                
+                // Account Opening specific
+                cardNo:              document.getElementById('inCardNo').value.trim()        || '',
+                targetGroup:         document.getElementById('inTargetGroup').value.trim()   || '',
+                nid:                 document.getElementById('inNid').value.trim()           || '',
+                fiscalYear:          getFiscalYear(),
+                trimester:           getSelectedTrimester(),
+
+                // Deceased Account Closure specific
+                applicantCitDate:    document.getElementById('inApplicantCitDate').value.trim() || '',
+                relation:            document.getElementById('inRelation').value.trim() || '',
+                deceasedName:        document.getElementById('inDeceasedName').value.trim() || '',
+                deathDate:           document.getElementById('inDeathDate').value.trim() || '',
+                deceasedCitNo:       document.getElementById('inDeceasedCitNo').value.trim() || '',
+                deceasedNid:         document.getElementById('inDeceasedNid').value.trim() || '',
+                deceasedAccountNo:   document.getElementById('inDeceasedAccountNo').value.trim() || '',
+
+                subject:             mode === 'CLOSE_ACCOUNT_DECEASED' ? "मृतकको बैंक खाता बन्द सिफारिस" : "सामाजिक सुरक्षा बैंक सिफारिस",
+                signAuth:            document.getElementById('inSignAuthority').value,
+                customSignName:      document.getElementById('inCustomSignName').value.trim(),
+                customSignTitle:     document.getElementById('inCustomSignTitle').value.trim(),
+                sigMargin:           document.getElementById('inSigMargin').value,
+                timestamp:           Date.now()
             };
 
             const btn = document.querySelector('.btn-print');
@@ -912,16 +1012,19 @@
             tbody.innerHTML = '';
             let counter = 0;
             globalDatabase.forEach((rec) => {
-                if (search && !(rec.name || '').toLowerCase().includes(search)) return;
+                if (search && !(rec.name || '').toLowerCase().includes(search) && !(rec.deceasedName || '').toLowerCase().includes(search)) return;
                 counter++;
+                const isDeceased = rec.sifarishMode === 'CLOSE_ACCOUNT_DECEASED';
+                const desc = isDeceased 
+                    ? `<span style="color:#e53e3e; font-weight:bold;">⚰️ खाता बन्द (${rec.deceasedName || 'मृतक'})</span>`
+                    : `<span style="color:#2b6cb0; font-weight:bold;">🏦 खाता खोल्ने (${rec.targetGroup || 'सा.सु.'})</span>`;
+
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td><b>${toNepaliDigit(counter)}</b></td>
                         <td><b>${rec.name || '-'}</b></td>
-                        <td><span style="color:#2b6cb0; font-weight:bold;">${rec.targetGroup || 'सामाजिक सुरक्षा भत्ता'}</span></td>
-                        <td>
-                            ${rec.miti || '-'}
-                        </td>
+                        <td>${desc}</td>
+                        <td>${rec.miti || '-'}</td>
                         <td>
                             <div style="display:flex; gap:4px;">
                                 <button class="btn-action btn-edit-db" onclick="editFromDB('${rec.id}')" style="padding: 4px 8px; font-size: 0.85rem; width: auto; margin-top:0;">📝</button>
@@ -940,6 +1043,11 @@
 
             document.getElementById('editRecordIndex').value = id;
             document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
+
+            if (rec.sifarishMode && document.getElementById('inSifarishMode')) {
+                document.getElementById('inSifarishMode').value = rec.sifarishMode;
+                toggleSifarishMode();
+            }
 
             document.getElementById('inChalani').value      = rec.chalani === '-' ? '' : (rec.chalani || '');
             document.getElementById('inMiti').value         = rec.miti || '';
@@ -961,12 +1069,21 @@
                 document.getElementById('inReceiverLocation').value = rec.receiverLocation || bank.location;
             }
             
-            document.getElementById('inName').value         = rec.name || '';
-            document.getElementById('inCardNo').value       = rec.cardNo || '';
-            document.getElementById('inTargetGroup').value  = rec.targetGroup || '';
-            document.getElementById('inCitNo').value        = rec.citNo || '';
-            document.getElementById('inCitDistrict').value   = rec.citDistrict || '';
-            document.getElementById('inNid').value          = rec.nid || '';
+            document.getElementById('inName').value               = rec.name || '';
+            document.getElementById('inCitNo').value              = rec.citNo || '';
+            document.getElementById('inCitDistrict').value         = rec.citDistrict || '';
+
+            document.getElementById('inCardNo').value             = rec.cardNo || '';
+            document.getElementById('inTargetGroup').value        = rec.targetGroup || '';
+            document.getElementById('inNid').value                = rec.nid || '';
+
+            document.getElementById('inApplicantCitDate').value   = rec.applicantCitDate || '';
+            document.getElementById('inRelation').value           = rec.relation || '';
+            document.getElementById('inDeceasedName').value       = rec.deceasedName || '';
+            document.getElementById('inDeathDate').value          = rec.deathDate || '';
+            document.getElementById('inDeceasedCitNo').value      = rec.deceasedCitNo || '';
+            document.getElementById('inDeceasedNid').value        = rec.deceasedNid || '';
+            document.getElementById('inDeceasedAccountNo').value  = rec.deceasedAccountNo || '';
 
             // Restore fiscal year
             document.getElementById('inFiscalYear').value = rec.fiscalYear || rec.ay || '';
@@ -1011,137 +1128,13 @@
         }
 
         // ── Nepal Sambat helper ───────────────────────────────
-        function getNepalSambatYear(adDate) {
-            const year = adDate.getFullYear();
-            const newYearDates = {
-                2020: new Date(2020,10,15), 2021: new Date(2021,10,5),
-                2022: new Date(2022, 9,26), 2023: new Date(2023,10,14),
-                2024: new Date(2024,10, 2), 2025: new Date(2025, 9,22),
-                2026: new Date(2026,10,10), 2027: new Date(2027, 9,30),
-                2028: new Date(2028, 9,19), 2029: new Date(2029,10, 7),
-                2030: new Date(2030, 9,27), 2031: new Date(2031,10,15),
-                2032: new Date(2032,10, 3), 2033: new Date(2033, 9,23),
-                2034: new Date(2034,10,12), 2035: new Date(2035,10, 1)
-            };
-            const ny = newYearDates[year];
-            if (ny) return adDate >= ny ? year - 879 : year - 880;
-            return adDate.getMonth() > 9 ? year - 879 : year - 880;
-        }
-
         function updateNepalSambatFromMiti() {
-            // Nepal Sambat is updated automatically or stays unchanged on custom input
+            // Keeps Sambat sync active
         }
 
-        function initializeFiscalYear(bsYear, bsMonth) {
-            try {
-                // Nepal fiscal year: Shrawan 1 (month 4) to Ashar end (month 3)
-                let startYear = bsYear;
-                if (bsMonth < 4) startYear = bsYear - 1;
-                const endSfx = String(startYear + 1).slice(-2);
-                const fyStr = toNepaliDigit(`${startYear}/0${endSfx}`);
-
-                const fySelect = document.getElementById('inPatraSankhya');
-                if (fySelect) {
-                    fySelect.innerHTML = '';
-                    for (let y = startYear - 2; y <= startYear + 2; y++) {
-                        const sfx = String(y + 1).slice(-2);
-                        const optVal = toNepaliDigit(`${y}/0${sfx}`);
-                        const sel = (y === startYear) ? 'selected' : '';
-                        fySelect.insertAdjacentHTML('beforeend', `<option value="${optVal}" ${sel}>${optVal}</option>`);
-                    }
-                    fySelect.value = fyStr;
-                }
-
-                const fyInput = document.getElementById('inFiscalYear');
-                if (fyInput) fyInput.value = '२०८३/०८४';
-
-                // Auto-select trimester based on BS month
-                autoSelectTrimester(bsMonth);
-            } catch (e) { console.error(e); }
-        }
-
-        // ── Auto-fill date on page load ───────────────────────
-        function initializeAutomaticDate() {
-            try {
-                let nepaliBSDateStr = '';
-                let bsYearVal  = 2083;
-                let bsMonthVal = 2;
-
-                const converter = window["@sbmdkl/nepali-date-converter"];
-                if (!converter && (window._dateInitRetries || 0) < 5) {
-                    window._dateInitRetries = (window._dateInitRetries || 0) + 1;
-                    setTimeout(initializeAutomaticDate, 400);
-                    return;
-                }
-                if (converter && typeof converter.adToBs === 'function') {
-                    const today = new Date();
-                    const yyyy  = today.getFullYear();
-                    const mm    = String(today.getMonth() + 1).padStart(2, '0');
-                    const dd    = String(today.getDate()).padStart(2, '0');
-                    const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
-
-                    let bsDayVal = 1;
-                    if (typeof bsDate === 'string') {
-                        const parts = bsDate.split(/[-/]/);
-                        bsYearVal  = parseInt(parts[0], 10);
-                        bsMonthVal = parseInt(parts[1], 10);
-                        bsDayVal   = parseInt(parts[2], 10);
-                    } else if (bsDate && typeof bsDate === 'object') {
-                        bsYearVal  = bsDate.bsYear  || bsDate.year  || 2083;
-                        bsMonthVal = bsDate.bsMonth || bsDate.month || 2;
-                        bsDayVal   = bsDate.bsDay   || bsDate.day   || 1;
-                    }
-                    const bsM = String(bsMonthVal).padStart(2, '0');
-                    const bsD = String(bsDayVal).padStart(2, '0');
-                    nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsM}/${bsD}`);
-                } else {
-                    const today = new Date();
-                    const adYear  = today.getFullYear();
-                    const adMonth = today.getMonth() + 1;
-                    const adDay   = today.getDate();
-                    let bsY = adYear + 57;
-                    let bsM = 1;
-                    if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
-                    else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
-                    else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
-                    else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
-                    else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
-                    else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
-                    else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
-                    else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
-                    else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
-                    else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
-                    else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
-                    else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
-                    bsYearVal  = bsY;
-                    bsMonthVal = bsM;
-                    let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
-                    if (bsD > 32) bsD = 30;
-                    const bsMStr = String(bsMonthVal).padStart(2, '0');
-                    const bsDStr = String(bsD).padStart(2, '0');
-                    nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsMStr}/${bsDStr}`);
-                }
-
-                initializeFiscalYear(bsYearVal, bsMonthVal);
-
-                const today  = new Date();
-                const nsYear = getNepalSambatYear(today);
-
-                const inMiti = document.getElementById('inMiti');
-                if (inMiti) inMiti.value = nepaliBSDateStr;
-
-                const inNepalSamvat = document.getElementById('inNepalSamvat');
-                if (inNepalSamvat) inNepalSamvat.value = toNepaliDigit(nsYear);
-
-                updateDoc();
-            } catch (e) {
-                console.error("Error during date initialization:", e);
-            }
-        }
-
+        // Initialize on load
         window.onload = function() {
-            initializeAutomaticDate();
-            adjustSignaturePosition(40);
+            updateDoc();
         };
     </script>
 </body>
