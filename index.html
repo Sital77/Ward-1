@@ -1074,7 +1074,8 @@
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
                 'abhilekh-pramanit': 'अभिलेख प्रमाणित',
                 'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
-                'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस'
+                'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
+                'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस'
             };
             const categories = {
                 'gharbato': 'जग्गा सम्बन्धि',
@@ -1088,7 +1089,8 @@
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
                 'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',
-                'bank-sifarish': 'व्यक्तिगत प्रमाणित'
+                'bank-sifarish': 'व्यक्तिगत प्रमाणित',
+                'aamdani-pramanit': 'व्यक्तिगत प्रमाणित'
             };
 
             try {
@@ -1133,7 +1135,7 @@
             }
         }
 
-        const defaultTemplateIds = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish'];
+        const defaultTemplateIds = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'aamdani-pramanit'];
         db.collection('sifarish_templates').get().then(snapshot => {
             const existingIds = [];
             snapshot.forEach(doc => {
@@ -1164,7 +1166,8 @@
             'arko-bibaha-nagareko': '👰',
             'bank-sifarish': '🏦',
             'nabalak-parichayapatra': '👶',
-            'jaggadhani-pratilipi': '📜'
+            'jaggadhani-pratilipi': '📜',
+            'aamdani-pramanit': '💰'
         };
         const borderMap = {
             'suchana-tans': '#d6bcfa',
@@ -1176,7 +1179,8 @@
             'arko-bibaha-nagareko': '#fed7d7',
             'bank-sifarish': '#cbd5e0',
             'nabalak-parichayapatra': '#feb2b2',
-            'jaggadhani-pratilipi': '#fbd38d'
+            'jaggadhani-pratilipi': '#fbd38d',
+            'aamdani-pramanit': '#f6e05e'
         };
         const categoryEmojis = {
             'जग्गा सम्बन्धि': '🗺️',
@@ -1199,7 +1203,8 @@
             { id: 'arko-bibaha-nagareko', title: 'अर्को विवाह नगरेको प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'bank-sifarish', title: 'सामाजिक सुरक्षा बैंक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'nabalak-parichayapatra', title: 'नाबालक परिचय पत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
-            { id: 'jaggadhani-pratilipi', title: 'धनीपूर्जा प्रतिलिपि सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' }
+            { id: 'jaggadhani-pratilipi', title: 'धनीपूर्जा प्रतिलिपि सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' },
+            { id: 'aamdani-pramanit', title: 'आम्दानी प्रमाणित सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
         ];
 
         function renderSifarishGrid(remoteList) {
@@ -1220,7 +1225,7 @@
             let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -1236,7 +1241,7 @@
                 templates.forEach(t => {
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
                     const targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
 
                     const card = document.createElement('a');

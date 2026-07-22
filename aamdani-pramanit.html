@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>आम्दानी प्रमाणित सिफारिस - गौरादह नगरपालिका</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .table-builder {
+            margin-top: 15px;
+            background: #f8fafc;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .table-builder h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: #2b6cb0;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #bee3f8;
+            padding-bottom: 5px;
+        }
+
+        .builder-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #edf2f7;
+        }
+
+        .builder-row-income {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #edf2f7;
+        }
+
+        .builder-row input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        
+        .builder-row-income input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .btn-remove {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-remove:hover {
+            background: #f87171;
+            color: white;
+        }
+
+        .btn-add-row {
+            background: #ebf8ff;
+            color: #3182ce;
+            border: 1px dashed #90cdf4;
+            padding: 10px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 5px;
+            transition: 0.2s;
+        }
+
+        .btn-add-row:hover {
+            background: #bee3f8;
+        }
+
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .print-table th,
+        .print-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            text-align: center;
+            font-size: 13.5pt;
+        }
+
+        .print-table th {
+            font-weight: bold;
+        }
+
+        @media print {
+            .input-panel {
+                display: none !important;
+            }
+
+            .preview-panel {
+                width: 100% !important;
+            }
+
+            .modal-overlay {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="auth.js"></script>
+
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">📝 सिफारिस प्रविष्टि</h2>
+            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+
+        <div class="form-group">
+            <label>पत्र संख्या (प.सं.):</label>
+            <select id="inPatraSankhya" onchange="updateDoc()">
+                <option value="२०८२/०८३">२०८२/०८३</option>
+                <option value="२०८३/०८४" selected>२०८३/०८४</option>
+                <option value="२०८४/०८५">२०८४/०८५</option>
+                <option value="२०८५/०८६">२०८५/०८६</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>चलानी नं :</label>
+            <input type="text" id="inChalani" placeholder="उदा: ११५१" oninput="updateDoc()">
+        </div>
+
+        <div class="row-grid">
+            <div class="form-group">
+                <label>मिति (वि.सं.):</label>
+                <input type="text" id="inMiti" value="२०८३/०२/२७" oninput="updateNepalSambatFromMiti(); updateDoc()">
+            </div>
+            <div class="form-group">
+                <label>ने.स. :</label>
+                <input type="text" id="inNepalSamvat" value="११४६" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>सम्बोधन (श्री ...):</label>
+            <input type="text" id="inOffice" value="यो जोजस सँग सम्बन्धित छ l" oninput="updateDoc()">
+        </div>
+
+        <div class="form-group">
+            <label>निवेदकको पुरा नाम :</label>
+            <input type="text" id="inName" placeholder="उदा: राम बहादुर श्रेष्ठ" oninput="updateDoc()">
+        </div>
+
+        <div class="row-grid">
+            <div class="form-group">
+                <label>नागरिकता नं. (वैकल्पिक):</label>
+                <input type="text" id="inCitNo" placeholder="उदा: ०४-०१-७५-१२३४५" oninput="updateDoc()">
+            </div>
+            <div class="form-group">
+                <label>जारी मिति (वैकल्पिक):</label>
+                <input type="text" id="inCitDate" placeholder="उदा: २०७५/०५/१२" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="row-grid">
+            <div class="form-group">
+                <label>निवेदकको ठेगाना जिल्ला:</label>
+                <input type="text" id="inDist" value="झापा" oninput="updateDoc()">
+            </div>
+            <div class="form-group">
+                <label>पालिका:</label>
+                <input type="text" id="inPalika" value="गौरादह नगरपालिका" oninput="updateDoc()">
+            </div>
+            <div class="form-group">
+                <label>वडा नं:</label>
+                <input type="text" id="inWadaNo" value="१" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="row-grid">
+            <div class="form-group">
+                <label>जग्गाको ठेगाना जिल्ला:</label>
+                <input type="text" id="inLandDist" value="झापा" oninput="updateDoc()">
+            </div>
+            <div class="form-group">
+                <label>पालिका:</label>
+                <input type="text" id="inLandPalika" value="गौरादह नगरपालिका" oninput="updateDoc()">
+            </div>
+            <div class="form-group">
+                <label>वडा नं:</label>
+                <input type="text" id="inLandWada" value="१" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <div class="table-builder">
+            <h3>🗺️ जग्गाको विवरण (सिट नं, कि.नं, क्षेत्रफल)</h3>
+            <div id="landRowsContainer"></div>
+            <button type="button" class="btn-add-row" onclick="addLandRow()">➕ जग्गा थप्नुहोस्</button>
+        </div>
+        
+        <div class="form-group">
+            <label>आय स्रोतको प्रकार (कृषि/पशुपालन/ब्यापार आदि):</label>
+            <input type="text" id="inIncomeType" value="कृषि तथा पशुपालन" oninput="updateDoc()">
+        </div>
+
+        <div class="table-builder">
+            <h3>💰 आम्दानीको विवरण (तपसिल)</h3>
+            <div id="incomeRowsContainer"></div>
+            <button type="button" class="btn-add-row" onclick="addIncomeRow()">➕ व्यवसाय थप्नुहोस्</button>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px;">
+            <label>जम्मा आम्दानी (अक्षरेपी - म्यानुअल लेख्नुस्):</label>
+            <input type="text" id="inTotalWords" placeholder="उदा: पाँच लाख चालिस हजार" oninput="updateDoc()">
+            <small style="color:#718096;">*अङ्कमा आफैं हिसाब हुन्छ, यहाँ अक्षरेपी मात्र लेख्नुहोस्।</small>
+        </div>
+
+        <div class="form-group"
+            style="margin-top: 15px; background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
+            <label style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
+                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी (स्थान) मिलाउनुस्:</span>
+                    <span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40"
+                    oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र डेटाबेस सुरक्षित गर्नुस्</button>
+    </div>
+
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ सिफारिस अभिलेख (Database Records)</h3>
+
+            <div class="search-container">
+                <label>🔍 नामबाट खोज्नुहोस् (Search Name):</label>
+                <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..."
+                    oninput="renderDatabaseTable()">
+            </div>
+
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">क्रम</th>
+                        <th style="width: 40%;">निवेदकको नाम</th>
+                        <th style="width: 25%;">विषय</th>
+                        <th style="width: 17%;">मिति</th>
+                        <th style="width: 10%;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="preview-panel">
+        <div class="a4-page">
+
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblPatraSankhya">२०८३/०८४</span></div>
+                        <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
+                    </div>
+                </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title">१ नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३/०२/२७</span></div>
+                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४६</span></div>
+                </div>
+            </div>
+
+            <div class="header-red-line"></div>
+
+            <div class="address-to">
+                <span id="lblOfficeName">श्री यो जोजस सँग सम्बन्धित छ l</span><br>
+            </div>
+
+            <div class="subject-container">
+                <div class="subject-title"><span style="color: #e51a23;">विषय:</span> आम्दानी प्रमाणित सम्बन्धमा ।</div>
+            </div>
+
+            <div class="letter-body">
+                उपरोक्त सम्बन्धमा <span id="lblDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblWadaBody" class="fill-space" style="min-width:20px;">१</span> का स्थायी बसोबास गर्ने <span id="lblOwnerName" class="fill-space" style="font-weight: bold; min-width:180px;">.......</span> <span id="lblCitBlock" style="display:none;">(ना.प्र.नं: <span id="lblCitNo" class="fill-space" style="min-width:100px;"></span>, जारी मिति: <span id="lblCitDate" class="fill-space" style="min-width:80px;"></span>) </span>ले यस वडा कार्यालयमा दिनुभएको निवेदन माग अनुसार निज निवेदकको नाममा <span id="lblLandDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblLandPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblLandWada" class="fill-space" style="min-width:20px;">१</span> मा दर्ता कायम रहेको <span id="lblLandDetails">सिट नं. ..... कि.नं. ..... को ज.वि. .....</span> क्षेत्रफल भएको जग्गामा तपशिल अनुसार <span id="lblIncomeType" class="fill-space" style="min-width:150px;">कृषि तथा पशुपालन</span> गरी वार्षिक रू.<span id="lblTotalAmt" class="fill-space" style="min-width:100px; font-weight:bold;">...........</span>।- (अक्षरेपी <span id="lblTotalWords" class="fill-space" style="min-width:200px;">..........................</span> मात्र) आम्दानी गर्ने गरेको व्यहोरा प्रमाणित गरिन्छ ।
+                <br><br>
+                <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 10px;">तपसिल:</div>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">क्रम</th>
+                            <th style="width: 55%;">व्यवसाय</th>
+                            <th style="width: 30%;">बार्षिक आम्दानी (रू)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outputTableBody">
+                        <!-- Dynamic rows injected here -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="text-align: right; font-weight: bold; padding-right: 15px;">जम्मा</td>
+                            <td style="font-weight: bold;">रू. <span id="lblTotalTableAmount">/-</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="signature-section" id="docFooterSection" style="margin-top: 40px; display: flex; justify-content: flex-end;">
+                <div class="signature-box" style="text-align: center; width: 250px;">
+                    <div id="lblSigName" style="font-weight: bold; font-size: 14pt; border-top: 1.5px dashed #000; padding-top: 5px;">नगेन्द्र भण्डारी</div>
+                    <div id="lblSigTitle" style="font-size: 12pt;">वडा अध्यक्ष</div>
+                </div>
+            </div>
+
+            <!-- Font settings integration block (essential for injection) -->
+            <script src="font-settings.js"></script>
+
+        </div>
+    </div>
+
+    <!-- Main Logic Script -->
+    <script src="script-aamdani-pramanit.js"></script>
+</body>
+
+</html>
