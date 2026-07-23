@@ -440,10 +440,18 @@
             customSigList = JSON.parse(localStorage.getItem('custom_signing_authorities') || '[]');
         } catch(e) {}
 
+        // Force-correct Ward 3 sig_9 name (होमनाथ → हेमनाथ) in any cached data
+        const SIG_VERSION = 'sig_v3_hemnath';
+        if (localStorage.getItem('sig_authority_version') !== SIG_VERSION) {
+            // Clear stale cached data so fresh defaults or Firestore corrected data loads
+            localStorage.removeItem('custom_signing_authorities');
+            localStorage.setItem('sig_authority_version', SIG_VERSION);
+            customSigList = null;
+        }
         if (customSigList && Array.isArray(customSigList) && customSigList.length > 0) {
             let migrated = false;
             customSigList.forEach(s => {
-                if (s.name === 'होमनाथ थापा' || s.id === 'sig_9') {
+                if (s.name === 'होमनाथ थापा' || (s.id === 'sig_9' && s.ward === '3')) {
                     if (s.name !== 'हेमनाथ थापा') {
                         s.name = 'हेमनाथ थापा';
                         migrated = true;
@@ -483,6 +491,7 @@
                 '3': [
                     { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
                     { value: "हेमनाथ थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - हेमनाथ थापा" },
+                    { value: "मेनुका बस्नेत|वडा सचिव", text: "वडा सचिव - मेनुका बस्नेत" },
                     { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
                 ]
             };
@@ -506,9 +515,9 @@
                     { value: "लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा" }
                 ],
                 '3': [
-                    { value: "मेनुका बस्नेत|वडा सचिव", text: "वडा सचिव - मेनुका बस्नेत" },
                     { value: "दिलिप कुमार भण्डारी|वडा अध्यक्ष", text: "वडा अध्यक्ष - दिलिप कुमार भण्डारी" },
                     { value: "हेमनाथ थापा|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - हेमनाथ थापा" },
+                    { value: "मेनुका बस्नेत|वडा सचिव", text: "वडा सचिव - मेनुका बस्नेत" },
                     { value: "कल्पना अधिकारी|कार्यवाहक वडा अध्यक्ष", text: "कार्यवाहक वडा अध्यक्ष - कल्पना अधिकारी" }
                 ]
             };
@@ -616,7 +625,7 @@
                     snap.forEach(doc => {
                         const data = doc.data();
                         const item = { id: doc.id, ...data };
-                        if (item.name === 'होमनाथ थापा' || item.id === 'sig_9') {
+                        if (item.name === 'होमनाथ थापा' || (item.id === 'sig_9' && item.ward === '3')) {
                             if (item.name !== 'हेमनाथ थापा') {
                                 item.name = 'हेमनाथ थापा';
                                 try {

@@ -1159,9 +1159,17 @@
             signaturesList = JSON.parse(localStorage.getItem('custom_signing_authorities') || '[]');
         } catch(e) { signaturesList = []; }
 
+        // Force-reset stale data with version key
+        const SIG_VERSION = 'sig_v3_hemnath';
+        if (localStorage.getItem('sig_authority_version') !== SIG_VERSION) {
+            localStorage.removeItem('custom_signing_authorities');
+            localStorage.setItem('sig_authority_version', SIG_VERSION);
+            signaturesList = [];
+        }
+
         let migrated = false;
         signaturesList.forEach(item => {
-            if (item.name === 'होमनाथ थापा' || item.id === 'sig_9') {
+            if (item.name === 'होमनाथ थापा' || (item.id === 'sig_9' && item.ward === '3')) {
                 if (item.name !== 'हेमनाथ थापा') {
                     item.name = 'हेमनाथ थापा';
                     migrated = true;
@@ -1186,6 +1194,7 @@
                 { id: 'sig_7', name: 'अनिता अधिकारी', title: 'स्थानीय पञ्जिकाधिकारी', ward: '1', category: 'abhilekh-pramanit' },
                 { id: 'sig_8', name: 'दिलिप कुमार भण्डारी', title: 'वडा अध्यक्ष', ward: '3', category: 'default' },
                 { id: 'sig_9', name: 'हेमनाथ थापा', title: 'कार्यवाहक वडा अध्यक्ष', ward: '3', category: 'default' },
+                { id: 'sig_13', name: 'मेनुका बस्नेत', title: 'वडा सचिव', ward: '3', category: 'default' },
                 { id: 'sig_10', name: 'कल्पना अधिकारी', title: 'कार्यवाहक वडा अध्यक्ष', ward: '3', category: 'default' },
                 { id: 'sig_11', name: 'मेनुका बस्नेत', title: 'वडा सचिव', ward: '3', category: 'bank-sifarish' },
                 { id: 'sig_12', name: 'मेनुका बस्नेत', title: 'स्थानीय पञ्जिकाधिकारी', ward: '3', category: 'abhilekh-pramanit' }
@@ -2197,7 +2206,7 @@
         snap.forEach(doc => {
             const data = doc.data();
             const item = { id: doc.id, ...data };
-            if (item.name === 'होमनाथ थापा' || item.id === 'sig_9') {
+            if (item.name === 'होमनाथ थापा' || (item.id === 'sig_9' && item.ward === '3')) {
                 if (item.name !== 'हेमनाथ थापा') {
                     item.name = 'हेमनाथ थापा';
                     try {
