@@ -1159,6 +1159,22 @@
             signaturesList = JSON.parse(localStorage.getItem('custom_signing_authorities') || '[]');
         } catch(e) { signaturesList = []; }
 
+        let migrated = false;
+        signaturesList.forEach(item => {
+            if (item.name === 'होमनाथ थापा' || item.id === 'sig_9') {
+                if (item.name !== 'हेमनाथ थापा') {
+                    item.name = 'हेमनाथ थापा';
+                    migrated = true;
+                    if (typeof db !== 'undefined' && db.collection) {
+                        db.collection('signing_authorities').doc(item.id).set({ name: 'हेमनाथ थापा' }, { merge: true }).catch(e => {});
+                    }
+                }
+            }
+        });
+        if (migrated) {
+            localStorage.setItem('custom_signing_authorities', JSON.stringify(signaturesList));
+        }
+
         if (signaturesList.length === 0) {
             signaturesList = [
                 { id: 'sig_1', name: 'नगेन्द्र भण्डारी', title: 'वडा अध्यक्ष', ward: '1', category: 'default' },
@@ -2178,7 +2194,19 @@
     // Signing authorities - real-time
     db.collection('signing_authorities').onSnapshot(snap => {
         const remote = [];
-        snap.forEach(doc => remote.push({ id: doc.id, ...doc.data() }));
+        snap.forEach(doc => {
+            const data = doc.data();
+            const item = { id: doc.id, ...data };
+            if (item.name === 'होमनाथ थापा' || item.id === 'sig_9') {
+                if (item.name !== 'हेमनाथ थापा') {
+                    item.name = 'हेमनाथ थापा';
+                    try {
+                        db.collection('signing_authorities').doc(doc.id).set({ name: 'हेमनाथ थापा' }, { merge: true }).catch(e => {});
+                    } catch(e) {}
+                }
+            }
+            remote.push(item);
+        });
         if (remote.length > 0) {
             signaturesList = remote;
             localStorage.setItem('custom_signing_authorities', JSON.stringify(signaturesList));

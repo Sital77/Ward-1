@@ -440,6 +440,21 @@
             customSigList = JSON.parse(localStorage.getItem('custom_signing_authorities') || '[]');
         } catch(e) {}
 
+        if (customSigList && Array.isArray(customSigList) && customSigList.length > 0) {
+            let migrated = false;
+            customSigList.forEach(s => {
+                if (s.name === 'होमनाथ थापा' || s.id === 'sig_9') {
+                    if (s.name !== 'हेमनाथ थापा') {
+                        s.name = 'हेमनाथ थापा';
+                        migrated = true;
+                    }
+                }
+            });
+            if (migrated) {
+                localStorage.setItem('custom_signing_authorities', JSON.stringify(customSigList));
+            }
+        }
+
         let wardSigns = [];
         if (customSigList && customSigList.length > 0) {
             let filterCat = 'default';
@@ -598,7 +613,19 @@
             try {
                 firebase.firestore().collection('signing_authorities').onSnapshot(snap => {
                     const list = [];
-                    snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        const item = { id: doc.id, ...data };
+                        if (item.name === 'होमनाथ थापा' || item.id === 'sig_9') {
+                            if (item.name !== 'हेमनाथ थापा') {
+                                item.name = 'हेमनाथ थापा';
+                                try {
+                                    firebase.firestore().collection('signing_authorities').doc(doc.id).set({ name: 'हेमनाथ थापा' }, { merge: true }).catch(e => {});
+                                } catch(e) {}
+                            }
+                        }
+                        list.push(item);
+                    });
                     if (list.length > 0) {
                         localStorage.setItem('custom_signing_authorities', JSON.stringify(list));
                         setupDynamicSignatures();
