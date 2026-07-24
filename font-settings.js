@@ -1124,6 +1124,27 @@
                 }
             }
             badge.innerHTML = `<span>🗓️ <strong>स्वचालित नेपाली मिति:</strong></span> <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; letter-spacing: 0.5px;">${dateStr}</span>`;
+
+            // Dynamic Ward Number Display based on Login Session
+            try {
+                const loggedWard = localStorage.getItem('sifarish_ward');
+                if (loggedWard) {
+                    const nepWard = String(loggedWard).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
+                    
+                    document.querySelectorAll('.wada-title').forEach(el => {
+                        if (el.innerText.includes('१ नं.')) {
+                            el.innerText = el.innerText.replace('१', nepWard);
+                        } else if (el.innerText === '१ नं. वडा कार्यालय') {
+                            el.innerText = nepWard + ' नं. वडा कार्यालय';
+                        }
+                    });
+
+                    const nabalakStamp = document.getElementById('lblNabalakOfficeStamp');
+                    if (nabalakStamp) {
+                        nabalakStamp.innerText = 'गौरादह नगरपालिका वडा नं. ' + nepWard + ' कार्यालय';
+                    }
+                }
+            } catch(e) { console.error("Ward dynamic load error", e); }
         } catch(e) {}
     }
 

@@ -1320,6 +1320,21 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initPortalNepaliDate();
+
+            // Dynamic Ward Display on Dashboard
+            try {
+                const wWard = localStorage.getItem('sifarish_ward');
+                if (wWard) {
+                    const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
+                    const nepWard = toNep(wWard);
+                    document.querySelectorAll('.wada-title').forEach(el => {
+                        if (el.innerText.includes('वडा कार्यालयको')) {
+                            el.innerText = 'वडा नं. ' + nepWard + ' कार्यालयको';
+                        }
+                    });
+                }
+            } catch (e) {}
+
             if (window.location.search.includes('open=sifarish') && localStorage.getItem('sifarish_auth') === 'true') {
                 openModal('modal-sifarish');
                 window.history.replaceState({}, document.title, window.location.pathname);
