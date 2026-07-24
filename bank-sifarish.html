@@ -441,7 +441,8 @@
                 <div class="form-group">
                     <label>👨‍👩‍👧‍👦 मृतक सँगको नाता छान्नुहोस्:</label>
                     <select id="inRelationSelect" class="bank-select-dropdown" onchange="toggleCustomRelation(); updateDoc()">
-                        <option value="छोरा" selected>छोरा</option>
+                        <option value="" disabled selected>👨‍👩‍👧‍👦 मृतक सँगको नाता छान्नुहोस्</option>
+                        <option value="छोरा">छोरा</option>
                         <option value="छोरी">छोरी</option>
                         <option value="श्रीमती">श्रीमती</option>
                         <option value="श्रीमान">श्रीमान</option>
@@ -453,6 +454,10 @@
                         <option value="बाबु">बाबु</option>
                         <option value="दाजु">दाजु</option>
                         <option value="दिदी">दिदी</option>
+                        <option value="बहिनी">बहिनी</option>
+                        <option value="भाइ">भाइ</option>
+                        <option value="बुहारी">बुहारी</option>
+                        <option value="ज्वाइँ">ज्वाइँ</option>
                         <option value="CUSTOM">✍️ आफैँ नाता लेख्नुहोस् (Custom)</option>
                     </select>
                     <input type="text" id="inRelation" placeholder="नाता लेख्नुहोस् (उदा: बुहारी, भतिज, आदि)..." style="display:none; margin-top:8px;" oninput="updateDoc()">

@@ -141,6 +141,9 @@ function setMode(mode) {
         if (tapsilTransfer) tapsilTransfer.style.display = "none";
 
         if (recipientCard) recipientCard.style.display = "block";
+
+        const secOpt = document.getElementById('secOptionalSettings');
+        if (secOpt) secOpt.style.display = "block";
     } else if (mode === 'bibaha') {
         btnJanma.className = "mode-btn";
         btnBibaha.className = "mode-btn active-bibaha";
@@ -159,6 +162,9 @@ function setMode(mode) {
         if (tapsilTransfer) tapsilTransfer.style.display = "none";
 
         if (recipientCard) recipientCard.style.display = "block";
+
+        const secOpt = document.getElementById('secOptionalSettings');
+        if (secOpt) secOpt.style.display = "block";
     } else {
         btnJanma.className = "mode-btn";
         btnBibaha.className = "mode-btn";
@@ -177,6 +183,9 @@ function setMode(mode) {
         if (tapsilTransfer) tapsilTransfer.style.display = "block";
 
         if (recipientCard) recipientCard.style.display = "none";
+
+        const secOpt = document.getElementById('secOptionalSettings');
+        if (secOpt) secOpt.style.display = "none";
     }
     
     updateDoc();
