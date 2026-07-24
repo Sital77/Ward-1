@@ -439,28 +439,53 @@
                 </div>
 
                 <div class="form-group">
-                    <label>👨‍👩‍👧‍👦 मृतक सँगको नाता छान्नुहोस्:</label>
+                    <label>👨‍👩‍👧‍👦 निवेदकसँग मृतकको नाता (उदा: आमा, बाबु, पति):</label>
                     <select id="inRelationSelect" class="bank-select-dropdown" onchange="toggleCustomRelation(); updateDoc()">
-                        <option value="" disabled selected>👨‍👩‍👧‍👦 मृतक सँगको नाता छान्नुहोस्</option>
-                        <option value="छोरा">छोरा</option>
-                        <option value="छोरी">छोरी</option>
-                        <option value="श्रीमती">श्रीमती</option>
-                        <option value="श्रीमान">श्रीमान</option>
-                        <option value="नाति">नाति</option>
-                        <option value="नातिनी">नातिनी</option>
-                        <option value="सासू">सासू</option>
-                        <option value="ससूरा">ससूरा</option>
+                        <option value="" disabled selected>👨‍👩‍👧‍👦 निवेदकसँग मृतकको नाता छान्नुहोस्</option>
                         <option value="आमा">आमा</option>
                         <option value="बाबु">बाबु</option>
+                        <option value="श्रीमान">श्रीमान</option>
+                        <option value="श्रीमती">श्रीमती</option>
+                        <option value="छोरा">छोरा</option>
+                        <option value="छोरी">छोरी</option>
                         <option value="दाजु">दाजु</option>
                         <option value="दिदी">दिदी</option>
-                        <option value="बहिनी">बहिनी</option>
                         <option value="भाइ">भाइ</option>
+                        <option value="बहिनी">बहिनी</option>
+                        <option value="सासू">सासू</option>
+                        <option value="ससूरा">ससूरा</option>
+                        <option value="नाति">नाति</option>
+                        <option value="नातिनी">नातिनी</option>
                         <option value="बुहारी">बुहारी</option>
                         <option value="ज्वाइँ">ज्वाइँ</option>
                         <option value="CUSTOM">✍️ आफैँ नाता लेख्नुहोस् (Custom)</option>
                     </select>
                     <input type="text" id="inRelation" placeholder="नाता लेख्नुहोस् (उदा: बुहारी, भतिज, आदि)..." style="display:none; margin-top:8px;" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>👨‍👩‍👧‍👦 मृतकसँग हकदारको नाता (उदा: छोरी, छोरा, हकदार):</label>
+                    <select id="inHeirRelationSelect" class="bank-select-dropdown" onchange="toggleCustomHeirRelation(); updateDoc()">
+                        <option value="" disabled selected>👨‍👩‍👧‍👦 मृतकसँग हकदारको नाता छान्नुहोस्</option>
+                        <option value="छोरी">छोरी</option>
+                        <option value="छोरा">छोरा</option>
+                        <option value="श्रीमती">श्रीमती</option>
+                        <option value="श्रीमान">श्रीमान</option>
+                        <option value="आमा">आमा</option>
+                        <option value="बाबु">बाबु</option>
+                        <option value="नाति">नाति</option>
+                        <option value="नातिनी">नातिनी</option>
+                        <option value="दाजु">दाजु</option>
+                        <option value="दिदी">दिदी</option>
+                        <option value="भाइ">भाइ</option>
+                        <option value="बहिनी">बहिनी</option>
+                        <option value="सासू">सासू</option>
+                        <option value="ससूरा">ससूरा</option>
+                        <option value="बुहारी">बुहारी</option>
+                        <option value="ज्वाइँ">ज्वाइँ</option>
+                        <option value="CUSTOM">✍️ आफैँ नाता लेख्नुहोस् (Custom)</option>
+                    </select>
+                    <input type="text" id="inHeirRelation" placeholder="हकदारको नाता लेख्नुहोस् (उदा: बुहारी, भतिज, आदि)..." style="display:none; margin-top:8px;" oninput="updateDoc()">
                 </div>
 
                 <div class="form-group">
@@ -735,6 +760,21 @@
             updateDoc();
         }
 
+        function toggleCustomHeirRelation() {
+            const selEl = document.getElementById('inHeirRelationSelect');
+            const customInput = document.getElementById('inHeirRelation');
+            if (selEl && customInput) {
+                if (selEl.value === 'CUSTOM') {
+                    customInput.style.display = 'block';
+                    customInput.focus();
+                } else {
+                    customInput.style.display = 'none';
+                    customInput.value = selEl.value;
+                }
+            }
+            updateDoc();
+        }
+
         // ── Mode Toggle Button Tabs (PAN Style) ────────────────
         function setMode(mode) {
             const btnKholne = document.getElementById('btnKholne');
@@ -929,7 +969,7 @@
                     citInfoStr = ` (${citParts.join(', ')})`;
                 }
 
-                // Get selected relation from dropdown or custom input
+                // Get selected deceased relation from dropdown or custom input
                 let relation = "";
                 const relSelect = document.getElementById('inRelationSelect');
                 if (relSelect) {
@@ -943,6 +983,20 @@
                 }
                 if (!relation) relation = '.........';
 
+                // Get selected heir relation from dropdown or custom input
+                let heirRelation = "";
+                const heirRelSelect = document.getElementById('inHeirRelationSelect');
+                if (heirRelSelect) {
+                    if (heirRelSelect.value === 'CUSTOM') {
+                        heirRelation = document.getElementById('inHeirRelation').value.trim();
+                    } else {
+                        heirRelation = heirRelSelect.value;
+                    }
+                } else {
+                    heirRelation = (document.getElementById('inHeirRelation') || {}).value || '';
+                }
+                if (!heirRelation) heirRelation = '.........';
+
                 const deceasedName = document.getElementById('inDeceasedName').value.trim() || '.........................';
                 const deathDate = document.getElementById('inDeathDate').value.trim() || '.....................';
                 const deceasedAccNo = document.getElementById('inDeceasedAccountNo').value.trim() || '..................................';
@@ -950,7 +1004,7 @@
                 const deceasedCitNo = document.getElementById('inDeceasedCitNo').value.trim() || '..................';
 
                 bodyTextEl.innerHTML = `
-                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ l
+                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${heirRelation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ l
                 `;
 
                 document.getElementById('tapasilHeaderBlock').innerText = "मृतकको विवरण:";
@@ -1093,6 +1147,14 @@
                 relation = document.getElementById('inRelation').value.trim();
             }
 
+            let heirRelation = "";
+            const heirRelSelect = document.getElementById('inHeirRelationSelect');
+            if (heirRelSelect) {
+                heirRelation = (heirRelSelect.value === 'CUSTOM') ? document.getElementById('inHeirRelation').value.trim() : heirRelSelect.value;
+            } else {
+                heirRelation = (document.getElementById('inHeirRelation') || {}).value || '';
+            }
+
             const chkAddr = document.getElementById('chkCustomAddress');
             const isCustomAddress = !!(chkAddr && chkAddr.checked);
             const applicantDistrict = isCustomAddress ? (document.getElementById('inApplicantDistrict').value.trim() || 'झापा') : 'झापा';
@@ -1129,6 +1191,7 @@
                 // Deceased Account Closure specific
                 applicantCitDate:    document.getElementById('inApplicantCitDate').value.trim() || '',
                 relation:            relation,
+                heirRelation:        heirRelation,
                 deceasedName:        document.getElementById('inDeceasedName').value.trim() || '',
                 deathDate:           document.getElementById('inDeathDate').value.trim() || '',
                 deceasedCitNo:       document.getElementById('inDeceasedCitNo').value.trim() || '',
@@ -1253,8 +1316,8 @@
 
             document.getElementById('inApplicantCitDate').value   = rec.applicantCitDate || '';
             
-            // Restore Relation Select dropdown
-            const relVal = rec.relation || 'छोरा';
+            // Restore Relation Select dropdown (निवेदकसँग मृतकको नाता)
+            const relVal = rec.relation || '';
             const relSelect = document.getElementById('inRelationSelect');
             const customRelInput = document.getElementById('inRelation');
 
@@ -1264,10 +1327,36 @@
                     relSelect.value = relVal;
                     customRelInput.style.display = 'none';
                     customRelInput.value = relVal;
-                } else {
+                } else if (relVal) {
                     relSelect.value = 'CUSTOM';
                     customRelInput.style.display = 'block';
                     customRelInput.value = relVal;
+                } else {
+                    relSelect.selectedIndex = 0;
+                    customRelInput.style.display = 'none';
+                    customRelInput.value = '';
+                }
+            }
+
+            // Restore Heir Relation Select dropdown (मृतकसँग हकदारको नाता)
+            const heirRelVal = rec.heirRelation || '';
+            const heirRelSelect = document.getElementById('inHeirRelationSelect');
+            const customHeirRelInput = document.getElementById('inHeirRelation');
+
+            if (heirRelSelect) {
+                const options = Array.from(heirRelSelect.options).map(o => o.value);
+                if (options.includes(heirRelVal) && heirRelVal !== 'CUSTOM') {
+                    heirRelSelect.value = heirRelVal;
+                    customHeirRelInput.style.display = 'none';
+                    customHeirRelInput.value = heirRelVal;
+                } else if (heirRelVal) {
+                    heirRelSelect.value = 'CUSTOM';
+                    customHeirRelInput.style.display = 'block';
+                    customHeirRelInput.value = heirRelVal;
+                } else {
+                    heirRelSelect.selectedIndex = 0;
+                    customHeirRelInput.style.display = 'none';
+                    customHeirRelInput.value = '';
                 }
             }
 
