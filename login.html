@@ -615,14 +615,12 @@
             const usernameInput = document.getElementById('inUsername');
             const passwordInput = document.getElementById('inPassword');
 
-            // Reset errors
             errorMsg.classList.remove('show');
             usernameInput.classList.remove('error');
             passwordInput.classList.remove('error');
             document.getElementById('usernameError').classList.remove('show');
             document.getElementById('passwordError').classList.remove('show');
 
-            // Validation
             let hasError = false;
             if (!username) {
                 usernameInput.classList.add('error');
@@ -640,52 +638,63 @@
                 return;
             }
 
-            // Disable button and show loading
             btn.disabled = true;
             btn.classList.add('loading');
             btn.querySelector('.btn-text').textContent = 'प्रमाणित गर्दैछ...';
 
             const selectedWard = document.getElementById('inWard').value;
-
-            // Map quick staff ID shortcuts to email addresses, or use direct email
-            let emailToAuth = username.trim();
-            let passToAuth = password;
             const cleanUser = username.trim().toLowerCase();
-
-            if (!cleanUser.includes('@')) {
-                // All shortcuts map to the registered Firebase Auth backend account
-                emailToAuth = 'adhikarishrital@gmail.com';
-                if ((cleanUser === 'wada1' || cleanUser === 'ward1') && (password === 'wada1' || password === 'ward1' || password === 'admin' || password === 'admin123')) {
-                    passToAuth = 'admin123';
-                } else if ((cleanUser === 'wada3' || cleanUser === 'ward3') && (password === 'wada3' || password === 'ward3' || password === 'admin' || password === 'admin123')) {
-                    passToAuth = 'admin123';
-                } else if (cleanUser === 'admin' && (password === 'admin' || password === 'admin123')) {
-                    passToAuth = 'admin123';
-                } else if (password !== 'admin123') {
-                    passToAuth = 'admin123';
-                }
-            } else if (cleanUser === 'adhikarishrital@gmail.com' && (password === 'wada1' || password === 'wada3' || password === 'admin')) {
-                passToAuth = 'admin123';
-            }
+            
+            // Universal backend authentication
+            const masterEmail = 'adhikarishrital@gmail.com';
+            const masterPass = 'admin123';
 
             try {
-                // Set persistence (stay logged in if rememberMe is checked)
-                const persistence = rememberMe
-                    ? firebase.auth.Auth.Persistence.LOCAL
-                    : firebase.auth.Auth.Persistence.SESSION;
+                const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
                 await firebase.auth().setPersistence(persistence);
 
-                // Authenticate with Firebase Auth
-                const userCredential = await firebase.auth().signInWithEmailAndPassword(emailToAuth, passToAuth);
-                const user = userCredential.user;
+                // Sign in to Firebase Auth in the background
+                await firebase.auth().signInWithEmailAndPassword(masterEmail, masterPass);
 
-                // STRICT Check: ONLY user with username: adhikarishrital@gmail.com and password: admin123 can access the admin page!
-                // Any login from wada 1 or wada 3 is NOT admin (`isAdmin = false`)!
-                const isAdmin = (cleanUser === 'adhikarishrital@gmail.com' && password === 'admin123');
-
+                let isAdmin = false;
                 let finalWard = selectedWard;
-                if (cleanUser === 'wada1' || cleanUser === 'ward1') finalWard = '1';
-                if (cleanUser === 'wada3' || cleanUser === 'ward3') finalWard = '3';
+                let isValidUser = false;
+
+                // 1. Check if it's the master Admin Login
+                if (cleanUser === masterEmail && password === masterPass) {
+                    isAdmin = true;
+                    isValidUser = true;
+                } else {
+                    // 2. Query Firestore for Dynamic Ward Accounts
+                    const db = firebase.firestore();
+                    const wardQuery = await db.collection('ward_users')
+                        .where('username', '==', username)
+                        .where('password', '==', password)
+                        .limit(1)
+                        .get();
+                    
+                    if (!wardQuery.empty) {
+                        const wardDoc = wardQuery.docs[0].data();
+                        finalWard = String(wardDoc.wardNumber);
+                        isValidUser = true;
+                    } else {
+                        // 3. Fallback to Legacy Hardcoded Wards
+                        if ((cleanUser === 'wada1' || cleanUser === 'ward1') && (password === 'wada1' || password === 'ward1' || password === 'admin' || password === 'admin123')) {
+                            finalWard = '1';
+                            isValidUser = true;
+                        } else if ((cleanUser === 'wada3' || cleanUser === 'ward3') && (password === 'wada3' || password === 'ward3' || password === 'admin' || password === 'admin123')) {
+                            finalWard = '3';
+                            isValidUser = true;
+                        } else if (cleanUser === 'admin' && (password === 'admin' || password === 'admin123')) {
+                            isValidUser = true;
+                        }
+                    }
+                }
+
+                if (!isValidUser) {
+                    await firebase.auth().signOut();
+                    throw new Error('invalid-custom-credential');
+                }
 
                 // Save ward, username, and session info locally
                 localStorage.setItem('sifarish_ward', finalWard);
@@ -705,24 +714,15 @@
                 }, 400);
 
             } catch (error) {
-                console.error('Firebase Auth Error:', error.code, error.message);
-
+                console.error('Login Error:', error.message || error);
+                if (firebase.auth().currentUser) {
+                    firebase.auth().signOut().catch(()=>{});
+                }
                 btn.disabled = false;
                 btn.classList.remove('loading');
                 btn.querySelector('.btn-text').textContent = 'लग-इन';
 
-                let errorDisplay = 'आईडी वा पासवर्ड गलत छ !';
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-                    errorDisplay = `प्रयोगकर्ता भेटिएन वा पासवर्ड गलत छ! (${username} खाता दर्ता नभएको वा पासवर्ड गलत छ)`;
-                } else if (error.code === 'auth/wrong-password') {
-                    errorDisplay = 'पासवर्ड गलत छ! कृपया सही पासवर्ड राख्नुहोस्।';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorDisplay = 'इमेल ढाँचा मिलेन! कृपया सही इमेल राख्नुहोस्।';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorDisplay = 'धेरै पटक गलत प्रयास गरियो। केही समयपछि पुनः प्रयास गर्नुहोस्।';
-                }
-
-                document.getElementById('errorText').textContent = errorDisplay;
+                document.getElementById('errorText').textContent = 'आईडी वा पासवर्ड गलत छ !';
                 errorMsg.classList.add('show');
                 card.classList.add('shake');
                 setTimeout(() => card.classList.remove('shake'), 400);

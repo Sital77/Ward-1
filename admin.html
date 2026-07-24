@@ -99,6 +99,9 @@
             <div class="sidebar-nav-item" data-section="signatures" onclick="switchSection('signatures')">
                 <span class="nav-icon">🖋️</span> हस्ताक्षर अधिकारी
             </div>
+            <div class="sidebar-nav-item" data-section="ward-users" onclick="switchSection('ward-users')">
+                <span class="nav-icon">🏢</span> वडा प्रयोगकर्ता
+            </div>
             <div class="sidebar-nav-item" data-section="activity" onclick="switchSection('activity')">
                 <span class="nav-icon">📝</span> गतिविधि लग
             </div>
@@ -335,9 +338,8 @@
                     <button class="btn btn-primary" onclick="openAddSignatureModal()">➕ नयाँ हस्ताक्षर अधिकारी</button>
                 </div>
 
-                <div style="display:flex; gap:12px; margin-bottom:18px;">
-                    <button type="button" class="btn btn-secondary sig-ward-btn active" id="btnSigWard1" onclick="filterSigByWard('1')" style="font-weight:700; border-color:#3182ce; background:#ebf8ff; color:#2b6cb0;">🏢 वडा नं. १ का अधिकारीहरू</button>
-                    <button type="button" class="btn btn-secondary sig-ward-btn" id="btnSigWard3" onclick="filterSigByWard('3')" style="font-weight:700;">🏢 वडा नं. ३ का अधिकारीहरू</button>
+                <div id="sigWardTabsContainer" style="display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
+                    <!-- Dynamic tabs will be inserted here -->
                 </div>
 
                 <div class="table-card" style="padding:20px;">
@@ -354,6 +356,34 @@
                         </thead>
                         <tbody id="signatureTableBody">
                             <tr><td colspan="6" class="empty-state">🌀 लोड हुँदैछ...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== SECTION: WARD USERS ===== -->
+            <div class="dashboard-section" id="section-ward-users" style="display: none;">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">🏢 वडा प्रयोगकर्ता व्यवस्थापन</div>
+                        <div class="section-subtitle">विभिन्न वडाहरूको लग-इन आईडी र पासवर्ड व्यवस्थापन गर्नुहोस्</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddWardUserModal()">➕ नयाँ वडा प्रयोगकर्ता</button>
+                </div>
+                
+                <div class="table-card" style="padding:20px;">
+                    <table class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>क्र.सं.</th>
+                                <th>वडा नम्बर</th>
+                                <th>प्रयोगकर्ता आईडी (Username)</th>
+                                <th>पासवर्ड (Password)</th>
+                                <th style="text-align:center;">कार्य (Actions)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wardUsersTableBody">
+                            <tr><td colspan="5" class="empty-state">🌀 लोड हुँदैछ...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -643,6 +673,40 @@
                     </div>
                     <div style="margin-top:20px; text-align:right;">
                         <button type="button" class="btn btn-secondary" onclick="closeModalEl('signatureModal')">रद्द गर्नुहोस्</button>
+                        <button type="submit" class="btn btn-success">✅ सुरक्षित गर्नुहोस्</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- ===== WARD USER ADD/EDIT MODAL ===== -->
+    <div class="modal-overlay" id="wardUserModal">
+        <div class="modal-content modal-md">
+            <div class="modal-head">
+                <h3 class="modal-head-title" id="wardModalTitleDisplay">➕ नयाँ वडा प्रयोगकर्ता थप्नुहोस्</h3>
+                <button class="modal-head-close" onclick="closeModalEl('wardUserModal')">×</button>
+            </div>
+            <div class="modal-body" style="padding:24px;">
+                <form id="wardUserForm" onsubmit="saveWardUserForm(event)">
+                    <input type="hidden" id="formWardUserId">
+                    <div class="form-group">
+                        <label class="form-label">🏢 वडा नम्बर <span class="required">*</span></label>
+                        <input type="number" class="form-input" id="formWardUserNumber" placeholder="उदा: 4" required min="1" max="99">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">👤 प्रयोगकर्ता आईडी (Username) <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="formWardUsername" placeholder="उदा: wada4" required>
+                        <small style="color: #64748b; font-size: 0.8rem; margin-top: 4px; display: block;">लग-इन गर्न प्रयोग हुने आईडी (खाली ठाउँ नराख्नुहोला)</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🔒 पासवर्ड <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="formWardPassword" placeholder="उदा: wada4password" required>
+                    </div>
+                    <div style="margin-top:20px; text-align:right;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModalEl('wardUserModal')">रद्द गर्नुहोस्</button>
                         <button type="submit" class="btn btn-success">✅ सुरक्षित गर्नुहोस्</button>
                     </div>
                 </form>
@@ -1150,7 +1214,8 @@
         showToast('नमुना लोड भयो', 'तयार नमुना व्यहोरा लोड गरियो, अब आवश्यक संशोधन गर्नुहोस्', 'info');
     }
 
-    // ===== SIGNING AUTHORITIES MANAGEMENT =====
+    // ===== WARD USERS & SIGNING AUTHORITIES MANAGEMENT =====
+    let wardUsersList = [];
     let signaturesList = [];
     let currentSigWardFilter = '1';
 
@@ -1207,12 +1272,37 @@
         renderSignaturesTable();
     }
 
+    function updateSigWardTabs() {
+        const container = document.getElementById('sigWardTabsContainer');
+        if (!container) return;
+        
+        let wards = [...new Set(wardUsersList.map(w => w.wardNumber))].sort((a,b) => parseInt(a) - parseInt(b));
+        if (wards.length === 0) wards = ['1', '3']; // Fallback
+        
+        if (!wards.includes(currentSigWardFilter)) {
+            currentSigWardFilter = wards[0] || '1';
+        }
+
+        let html = '';
+        wards.forEach(w => {
+            const isActive = w === currentSigWardFilter;
+            const style = isActive 
+                ? 'font-weight:700; border-color:#3182ce; background:#ebf8ff; color:#2b6cb0;' 
+                : 'font-weight:700; background:#fff; border-color:#cbd5e0; color:#4a5568;';
+            html += `<button type="button" class="btn btn-secondary sig-ward-btn ${isActive ? 'active' : ''}" onclick="filterSigByWard('${w}')" style="${style}">🏢 वडा नं. ${w} का अधिकारीहरू</button>`;
+        });
+        container.innerHTML = html;
+        
+        const selectWard = document.getElementById('formSigWard');
+        if (selectWard) {
+            selectWard.innerHTML = wards.map(w => `<option value="${w}">वडा नं. ${w}</option>`).join('');
+            selectWard.value = currentSigWardFilter;
+        }
+    }
+
     function filterSigByWard(ward) {
         currentSigWardFilter = ward;
-        const b1 = document.getElementById('btnSigWard1');
-        const b3 = document.getElementById('btnSigWard3');
-        if (b1) { b1.style.background = ward === '1' ? '#ebf8ff' : '#fff'; b1.style.borderColor = ward === '1' ? '#3182ce' : '#cbd5e0'; b1.style.color = ward === '1' ? '#2b6cb0' : '#4a5568'; }
-        if (b3) { b3.style.background = ward === '3' ? '#ebf8ff' : '#fff'; b3.style.borderColor = ward === '3' ? '#3182ce' : '#cbd5e0'; b3.style.color = ward === '3' ? '#2b6cb0' : '#4a5568'; }
+        updateSigWardTabs();
         renderSignaturesTable();
     }
 
@@ -1320,6 +1410,90 @@
         window.dispatchEvent(new CustomEvent('signing_authorities_updated'));
         renderSignaturesTable();
         showToast('हटाइयो', 'हस्ताक्षर अधिकारी हटाइयो', 'info');
+    }
+
+    // ===== WARD USERS MANAGEMENT FUNCTIONS =====
+    function renderWardUsersTable() {
+        const tbody = document.getElementById('wardUsersTableBody');
+        if (!tbody) return;
+        if (wardUsersList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">कुनै वडा प्रयोगकर्ता भेटिएन।</td></tr>`;
+            return;
+        }
+        let html = '';
+        wardUsersList.sort((a, b) => parseInt(a.wardNumber) - parseInt(b.wardNumber)).forEach((item, idx) => {
+            html += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td style="font-weight:700;">वडा नं. ${item.wardNumber}</td>
+                    <td><span class="status-badge status-active">${item.username}</span></td>
+                    <td style="font-family:monospace; color:#4a5568;">${item.password}</td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-secondary btn-sm" onclick="openEditWardUserModal('${item.id}')">✏️ सम्पादन</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteWardUser('${item.id}')">🗑️ हटाउनुहोस्</button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+        updateSigWardTabs();
+    }
+
+    function openAddWardUserModal() {
+        document.getElementById('wardModalTitleDisplay').textContent = '➕ नयाँ वडा प्रयोगकर्ता थप्नुहोस्';
+        document.getElementById('wardUserForm').reset();
+        document.getElementById('formWardUserId').value = '';
+        openModalEl('wardUserModal');
+    }
+
+    function openEditWardUserModal(id) {
+        const item = wardUsersList.find(u => u.id === id);
+        if (!item) return;
+        document.getElementById('wardModalTitleDisplay').textContent = '✏️ वडा प्रयोगकर्ता सम्पादन';
+        document.getElementById('formWardUserId').value = item.id;
+        document.getElementById('formWardUserNumber').value = item.wardNumber;
+        document.getElementById('formWardUsername').value = item.username;
+        document.getElementById('formWardPassword').value = item.password;
+        openModalEl('wardUserModal');
+    }
+
+    function saveWardUserForm(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const idVal = document.getElementById('formWardUserId').value;
+        const wardNumber = document.getElementById('formWardUserNumber').value.trim();
+        const username = document.getElementById('formWardUsername').value.trim();
+        const password = document.getElementById('formWardPassword').value.trim();
+
+        if (!wardNumber || !username || !password) {
+            showToast('त्रुटि', 'सबै विवरण भर्नुहोस्', 'error'); return;
+        }
+
+        const docId = idVal || 'ward_' + Date.now();
+        const docData = {
+            id: docId,
+            wardNumber: wardNumber,
+            username: username,
+            password: password,
+            updated_at: Date.now()
+        };
+
+        const idx = wardUsersList.findIndex(u => u.id === docId);
+        if (idx !== -1) wardUsersList[idx] = docData;
+        else wardUsersList.push(docData);
+
+        db.collection('ward_users').doc(docId).set(docData, { merge: true }).catch(err => {});
+        
+        closeModalEl('wardUserModal');
+        renderWardUsersTable();
+        showToast('सफल 🎉', 'वडा प्रयोगकर्ता सफलतापूर्वक सुरक्षित भयो', 'success');
+    }
+
+    function deleteWardUser(id) {
+        if (!confirm('के तपाईं यो वडा प्रयोगकर्ता हटाउन चाहनुहुन्छ? यो वडाको लग-इन बन्द हुनेछ!')) return;
+        wardUsersList = wardUsersList.filter(u => u.id !== id);
+        db.collection('ward_users').doc(id).delete().catch(err => {});
+        renderWardUsersTable();
+        showToast('हटाइयो', 'वडा प्रयोगकर्ता हटाइयो', 'info');
     }
 
     function getFormData() {
@@ -1914,6 +2088,7 @@
     function saveCategory() {
         const name = document.getElementById('categoryNameInput').value.trim();
         if (!name) { showToast('त्रुटि', 'कृपया श्रेणीको नाम लेख्नुहोस्', 'error'); return; }
+
         const editVal = document.getElementById('categoryEditId').value;
         if (editVal) {
             // Edit mode - rename
@@ -2227,6 +2402,13 @@
         initSignaturesList();
     });
     initSignaturesList();
+
+    // Ward users - real-time
+    db.collection('ward_users').onSnapshot(snap => {
+        wardUsersList = [];
+        snap.forEach(doc => wardUsersList.push({ id: doc.id, ...doc.data() }));
+        renderWardUsersTable();
+    }, err => console.error('Ward users listener failed:', err));
 
     // ===== Init =====
     function initAdminNepaliDate() {
