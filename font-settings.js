@@ -1090,6 +1090,30 @@
             const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
             const dateStr = `मिति : ${toNep(bsY)} ${nepaliMonths[bsM - 1] || 'असार'} ${toNep(bsD)} गते, ${dayName}`;
             
+            // Auto-populate date fields if they are empty or have hardcoded placeholders
+            setTimeout(() => {
+                try {
+                    const yStr = toNep(bsY);
+                    const mStr = toNep(String(bsM).padStart(2, '0'));
+                    const dStr = toNep(String(bsD).padStart(2, '0'));
+                    const autoMiti = `${yStr}/${mStr}/${dStr}`;
+                    const mFields = ['inMiti', 'inSubmitMiti', 'inCustomCertifiedMiti'];
+                    let updated = false;
+                    mFields.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && (!el.value || el.value.trim() === '' || el.value === '२०८३/' || el.value === '२०८३/०२/२७' || el.value === '२०८३/०२/१८')) {
+                            el.value = autoMiti;
+                            updated = true;
+                        }
+                    });
+                    if (updated && typeof updateDoc === 'function') {
+                        updateDoc();
+                    }
+                } catch(err) {
+                    console.error("Error auto-filling miti:", err);
+                }
+            }, 500);
+            
             let badge = document.getElementById('nepaliDateBannerBadge');
             if (!badge) {
                 badge = document.createElement('div');
