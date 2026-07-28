@@ -11,58 +11,191 @@
         .preview-panel .a4-page * {
             font-family: 'Mukta', sans-serif;
         }
+
         .letter-body-para {
             font-size: 13pt;
             line-height: 1.9;
             text-align: justify;
             text-justify: inter-word;
         }
+
         .mode-toggle-wrap {
-            display: flex; gap: 8px; margin-bottom: 18px;
-            background: #edf2f7; padding: 5px; border-radius: 12px; border: 1px solid #cbd5e0;
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            background: #edf2f7;
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e0;
         }
+
         .mode-btn {
-            flex: 1; padding: 11px 8px; border: none; border-radius: 9px;
-            font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
-            color: #4a5568; background: transparent; font-family: inherit;
+            flex: 1;
+            padding: 11px 8px;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4a5568;
+            background: transparent;
+            font-family: inherit;
         }
+
         .mode-btn.active-kholne {
-            background: linear-gradient(135deg, #2b6cb0, #3182ce); color: #fff;
+            background: linear-gradient(135deg, #2b6cb0, #3182ce);
+            color: #fff;
             box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
         }
+
         .mode-btn.active-banda {
-            background: linear-gradient(135deg, #c53030, #9b2c2c); color: #fff;
+            background: linear-gradient(135deg, #c53030, #9b2c2c);
+            color: #fff;
             box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
         }
+
         .section-card {
-            border-radius: 10px; padding: 14px 14px 6px 14px; margin-bottom: 18px;
+            border-radius: 10px;
+            padding: 14px 14px 14px 14px;
+            margin-bottom: 18px;
         }
+
         .section-label {
-            font-size: 0.82rem; font-weight: 800; letter-spacing: 0.5px;
-            text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
         .body-section {
-            background: rgba(43, 108, 176, 0.07); border: 1.5px dashed rgba(43, 108, 176, 0.4);
+            background: rgba(43, 108, 176, 0.05);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
         }
-        .body-section .section-label { color: #2b6cb0; }
-        
-        .bank-select-dropdown {
-            width: 100%; padding: 9px; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 5px; font-family: inherit;
+
+        .body-section .section-label {
+            color: #2b6cb0;
         }
+
+        /* Radio option cards styling */
+        .bank-radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .bank-radio-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.88rem;
+            color: #2d3748;
+        }
+
+        .bank-radio-card:hover {
+            border-color: #3182ce;
+            background: #ebf8ff;
+        }
+
+        .bank-radio-card.active {
+            border-color: #2b6cb0;
+            background: #ebf8ff;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
+            font-weight: 700;
+            color: #2b6cb0;
+        }
+
+        .budget-type-radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .budget-radio-card {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+
+        .budget-radio-card:hover {
+            border-color: #3182ce;
+            background: #ebf8ff;
+        }
+
+        .budget-radio-card.active {
+            border-color: #2b6cb0;
+            background: #ebf8ff;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
+            font-weight: 700;
+            color: #2b6cb0;
+        }
+
         .btn-abhilekh {
-            background: #e2e8f0; color: #2d3748; padding: 6px 12px; border: 1px solid #cbd5e0; border-radius: 5px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            background: #e2e8f0;
+            color: #2d3748;
+            padding: 6px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
         }
-        .btn-abhilekh:hover { background: #cbd5e0; }
+
+        .btn-abhilekh:hover {
+            background: #cbd5e0;
+        }
 
         @media print {
-            .input-panel, .mode-toggle-wrap, .top-bar-buttons, .btn-abhilekh, #abhilekhModal {
+            .input-panel,
+            .mode-toggle-wrap,
+            .top-bar-buttons,
+            .btn-abhilekh,
+            #abhilekhModal {
                 display: none !important;
             }
+
             .preview-panel {
-                width: 100% !important; height: auto !important; overflow: visible !important; padding: 0 !important; border: none !important; margin: 0 !important; background: transparent !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                border: none !important;
+                margin: 0 !important;
+                background: transparent !important;
             }
-            body { margin: 0; padding: 0; background: #fff; }
-            .a4-page { box-shadow: none !important; border: none !important; margin: 0 !important; border-radius: 0 !important; }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            .a4-page {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+            }
         }
     </style>
 </head>
@@ -71,40 +204,41 @@
     <script src="auth.js?v=2.3"></script>
 
     <div class="input-panel">
-        <div class="top-bar-buttons" style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+        <div class="top-bar-buttons" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <button onclick="window.location.href='index.html'" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #4a5568;">
                 🏠 ड्यासबोर्डमा जानुहोस्
             </button>
             <button class="btn-abhilekh" onclick="toggleModal(true)">🗄️ अभिलेख खोल्नुस्</button>
         </div>
 
+        <!-- Mode Toggle Tabs -->
         <div class="mode-toggle-wrap">
             <button id="btnKholne" class="mode-btn active-kholne" onclick="setMode('OPEN_ACCOUNT')">
-                📂 योजनाको बैंक खाता खोल्ने
+                📂 बैंक खाता सञ्चालन (खोल्ने)
             </button>
             <button id="btnBanda" class="mode-btn" onclick="setMode('CLOSE_ACCOUNT')">
-                🔒 योजनाको बैंक खाता बन्द
+                🔒 बैंक खाता बन्द सिफारिस
             </button>
         </div>
 
         <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
 
-        <h2 id="formMainTitle" style="color:#2c5282; font-size:1.4rem; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom:15px;">
-            📂 योजनाको बैंक खाता खोल्ने सिफारिस
+        <h2 id="formMainTitle" style="color:#2c5282; font-size:1.35rem; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom:15px;">
+            📂 योजनाको बैंक खाता सञ्चालन सिफारिस
         </h2>
 
         <!-- ══ COMMON SECTION ══ -->
         <div class="section-card body-section">
             <div class="section-label">📋 साधारण विवरण</div>
-            
+
             <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                     <label>मिति:</label>
-                    <input type="text" id="inMiti" placeholder="उदा: २०८०/१०/१२" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                    <input type="text" id="inMiti" placeholder="उदा: २०८२/०४/१५" oninput="updateDoc()">
                 </div>
                 <div>
                     <label>नेपाल संवत्:</label>
-                    <input type="text" id="inNepalSamvat" placeholder="उदा: ११४४" oninput="updateDoc()">
+                    <input type="text" id="inNepalSamvat" placeholder="उदा: ११४५" oninput="updateDoc()">
                 </div>
             </div>
 
@@ -112,47 +246,64 @@
                 <label>उपभोक्ता समितिको नाम:</label>
                 <input type="text" id="inCommitteeName" placeholder="उदा: गौरादह खानेपानी उपभोक्ता समिति" oninput="updateDoc()">
             </div>
-            
-            <div class="form-group">
-                <label>अध्यक्षको नाम:</label>
-                <input type="text" id="inChairman" placeholder="उदा: राम बहादुर थापा" oninput="updateDoc()">
-            </div>
-            <div class="form-group">
-                <label>सचिवको नाम:</label>
-                <input type="text" id="inSecretary" placeholder="उदा: श्याम हरि आचार्य" oninput="updateDoc()">
-            </div>
-            <div class="form-group">
-                <label>कोषाध्यक्षको नाम:</label>
-                <input type="text" id="inTreasurer" placeholder="उदा: गीता कुमारी शर्मा" oninput="updateDoc()">
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>अध्यक्षको नाम:</label>
+                    <input type="text" id="inChairman" placeholder="अध्यक्षको नाम" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>सचिवको नाम:</label>
+                    <input type="text" id="inSecretary" placeholder="सचिवको नाम" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>कोषाध्यक्षको नाम:</label>
+                    <input type="text" id="inTreasurer" placeholder="कोषाध्यक्षको नाम" oninput="updateDoc()">
+                </div>
             </div>
         </div>
 
         <!-- ══ OPENING SPECIFIC SECTION ══ -->
         <div class="section-card body-section" id="secOpenAccount">
-            <div class="section-label">📂 खाता खोल्ने विवरण</div>
+            <div class="section-label">📂 खाता सञ्चालन (खोल्ने) विवरण</div>
+
             <div class="form-group">
                 <label>चालू आर्थिक वर्ष:</label>
                 <input type="text" id="inFiscalYear" value="२०८२/०८३" oninput="updateDoc()">
             </div>
+
             <div class="form-group">
-                <label>योजनाको प्रकार:</label>
-                <select id="inBudgetTypeSelect" class="bank-select-dropdown" onchange="toggleCustomBudgetType(); updateDoc()">
-                    <option value="वडा स्तरीय" selected>वडा स्तरीय</option>
-                    <option value="नगर स्तरीय">नगर स्तरीय</option>
-                    <option value="प्रदेश स्तरीय">प्रदेश स्तरीय</option>
-                    <option value="संघीय">संघीय</option>
-                    <option value="CUSTOM">✍️ आफैँ लेख्नुहोस् (Custom)</option>
-                </select>
-                <input type="text" id="inBudgetTypeCustom" placeholder="उदा: गाउँ स्तरीय" style="display:none; margin-top:8px;" oninput="updateDoc()">
+                <label style="font-weight:bold; margin-bottom:6px; display:block;">स्वीकृत योजनाको प्रकार:</label>
+                <div class="budget-type-radio-group">
+                    <label class="budget-radio-card active" id="lblBudgetTypeWada">
+                        <input type="radio" name="budgetTypeRadio" value="वडा स्तरीय" checked onchange="onBudgetTypeRadioChange(this)">
+                        <span>वडा स्तरीय</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypeNagar">
+                        <input type="radio" name="budgetTypeRadio" value="नगर स्तरीय" onchange="onBudgetTypeRadioChange(this)">
+                        <span>नगर स्तरीय</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypePradesh">
+                        <input type="radio" name="budgetTypeRadio" value="प्रदेश स्तरीय" onchange="onBudgetTypeRadioChange(this)">
+                        <span>प्रदेश स्तरीय</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypeCustom">
+                        <input type="radio" name="budgetTypeRadio" value="CUSTOM" onchange="onBudgetTypeRadioChange(this)">
+                        <span>✍️ आफैँ हाल्नुस (Custom)</span>
+                    </label>
+                </div>
+                <input type="text" id="inBudgetTypeCustom" placeholder="उदा: संघ स्तरीय" style="display:none; margin-top:8px;" oninput="updateDoc()">
             </div>
+
             <div class="form-group">
                 <label>योजनाको शिर्षक:</label>
-                <input type="text" id="inProjectName" placeholder="उदा: गौरादह बजार ढल निर्माण योजना" oninput="updateDoc()">
+                <input type="text" id="inProjectName" placeholder="उदा: गौरादह १ बजार ढल तथा सडक निर्माण योजना" oninput="updateDoc()">
             </div>
+
             <div class="form-group" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px;">
                 <div>
-                    <label>रकम (अंकमा) रू:</label>
-                    <input type="text" id="inBudgetAmt" placeholder="उदा: ५,००,०००" oninput="updateDoc()">
+                    <label>विनियोजन रकम रू. (अंकमा):</label>
+                    <input type="text" id="inBudgetAmt" placeholder="उदा: ५०००००" oninput="autoConvertAmtToWords(); updateDoc()">
                 </div>
                 <div>
                     <label>रकम (अक्षरेपी):</label>
@@ -163,51 +314,80 @@
 
         <!-- ══ CLOSING SPECIFIC SECTION ══ -->
         <div class="section-card body-section" id="secCloseAccount" style="display:none;">
-            <div class="section-label">🔒 खाता बन्द गर्ने विवरण</div>
+            <div class="section-label">🔒 खाता बन्द विवरण</div>
             <div class="form-group">
-                <label>बैंक खाता नम्बर:</label>
+                <label>सञ्चालनमा रहेको बैंक खाता नम्बर:</label>
                 <input type="text" id="inAccountNo" placeholder="उदा: ०४१२३०१००२९३००१" oninput="updateDoc()">
             </div>
         </div>
 
-        <!-- ══ BANK DETAILS ══ -->
-        <div class="section-card lh-section">
-            <div class="section-label">🏦 बैंकको विवरण</div>
-            <div class="form-group">
-                <label>बैंक छान्नुहोस्:</label>
-                <select id="inBankSelect" class="bank-select-dropdown" onchange="toggleCustomBank(); updateDoc()">
-                    <option value="saptakoshi" selected>श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="krishi">श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="nic">श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="prime">श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="nabil">श्री नबिल बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="laxmi">श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="siddhartha">श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="global">श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="excel">श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)</option>
-                    <option value="CUSTOM">✍️ आफैँ बैंकको नाम लेख्नुहोस् (Custom)</option>
-                </select>
+        <!-- ══ BANK SELECTION (RADIO OPTIONS) ══ -->
+        <div class="section-card body-section" style="background: rgba(237, 137, 54, 0.05); border-color: rgba(237, 137, 54, 0.4);">
+            <div class="section-label" style="color: #c05621;">🏦 बैंक छान्नुहोस् (Radio Options)</div>
+
+            <div class="bank-radio-group">
+                <label class="bank-radio-card active" id="cardBankSaptakoshi">
+                    <input type="radio" name="bankRadio" value="saptakoshi" checked onchange="onBankRadioChange(this)">
+                    <span>श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, झापा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankKrishi">
+                    <input type="radio" name="bankRadio" value="krishi" onchange="onBankRadioChange(this)">
+                    <span>श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankNic">
+                    <input type="radio" name="bankRadio" value="nic" onchange="onBankRadioChange(this)">
+                    <span>श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankPrime">
+                    <input type="radio" name="bankRadio" value="prime" onchange="onBankRadioChange(this)">
+                    <span>श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankNabil">
+                    <input type="radio" name="bankRadio" value="nabil" onchange="onBankRadioChange(this)">
+                    <span>श्री नबिल बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankLaxmi">
+                    <input type="radio" name="bankRadio" value="laxmi" onchange="onBankRadioChange(this)">
+                    <span>श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankSiddhartha">
+                    <input type="radio" name="bankRadio" value="siddhartha" onchange="onBankRadioChange(this)">
+                    <span>श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankGlobal">
+                    <input type="radio" name="bankRadio" value="global" onchange="onBankRadioChange(this)">
+                    <span>श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankExcel">
+                    <input type="radio" name="bankRadio" value="excel" onchange="onBankRadioChange(this)">
+                    <span>श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)</span>
+                </label>
+                <label class="bank-radio-card" id="cardBankCustom">
+                    <input type="radio" name="bankRadio" value="CUSTOM" onchange="onBankRadioChange(this)">
+                    <span>✍️ अन्य बैंक (Custom)</span>
+                </label>
             </div>
-            <div id="customBankBox" style="display:none; gap:10px;" class="row-grid">
+
+            <div id="customBankBox" style="display:none; margin-top:12px; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
                 <div class="form-group">
                     <label>बैंकको नाम:</label>
                     <input type="text" id="inCustomBankName" placeholder="उदा: श्री राष्ट्रिय वाणिज्य बैंक लिमिटेड" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
                     <label>शाखा:</label>
-                    <input type="text" id="inCustomBankOffice" placeholder="उदा: दमक शाखा" oninput="updateDoc()">
+                    <input type="text" id="inCustomBankOffice" placeholder="उदा: गौरादह शाखा" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
                     <label>ठेगाना:</label>
-                    <input type="text" id="inCustomBankLocation" placeholder="उदा: दमक, झापा" oninput="updateDoc()">
+                    <input type="text" id="inCustomBankLocation" placeholder="उदा: गौरादह, झापा" oninput="updateDoc()">
                 </div>
             </div>
         </div>
 
         <!-- हस्ताक्षर अधिकारी -->
-        <div class="form-group" style="margin-top: 5px; background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
-            <label style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी:</label>
-            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
+        <div class="form-group" style="margin-top: 5px; background: #fff3f3; padding: 12px; border: 1px solid #feb2b2; border-radius: 8px;">
+            <label style="color: #c53030; font-weight:bold;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()" style="width:100%; padding:9px; border-radius:6px; border:1px solid #cbd5e0; margin-top:4px;">
                 <option value="अनिता अधिकारी|वडा सचिव" selected>वडा सचिव - अनिता अधिकारी</option>
                 <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
                 <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
@@ -215,7 +395,7 @@
                 <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
                 <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
             </select>
-            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px; grid-template-columns: 1fr 1fr;">
                 <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
                 <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
             </div>
@@ -245,12 +425,12 @@
                         <th style="width: 100px;">मिति</th>
                         <th>उपभोक्ता समितिको नाम</th>
                         <th>अध्यक्ष</th>
-                        <th>प्रकार</th>
+                        <th>सिफारिस प्रकार</th>
                         <th style="width: 90px; text-align: center;">कार्य</th>
                     </tr>
                 </thead>
                 <tbody id="dbTableBody">
-                    <!-- Data will be injected here -->
+                    <!-- Data injected via JS -->
                 </tbody>
             </table>
         </div>
@@ -265,7 +445,7 @@
                     <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
                     <div class="lh-meta">
                         <div>प.सं. <span id="lblAY"></span></div>
-                        <div>च.नं. <span id="lblChalani"></span></div>
+                        <div>च.नं. <span id="lblChalani">..........</span></div>
                     </div>
                 </div>
                 <div class="lh-center">
@@ -276,25 +456,25 @@
                     <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
                 </div>
                 <div class="lh-right">
-                    <div class="miti-block">मिति : <span id="lblMiti" style="font-weight:bold;">..............</span></div>
+                    <div class="miti-block">मिति : <span id="lblMiti">..............</span></div>
                     <div class="ns-block">ने.सं. : <span id="lblNepalSamvat"></span></div>
                 </div>
             </div>
 
             <div class="header-red-line"></div>
 
-            <div class="bank-receiver" style="margin-top: 40px; margin-bottom: 25px; line-height: 1.4; font-size: 13pt;">
+            <div class="bank-receiver" style="margin-top: 35px; margin-bottom: 25px; line-height: 1.5; font-size: 13pt;">
                 <div id="lblReceiverName" style="font-weight:bold;">श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,</div>
                 <div id="lblReceiverOffice">गौरादह शाखा,</div>
                 <div id="lblReceiverLocation">गौरादह, झापा ।</div>
             </div>
 
-            <div class="subject-line" style="text-align: center; margin: 30px 0; font-weight: bold; font-size: 13pt; text-decoration: underline;">
+            <div class="subject-line" style="text-align: center; margin: 28px 0; font-weight: bold; font-size: 13.5pt; text-decoration: underline;">
                 विषय: <span id="lblSubject">बैंक खाता सञ्चालन सम्बन्धमा</span> ।
             </div>
 
             <div class="letter-body" id="bodyText">
-                <!-- Dynamically populated -->
+                <!-- Dynamically Populated Text -->
             </div>
 
             <div class="signature-section" style="margin-top: 40px; text-align: right; margin-right: 40px; position: relative; height: 120px;">
@@ -329,7 +509,7 @@
         const db  = firebase.firestore();
 
         const bankData = {
-            'saptakoshi': { name: 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
+            'saptakoshi': { name: 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह झापा ।' },
             'krishi': { name: 'श्री कृषि विकास बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
             'nic': { name: 'श्री एन.आई.सी. एशिया बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
             'prime': { name: 'श्री प्राईम कमर्सियल बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
@@ -340,14 +520,76 @@
             'excel': { name: 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' }
         };
 
-        function toggleCustomBudgetType() {
-            const val = document.getElementById('inBudgetTypeSelect').value;
-            document.getElementById('inBudgetTypeCustom').style.display = val === 'CUSTOM' ? 'block' : 'none';
+        // Number to Nepali Words Converter
+        function convertNumberToNepaliWords(numberStr) {
+            if (!numberStr) return '';
+            let clean = numberStr.replace(/[^0-9]/g, '');
+            let num = parseInt(clean, 10);
+            if (isNaN(num) || num <= 0) return '';
+
+            const ones = ['', 'एक', 'दुई', 'तीन', 'चार', 'पाँच', 'छ', 'सात', 'आठ', 'नौ', 'दस',
+                'एघार', 'बाह्र', 'तेह्र', 'चौध', 'पन्ध्र', 'सोह्र', 'सत्र', 'अठार', 'उन्नाइस', 'बीस',
+                'एकाइस', 'बाइस', 'त्रिइस', 'चौबिस', 'पच्चिस', 'छब्बिस', 'सत्ताइस', 'अठ्ठाइस', 'उनन्तीस', 'तीस',
+                'एकतीस', 'बत्तीस', 'तेत्तीस', 'चौत्तीस', 'पैंतीस', 'छत्तीस', 'सरतीस', 'अड्तीस', 'उनन्चालीस', 'चालीस',
+                'एकचालीस', 'बयालीस', 'त्रिचालीस', 'चौवालीस', 'पैंतालीस', 'छयालीस', 'सच्चालीस', 'अढ्चालीस', 'उनन्पचास', 'पचास',
+                'एकान्न', 'बाउन्न', 'त्रिपन्न', 'चौपन्न', 'पचपन्न', 'छप्पन्न', 'सन्तान्न', 'अन्ठाउन्न', 'उनन्साठ्ठी', 'साठ्ठी',
+                'एकसट्ठी', 'ब्यासट्ठी', 'त्रिसट्ठी', 'चौसट्ठी', 'पैंसट्ठी', 'छ्यासट्ठी', 'सत्सट्ठी', 'अड्सट्ठी', 'उनन्सत्तरी', 'सत्तरी',
+                'एकहत्तर', 'बहत्तर', 'त्रिहत्तर', 'चौहत्तर', 'पचहत्तर', 'छ्याहत्तर', 'सतहत्तर', 'अठहत्तर', 'उनासी', 'असी',
+                'एकासी', 'बयासी', 'त्रियासी', 'चौरासी', 'पचासी', 'छयासी', 'सत्तासी', 'अठासी', 'उनान्नब्बे', 'नब्बे',
+                'एकान्नब्बे', 'बयान्नब्बे', 'त्रियान्नब्बे', 'चौरान्नब्बे', 'पञ्चान्नब्बे', 'छयान्नब्बे', 'सन्तान्नब्बे', 'अन्ठान्नब्बे', 'उनान्सय'];
+
+            function twoDigits(n) {
+                if (n <= 0) return '';
+                return ones[n] || '';
+            }
+
+            let words = [];
+
+            let crore = Math.floor(num / 10000000);
+            num %= 10000000;
+            if (crore > 0) words.push(twoDigits(crore) + ' करोड');
+
+            let lakh = Math.floor(num / 100000);
+            num %= 100000;
+            if (lakh > 0) words.push(twoDigits(lakh) + ' लाख');
+
+            let thousand = Math.floor(num / 1000);
+            num %= 1000;
+            if (thousand > 0) words.push(twoDigits(thousand) + ' हजार');
+
+            let hundred = Math.floor(num / 100);
+            num %= 100;
+            if (hundred > 0) words.push(twoDigits(hundred) + ' सय');
+
+            if (num > 0) words.push(twoDigits(num));
+
+            return words.join(' ');
         }
 
-        function toggleCustomBank() {
-            const val = document.getElementById('inBankSelect').value;
-            document.getElementById('customBankBox').style.display = val === 'CUSTOM' ? 'grid' : 'none';
+        function autoConvertAmtToWords() {
+            const amtStr = document.getElementById('inBudgetAmt').value;
+            const words = convertNumberToNepaliWords(amtStr);
+            if (words) {
+                document.getElementById('inBudgetWords').value = words;
+            }
+        }
+
+        function onBankRadioChange(radio) {
+            document.querySelectorAll('.bank-radio-card').forEach(card => card.classList.remove('active'));
+            radio.closest('.bank-radio-card').classList.add('active');
+
+            const isCustom = radio.value === 'CUSTOM';
+            document.getElementById('customBankBox').style.display = isCustom ? 'grid' : 'none';
+            updateDoc();
+        }
+
+        function onBudgetTypeRadioChange(radio) {
+            document.querySelectorAll('.budget-radio-card').forEach(card => card.classList.remove('active'));
+            radio.closest('.budget-radio-card').classList.add('active');
+
+            const isCustom = radio.value === 'CUSTOM';
+            document.getElementById('inBudgetTypeCustom').style.display = isCustom ? 'block' : 'none';
+            updateDoc();
         }
 
         function toggleCustomSign() {
@@ -380,7 +622,7 @@
 
             document.getElementById('formMainTitle').innerText = isClosing 
                 ? "🔒 योजनाको बैंक खाता बन्द सिफारिस" 
-                : "📂 योजनाको बैंक खाता खोल्ने सिफारिस";
+                : "📂 योजनाको बैंक खाता सञ्चालन सिफारिस";
 
             updateDoc();
         }
@@ -391,15 +633,18 @@
 
             // Header Elements
             document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
+            document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value.trim() || '';
             
             // Sync Fiscal Year to Patra Sankhya (lblAY) if present
-            const fYear = document.getElementById('inFiscalYear').value.trim() || '...................';
+            const fYear = document.getElementById('inFiscalYear').value.trim() || '२०८२/०८३';
             if (document.getElementById('lblAY')) {
                 document.getElementById('lblAY').innerText = fYear;
             }
 
             // Bank Receiver Logic
-            const bankVal = document.getElementById('inBankSelect').value;
+            const selectedBankRadio = document.querySelector('input[name="bankRadio"]:checked');
+            const bankVal = selectedBankRadio ? selectedBankRadio.value : 'saptakoshi';
+
             if (bankVal === 'CUSTOM') {
                 document.getElementById('lblReceiverName').innerText = document.getElementById('inCustomBankName').value.trim() || '...................................';
                 document.getElementById('lblReceiverOffice').innerText = document.getElementById('inCustomBankOffice').value.trim() || '........................';
@@ -414,41 +659,41 @@
             }
 
             // Common Committee Fields
-            const committeeName = document.getElementById('inCommitteeName').value.trim() || '............................ (उपभोक्ता समितिको नाम)';
+            const committeeName = document.getElementById('inCommitteeName').value.trim() || '............................';
             
             const pChair = document.getElementById('inChairman').value.trim();
             const pSec = document.getElementById('inSecretary').value.trim();
             const pTreas = document.getElementById('inTreasurer').value.trim();
 
             let persons = [];
-            if (pChair) persons.push(`अध्यक्ष: ${pChair}`);
-            if (pSec) persons.push(`सचिव: ${pSec}`);
-            if (pTreas) persons.push(`कोषाध्यक्ष: ${pTreas}`);
+            if (pChair) persons.push(`अध्यक्ष: <span style="font-weight:bold;">${pChair}</span>`);
+            if (pSec) persons.push(`सचिव: <span style="font-weight:bold;">${pSec}</span>`);
+            if (pTreas) persons.push(`कोषाध्यक्ष: <span style="font-weight:bold;">${pTreas}</span>`);
 
             let personsText = "";
-            let personCount = 3;
+            let personCountWord = "तीन";
             
             if (persons.length > 0) {
                 if (persons.length === 1) {
                     personsText = persons[0];
-                    personCount = 1;
+                    personCountWord = "एक";
                 } else if (persons.length === 2) {
                     personsText = persons.join(" र ");
-                    personCount = 2;
+                    personCountWord = "दुई";
                 } else {
                     const last = persons.pop();
                     personsText = persons.join(", ") + " र " + last;
-                    personCount = persons.length + 1;
+                    personCountWord = "तीन";
                 }
             } else {
                 personsText = "अध्यक्ष: ........, सचिव: ......... र कोषाध्यक्ष: ..........";
-                personCount = 3;
+                personCountWord = "तीन";
             }
 
             const bodyTextEl = document.getElementById('bodyText');
 
             if (isClosing) {
-                // CLOSING TEXT
+                // CLOSING TEXT EXACT MATCH USER PROMPT
                 document.getElementById('lblSubject').innerText = "बैंक खाता बन्द गरिदिने सम्बन्धमा";
                 
                 const accNo = document.getElementById('inAccountNo').value.trim() || '...............';
@@ -456,21 +701,22 @@
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
                         उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ स्थित <span style="font-weight:bold;">${committeeName}</span> 
-                        ${personsText} समेत ${personCount} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको 
-                        खाता नं. <span style="font-weight:bold;">${accNo}</span> तहाँ कार्यालयको नियमानुसार उक्त खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
+                        ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको खाता नं.<span style="font-weight:bold;">${accNo}</span> तहाँ कार्यालयको नियमानुसार उक्त खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
                     </div>
                 `;
 
             } else {
-                // OPENING TEXT
+                // OPENING TEXT EXACT MATCH USER PROMPT
                 document.getElementById('lblSubject').innerText = "बैंक खाता सञ्चालन सम्बन्धमा";
 
                 let budgetType = "";
-                const typeSelect = document.getElementById('inBudgetTypeSelect');
-                if (typeSelect.value === 'CUSTOM') {
+                const selectedBudgetTypeRadio = document.querySelector('input[name="budgetTypeRadio"]:checked');
+                const bTypeVal = selectedBudgetTypeRadio ? selectedBudgetTypeRadio.value : 'वडा स्तरीय';
+
+                if (bTypeVal === 'CUSTOM') {
                     budgetType = document.getElementById('inBudgetTypeCustom').value.trim() || '.........';
                 } else {
-                    budgetType = typeSelect.value;
+                    budgetType = bTypeVal;
                 }
 
                 const projName = document.getElementById('inProjectName').value.trim() || '............';
@@ -479,11 +725,7 @@
 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष: <span style="font-weight:bold;">${fYear}</span> को स्वीकृत ${budgetType} 
-                        योजना तथा कार्यक्रम अन्तर्गत “<span style="font-weight:bold;">${projName}</span>” शीर्षकमा विनियोजन भएको 
-                        रकम रू. <span style="font-weight:bold;">${amtNum}</span> /- (अक्षरेपी ${amtWords} मात्र) बाट योजना कार्यन्वयन गर्नको लागि 
-                        गठित <span style="font-weight:bold;">${committeeName}</span> ${personsText} समेत ${personCount} जनाको संयुक्त नामबाट 
-                        तहाँ बैंकको नियामानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
+                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष:. <span style="font-weight:bold;">${fYear}</span> को स्वीकृत <span style="font-weight:bold;">${budgetType}</span> योजना तथा कार्यक्रम अन्तर्गत “<span style="font-weight:bold;">${projName}</span>” शीर्षकमा विनियोजन भएको रकम रू.<span style="font-weight:bold;">${amtNum}</span> /- (अक्षरेपी <span style="font-weight:bold;">${amtWords}</span>  मात्र)बाट योजना कार्यन्वयन गर्नको लागि गठित <span style="font-weight:bold;">${committeeName}</span> ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियामानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                     </div>
                 `;
             }
@@ -503,7 +745,7 @@
             }
         }
 
-        // ================= DATABASE LOGIC =================
+        // ================= DATABASE / ABHILEKH LOGIC =================
 
         let abhilekhData = [];
 
@@ -514,6 +756,8 @@
             const committeeName = document.getElementById('inCommitteeName').value.trim();
             if (!committeeName) return;
 
+            const selectedBankRadio = document.querySelector('input[name="bankRadio"]:checked');
+
             const record = {
                 mode: mode,
                 miti: document.getElementById('inMiti').value.trim(),
@@ -522,14 +766,15 @@
                 chairman: document.getElementById('inChairman').value.trim(),
                 secretary: document.getElementById('inSecretary').value.trim(),
                 treasurer: document.getElementById('inTreasurer').value.trim(),
-                bankKey: document.getElementById('inBankSelect').value,
+                bankKey: selectedBankRadio ? selectedBankRadio.value : 'saptakoshi',
                 timestamp: Date.now()
             };
 
             if (mode === 'OPEN_ACCOUNT') {
                 record.fiscalYear = document.getElementById('inFiscalYear').value.trim();
-                record.budgetTypeSelect = document.getElementById('inBudgetTypeSelect').value;
-                if (record.budgetTypeSelect === 'CUSTOM') {
+                const selectedBudgetTypeRadio = document.querySelector('input[name="budgetTypeRadio"]:checked');
+                record.budgetTypeRadio = selectedBudgetTypeRadio ? selectedBudgetTypeRadio.value : 'वडा स्तरीय';
+                if (record.budgetTypeRadio === 'CUSTOM') {
                     record.budgetTypeCustom = document.getElementById('inBudgetTypeCustom').value.trim();
                 }
                 record.projectName = document.getElementById('inProjectName').value.trim();
@@ -607,22 +852,26 @@
             document.getElementById('inTreasurer').value = rec.treasurer || '';
             
             if (rec.bankKey) {
-                document.getElementById('inBankSelect').value = rec.bankKey;
-                toggleCustomBank();
+                const radio = document.querySelector(`input[name="bankRadio"][value="${rec.bankKey}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    onBankRadioChange(radio);
+                }
             }
 
-            // We only load project details if the current mode is also OPEN_ACCOUNT
-            // But usually loading is done to fill closing details from opening details.
             if (document.getElementById('currentMode').value === 'OPEN_ACCOUNT') {
                 if (rec.fiscalYear) document.getElementById('inFiscalYear').value = rec.fiscalYear;
                 if (rec.projectName) document.getElementById('inProjectName').value = rec.projectName;
                 if (rec.budgetAmt) document.getElementById('inBudgetAmt').value = rec.budgetAmt;
                 if (rec.budgetWords) document.getElementById('inBudgetWords').value = rec.budgetWords;
-                if (rec.budgetTypeSelect) {
-                    document.getElementById('inBudgetTypeSelect').value = rec.budgetTypeSelect;
-                    if (rec.budgetTypeSelect === 'CUSTOM') {
+                if (rec.budgetTypeRadio) {
+                    const rType = document.querySelector(`input[name="budgetTypeRadio"][value="${rec.budgetTypeRadio}"]`);
+                    if (rType) {
+                        rType.checked = true;
+                        onBudgetTypeRadioChange(rType);
+                    }
+                    if (rec.budgetTypeRadio === 'CUSTOM') {
                         document.getElementById('inBudgetTypeCustom').value = rec.budgetTypeCustom || '';
-                        document.getElementById('inBudgetTypeCustom').style.display = 'block';
                     }
                 }
             } else {
@@ -633,16 +882,8 @@
             toggleModal(false);
         }
 
-        function updateNepalSambatFromMiti() {
-            // Keep NS in sync if needed
-        }
-
         window.onload = function() {
             setMode('OPEN_ACCOUNT');
-            // Try to set current date if possible
-            if (typeof window['@sbmdkl/nepali-date-converter'] !== 'undefined') {
-                // Auto date logic goes here...
-            }
         };
     </script>
 </body>
