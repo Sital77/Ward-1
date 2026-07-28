@@ -259,17 +259,29 @@
     <!-- ══════════════ PREVIEW PANEL ══════════════ -->
     <div class="preview-panel">
         <div class="a4-page">
-            <div class="letter-header">
-                <div class="header-content" style="display: flex; justify-content: space-between; align-items: flex-end;">
-                    <div style="flex: 1;">
-                        <div class="p-sankhya">पत्र संख्या: <span id="lblPatraSankhya" class="fill-space" style="font-weight:bold;">२०८२/०८३</span></div>
-                        <div class="c-number">चलानी नं.: <span id="lblChalani" class="fill-space">..........</span></div>
-                    </div>
-                    <div style="flex: 1; text-align: right;">
-                        <div class="miti">मिति: <span id="lblMiti" class="fill-space" style="font-weight:bold;">..............</span></div>
+            <!-- 📄 Letterhead 📄 -->
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblPatraSankhya" style="font-weight:bold;">२०८२/०८३</span></div>
+                        <div>च.नं. <span id="lblChalani" class="fill-space">..........</span></div>
                     </div>
                 </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title">१ नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" style="font-weight:bold;">..............</span></div>
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat"></span></div>
+                </div>
             </div>
+
+            <div class="header-red-line"></div>
 
             <div class="bank-receiver" style="margin-top: 40px; margin-bottom: 25px; line-height: 1.4; font-size: 13pt;">
                 <div id="lblReceiverName" style="font-weight:bold;">श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,</div>
