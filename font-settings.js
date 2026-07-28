@@ -252,7 +252,10 @@
         setTimeout(resolve, 3500); // 3.5s fallback timeout
     });
 
-    if (templateId && !isDynamic) {
+    // yojana-bank-sifarish has its own complete JS logic - skip template loading entirely
+    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish');
+
+    if (templateId && !isDynamic && !skipTemplateLoad) {
         // Intercept window.onload assigner
         let originalOnload = window.onload;
         Object.defineProperty(window, 'onload', {

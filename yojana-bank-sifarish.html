@@ -454,9 +454,8 @@
             <div class="header-red-line"></div>
 
             <div class="bank-receiver" style="margin-top: 35px; margin-bottom: 25px; line-height: 1.5; font-size: 13pt;">
-                <div id="lblReceiverName" style="font-weight:bold;">श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,</div>
-                <div id="lblReceiverOffice">गौरादह शाखा,</div>
-                <div id="lblReceiverLocation">गौरादह, झापा ।</div>
+                <div id="lblReceiverLine1" style="font-weight:bold;">श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,</div>
+                <div id="lblReceiverLine2">गौरादह शाखा, गौरादह झापा ।</div>
             </div>
 
             <div class="subject-line" style="text-align: center; margin: 28px 0; font-weight: bold; font-size: 13.5pt; text-decoration: underline;">
@@ -499,15 +498,15 @@
         const db  = firebase.firestore();
 
         const bankData = {
-            'saptakoshi': { name: 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह झापा ।' },
-            'krishi': { name: 'श्री कृषि विकास बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
-            'nic': { name: 'श्री एन.आई.सी. एशिया बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
-            'prime': { name: 'श्री प्राईम कमर्सियल बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
-            'nabil': { name: 'श्री नबिल बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
-            'laxmi': { name: 'श्री लक्ष्मी सनराइज बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
-            'siddhartha': { name: 'श्री सिद्धार्थ बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
-            'global': { name: 'श्री ग्लोबल आइएमई बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
-            'excel': { name: 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' }
+            'saptakoshi': { line1: 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह झापा ।' },
+            'krishi': { line1: 'श्री कृषि विकास बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'nic': { line1: 'श्री एन.आई.सी. एशिया बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'prime': { line1: 'श्री प्राईम कमर्सियल बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'nabil': { line1: 'श्री नबिल बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'laxmi': { line1: 'श्री लक्ष्मी सनराइज बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'siddhartha': { line1: 'श्री सिद्धार्थ बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'global': { line1: 'श्री ग्लोबल आइएमई बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'excel': { line1: 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' }
         };
 
         // Number to Nepali Words Converter
@@ -653,19 +652,17 @@
                 ? document.getElementById('lblAY').innerText.trim() 
                 : '२०८२/०८३';
 
-            // Bank Receiver Logic
+            // Bank Receiver Logic (2-line display)
             const bankVal = document.getElementById('selectedBankKey').value;
 
             if (bankVal === 'CUSTOM') {
-                document.getElementById('lblReceiverName').innerText = document.getElementById('inCustomBankName').value.trim() || '...................................';
-                document.getElementById('lblReceiverOffice').innerText = document.getElementById('inCustomBankOffice').value.trim() || '........................';
-                document.getElementById('lblReceiverLocation').innerText = document.getElementById('inCustomBankLocation').value.trim() || '......................';
+                document.getElementById('lblReceiverLine1').innerText = document.getElementById('inCustomBankName').value.trim() || '...................................';
+                document.getElementById('lblReceiverLine2').innerText = (document.getElementById('inCustomBankOffice').value.trim() || '............') + ', ' + (document.getElementById('inCustomBankLocation').value.trim() || '............');
             } else {
                 const b = bankData[bankVal];
                 if (b) {
-                    document.getElementById('lblReceiverName').innerText = b.name;
-                    document.getElementById('lblReceiverOffice').innerText = b.office;
-                    document.getElementById('lblReceiverLocation').innerText = b.location;
+                    document.getElementById('lblReceiverLine1').innerText = b.line1;
+                    document.getElementById('lblReceiverLine2').innerText = b.line2;
                 }
             }
 
