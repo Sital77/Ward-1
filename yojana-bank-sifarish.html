@@ -264,8 +264,8 @@
                 <div class="lh-left">
                     <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
                     <div class="lh-meta">
-                        <div>प.सं. <span id="lblPatraSankhya" style="font-weight:bold;">२०८२/०८३</span></div>
-                        <div>च.नं. <span id="lblChalani" class="fill-space">..........</span></div>
+                        <div>प.सं. <span id="lblAY"></span></div>
+                        <div>च.नं. <span id="lblChalani"></span></div>
                     </div>
                 </div>
                 <div class="lh-center">
@@ -316,6 +316,17 @@
         if (localStorage.getItem('sifarish_auth') !== 'true') {
             window.location.href = 'login.html';
         }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db  = firebase.firestore();
 
         const bankData = {
             'saptakoshi': { name: 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,', office: 'गौरादह शाखा,', location: 'गौरादह, झापा ।' },
@@ -380,6 +391,12 @@
 
             // Header Elements
             document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
+            
+            // Sync Fiscal Year to Patra Sankhya (lblAY) if present
+            const fYear = document.getElementById('inFiscalYear').value.trim() || '...................';
+            if (document.getElementById('lblAY')) {
+                document.getElementById('lblAY').innerText = fYear;
+            }
 
             // Bank Receiver Logic
             const bankVal = document.getElementById('inBankSelect').value;
@@ -448,9 +465,6 @@
                 // OPENING TEXT
                 document.getElementById('lblSubject').innerText = "बैंक खाता सञ्चालन सम्बन्धमा";
 
-                const fYear = document.getElementById('inFiscalYear').value.trim() || '...................';
-                document.getElementById('lblPatraSankhya').innerText = fYear;
-
                 let budgetType = "";
                 const typeSelect = document.getElementById('inBudgetTypeSelect');
                 if (typeSelect.value === 'CUSTOM') {
@@ -465,7 +479,7 @@
 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष: ${fYear} को स्वीकृत ${budgetType} 
+                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष: <span style="font-weight:bold;">${fYear}</span> को स्वीकृत ${budgetType} 
                         योजना तथा कार्यक्रम अन्तर्गत “<span style="font-weight:bold;">${projName}</span>” शीर्षकमा विनियोजन भएको 
                         रकम रू. <span style="font-weight:bold;">${amtNum}</span> /- (अक्षरेपी ${amtWords} मात्र) बाट योजना कार्यन्वयन गर्नको लागि 
                         गठित <span style="font-weight:bold;">${committeeName}</span> ${personsText} समेत ${personCount} जनाको संयुक्त नामबाट 
