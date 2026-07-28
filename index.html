@@ -1286,7 +1286,8 @@
             'bank-sifarish': '🏦',
             'nabalak-parichayapatra': '👶',
             'jaggadhani-pratilipi': '📜',
-            'aamdani-pramanit': '💰'
+            'aamdani-pramanit': '💰',
+            'yojana-bank-sifarish': '🏦'
         };
         const borderMap = {
             'suchana-tans': '#d6bcfa',
@@ -1299,7 +1300,8 @@
             'bank-sifarish': '#cbd5e0',
             'nabalak-parichayapatra': '#feb2b2',
             'jaggadhani-pratilipi': '#fbd38d',
-            'aamdani-pramanit': '#f6e05e'
+            'aamdani-pramanit': '#f6e05e',
+            'yojana-bank-sifarish': '#9ae6b4'
         };
         const categoryEmojis = {
             'जग्गा सम्बन्धि': '🗺️',
@@ -1323,7 +1325,8 @@
             { id: 'bank-sifarish', title: 'सामाजिक सुरक्षा बैंक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'nabalak-parichayapatra', title: 'नाबालक परिचय पत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'jaggadhani-pratilipi', title: 'धनीपूर्जा प्रतिलिपि सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' },
-            { id: 'aamdani-pramanit', title: 'आम्दानी प्रमाणित सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
+            { id: 'aamdani-pramanit', title: 'आम्दानी प्रमाणित सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'yojana-bank-sifarish', title: 'योजनाको बैंक खाता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' }
         ];
 
         function renderSifarishGrid(remoteList) {
@@ -1344,7 +1347,7 @@
             let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish', 'nabalak-parichayapatra'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -1360,9 +1363,9 @@
                 templates.forEach(t => {
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish', 'nabalak-parichayapatra'];
                     let targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
-                    if (t.id === 'bank-sifarish') {
+                    if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish') {
                         targetUrl += "?v=" + new Date().getTime();
                     }
 
