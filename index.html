@@ -686,39 +686,158 @@
             border-color: #4a5568;
         }
 
+        /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 900px) {
             .portal-grid {
                 grid-template-columns: 1fr 1fr;
             }
-        }
-
-        .portal-grid-wide {
-            grid-template-columns: repeat(4, 1fr) !important;
-        }
-
-        @media (max-width: 900px) {
             .portal-grid-wide {
                 grid-template-columns: 1fr 1fr !important;
+            }
+            .mega-dashboard {
+                padding: 30px 20px;
+            }
+            .top-bar-buttons {
+                position: static;
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 15px;
+            }
+            .muni-header {
+                margin-bottom: 25px;
+            }
+            .modal-content {
+                padding: 25px 20px;
+            }
+            .modal-large {
+                width: 95vw;
+            }
+            .sifarish-btn-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
             }
         }
 
         @media (max-width: 600px) {
-
-            .portal-grid,
-            .sifarish-btn-grid {
-                grid-template-columns: 1fr;
+            body {
+                padding: 8px;
             }
-
             .mega-dashboard {
-                padding: 25px 15px;
+                padding: 20px 14px;
+                border-radius: 16px;
             }
-
+            .portal-grid,
+            .sifarish-btn-grid,
+            .portal-grid-wide {
+                grid-template-columns: 1fr !important;
+                gap: 14px;
+            }
             .muni-title {
+                font-size: 18pt;
+            }
+            .wada-title {
+                font-size: 22pt;
+            }
+            .sub-title {
+                font-size: 12pt;
+            }
+            .gov-logo {
+                width: 80px;
+                height: 80px;
+            }
+            .muni-header {
+                margin-bottom: 20px;
+                padding-bottom: 18px;
+            }
+            .top-bar-buttons {
+                position: static;
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                margin-bottom: 12px;
+                flex-wrap: wrap;
+            }
+            #themeToggle,
+            #adminBtn,
+            #logoutBtn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            .card-icon {
+                font-size: 2.6rem;
+            }
+            .card-title {
+                font-size: 1.15rem;
+            }
+            .card-desc {
+                font-size: 0.85rem;
+            }
+            .portal-card {
+                padding: 20px 12px;
+            }
+            .modal-content {
+                max-width: 98vw;
+                padding: 20px 15px;
+                border-radius: 14px;
+            }
+            .modal-title {
+                font-size: 1.3rem;
+            }
+            .modal-close {
+                width: 34px;
+                height: 34px;
+                right: 14px;
+                top: 14px;
+                font-size: 1.2rem;
+            }
+            /* Sifarish login modal responsive */
+            .sif-login-wrap {
+                flex-direction: column;
+                min-height: auto;
+            }
+            .sif-login-left {
+                width: 100%;
+                padding: 24px 16px;
+            }
+            .sif-login-right {
+                width: 100%;
+                padding: 24px 20px;
+            }
+            .sif-login-right h3 {
+                font-size: 14pt;
+            }
+            .sifarish-link-card {
+                padding: 20px;
+                font-size: 1.1rem;
+            }
+            .sifarish-link-card .emoji {
+                font-size: 2.4rem;
+            }
+            .system-footer {
+                margin-top: 24px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .mega-dashboard {
+                padding: 14px 10px;
+            }
+            .muni-title {
+                font-size: 16pt;
+            }
+            .wada-title {
                 font-size: 20pt;
             }
-
-            .wada-title {
-                font-size: 24pt;
+            .gov-logo {
+                width: 65px;
+                height: 65px;
+            }
+            .card-icon {
+                font-size: 2.2rem;
+            }
+            .card-title {
+                font-size: 1.05rem;
             }
         }
     </style>

@@ -426,6 +426,7 @@
                     <option value="1">गौरादह वडा नं. १ (Ward 1)</option>
                     <option value="3">गौरादह वडा नं. ३ (Ward 3)</option>
                 </select>
+                <small id="wardLoadingHint" style="display:none; color:#64748b; font-size:0.78rem; margin-top:4px;">🔄 वडा सूची लोड हुँदैछ...</small>
             </div>
 
             <label class="form-label" for="inUsername">प्रयोगकर्ता आईडी</label>
@@ -590,6 +591,49 @@
             document.getElementById('forgotModal').classList.remove('show');
         }
 
+        // ===== Dynamic Ward Loading from Firestore =====
+        async function loadDynamicWards() {
+            const hint = document.getElementById('wardLoadingHint');
+            try {
+                hint.style.display = 'block';
+                const db = firebase.firestore();
+                const snap = await db.collection('ward_users').get();
+                if (!snap.empty) {
+                    const wardSet = new Set();
+                    // Collect default wards
+                    wardSet.add('1');
+                    wardSet.add('3');
+                    // Collect dynamic wards from Firestore
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        if (data.wardNumber) wardSet.add(String(data.wardNumber));
+                    });
+                    // Sort wards numerically
+                    const sortedWards = [...wardSet].sort((a, b) => parseInt(a) - parseInt(b));
+                    // Nepali digit converter
+                    const toNepali = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
+                    // Rebuild dropdown
+                    const select = document.getElementById('inWard');
+                    const currentVal = select.value;
+                    select.innerHTML = '';
+                    sortedWards.forEach(w => {
+                        const opt = document.createElement('option');
+                        opt.value = w;
+                        opt.textContent = `गौरादह वडा नं. ${toNepali(w)} (Ward ${w})`;
+                        select.appendChild(opt);
+                    });
+                    // Restore selection if it exists
+                    if ([...select.options].some(o => o.value === currentVal)) {
+                        select.value = currentVal;
+                    }
+                }
+            } catch(e) {
+                console.warn('Dynamic ward load failed, using defaults:', e);
+            } finally {
+                hint.style.display = 'none';
+            }
+        }
+
         // Clear field error on input
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('inWard').addEventListener('change', updateForgotEmail);
@@ -603,6 +647,8 @@
                 document.getElementById('passwordError').classList.remove('show');
                 document.getElementById('errorMsg').classList.remove('show');
             });
+            // Load dynamic wards after Firebase is ready
+            loadDynamicWards();
         });
 
         async function doLogin() {
