@@ -1361,7 +1361,10 @@
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
                     const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'nabalak-parichayapatra'];
-                    const targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
+                    let targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
+                    if (t.id === 'bank-sifarish') {
+                        targetUrl += "?v=" + new Date().getTime();
+                    }
 
                     const card = document.createElement('a');
                     card.className = 'sifarish-link-card';
