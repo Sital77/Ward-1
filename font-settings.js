@@ -30,6 +30,7 @@
         'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' },
         'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
         'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' },
+        'yojana-bank-sifarish': { collection: 'yojanaBankRecords', title: 'योजनाको बैंक खाता सिफारिस' },
         'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' }
     };
 
@@ -235,6 +236,7 @@
     else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
     else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
     else if (path.includes('arko-bibaha-nagareko.html')) templateId = 'arko-bibaha-nagareko';
+    else if (path.includes('yojana-bank-sifarish.html')) templateId = 'yojana-bank-sifarish';
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
     else if (path.includes('nabalak-parichayapatra.html')) templateId = 'nabalak-parichayapatra';
     else if (path.includes('jaggadhani-pratilipi.html')) templateId = 'jaggadhani-pratilipi';
@@ -573,6 +575,7 @@
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
                 'abhilekh-pramanit': 'अभिलेख प्रमाणित',
                 'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
+                'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
                 'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस'
             };
 
@@ -588,6 +591,7 @@
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
                 'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',
+                'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
                 'bank-sifarish': 'व्यक्तिगत प्रमाणित'
             };
 
