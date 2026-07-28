@@ -57,7 +57,7 @@
 
         .section-card {
             border-radius: 10px;
-            padding: 14px 14px 14px 14px;
+            padding: 14px;
             margin-bottom: 18px;
         }
 
@@ -81,39 +81,27 @@
             color: #2b6cb0;
         }
 
-        /* Radio option cards styling */
-        .bank-radio-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 8px;
-            margin-top: 6px;
-        }
-
-        .bank-radio-card {
+        /* Scrolling Bank List option styling */
+        .bank-scroll-item {
             display: flex;
             align-items: center;
             gap: 8px;
             padding: 10px 12px;
-            border: 1.5px solid #cbd5e0;
-            border-radius: 8px;
-            background: #fff;
+            border-bottom: 1px solid #edf2f7;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.88rem;
+            transition: background 0.15s ease;
+            font-size: 0.9rem;
             color: #2d3748;
         }
 
-        .bank-radio-card:hover {
-            border-color: #3182ce;
-            background: #ebf8ff;
+        .bank-scroll-item:last-child {
+            border-bottom: none;
         }
 
-        .bank-radio-card.active {
-            border-color: #2b6cb0;
+        .bank-scroll-item:hover, .bank-scroll-item.selected {
             background: #ebf8ff;
-            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
-            font-weight: 700;
             color: #2b6cb0;
+            font-weight: 700;
         }
 
         .budget-type-radio-group {
@@ -211,7 +199,7 @@
             <button class="btn-abhilekh" onclick="toggleModal(true)">🗄️ अभिलेख खोल्नुस्</button>
         </div>
 
-        <!-- Mode Toggle Tabs -->
+        <!-- Mode Toggle Tabs (Fast Switch) -->
         <div class="mode-toggle-wrap">
             <button id="btnKholne" class="mode-btn active-kholne" onclick="setMode('OPEN_ACCOUNT')">
                 📂 बैंक खाता सञ्चालन (खोल्ने)
@@ -227,50 +215,80 @@
             📂 योजनाको बैंक खाता सञ्चालन सिफारिस
         </h2>
 
-        <!-- ══ COMMON SECTION ══ -->
-        <div class="section-card body-section">
-            <div class="section-label">📋 साधारण विवरण</div>
+        <!-- ══ SECTION 1: BANK SELECTION (ACCORDION / SCROLLING LIST) ══ -->
+        <div class="section-card body-section" style="background: rgba(237, 137, 54, 0.05); border-color: rgba(237, 137, 54, 0.4);">
+            <div class="section-label" style="color: #c05621; display:flex; justify-content:space-between; align-items:center;">
+                <span>🏦 बैंक छान्नुहोस् (सप्तकोशी बैंक Default)</span>
+                <span style="font-size:0.78rem; color:#dd6b20; text-transform:none;">(फेर्न थिच्नुहोस् ▾)</span>
+            </div>
 
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <!-- Trigger Box showing currently selected bank -->
+            <div id="bankAccordionTrigger" onclick="toggleBankAccordion()" style="background: #fff; border: 2px solid #2b6cb0; border-radius: 8px; padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                 <div>
-                    <label>मिति:</label>
-                    <input type="text" id="inMiti" placeholder="उदा: २०८२/०४/१५" oninput="updateDoc()">
+                    <div style="font-size:0.75rem; color:#718096; font-weight:bold;">चयन गरिएको बैंक:</div>
+                    <div id="lblSelectedBankText" style="font-weight:bold; color:#2b6cb0; font-size:0.95rem;">
+                        श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)
+                    </div>
                 </div>
-                <div>
-                    <label>नेपाल संवत्:</label>
-                    <input type="text" id="inNepalSamvat" placeholder="उदा: ११४५" oninput="updateDoc()">
+                <span id="bankAccordionIcon" style="font-size: 1.1rem; color: #2b6cb0; font-weight:bold;">▼</span>
+            </div>
+
+            <!-- Scrolling List of Banks (Hidden by default, expands on click) -->
+            <div id="bankAccordionContent" style="display:none; margin-top: 10px; max-height: 240px; overflow-y: auto; background: #fff; border: 1.5px solid #cbd5e0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <div class="bank-scroll-item selected" onclick="selectBankOption('saptakoshi', 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)')">
+                    <span>🏦 श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('krishi', 'श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('nic', 'श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('prime', 'श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('nabil', 'श्री नबिल बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री नबिल बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('laxmi', 'श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('siddhartha', 'श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('global', 'श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('excel', 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('CUSTOM', '✍️ अन्य बैंक (Custom)')">
+                    <span>✍️ अन्य बैंक (Custom)</span>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>उपभोक्ता समितिको नाम:</label>
-                <input type="text" id="inCommitteeName" placeholder="उदा: गौरादह खानेपानी उपभोक्ता समिति" oninput="updateDoc()">
-            </div>
+            <input type="hidden" id="selectedBankKey" value="saptakoshi">
 
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                <div>
-                    <label>अध्यक्षको नाम:</label>
-                    <input type="text" id="inChairman" placeholder="अध्यक्षको नाम" oninput="updateDoc()">
+            <!-- Custom Bank Fields -->
+            <div id="customBankBox" style="display:none; margin-top:12px; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                <div class="form-group">
+                    <label>बैंकको नाम:</label>
+                    <input type="text" id="inCustomBankName" placeholder="उदा: श्री राष्ट्रिय वाणिज्य बैंक लिमिटेड" oninput="updateDoc()">
                 </div>
-                <div>
-                    <label>सचिवको नाम:</label>
-                    <input type="text" id="inSecretary" placeholder="सचिवको नाम" oninput="updateDoc()">
+                <div class="form-group">
+                    <label>शाखा:</label>
+                    <input type="text" id="inCustomBankOffice" placeholder="उदा: गौरादह शाखा" oninput="updateDoc()">
                 </div>
-                <div>
-                    <label>कोषाध्यक्षको नाम:</label>
-                    <input type="text" id="inTreasurer" placeholder="कोषाध्यक्षको नाम" oninput="updateDoc()">
+                <div class="form-group">
+                    <label>ठेगाना:</label>
+                    <input type="text" id="inCustomBankLocation" placeholder="उदा: गौरादह, झापा" oninput="updateDoc()">
                 </div>
             </div>
         </div>
 
-        <!-- ══ OPENING SPECIFIC SECTION ══ -->
+        <!-- ══ SECTION 2: OPENING / CLOSING SPECIFIC DETAILS ══ -->
         <div class="section-card body-section" id="secOpenAccount">
             <div class="section-label">📂 खाता सञ्चालन (खोल्ने) विवरण</div>
-
-            <div class="form-group">
-                <label>चालू आर्थिक वर्ष:</label>
-                <input type="text" id="inFiscalYear" value="२०८२/०८३" oninput="updateDoc()">
-            </div>
 
             <div class="form-group">
                 <label style="font-weight:bold; margin-bottom:6px; display:block;">स्वीकृत योजनाको प्रकार:</label>
@@ -312,7 +330,6 @@
             </div>
         </div>
 
-        <!-- ══ CLOSING SPECIFIC SECTION ══ -->
         <div class="section-card body-section" id="secCloseAccount" style="display:none;">
             <div class="section-label">🔒 खाता बन्द विवरण</div>
             <div class="form-group">
@@ -321,70 +338,43 @@
             </div>
         </div>
 
-        <!-- ══ BANK SELECTION (RADIO OPTIONS) ══ -->
-        <div class="section-card body-section" style="background: rgba(237, 137, 54, 0.05); border-color: rgba(237, 137, 54, 0.4);">
-            <div class="section-label" style="color: #c05621;">🏦 बैंक छान्नुहोस् (Radio Options)</div>
+        <!-- ══ SECTION 3: COMMON COMMITTEE DETAILS ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">📋 साधारण विवरण</div>
 
-            <div class="bank-radio-group">
-                <label class="bank-radio-card active" id="cardBankSaptakoshi">
-                    <input type="radio" name="bankRadio" value="saptakoshi" checked onchange="onBankRadioChange(this)">
-                    <span>श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, झापा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankKrishi">
-                    <input type="radio" name="bankRadio" value="krishi" onchange="onBankRadioChange(this)">
-                    <span>श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankNic">
-                    <input type="radio" name="bankRadio" value="nic" onchange="onBankRadioChange(this)">
-                    <span>श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankPrime">
-                    <input type="radio" name="bankRadio" value="prime" onchange="onBankRadioChange(this)">
-                    <span>श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankNabil">
-                    <input type="radio" name="bankRadio" value="nabil" onchange="onBankRadioChange(this)">
-                    <span>श्री नबिल बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankLaxmi">
-                    <input type="radio" name="bankRadio" value="laxmi" onchange="onBankRadioChange(this)">
-                    <span>श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankSiddhartha">
-                    <input type="radio" name="bankRadio" value="siddhartha" onchange="onBankRadioChange(this)">
-                    <span>श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankGlobal">
-                    <input type="radio" name="bankRadio" value="global" onchange="onBankRadioChange(this)">
-                    <span>श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankExcel">
-                    <input type="radio" name="bankRadio" value="excel" onchange="onBankRadioChange(this)">
-                    <span>श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)</span>
-                </label>
-                <label class="bank-radio-card" id="cardBankCustom">
-                    <input type="radio" name="bankRadio" value="CUSTOM" onchange="onBankRadioChange(this)">
-                    <span>✍️ अन्य बैंक (Custom)</span>
-                </label>
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>मिति:</label>
+                    <input type="text" id="inMiti" placeholder="उदा: २०८२/०४/१५" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>नेपाल संवत्:</label>
+                    <input type="text" id="inNepalSamvat" placeholder="उदा: ११४५" oninput="updateDoc()">
+                </div>
             </div>
 
-            <div id="customBankBox" style="display:none; margin-top:12px; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                <div class="form-group">
-                    <label>बैंकको नाम:</label>
-                    <input type="text" id="inCustomBankName" placeholder="उदा: श्री राष्ट्रिय वाणिज्य बैंक लिमिटेड" oninput="updateDoc()">
+            <div class="form-group">
+                <label>उपभोक्ता समितिको नाम:</label>
+                <input type="text" id="inCommitteeName" placeholder="उदा: गौरादह खानेपानी उपभोक्ता समिति" oninput="updateDoc()">
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>अध्यक्षको नाम:</label>
+                    <input type="text" id="inChairman" placeholder="अध्यक्षको नाम" oninput="updateDoc()">
                 </div>
-                <div class="form-group">
-                    <label>शाखा:</label>
-                    <input type="text" id="inCustomBankOffice" placeholder="उदा: गौरादह शाखा" oninput="updateDoc()">
+                <div>
+                    <label>सचिवको नाम:</label>
+                    <input type="text" id="inSecretary" placeholder="सचिवको नाम" oninput="updateDoc()">
                 </div>
-                <div class="form-group">
-                    <label>ठेगाना:</label>
-                    <input type="text" id="inCustomBankLocation" placeholder="उदा: गौरादह, झापा" oninput="updateDoc()">
+                <div>
+                    <label>कोषाध्यक्षको नाम:</label>
+                    <input type="text" id="inTreasurer" placeholder="कोषाध्यक्षको नाम" oninput="updateDoc()">
                 </div>
             </div>
         </div>
 
-        <!-- हस्ताक्षर अधिकारी -->
+        <!-- ══ SECTION 4: SIGNATURE AUTHORITY ══ -->
         <div class="form-group" style="margin-top: 5px; background: #fff3f3; padding: 12px; border: 1px solid #feb2b2; border-radius: 8px;">
             <label style="color: #c53030; font-weight:bold;">🖋️ हस्ताक्षर अधिकारी:</label>
             <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()" style="width:100%; padding:9px; border-radius:6px; border:1px solid #cbd5e0; margin-top:4px;">
@@ -574,12 +564,35 @@
             }
         }
 
-        function onBankRadioChange(radio) {
-            document.querySelectorAll('.bank-radio-card').forEach(card => card.classList.remove('active'));
-            radio.closest('.bank-radio-card').classList.add('active');
+        // Bank Accordion Toggle & Selection Logic
+        function toggleBankAccordion() {
+            const content = document.getElementById('bankAccordionContent');
+            const icon = document.getElementById('bankAccordionIcon');
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                icon.innerText = '▲';
+            } else {
+                content.style.display = 'none';
+                icon.innerText = '▼';
+            }
+        }
 
-            const isCustom = radio.value === 'CUSTOM';
+        function selectBankOption(key, displayText) {
+            document.getElementById('selectedBankKey').value = key;
+            document.getElementById('lblSelectedBankText').innerText = displayText;
+
+            // Highlight selected item in scroll list
+            document.querySelectorAll('.bank-scroll-item').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            // Collapse Accordion
+            document.getElementById('bankAccordionContent').style.display = 'none';
+            document.getElementById('bankAccordionIcon').innerText = '▼';
+
+            // Custom Bank Box toggle
+            const isCustom = (key === 'CUSTOM');
             document.getElementById('customBankBox').style.display = isCustom ? 'grid' : 'none';
+
             updateDoc();
         }
 
@@ -635,15 +648,13 @@
             document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
             document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value.trim() || '';
             
-            // Sync Fiscal Year to Patra Sankhya (lblAY) if present
-            const fYear = document.getElementById('inFiscalYear').value.trim() || '२०८२/०८३';
-            if (document.getElementById('lblAY')) {
-                document.getElementById('lblAY').innerText = fYear;
-            }
+            // Derive Fiscal Year (lblAY) automatically from letterhead or fallback
+            const ayText = (document.getElementById('lblAY') && document.getElementById('lblAY').innerText.trim()) 
+                ? document.getElementById('lblAY').innerText.trim() 
+                : '२०८२/०८३';
 
             // Bank Receiver Logic
-            const selectedBankRadio = document.querySelector('input[name="bankRadio"]:checked');
-            const bankVal = selectedBankRadio ? selectedBankRadio.value : 'saptakoshi';
+            const bankVal = document.getElementById('selectedBankKey').value;
 
             if (bankVal === 'CUSTOM') {
                 document.getElementById('lblReceiverName').innerText = document.getElementById('inCustomBankName').value.trim() || '...................................';
@@ -693,7 +704,7 @@
             const bodyTextEl = document.getElementById('bodyText');
 
             if (isClosing) {
-                // CLOSING TEXT EXACT MATCH USER PROMPT
+                // CLOSING TEXT
                 document.getElementById('lblSubject').innerText = "बैंक खाता बन्द गरिदिने सम्बन्धमा";
                 
                 const accNo = document.getElementById('inAccountNo').value.trim() || '...............';
@@ -706,7 +717,7 @@
                 `;
 
             } else {
-                // OPENING TEXT EXACT MATCH USER PROMPT
+                // OPENING TEXT
                 document.getElementById('lblSubject').innerText = "बैंक खाता सञ्चालन सम्बन्धमा";
 
                 let budgetType = "";
@@ -725,7 +736,7 @@
 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष:. <span style="font-weight:bold;">${fYear}</span> को स्वीकृत <span style="font-weight:bold;">${budgetType}</span> योजना तथा कार्यक्रम अन्तर्गत “<span style="font-weight:bold;">${projName}</span>” शीर्षकमा विनियोजन भएको रकम रू.<span style="font-weight:bold;">${amtNum}</span> /- (अक्षरेपी <span style="font-weight:bold;">${amtWords}</span>  मात्र)बाट योजना कार्यन्वयन गर्नको लागि गठित <span style="font-weight:bold;">${committeeName}</span> ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियामानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
+                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष:. <span style="font-weight:bold;">${ayText}</span> को स्वीकृत <span style="font-weight:bold;">${budgetType}</span> योजना तथा कार्यक्रम अन्तर्गत “<span style="font-weight:bold;">${projName}</span>” शीर्षकमा विनियोजन भएको रकम रू.<span style="font-weight:bold;">${amtNum}</span> /- (अक्षरेपी <span style="font-weight:bold;">${amtWords}</span>  मात्र)बाट योजना कार्यन्वयन गर्नको लागि गठित <span style="font-weight:bold;">${committeeName}</span> ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियामानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                     </div>
                 `;
             }
@@ -756,8 +767,6 @@
             const committeeName = document.getElementById('inCommitteeName').value.trim();
             if (!committeeName) return;
 
-            const selectedBankRadio = document.querySelector('input[name="bankRadio"]:checked');
-
             const record = {
                 mode: mode,
                 miti: document.getElementById('inMiti').value.trim(),
@@ -766,12 +775,11 @@
                 chairman: document.getElementById('inChairman').value.trim(),
                 secretary: document.getElementById('inSecretary').value.trim(),
                 treasurer: document.getElementById('inTreasurer').value.trim(),
-                bankKey: selectedBankRadio ? selectedBankRadio.value : 'saptakoshi',
+                bankKey: document.getElementById('selectedBankKey').value,
                 timestamp: Date.now()
             };
 
             if (mode === 'OPEN_ACCOUNT') {
-                record.fiscalYear = document.getElementById('inFiscalYear').value.trim();
                 const selectedBudgetTypeRadio = document.querySelector('input[name="budgetTypeRadio"]:checked');
                 record.budgetTypeRadio = selectedBudgetTypeRadio ? selectedBudgetTypeRadio.value : 'वडा स्तरीय';
                 if (record.budgetTypeRadio === 'CUSTOM') {
@@ -852,15 +860,22 @@
             document.getElementById('inTreasurer').value = rec.treasurer || '';
             
             if (rec.bankKey) {
-                const radio = document.querySelector(`input[name="bankRadio"][value="${rec.bankKey}"]`);
-                if (radio) {
-                    radio.checked = true;
-                    onBankRadioChange(radio);
-                }
+                const textMap = {
+                    'saptakoshi': 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)',
+                    'krishi': 'श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)',
+                    'nic': 'श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)',
+                    'prime': 'श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)',
+                    'nabil': 'श्री नबिल बैंक लिमिटेड (गौरादह शाखा)',
+                    'laxmi': 'श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)',
+                    'siddhartha': 'श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)',
+                    'global': 'श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)',
+                    'excel': 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)',
+                    'CUSTOM': '✍️ अन्य बैंक (Custom)'
+                };
+                selectBankOption(rec.bankKey, textMap[rec.bankKey] || textMap['saptakoshi']);
             }
 
             if (document.getElementById('currentMode').value === 'OPEN_ACCOUNT') {
-                if (rec.fiscalYear) document.getElementById('inFiscalYear').value = rec.fiscalYear;
                 if (rec.projectName) document.getElementById('inProjectName').value = rec.projectName;
                 if (rec.budgetAmt) document.getElementById('inBudgetAmt').value = rec.budgetAmt;
                 if (rec.budgetWords) document.getElementById('inBudgetWords').value = rec.budgetWords;
