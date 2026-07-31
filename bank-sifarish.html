@@ -799,6 +799,22 @@
             document.getElementById('childChkBoxWrapper').style.display = isDeceased ? 'none' : 'block';
             document.getElementById('secPasteBox').style.display = 'block';
 
+            // Hide bank dropdown in deceased mode, show in open account mode
+            const bankSelectGroup = document.getElementById('inBankSelect').closest('.form-group');
+            if (bankSelectGroup) {
+                bankSelectGroup.style.display = isDeceased ? 'none' : 'block';
+            }
+
+            // Set receiver based on mode
+            if (isDeceased) {
+                document.getElementById('inReceiverName').value = 'श्री गौरादह नगरपालिका';
+                document.getElementById('inReceiverOffice').value = 'नगर कार्यपालिकाको कार्यालय';
+                document.getElementById('inReceiverLocation').value = 'गौरादह, झापा';
+            } else {
+                // Restore bank receiver when switching back
+                selectBank(document.getElementById('inBankSelect').value);
+            }
+
             document.getElementById('formMainTitle').innerText = isDeceased 
                 ? "🔒 मृतकको बैंक खाता बन्द सिफारिस" 
                 : "📂 बैंक खाता खोल्ने सिफारिस";
@@ -995,10 +1011,17 @@
             document.getElementById('lblMiti').innerText        = miti;
             document.getElementById('lblNepalSamvat').innerText = ns;
 
-            // Receiver Bank Details
-            const recName = document.getElementById('inReceiverName').value || '';
-            const recOffice = document.getElementById('inReceiverOffice').value || '';
-            const recLoc = document.getElementById('inReceiverLocation').value || '';
+            // Receiver Details - use नगरपालिका for deceased mode, bank for open account mode
+            let recName, recOffice, recLoc;
+            if (isDeceased) {
+                recName = 'श्री गौरादह नगरपालिका';
+                recOffice = 'नगर कार्यपालिकाको कार्यालय';
+                recLoc = 'गौरादह, झापा';
+            } else {
+                recName = document.getElementById('inReceiverName').value || '';
+                recOffice = document.getElementById('inReceiverOffice').value || '';
+                recLoc = document.getElementById('inReceiverLocation').value || '';
+            }
             document.getElementById('lblReceiverName').innerText = recName;
             document.getElementById('lblReceiverOffice').innerText = recOffice;
             document.getElementById('lblReceiverLocation').innerText = recLoc;
