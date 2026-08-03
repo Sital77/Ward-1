@@ -321,7 +321,7 @@
             <div class="form-group" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px;">
                 <div>
                     <label>विनियोजन रकम रू. (अंकमा):</label>
-                    <input type="text" id="inBudgetAmt" placeholder="उदा: ५०००००" oninput="autoConvertAmtToWords(); updateDoc()">
+                    <input type="text" id="inBudgetAmt" placeholder="उदा: ५,५५,५५५/- वा 555555" oninput="autoConvertAmtToWords(); updateDoc()">
                 </div>
                 <div>
                     <label>रकम (अक्षरेपी):</label>
@@ -509,10 +509,21 @@
             'excel': { line1: 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' }
         };
 
-        // Number to Nepali Words Converter
+        // Convert Nepali Unicode digits (०-९) to ASCII digits (0-9)
+        function nepaliDigitsToAscii(str) {
+            const nepaliDigits = '०१२३४५६७८९';
+            return str.replace(/[०-९]/g, function(ch) {
+                return nepaliDigits.indexOf(ch).toString();
+            });
+        }
+
+        // Number to Nepali Words Converter (handles both Nepali & English digits)
         function convertNumberToNepaliWords(numberStr) {
             if (!numberStr) return '';
-            let clean = numberStr.replace(/[^0-9]/g, '');
+            // First convert any Nepali digits to ASCII
+            let ascii = nepaliDigitsToAscii(numberStr);
+            // Remove all non-digit characters (commas, /-, spaces, etc.)
+            let clean = ascii.replace(/[^0-9]/g, '');
             let num = parseInt(clean, 10);
             if (isNaN(num) || num <= 0) return '';
 
@@ -533,6 +544,11 @@
             }
 
             let words = [];
+
+            // Handle अर्ब (arab = 1,00,00,00,000)
+            let arab = Math.floor(num / 1000000000);
+            num %= 1000000000;
+            if (arab > 0) words.push(twoDigits(arab) + ' अर्ब');
 
             let crore = Math.floor(num / 10000000);
             num %= 10000000;
@@ -559,7 +575,9 @@
             const amtStr = document.getElementById('inBudgetAmt').value;
             const words = convertNumberToNepaliWords(amtStr);
             if (words) {
-                document.getElementById('inBudgetWords').value = words;
+                document.getElementById('inBudgetWords').value = words + ' मात्र';
+            } else {
+                document.getElementById('inBudgetWords').value = '';
             }
         }
 
