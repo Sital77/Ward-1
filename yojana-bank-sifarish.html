@@ -192,12 +192,12 @@
     <script src="auth.js?v=2.3"></script>
 
     <div class="input-panel">
-        <div class="top-bar-buttons" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <button onclick="window.location.href='index.html'" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #4a5568;">
-                🏠 ड्यासबोर्डमा जानुहोस्
-            </button>
-            <button class="btn-abhilekh" onclick="toggleModal(true)">🗄️ अभिलेख खोल्नुस्</button>
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">📂 योजनाको बैंक खाता सञ्चालन सिफारिस</h2>
+            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
         </div>
+
+        <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
 
         <!-- Mode Toggle Tabs (Fast Switch) -->
         <div class="mode-toggle-wrap">
@@ -209,11 +209,36 @@
             </button>
         </div>
 
-        <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
+        <!-- ══ SECTION 0: LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 लेटर हेड विवरण</div>
 
-        <h2 id="formMainTitle" style="color:#2c5282; font-size:1.35rem; margin-top:0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom:15px;">
-            📂 योजनाको बैंक खाता सञ्चालन सिफारिस
-        </h2>
+            <div class="form-group">
+                <label>पत्र संख्या (प.सं.):</label>
+                <div class="radio-container">
+                    <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"><label for="ay1" class="radio-label">२०८१/०८२</label></div>
+                    <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()"><label for="ay2" class="radio-label">२०८२/०८३</label></div>
+                    <div class="radio-option"><input type="radio" id="ay3" name="ayRadio" value="२०८३/०८४" checked onchange="updateDoc()"><label for="ay3" class="radio-label">२०८३/०८४</label></div>
+                    <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()"><label for="ay4" class="radio-label">२०८४/०८५</label></div>
+                </div>
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="उदा: २०८३/०४/१५" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ने.सं. :</label>
+                <input type="text" id="inNepalSamvat" placeholder="उदा: ११४६" oninput="updateDoc()">
+            </div>
+        </div>
 
         <!-- ══ SECTION 1: BANK SELECTION (ACCORDION / SCROLLING LIST) ══ -->
         <div class="section-card body-section" style="background: rgba(237, 137, 54, 0.05); border-color: rgba(237, 137, 54, 0.4);">
@@ -340,18 +365,7 @@
 
         <!-- ══ SECTION 3: COMMON COMMITTEE DETAILS ══ -->
         <div class="section-card body-section">
-            <div class="section-label">📋 साधारण विवरण</div>
-
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label>मिति:</label>
-                    <input type="text" id="inMiti" placeholder="उदा: २०८२/०४/१५" oninput="updateDoc()">
-                </div>
-                <div>
-                    <label>नेपाल संवत्:</label>
-                    <input type="text" id="inNepalSamvat" placeholder="उदा: ११४५" oninput="updateDoc()">
-                </div>
-            </div>
+            <div class="section-label">📋 उपभोक्ता समिति विवरण</div>
 
             <div class="form-group">
                 <label>उपभोक्ता समितिको नाम:</label>
@@ -453,12 +467,12 @@
 
             <div class="header-red-line"></div>
 
-            <div class="bank-receiver" style="margin-top: 35px; margin-bottom: 25px; line-height: 1.5; font-size: 13pt;">
+            <div class="bank-receiver" style="margin-top: 10px; margin-bottom: 16px; line-height: 1.5; font-size: 13pt;">
                 <div id="lblReceiverLine1" style="font-weight:bold;">श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,</div>
                 <div id="lblReceiverLine2">गौरादह शाखा, गौरादह झापा ।</div>
             </div>
 
-            <div class="subject-line" style="text-align: center; margin: 28px 0; font-weight: bold; font-size: 13.5pt; text-decoration: underline;">
+            <div class="subject-line" style="text-align: center; margin: 12px 0 20px 0; font-weight: bold; font-size: 13.5pt; text-decoration: underline;">
                 विषय: <span id="lblSubject">बैंक खाता सञ्चालन सम्बन्धमा</span> ।
             </div>
 
@@ -657,18 +671,26 @@
             updateDoc();
         }
 
+        function getSelectedAY() {
+            const radios = document.querySelectorAll('input[name="ayRadio"]');
+            for (const r of radios) { if (r.checked) return r.value; }
+            return '२०८३/०८४';
+        }
+
         function updateDoc() {
             const mode = document.getElementById('currentMode').value;
             const isClosing = (mode === 'CLOSE_ACCOUNT');
 
             // Header Elements
+            const ay = getSelectedAY();
+            const chalani = document.getElementById('inChalani').value.trim();
+            document.getElementById('lblAY').innerText = ay;
+            document.getElementById('lblChalani').innerText = chalani || '..........';
             document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
             document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value.trim() || '';
             
-            // Derive Fiscal Year (lblAY) automatically from letterhead or fallback
-            const ayText = (document.getElementById('lblAY') && document.getElementById('lblAY').innerText.trim()) 
-                ? document.getElementById('lblAY').innerText.trim() 
-                : '२०८२/०८३';
+            // Fiscal Year for body text
+            const ayText = ay || '२०८३/०८४';
 
             // Bank Receiver Logic (2-line display)
             const bankVal = document.getElementById('selectedBankKey').value;
@@ -784,6 +806,8 @@
 
             const record = {
                 mode: mode,
+                ay: getSelectedAY(),
+                chalani: document.getElementById('inChalani').value.trim(),
                 miti: document.getElementById('inMiti').value.trim(),
                 ns: document.getElementById('inNepalSamvat').value.trim(),
                 committeeName: committeeName,
@@ -865,7 +889,12 @@
         function loadRecord(id) {
             const rec = abhilekhData.find(r => r.id === id);
             if (!rec) return;
-
+            // Restore AY radio
+            if (rec.ay) {
+                const ayRadio = document.querySelector(`input[name="ayRadio"][value="${rec.ay}"]`);
+                if (ayRadio) ayRadio.checked = true;
+            }
+            document.getElementById('inChalani').value = rec.chalani || '';
             document.getElementById('inMiti').value = rec.miti || '';
             document.getElementById('inNepalSamvat').value = rec.ns || '';
             
