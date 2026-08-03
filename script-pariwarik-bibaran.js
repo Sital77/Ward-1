@@ -249,7 +249,7 @@ window.updateDoc = function () {
             tbody.insertAdjacentHTML('beforeend', `
                 <tr>
                     <td>${window.toNepaliDigit(index + 1)}</td>
-                    <td style="text-align: left; padding-left: 15px; font-weight: bold;">${mName || '................'}</td>
+                    <td style="text-align: left; padding-left: 8px; font-weight: bold;">${mName || '................'}</td>
                     <td>${mDoc}</td>
                     <td>${mRel}</td>
                 </tr>
