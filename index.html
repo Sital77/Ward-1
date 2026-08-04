@@ -184,7 +184,7 @@
         }
 
         .card-calc::before {
-            background: linear-gradient(90deg, #4c51bf, #6b46c1);
+            background: linear-gradient(90deg, #0d9488, #0f766e);
         }
 
         .card-act::before {
@@ -251,8 +251,8 @@
         }
 
         .card-calc:hover {
-            box-shadow: 0 15px 30px rgba(76, 81, 191, 0.15);
-            border: 1px solid #b794f4;
+            box-shadow: 0 15px 30px rgba(13, 148, 136, 0.15);
+            border: 1px solid #5eead4;
         }
 
         .card-act:hover {
@@ -878,10 +878,10 @@
                 <div class="card-desc">पुँजी र प्रकृतिका आधारमा व्यवसाय कर हिसाब गर्नुस्।</div>
             </div>
 
-            <div class="portal-card card-calc" onclick="openModal('modal-calculator')">
-                <div class="card-icon">🧮</div>
-                <div class="card-title">सिफारिस दस्तुर</div>
-                <div class="card-desc">घर बाटो र चार किल्लाको क्षेत्रफल अनुसार लाग्ने राजस्व हिसाब गर्नुस्।</div>
+            <div class="portal-card card-calc" onclick="openModal('modal-nissa-khoji')">
+                <div class="card-icon">🔎</div>
+                <div class="card-title">निस्सा खोजी</div>
+                <div class="card-desc">भूमिहीन सुकुम्बासी, दलित तथा अव्यवस्थित बसोबासीको विवरण नामबाट खोज्नुहोस्।</div>
             </div>
 
             <div class="portal-card card-act" onclick="openModal('modal-act')">
@@ -946,13 +946,41 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-calculator">
+    <div class="modal-overlay" id="modal-nissa-khoji">
         <div class="modal-content modal-large">
-            <button class="modal-close" onclick="closeModal('modal-calculator')">×</button>
-            <h2 class="modal-title" style="color: #4c51bf; border-bottom-color:#b794f4;">🧮 सिफारिस दस्तुर क्यालकुलेटर
-            </h2>
-            <div style="width: 100%; height: 60vh; border: 2px solid #e2e8f0; border-radius: 12px; overflow:hidden;">
-                <iframe src="calculator.html" width="100%" height="100%" style="border:none;"></iframe>
+            <button class="modal-close" onclick="closeModal('modal-nissa-khoji')">×</button>
+            <h2 class="modal-title" style="color: #0d9488; border-bottom-color:#5eead4;">🔎 निस्सा खोजी — भूमिहीन सुकुम्बासी / दलित / अव्यवस्थित बसोबासी</h2>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+                <div style="flex:1; min-width:220px;">
+                    <label style="font-weight:600; font-size:0.95rem; color:#2d3748; margin-bottom:4px; display:block;">📝 नाम लेख्नुहोस्:</label>
+                    <input type="text" id="nissaNameInput" class="input-field" placeholder="जस्तै: विनिता मुर्मु" oninput="searchNissa()" style="font-size:1rem;">
+                </div>
+                <div style="min-width:180px; display:flex; align-items:flex-end;">
+                    <select id="nissaCategoryFilter" class="input-field" onchange="searchNissa()" style="font-size:0.95rem; height:46px;">
+                        <option value="all">📋 सबै श्रेणी</option>
+                        <option value="BS">🟢 भूमिहीन सुकुम्बासी (BS)</option>
+                        <option value="BD">🔵 भूमिहीन दलित (BD)</option>
+                        <option value="AB">🟠 अव्यवस्थित बसोबासी (AB)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="nissaStats" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+                <div style="background:linear-gradient(135deg,#d1fae5,#a7f3d0); padding:8px 16px; border-radius:10px; font-size:0.88rem; font-weight:600; color:#065f46;">🟢 BS: <span id="nissaCountBS">0</span></div>
+                <div style="background:linear-gradient(135deg,#dbeafe,#bfdbfe); padding:8px 16px; border-radius:10px; font-size:0.88rem; font-weight:600; color:#1e40af;">🔵 BD: <span id="nissaCountBD">0</span></div>
+                <div style="background:linear-gradient(135deg,#ffedd5,#fed7aa); padding:8px 16px; border-radius:10px; font-size:0.88rem; font-weight:600; color:#9a3412;">🟠 AB: <span id="nissaCountAB">0</span></div>
+                <div style="background:linear-gradient(135deg,#f3f4f6,#e5e7eb); padding:8px 16px; border-radius:10px; font-size:0.88rem; font-weight:600; color:#374151;">📊 जम्मा: <span id="nissaCountTotal">0</span></div>
+            </div>
+
+            <div id="nissaResultInfo" style="margin-bottom:8px; font-size:0.9rem; color:#718096; font-weight:600; display:none;"></div>
+
+            <div id="nissaResults" style="max-height:52vh; overflow-y:auto; border:2px solid #e2e8f0; border-radius:12px; padding:0;">
+                <div style="text-align:center; padding:40px 20px; color:#a0aec0;">
+                    <div style="font-size:3rem; margin-bottom:10px;">🔍</div>
+                    <div style="font-size:1.05rem; font-weight:600;">नाम लेखेर खोज्नुहोस्</div>
+                    <div style="font-size:0.85rem; margin-top:4px;">माथिको बक्समा नाम टाइप गर्नुहोस् — मिल्दो जुल्दो विवरण देखिनेछ</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1031,6 +1059,7 @@
 
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="nissa-data.js"></script>
     <script>
         function openModal(id) { const modal = document.getElementById(id); modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 10); }
         function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300); }
@@ -1142,6 +1171,162 @@
         let dataCache = null;
         async function fetchLandData() { if (dataCache) return dataCache; try { const response = await fetch('./convertcsv.json'); if (!response.ok) throw new Error('Data file not found.'); dataCache = await response.json(); return dataCache; } catch (error) { throw error; } }
         async function findClassification() { const kittaInput = document.getElementById("kittaInput").value.trim(); const mapSheetInput = document.getElementById("mapSheetInput").value.trim(); const resultDiv = document.getElementById("classificationResult"); if (!kittaInput && !mapSheetInput) { resultDiv.innerHTML = `<span style="color:#e53e3e;">⚠️ कृपया कित्ता वा नक्सा सिट नं. लेख्नुहोस्।</span>`; return; } resultDiv.innerHTML = `<span style="color:#3182ce;">🌀 खोजी हुँदैछ...</span>`; try { const data = await fetchLandData(); let results = data.filter(item => { const itemKitta = String(item.H || "").trim(); const itemMapSheet = String(item.G || "").trim(); if (kittaInput && mapSheetInput) return itemKitta === kittaInput && itemMapSheet === mapSheetInput; else if (kittaInput) return itemKitta === kittaInput; else if (mapSheetInput) return itemMapSheet === mapSheetInput; return false; }); if (results.length > 0) { let html = `<div style="color:#3182ce; font-weight:700; margin-bottom:8px;">${results.length} नतिजा भेटियो:</div><ul style="padding-left: 20px;">`; results.forEach(res => { html += `<li style="margin-bottom:8px;"><strong>कित्ता नं:</strong> ${res.H} | <strong>सिट नं:</strong> ${res.G} | <strong>साविक:</strong> ${res.F}<br><span style="color:#e51a23; font-weight:700;">👉 भु-उपयोग: ${res.I}</span></li>`; }); html += "</ul>"; resultDiv.innerHTML = html; } else { resultDiv.innerHTML = `<span style="color:#e53e3e;">❌ विवरण भेटिएन।</span>`; } } catch (error) { resultDiv.innerHTML = `<span style="color:#e53e3e;">🚫 डाटा लोड गर्न त्रुटि भयो (convertcsv.json छैन)।</span>`; } }
+        // ===== निस्सा खोजी (NISSA SEARCH SYSTEM) =====
+        let nissaData = { BS: [], BD: [], AB: [] };
+        let nissaLoaded = false;
+
+        function loadNissaData() {
+            if (nissaLoaded) return;
+            try {
+                const bsRes = (typeof NISSA_RAW_BS !== 'undefined') ? NISSA_RAW_BS : [];
+                const bdRes = (typeof NISSA_RAW_BD !== 'undefined') ? NISSA_RAW_BD : [];
+                const abRes = (typeof NISSA_RAW_AB !== 'undefined') ? NISSA_RAW_AB : [];
+
+                // Normalize BS data (English keys)
+                nissaData.BS = bsRes.map(item => ({
+                    category: 'BS',
+                    sn: item.sn || '',
+                    form_no: item.form_no || '',
+                    reg_no: item.reg_no || '',
+                    name: item.name || '',
+                    cit_no: item.cit_no || '',
+                    parcel_code: item.parcel_code || '',
+                    area: item.area || '',
+                    remarks: item.remarks || item.duration || ''
+                }));
+
+                // Normalize BD data (Nepali keys)
+                nissaData.BD = bdRes.map(item => ({
+                    category: 'BD',
+                    sn: item['सि.नं'] || '',
+                    form_no: item['निवेदन फारम नं.'] || '',
+                    reg_no: item['निवेदन दर्ता (कोड) नं.'] || '',
+                    name: item['परिवारमूलीको र निजको पति / पत्नीको नाम'] || '',
+                    cit_no: item['परिवारमूलीको ना. प्र. प. नं.'] || '',
+                    parcel_code: item['कित्ता कोड'] || '',
+                    area: item['जग्गाको अनुमानित क्षेत्रफल (स्थानीय एकाइ)'] || '',
+                    remarks: item['कैफियत'] || ''
+                }));
+
+                // Normalize AB data (English keys like BS)
+                nissaData.AB = abRes.map(item => ({
+                    category: 'AB',
+                    sn: item.sn || '',
+                    form_no: item.form_no || '',
+                    reg_no: item.reg_no || '',
+                    name: item.name || '',
+                    cit_no: item.cit_no || '',
+                    parcel_code: item.parcel_code || '',
+                    area: item.area || '',
+                    remarks: item.remarks || item.duration || ''
+                }));
+
+                nissaLoaded = true;
+                document.getElementById('nissaCountBS').textContent = nissaData.BS.length;
+                document.getElementById('nissaCountBD').textContent = nissaData.BD.length;
+                document.getElementById('nissaCountAB').textContent = nissaData.AB.length;
+                document.getElementById('nissaCountTotal').textContent = nissaData.BS.length + nissaData.BD.length + nissaData.AB.length;
+            } catch (e) {
+                console.error('निस्सा डाटा लोड त्रुटि:', e);
+            }
+        }
+
+        // Override openModal to load data when nissa modal opens
+        const originalOpenModal = openModal;
+        openModal = function(id) {
+            originalOpenModal(id);
+            if (id === 'modal-nissa-khoji') {
+                loadNissaData();
+            }
+        };
+
+        function searchNissa() {
+            const query = document.getElementById('nissaNameInput').value.trim().toLowerCase();
+            const category = document.getElementById('nissaCategoryFilter').value;
+            const resultsDiv = document.getElementById('nissaResults');
+            const infoDiv = document.getElementById('nissaResultInfo');
+
+            if (!query || query.length < 2) {
+                infoDiv.style.display = 'none';
+                resultsDiv.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:#a0aec0;">
+                        <div style="font-size:3rem; margin-bottom:10px;">🔍</div>
+                        <div style="font-size:1.05rem; font-weight:600;">नाम लेखेर खोज्नुहोस्</div>
+                        <div style="font-size:0.85rem; margin-top:4px;">माथिको बक्समा नाम टाइप गर्नुहोस् — मिल्दो जुल्दो विवरण देखिनेछ</div>
+                    </div>`;
+                return;
+            }
+
+            // Combine data based on category filter
+            let allData = [];
+            if (category === 'all' || category === 'BS') allData = allData.concat(nissaData.BS);
+            if (category === 'all' || category === 'BD') allData = allData.concat(nissaData.BD);
+            if (category === 'all' || category === 'AB') allData = allData.concat(nissaData.AB);
+
+            // Search by name - fuzzy matching
+            const queryWords = query.split(/\s+/).filter(w => w.length > 0);
+            const results = allData.filter(item => {
+                const name = (item.name || '').toLowerCase();
+                return queryWords.every(word => name.includes(word));
+            });
+
+            infoDiv.style.display = 'block';
+            if (results.length === 0) {
+                infoDiv.innerHTML = `<span style="color:#e53e3e;">❌ "${document.getElementById('nissaNameInput').value}" नामको विवरण भेटिएन।</span>`;
+                resultsDiv.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:#e53e3e;">
+                        <div style="font-size:3rem; margin-bottom:10px;">😔</div>
+                        <div style="font-size:1.05rem; font-weight:600;">कुनै विवरण भेटिएन</div>
+                        <div style="font-size:0.85rem; margin-top:4px; color:#a0aec0;">कृपया नाम सही लेख्नुहोस् वा अर्को नाम प्रयोग गर्नुहोस्</div>
+                    </div>`;
+                return;
+            }
+
+            infoDiv.innerHTML = `<span style="color:#0d9488;">✅ ${results.length} वटा विवरण भेटियो</span>`;
+
+            const categoryColors = { BS: '#059669', BD: '#2563eb', AB: '#ea580c' };
+            const categoryBgColors = { BS: '#ecfdf5', BD: '#eff6ff', AB: '#fff7ed' };
+            const categoryLabels = { BS: 'भूमिहीन सुकुम्बासी', BD: 'भूमिहीन दलित', AB: 'अव्यवस्थित बसोबासी' };
+            const categoryBorderColors = { BS: '#a7f3d0', BD: '#bfdbfe', AB: '#fed7aa' };
+
+            let html = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
+            html += `<thead><tr style="background:linear-gradient(135deg,#0d9488,#0f766e); color:#fff; position:sticky; top:0; z-index:1;">
+                <th style="padding:10px 8px; text-align:center; border-bottom:2px solid #0f766e;">सि.नं</th>
+                <th style="padding:10px 8px; text-align:left; border-bottom:2px solid #0f766e;">श्रेणी</th>
+                <th style="padding:10px 8px; text-align:left; border-bottom:2px solid #0f766e;">नाम / पति/पत्नी</th>
+                <th style="padding:10px 8px; text-align:left; border-bottom:2px solid #0f766e;">दर्ता कोड</th>
+                <th style="padding:10px 8px; text-align:left; border-bottom:2px solid #0f766e;">ना.प्र.प.नं.</th>
+                <th style="padding:10px 8px; text-align:left; border-bottom:2px solid #0f766e;">कित्ता कोड</th>
+                <th style="padding:10px 8px; text-align:left; border-bottom:2px solid #0f766e;">क्षेत्रफल</th>
+            </tr></thead><tbody>`;
+
+            results.forEach((item, idx) => {
+                const bgColor = idx % 2 === 0 ? categoryBgColors[item.category] : '#ffffff';
+                const catColor = categoryColors[item.category];
+                const borderColor = categoryBorderColors[item.category];
+
+                // Highlight matching text
+                let displayName = item.name;
+                queryWords.forEach(word => {
+                    const regex = new RegExp('(' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                    displayName = displayName.replace(regex, '<mark style="background:#fef08a; padding:0 2px; border-radius:2px;">$1</mark>');
+                });
+
+                html += `<tr style="background:${bgColor}; border-bottom:1px solid ${borderColor}; transition:background 0.2s;" onmouseover="this.style.background='#f0fdfa'" onmouseout="this.style.background='${bgColor}'">
+                    <td style="padding:10px 8px; text-align:center; font-weight:600; color:#4a5568;">${item.sn}</td>
+                    <td style="padding:10px 8px;"><span style="background:${catColor}; color:#fff; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:700;">${item.category}</span></td>
+                    <td style="padding:10px 8px; font-weight:600; color:#1a202c;">${displayName}</td>
+                    <td style="padding:10px 8px; color:#4a5568; font-size:0.82rem;">${item.reg_no}</td>
+                    <td style="padding:10px 8px; color:#4a5568; font-size:0.82rem;">${item.cit_no}</td>
+                    <td style="padding:10px 8px; color:#4a5568; font-size:0.82rem;">${item.parcel_code || '—'}</td>
+                    <td style="padding:10px 8px; color:#4a5568; font-size:0.82rem;">${item.area || '—'}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
         // Firebase Initialization and Listener
         const firebaseConfig = {
             apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
