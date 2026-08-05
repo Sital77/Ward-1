@@ -1434,6 +1434,9 @@
 
     // ===== Security: SHA-256 Hash for passwords =====
     async function hashWardPassword(password) {
+        if (!window.crypto || !window.crypto.subtle) {
+            return 'FALLBACK_' + btoa(password);
+        }
         const encoder = new TextEncoder();
         const data = encoder.encode(password);
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);

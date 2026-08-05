@@ -667,6 +667,10 @@
 
         // ===== Security: SHA-256 Hash Utility =====
         async function hashPassword(password) {
+            if (!window.crypto || !window.crypto.subtle) {
+                // Fallback for local file:/// execution where Web Crypto is blocked
+                return 'FALLBACK_' + btoa(password);
+            }
             const encoder = new TextEncoder();
             const data = encoder.encode(password);
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -776,11 +780,11 @@
                 // Security: Fallback for default users using hashes (no plaintext passwords in code)
                 if (!isValidUser) {
                     const defaultHashes = {
-                        'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', ward: '1', admin: false },
-                        'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', ward: '3', admin: false },
-                        'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', ward: '1', admin: true }
+                        'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', fallback: 'FALLBACK_d2FkYTE=', ward: '1', admin: false },
+                        'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', fallback: 'FALLBACK_d2FkYTM=', ward: '3', admin: false },
+                        'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', fallback: 'FALLBACK_YWRtaW4=', ward: '1', admin: true }
                     };
-                    if (defaultHashes[cleanUser] && defaultHashes[cleanUser].hash === passwordHash) {
+                    if (defaultHashes[cleanUser] && (defaultHashes[cleanUser].hash === passwordHash || defaultHashes[cleanUser].fallback === passwordHash)) {
                         finalWard = defaultHashes[cleanUser].ward;
                         isAdmin = defaultHashes[cleanUser].admin;
                         isValidUser = true;
