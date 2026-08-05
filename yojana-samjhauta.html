@@ -584,7 +584,7 @@
             }
 
             // B. Fiscal Year
-            const fyMatch = pastedText.match/आर्थिक\s*बर्ष\.?\s*[:\-\s]*([२०८९०-९0-9\/]+)/i);
+            const fyMatch = pastedText.match(/आर्थिक\s*बर्ष\.?\s*[:\-\s]*([२०८९०-९0-9\/]+)/i);
             if (fyMatch) {
                 parsedData.fiscalYear = fyMatch[1].trim();
             }
