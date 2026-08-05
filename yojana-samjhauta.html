@@ -242,7 +242,7 @@
             <div class="form-group" style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
                 <div>
                     <label>चालू आर्थिक बर्ष:</label>
-                    <input type="text" id="inFiscalYear" placeholder="उदा: २०८२/०८३" value="२०८२/०८३" oninput="updateDoc()">
+                    <input type="text" id="inFiscalYear" placeholder="उदा: २०८३/०८४" value="२०८३/०८४" oninput="updateDoc()">
                 </div>
                 <div>
                     <label>योजनाको शिर्षक:</label>
@@ -287,11 +287,16 @@
             </div>
 
             <div class="form-group">
-                <label>अन्य सदस्यहरू (तपसिल):</label>
+                <label>तपसिलका अन्य पदाधिकारी तथा सदस्यहरू:</label>
                 <div id="membersContainer">
                     <!-- Dynamic member rows appended here -->
                 </div>
-                <button type="button" class="btn-add-member" onclick="addMemberInput()">➕ थप सदस्य थप्नुहोस्</button>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+                    <button type="button" class="btn-add-member" onclick="addMemberInput('', 'सदस्य')">➕ सदस्य थप्नुहोस्</button>
+                    <button type="button" class="btn-add-member" style="background:#fffaf0; color:#dd6b20; border-color:#f6ad55;" onclick="addMemberInput('', 'उपाध्यक्ष')">➕ उपाध्यक्ष थप्नुहोस्</button>
+                    <button type="button" class="btn-add-member" style="background:#f0fff4; color:#276749; border-color:#68d391;" onclick="addMemberInput('', 'सह-सचिव')">➕ सह-सचिव थप्नुहोस्</button>
+                    <button type="button" class="btn-add-member" style="background:#faf5ff; color:#6b46c1; border-color:#b794f4;" onclick="addMemberInput('', 'अन्य पद')">➕ अन्य पद थप्नुहोस्</button>
+                </div>
             </div>
         </div>
 
@@ -374,8 +379,8 @@
 
             <div class="header-red-line"></div>
 
-            <div class="receiver-block" style="margin-top: 10px; margin-bottom: 14px; line-height: 1.5; font-size: 13pt;">
-                <div style="font-weight:bold;">श्री गौरादह नगरपालिका</div>
+            <div class="receiver-block" style="margin-top: 10px; margin-bottom: 14px; line-height: 1.5; font-size: 13pt; font-weight: bold;">
+                <div>श्री गौरादह नगरपालिका</div>
                 <div>नगर कार्यपालिकाको कार्यालय</div>
                 <div>गौरादह, झापा ।</div>
             </div>
@@ -421,15 +426,15 @@
 
         let memberCount = 0;
 
-        function addMemberInput(val = '') {
+        function addMemberInput(nameVal = '', roleVal = 'सदस्य') {
             memberCount++;
             const container = document.getElementById('membersContainer');
             const row = document.createElement('div');
             row.className = 'member-row';
             row.id = `memberRow_${memberCount}`;
             row.innerHTML = `
-                <span style="font-size:0.85rem; color:#4a5568; min-width:65px;">सदस्य ${memberCount}:</span>
-                <input type="text" id="inMember_${memberCount}" value="${val}" placeholder="सदस्यको नाम" oninput="updateDoc()" style="flex:1;">
+                <input type="text" id="inRole_${memberCount}" value="${roleVal}" placeholder="पद (उदा: उपाध्यक्ष/सह-सचिव/सदस्य)" oninput="updateDoc()" style="width:140px; font-weight:600; color:#2b6cb0;">
+                <input type="text" id="inMember_${memberCount}" value="${nameVal}" placeholder="नाम" oninput="updateDoc()" style="flex:1;">
                 <button type="button" class="btn-remove-member" onclick="removeMemberInput(${memberCount})">✕</button>
             `;
             container.appendChild(row);
@@ -579,7 +584,7 @@
             }
 
             // B. Fiscal Year
-            const fyMatch = pastedText.match(/आर्थिक\s*बर्ष\.?\s*[:\-\s]*([२०८९०-९0-9\/]+)/i);
+            const fyMatch = pastedText.match/आर्थिक\s*बर्ष\.?\s*[:\-\s]*([२०८९०-९0-9\/]+)/i);
             if (fyMatch) {
                 parsedData.fiscalYear = fyMatch[1].trim();
             }
@@ -618,24 +623,26 @@
                 parsedData.committeeName = commMatch[1].replace(/.*?गठित\s*/, '').trim();
             }
 
-            // G. Committee Members (अध्यक्ष, सचिव, कोषाध्यक्ष, सदस्यहरू)
+            // G. Committee Members & Custom Roles (अध्यक्ष, सचिव, कोषाध्यक्ष, उपाध्यक्ष, सह-सचिव, सदस्यहरू)
             const lines = pastedText.split(/\r?\n/);
             lines.forEach(line => {
                 const trimmed = line.trim();
                 const chairM = trimmed.match(/(?:•|\*|-)?\s*अध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
-                if (chairM && !parsedData.chairman) parsedData.chairman = chairM[1].trim();
+                if (chairM && !parsedData.chairman) { parsedData.chairman = chairM[1].trim(); return; }
 
                 const secM = trimmed.match(/(?:•|\*|-)?\s*सचिव\s*:\s*([^\n\r•\*]+)/i);
-                if (secM && !parsedData.secretary) parsedData.secretary = secM[1].trim();
+                if (secM && !parsedData.secretary) { parsedData.secretary = secM[1].trim(); return; }
 
                 const treasM = trimmed.match(/(?:•|\*|-)?\s*कोषाध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
-                if (treasM && !parsedData.treasurer) parsedData.treasurer = treasM[1].trim();
+                if (treasM && !parsedData.treasurer) { parsedData.treasurer = treasM[1].trim(); return; }
 
-                const memM = trimmed.match(/(?:•|\*|-)?\s*सदस्य\s*:\s*([^\n\r•\*]+)/i);
+                const memM = trimmed.match(/(?:•|\*|-)?\s*([^:\n\r]+?)\s*:\s*([^\n\r•\*]+)/i);
                 if (memM) {
-                    const mName = memM[1].trim();
-                    if (mName && !parsedData.members.includes(mName)) {
-                        parsedData.members.push(mName);
+                    const rStr = memM[1].trim();
+                    const nStr = memM[2].trim();
+                    const skipKeys = ['अध्यक्ष', 'सचिव', 'कोषाध्यक्ष', 'विषय', 'प.सं.', 'च.नं.', 'मिति', 'ने.सं.'];
+                    if (!skipKeys.includes(rStr) && nStr) {
+                        parsedData.members.push({ role: rStr, name: nStr });
                     }
                 }
             });
@@ -695,14 +702,14 @@
             if (parsedData.members.length > 0) {
                 document.getElementById('membersContainer').innerHTML = '';
                 memberCount = 0;
-                parsedData.members.forEach(mName => {
-                    addMemberInput(mName);
+                parsedData.members.forEach(mObj => {
+                    addMemberInput(mObj.name, mObj.role);
                 });
                 extractCount += parsedData.members.length;
             }
 
             if (extractCount > 0) {
-                showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू (बजेट, शिर्षक, रकम, समिति र सदस्यहरू) छानिए (Parsed)।`);
+                showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू (बजेट, शिर्षक, रकम, समिति र पदहरू) छानिए (Parsed)।`);
             } else {
                 showBadge(false, `❌ मिल्ने विवरण फेला परेन। ढाँचा जाँच गर्नुहोस्।`);
             }
@@ -738,7 +745,7 @@
             document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value.trim() || '';
 
             const budgetTypeStr = getSelectedBudgetType();
-            const fiscalYearStr = document.getElementById('inFiscalYear').value.trim() || '२०८२/०८३';
+            const fiscalYearStr = document.getElementById('inFiscalYear').value.trim() || '२०८३/०८४';
             const projectNameStr = document.getElementById('inProjectName').value.trim() || '...............................................................';
             const budgetAmtStr = document.getElementById('inBudgetAmt').value.trim() || '................/-';
             const budgetWordsStr = document.getElementById('inBudgetWords').value.trim() || '................................';
@@ -748,12 +755,14 @@
             const pSec = document.getElementById('inSecretary').value.trim();
             const pTreas = document.getElementById('inTreasurer').value.trim();
 
-            // Collect dynamic members
+            // Collect dynamic members with role and name
             let otherMembers = [];
             for (let i = 1; i <= memberCount; i++) {
+                const roleEl = document.getElementById(`inRole_${i}`);
                 const inputEl = document.getElementById(`inMember_${i}`);
                 if (inputEl && inputEl.value.trim()) {
-                    otherMembers.push(inputEl.value.trim());
+                    const rName = roleEl ? (roleEl.value.trim() || 'सदस्य') : 'सदस्य';
+                    otherMembers.push({ role: rName, name: inputEl.value.trim() });
                 }
             }
 
@@ -765,8 +774,8 @@
                     <li>कोषाध्यक्ष: <span style="font-weight:bold;">${pTreas || '....................'}</span></li>
             `;
 
-            otherMembers.forEach(memName => {
-                tapasilHtml += `<li>सदस्य: <span style="font-weight:bold;">${memName}</span></li>`;
+            otherMembers.forEach(mem => {
+                tapasilHtml += `<li>${mem.role}: <span style="font-weight:bold;">${mem.name}</span></li>`;
             });
 
             tapasilHtml += `</ul>`;
@@ -802,10 +811,10 @@
             if (typeof initPortalNepaliDate === 'function') initPortalNepaliDate();
 
             // Default sample members
-            addMemberInput('लेखकृष्ण घिमिरे');
-            addMemberInput('धर्म कुमारी सुवेदी');
-            addMemberInput('कृष्ण शर्मा');
-            addMemberInput('अप्सरा कार्की');
+            addMemberInput('लेखकृष्ण घिमिरे', 'सदस्य');
+            addMemberInput('धर्म कुमारी सुवेदी', 'सदस्य');
+            addMemberInput('कृष्ण शर्मा', 'सदस्य');
+            addMemberInput('अप्सरा कार्की', 'सदस्य');
 
             renderDatabaseTable();
             updateDoc();
@@ -824,6 +833,9 @@
                 projectName: document.getElementById('inProjectName').value.trim(),
                 committeeName: document.getElementById('inCommitteeName').value.trim(),
                 chairman: document.getElementById('inChairman').value.trim(),
+                secretary: document.getElementById('inSecretary').value.trim(),
+                treasurer: document.getElementById('inTreasurer').value.trim(),
+                budgetType: getSelectedBudgetType(),
                 amount: document.getElementById('inBudgetAmt').value.trim(),
                 timestamp: Date.now()
             };

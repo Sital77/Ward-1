@@ -209,6 +209,19 @@
             </button>
         </div>
 
+        <!-- ══ RETRIEVE SAVED SAMJHAUTA RECORD SECTION ══ -->
+        <div class="section-card" style="background: #fffaf0; border: 1.5px solid #dd6b20; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+            <div class="section-label" style="color: #c05621; font-weight: 800; display:flex; align-items:center; gap:6px;">
+                📥 सम्झौता गरिएको योजनाबाट डाटा तान्नुहोस्
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <select id="selectSamjhautaRecord" onchange="loadSamjhautaRecordData(this.value)" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e0; font-size:0.9rem; font-family:inherit; background:#fff; cursor:pointer;">
+                    <option value="">-- योजना सम्झौताको अभिलेख छान्नुहोस् --</option>
+                </select>
+                <div id="retrieveBadge" class="badge" style="display:none; margin-top:8px; font-size:0.85rem; padding:4px 12px; border-radius:6px; font-weight:700;"></div>
+            </div>
+        </div>
+
         <!-- ══ AUTO EXTRACT / PASTE SECTION ══ -->
         <div class="section-card paste-section" id="secPasteBox" style="background: #ebf8ff; border: 1.5px dashed #3182ce; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
             <div class="section-label" style="color: #2b6cb0; font-weight: 800; display:flex; align-items:center; gap:6px;">📋 कपी-पेस्ट बक्स (Auto-Extract)</div>
@@ -1108,8 +1121,101 @@
             toggleModal(false);
         }
 
+        let fetchedSamjhautaDocs = {};
+
+        async function populateSamjhautaDropdown() {
+            const selectEl = document.getElementById('selectSamjhautaRecord');
+            if (!selectEl) return;
+            try {
+                const snap = await db.collection("yojanaSamjhautaRecords").orderBy("timestamp", "desc").limit(40).get();
+                let options = '<option value="">-- योजना सम्झौताको अभिलेख छान्नुहोस् --</option>';
+                fetchedSamjhautaDocs = {};
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    fetchedSamjhautaDocs[doc.id] = data;
+                    const dateStr = data.miti ? `[${data.miti}] ` : '';
+                    const pName = data.projectName || data.committeeName || 'अनजान योजना';
+                    const amt = data.amount ? ` (रू. ${data.amount})` : '';
+                    options += `<option value="${doc.id}">📂 ${dateStr}${pName}${amt}</option>`;
+                });
+                selectEl.innerHTML = options;
+            } catch (e) {
+                console.warn("Error fetching samjhauta records:", e);
+            }
+        }
+
+        function loadSamjhautaRecordData(docId) {
+            if (!docId || !fetchedSamjhautaDocs[docId]) {
+                showRetrieveBadge(false, '');
+                return;
+            }
+            const data = fetchedSamjhautaDocs[docId];
+            let loadedCount = 0;
+
+            if (data.projectName) {
+                document.getElementById('inProjectName').value = data.projectName;
+                loadedCount++;
+            }
+            if (data.amount) {
+                document.getElementById('inBudgetAmt').value = data.amount;
+                autoConvertAmtToWords();
+                loadedCount++;
+            }
+            if (data.committeeName) {
+                document.getElementById('inCommitteeName').value = data.committeeName;
+                loadedCount++;
+            }
+            if (data.chairman) {
+                document.getElementById('inChairman').value = data.chairman;
+                loadedCount++;
+            }
+            if (data.secretary) {
+                document.getElementById('inSecretary').value = data.secretary;
+                loadedCount++;
+            }
+            if (data.treasurer) {
+                document.getElementById('inTreasurer').value = data.treasurer;
+                loadedCount++;
+            }
+            if (data.budgetType) {
+                let matchedType = 'वडा स्तरीय';
+                if (data.budgetType.includes('प्रदेश')) matchedType = 'प्रदेश स्तरीय';
+                else if (data.budgetType.includes('नगर')) matchedType = 'नगर स्तरीय';
+                
+                const radios = document.querySelectorAll('input[name="budgetTypeRadio"]');
+                radios.forEach(r => {
+                    if (r.value === matchedType) {
+                        r.checked = true;
+                        onBudgetTypeRadioChange(r);
+                    }
+                });
+                loadedCount++;
+            }
+
+            if (loadedCount > 0) {
+                showRetrieveBadge(true, `✅ योजना सम्झौताबाट विवरण सफलतापुर्वक तानियो (Loaded)!`);
+            }
+
+            updateDoc();
+        }
+
+        function showRetrieveBadge(success, msg) {
+            const badge = document.getElementById('retrieveBadge');
+            if (badge) {
+                if (!msg) {
+                    badge.style.display = 'none';
+                    return;
+                }
+                badge.style.display = 'inline-flex';
+                badge.style.backgroundColor = success ? '#c6f6d5' : '#fed7d7';
+                badge.style.color = success ? '#22543d' : '#9b2c2c';
+                badge.innerText = msg;
+            }
+        }
+
         window.onload = function() {
             setMode('OPEN_ACCOUNT');
+            populateSamjhautaDropdown();
         };
     </script>
 </body>
