@@ -894,9 +894,9 @@
             const pTreas = document.getElementById('inTreasurer').value.trim();
 
             let persons = [];
-            if (pChair) persons.push(`अध्यक्ष: <span style="font-weight:bold;">${pChair}</span>`);
-            if (pSec) persons.push(`सचिव: <span style="font-weight:bold;">${pSec}</span>`);
-            if (pTreas) persons.push(`कोषाध्यक्ष: <span style="font-weight:bold;">${pTreas}</span>`);
+            if (pChair) persons.push(`अध्यक्ष: ${pChair}`);
+            if (pSec) persons.push(`सचिव: ${pSec}`);
+            if (pTreas) persons.push(`कोषाध्यक्ष: ${pTreas}`);
 
             let personsText = "";
             let personCountWord = "तीन";
@@ -928,8 +928,8 @@
                 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ स्थित <span style="font-weight:bold;">${committeeName}</span> 
-                        ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको खाता नं.<span style="font-weight:bold;">${accNo}</span> तहाँ कार्यालयको नियमानुसार उक्त खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
+                        उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ स्थित ${committeeName} 
+                        ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको खाता नं. ${accNo} तहाँ कार्यालयको नियमानुसार उक्त खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
                     </div>
                 `;
 
@@ -953,7 +953,7 @@
 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष:. <span style="font-weight:bold;">${ayText}</span> को स्वीकृत <span style="font-weight:bold;">${budgetType}</span> योजना तथा कार्यक्रम अन्तर्गत “<span style="font-weight:bold;">${projName}</span>” शीर्षकमा विनियोजन भएको रकम रू.<span style="font-weight:bold;">${amtNum}</span> /- (अक्षरेपी <span style="font-weight:bold;">${amtWords}</span>  मात्र)बाट योजना कार्यन्वयन गर्नको लागि गठित <span style="font-weight:bold;">${committeeName}</span> ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियामानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
+                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष ${ayText} को स्वीकृत ${budgetType} योजना तथा कार्यक्रम अन्तर्गत “${projName}” शीर्षकमा विनियोजन भएको रकम रू. ${amtNum} (अक्षरेपी ${amtWords} मात्र) बाट योजना कार्यन्वयन गर्नको लागि गठित ${committeeName} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियमानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                     </div>
                 `;
             }
