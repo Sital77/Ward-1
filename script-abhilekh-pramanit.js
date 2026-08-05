@@ -477,7 +477,7 @@ function initializeAutomaticDate() {
         updateDoc();
         fetchCurrentNepalSambat();
     } catch(e) {
-        console.error("Date calculation crash:", e);
+
     }
 }
 
@@ -512,7 +512,7 @@ function initializeFiscalYear(bsYear, bsMonth) {
             fySelect.value = currFY;
         }
     } catch (error) {
-        console.error("Error initializing fiscal year:", error);
+
     }
 }
 
@@ -629,7 +629,7 @@ async function printAndSaveSystem() {
         }
         window.print();
     } catch (e) {
-        console.error(e);
+
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
     } finally {
         if (btn) {
@@ -789,7 +789,7 @@ async function deleteRecord(id) {
         await db.collection("abhilekhRecords").doc(id).delete();
         alert("रेकर्ड सफलतापूर्वक हटाइयो ।");
     } catch(e) {
-        console.error(e);
+
         alert("रेकर्ड हटाउन समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
     }
 }
@@ -803,3 +803,4 @@ window.onload = function () {
 window.addEventListener('templateInjected', function() {
     initializeAutomaticDate();
 });
+

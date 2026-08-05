@@ -664,7 +664,7 @@ async function deleteFromDB(id) {
         try {
             await db.collection("nabalakRecords").doc(id).delete();
         } catch (e) {
-            console.error(e);
+
             alert("डिलिट गर्न समस्या भयो ।");
         }
     }
@@ -832,7 +832,7 @@ async function printAndSaveSystem() {
         }
         window.print();
     } catch (e) {
-        console.error("Firestore Save Error:", e);
+
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! तर प्रिन्ट सुरु गरिँदैछ ।");
         window.print();
     } finally {
@@ -1022,7 +1022,7 @@ function handleBirthCertUpload(event) {
             if (typeof updateDoc === 'function') updateDoc();
             alert("जन्म दर्ता फाइलबाट विवरणहरू सफलतापूर्वक भरिएको छ!");
         } catch (err) {
-            console.error("Auto-Fill Error:", err);
+
             alert("फाइल पढ्दा समस्या भयो। कृपया सही जन्म दर्ता HTML फाइल छान्नुहोस्।");
         } finally {
             if (event.target) event.target.value = '';
@@ -1323,7 +1323,7 @@ function copyFormDataToClipboard() {
         navigator.clipboard.writeText(jsonText).then(() => {
             alert("✅ फारमको सम्पूर्ण डाटा (JSON) क्लिपबोर्डमा सफलतापूर्वक कपी भयो!\nतपाईँले यसलाई कतै सेभ गर्न वा पछि पेस्ट गरेर भर्न सक्नुहुन्छ।");
         }).catch(err => {
-            console.error("Copy failed", err);
+
             prompt("फारम विवरण कपी गर्न तलको टेक्स्ट कपी (Ctrl+C) गर्नुहोस्:", jsonText);
         });
     } else {
@@ -1373,7 +1373,7 @@ function executeFormPaste() {
         alert("✅ कपी गरिएको डाटाबाट फारम सफलतापूर्वक भरिएको छ!");
         toggleFormPasteBox(false);
     } catch (e) {
-        console.error("Paste parse error:", e);
+
         alert("डाटा פורम्याट मिलेन! कृपया सही JSON डाटा पेस्ट गर्नुहोस्।");
     }
 }
@@ -1385,3 +1385,4 @@ window.onload = function () {
     adjustSignaturePosition(5);
     updateDoc();
 };
+

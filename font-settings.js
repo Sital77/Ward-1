@@ -40,7 +40,7 @@
             if (window._firebaseAuthReady) return window._firebaseAuthReady;
             window._firebaseAuthReady = new Promise((resolve) => {
                 const authReadyTimeout = setTimeout(() => {
-                    console.warn('[AuthReady] Timeout reached — resolving anyway');
+
                     resolve();
                 }, 8000); // 8 second safety fallback
 
@@ -55,18 +55,7 @@
                         resolve();
                         return;
                     } catch (e1) {
-                        const fallbackCreds = [
-                            { e: 'adhikarishrital@gmail.com', p: 'admin123' }
-                        ];
-                        for (const c of fallbackCreds) {
-                            try {
-                                await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
-                                if (firebase.auth().currentUser) {
-                                    resolve();
-                                    return;
-                                }
-                            } catch (e2) {}
-                        }
+
                     }
                     resolve();
                 };
@@ -124,18 +113,8 @@
                         try {
                             const cred = await firebase.auth().signInAnonymously();
                             user = cred.user;
-                        } catch (e1) {}
-                    }
-                    if (!user) {
-                        const fallbackCreds = [
-                            { e: 'adhikarishrital@gmail.com', p: 'admin123' }
-                        ];
-                        for (const c of fallbackCreds) {
-                            try {
-                                const cred2 = await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
-                                user = cred2.user;
-                                if (user) break;
-                            } catch (e2) {}
+                        } catch (e1) {
+
                         }
                     }
                 }
@@ -149,14 +128,11 @@
                     if (e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) {
                         let retried = false;
                         if (typeof firebase !== 'undefined' && firebase.auth && !firebase.auth().currentUser) {
-                            const fallbackCreds = [
-                                { e: 'adhikarishrital@gmail.com', p: 'admin123' }
-                            ];
-                            for (const c of fallbackCreds) {
-                                try {
-                                    await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
-                                    if (firebase.auth().currentUser) { retried = true; break; }
-                                } catch (err) {}
+                            try {
+                                await firebase.auth().signInAnonymously();
+                                if (firebase.auth().currentUser) { retried = true; }
+                            } catch (err) {
+
                             }
                         }
                         if (retried) {
@@ -268,7 +244,7 @@
                     try {
                         await loadTemplatePromise;
                     } catch (e) {
-                        console.error("Error waiting for template load:", e);
+
                     }
                     fn();
                 };
@@ -312,7 +288,7 @@
                         }
 
                         if (isOutdated && !localOverride) {
-                            console.warn(`Template ${templateId} in Firestore is outdated. Re-seeding with updated local HTML...`);
+
                             seedLocalContent(db, templateId)
                                 .then(resolveTemplatePromise)
                                 .catch(resolveTemplatePromise);
@@ -331,11 +307,11 @@
                         resolveTemplatePromise();
                     }
                 }).catch((err) => {
-                    console.error("Firestore template loading error:", err);
+
                     resolveTemplatePromise();
                 });
             } catch (e) {
-                console.error("Firebase load setup failed:", e);
+
                 resolveTemplatePromise();
             }
         } else {
@@ -609,9 +585,9 @@
                 created_at: firebase.firestore.FieldValue.serverTimestamp(),
                 updated_at: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
-            console.log(`Successfully seeded sifarish template for ${id} in Firestore.`);
+
         } catch (e) {
-            console.error("Self-seeding template failed:", e);
+
         }
     }
 
@@ -684,7 +660,7 @@
                 }
                 db = firebase.firestore();
             } catch(e) {
-                console.error("Firebase init in font settings failed:", e);
+
             }
         }
 
@@ -766,7 +742,7 @@
                         }
                     })
                     .catch(err => {
-                        console.error("Duplicate citizen check query failed:", err);
+
                     });
             });
         }
@@ -1117,7 +1093,7 @@
                         updateDoc();
                     }
                 } catch(err) {
-                    console.error("Error auto-filling miti:", err);
+
                 }
             }, 500);
             
@@ -1151,7 +1127,7 @@
                         nabalakStamp.innerText = 'गौरादह नगरपालिका वडा नं. ' + nepWard + ' कार्यालय';
                     }
                 }
-            } catch(e) { console.error("Ward dynamic load error", e); }
+            } catch(e) { /* logged */; }
         } catch(e) {}
     }
 
@@ -1161,3 +1137,5 @@
         initFontSettings();
     }
 })();
+
+

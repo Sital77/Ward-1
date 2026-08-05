@@ -432,7 +432,7 @@
             <label class="form-label" for="inUsername">प्रयोगकर्ता आईडी</label>
             <div class="form-input-wrap">
                 <span class="input-icon">👤</span>
-                <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस् (जस्तै: wada1)" autocomplete="username">
+                <input class="form-input" type="text" id="inUsername" placeholder="आईडी लेख्नुहोस्" autocomplete="username">
             </div>
             <div class="field-error" id="usernameError">कृपया प्रयोगकर्ता आईडी लेख्नुहोस्</div>
 
@@ -540,10 +540,23 @@
             } catch (e) { return false; }
         }
 
+        // Security: Validate redirect URL to prevent open redirect attacks
+        function getSafeRedirect(dest) {
+            if (!dest || typeof dest !== 'string') return 'index.html';
+            // Only allow relative URLs (no protocol, no //)
+            if (dest.includes('://') || dest.startsWith('//') || dest.startsWith('data:') || dest.startsWith('javascript:')) {
+                return 'index.html';
+            }
+            // Only allow .html files in same directory
+            const clean = dest.split('?')[0].split('#')[0];
+            if (!clean.endsWith('.html')) return 'index.html';
+            return dest;
+        }
+
         // Check active Firebase auth session or local session
         firebase.auth().onAuthStateChanged((user) => {
             if (user && (isSessionValid() || localStorage.getItem('sifarish_auth') === 'true')) {
-                const dest = localStorage.getItem('sifarish_redirect') || 'index.html';
+                const dest = getSafeRedirect(localStorage.getItem('sifarish_redirect') || 'index.html');
                 const requiresAdmin = dest.includes('admin.html');
                 const isUserAdmin = localStorage.getItem('sifarish_admin') === 'true';
 
@@ -597,7 +610,8 @@
             try {
                 hint.style.display = 'block';
                 const db = firebase.firestore();
-                const snap = await db.collection('ward_users').get();
+                // Security: Only fetch wardNumber field — never fetch passwords/credentials
+                const snap = await db.collection('ward_users').select('wardNumber').get();
                 if (!snap.empty) {
                     const wardSet = new Set();
                     // Collect default wards
@@ -628,7 +642,7 @@
                     }
                 }
             } catch(e) {
-                console.warn('Dynamic ward load failed, using defaults:', e);
+                // Fallback silently — default wards already in HTML
             } finally {
                 hint.style.display = 'none';
             }
@@ -651,6 +665,33 @@
             loadDynamicWards();
         });
 
+        // ===== Security: SHA-256 Hash Utility =====
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // ===== Security: Rate Limiting =====
+        const loginAttempts = { count: 0, lockedUntil: 0 };
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_SECONDS = 30;
+
+        function isRateLimited() {
+            if (loginAttempts.lockedUntil > Date.now()) {
+                const remaining = Math.ceil((loginAttempts.lockedUntil - Date.now()) / 1000);
+                return remaining;
+            }
+            if (loginAttempts.count >= MAX_ATTEMPTS) {
+                loginAttempts.lockedUntil = Date.now() + (LOCKOUT_SECONDS * 1000);
+                loginAttempts.count = 0;
+                return LOCKOUT_SECONDS;
+            }
+            return 0;
+        }
+
         async function doLogin() {
             const username = document.getElementById('inUsername').value.trim();
             const password = document.getElementById('inPassword').value.trim();
@@ -666,6 +707,16 @@
             passwordInput.classList.remove('error');
             document.getElementById('usernameError').classList.remove('show');
             document.getElementById('passwordError').classList.remove('show');
+
+            // Rate limiting check
+            const lockSeconds = isRateLimited();
+            if (lockSeconds > 0) {
+                document.getElementById('errorText').textContent = `धेरै पटक गलत प्रयास! ${lockSeconds} सेकेन्ड पछि पुन: प्रयास गर्नुहोस्।`;
+                errorMsg.classList.add('show');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
+                return;
+            }
 
             let hasError = false;
             if (!username) {
@@ -690,57 +741,47 @@
 
             const selectedWard = document.getElementById('inWard').value;
             const cleanUser = username.trim().toLowerCase();
-            
-            // Universal backend authentication
-            const masterEmail = 'adhikarishrital@gmail.com';
-            const masterPass = 'admin123';
 
             try {
+                // Use anonymous auth — no credentials visible in Network tab
                 const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
                 await firebase.auth().setPersistence(persistence);
+                await firebase.auth().signInAnonymously();
 
-                // Sign in to Firebase Auth in the background
-                await firebase.auth().signInWithEmailAndPassword(masterEmail, masterPass);
-
+                const db = firebase.firestore();
                 let isAdmin = false;
                 let finalWard = selectedWard;
                 let isValidUser = false;
 
-                // 1. Check if it's the master Admin Login
-                if (cleanUser === masterEmail && password === masterPass) {
-                    isAdmin = true;
-                    isValidUser = true;
-                } else {
-                    // 2. Query Firestore for Dynamic Ward Accounts
-                    const db = firebase.firestore();
-                    const wardQuery = await db.collection('ward_users')
-                        .where('username', '==', username)
-                        .where('password', '==', password)
-                        .limit(1)
-                        .get();
-                    
-                    if (!wardQuery.empty) {
-                        const wardDoc = wardQuery.docs[0].data();
-                        finalWard = String(wardDoc.wardNumber);
+                // Hash the entered password for secure comparison
+                const passwordHash = await hashPassword(password);
+
+                // Query Firestore by username only (never send password in query)
+                const wardQuery = await db.collection('ward_users')
+                    .where('username', '==', cleanUser)
+                    .limit(1)
+                    .get();
+
+                if (!wardQuery.empty) {
+                    const wardDoc = wardQuery.docs[0].data();
+                    // Compare hashed password (supports both hashed and legacy plaintext)
+                    const storedPass = wardDoc.passwordHash || wardDoc.password || '';
+                    if (storedPass === passwordHash || storedPass === password) {
+                        finalWard = String(wardDoc.wardNumber || selectedWard);
+                        isAdmin = wardDoc.isAdmin === true;
                         isValidUser = true;
-                    } else {
-                        // 3. Fallback to Legacy Hardcoded Wards
-                        if ((cleanUser === 'wada1' || cleanUser === 'ward1') && (password === 'wada1' || password === 'ward1' || password === 'admin' || password === 'admin123')) {
-                            finalWard = '1';
-                            isValidUser = true;
-                        } else if ((cleanUser === 'wada3' || cleanUser === 'ward3') && (password === 'wada3' || password === 'ward3' || password === 'admin' || password === 'admin123')) {
-                            finalWard = '3';
-                            isValidUser = true;
-                        } else if (cleanUser === 'admin' && (password === 'admin' || password === 'admin123')) {
-                            isValidUser = true;
-                        }
                     }
                 }
 
                 if (!isValidUser) {
                     await firebase.auth().signOut();
-                    throw new Error('invalid-custom-credential');
+                    loginAttempts.count++;
+                    throw new Error('invalid-credential');
                 }
+
+                // Reset rate limiter on success
+                loginAttempts.count = 0;
+                loginAttempts.lockedUntil = 0;
 
                 // Save ward, username, and session info locally
                 localStorage.setItem('sifarish_ward', finalWard);
@@ -750,7 +791,7 @@
                 btn.querySelector('.btn-text').textContent = '✅ प्रवेश हुँदैछ...';
                 btn.style.background = 'linear-gradient(135deg, #276749, #38a169)';
 
-                let dest = localStorage.getItem('sifarish_redirect') || 'index.html';
+                let dest = getSafeRedirect(localStorage.getItem('sifarish_redirect') || 'index.html');
                 if (dest.includes('admin.html') && !isAdmin) {
                     dest = 'index.html';
                 }
@@ -760,15 +801,17 @@
                 }, 400);
 
             } catch (error) {
-                console.error('Login Error:', error.message || error);
                 if (firebase.auth().currentUser) {
                     firebase.auth().signOut().catch(()=>{});
                 }
                 btn.disabled = false;
                 btn.classList.remove('loading');
                 btn.querySelector('.btn-text').textContent = 'लग-इन';
+                btn.style.background = '';
 
-                document.getElementById('errorText').textContent = 'आईडी वा पासवर्ड गलत छ !';
+                if (!document.getElementById('errorText').textContent.includes('सेकेन्ड')) {
+                    document.getElementById('errorText').textContent = 'आईडी वा पासवर्ड गलत छ !';
+                }
                 errorMsg.classList.add('show');
                 card.classList.add('shake');
                 setTimeout(() => card.classList.remove('shake'), 400);

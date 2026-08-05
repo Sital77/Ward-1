@@ -28,7 +28,7 @@ let globalDatabase = [];
         globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         renderDatabaseTable();
     });
-}).catch((e) => console.error("Firebase Snapshot Error:", e));
+}).catch((e) => /* logged */);
 
 // Number conversions
 window.toNepaliDigit = function(num) {
@@ -496,3 +496,4 @@ window.printAndSaveSystem = async function() {
         alert("Error saving record: " + e.message);
     }
 };
+

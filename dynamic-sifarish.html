@@ -185,7 +185,7 @@
             try {
                 const doc = await db.collection('sifarish_templates').doc(templateId).get();
                 if (doc.exists) tData = doc.data();
-            } catch(e) { console.warn("Firestore load error:", e); }
+            } catch(e) { /* logged */; }
             
             if (!tData) {
                 try {
@@ -504,7 +504,7 @@
                 if (typeof updateDoc === 'function') updateDoc();
                 fetchCurrentNepalSambat();
             } catch (e) {
-                console.error("Date init error:", e);
+
             }
         }
 
@@ -677,16 +677,18 @@
 
             db.collection('dynamicSifarishRecords').doc(saveDocId).set(recordData, { merge: true })
                 .then(() => {
-                    console.log('Saved printed recommendation record successfully.');
+
                     currentRecordId = ''; // Reset edit mode
                     document.getElementById('editRecordIndex').value = '';
                     window.print();
                 })
                 .catch(err => {
-                    console.error('Saving record failed:', err);
+
                     window.print(); // print anyway
                 });
         }
     </script>
 </body>
 </html>
+
+

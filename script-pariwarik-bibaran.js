@@ -314,7 +314,7 @@ window.printAndSaveSystem = async function () {
         }
         window.print();
     } catch (e) {
-        console.error(e);
+
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
     } finally {
         if (btn) {
@@ -421,7 +421,7 @@ window.deleteFromDB = async function (id) {
         try {
             await db.collection("pariwarikRecords").doc(id).delete();
         } catch (e) {
-            console.error(e);
+
             alert("डिलिट गर्न समस्या भयो ।");
         }
     }
@@ -459,7 +459,7 @@ function initializeFiscalYear(bsYear, bsMonth) {
             fySelect.value = currFY;
         }
     } catch (error) {
-        console.error("Error initializing fiscal year:", error);
+
     }
 }
 
@@ -549,7 +549,7 @@ function initializeAutomaticDate() {
             window.fetchCurrentNepalSambat();
         }
     } catch (error) {
-        console.error("Error initializing automatic date:", error);
+
     }
 }
 
@@ -589,3 +589,4 @@ window.onload = function () {
 window.addEventListener('templateInjected', function() {
     initializeAutomaticDate();
 });
+

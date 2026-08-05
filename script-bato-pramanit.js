@@ -337,7 +337,7 @@ window.printAndSaveSystem = async function () {
         }
         window.print();
     } catch (e) {
-        console.error(e);
+
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
     } finally {
         if (btn) {
@@ -460,7 +460,7 @@ window.deleteFromDB = async function (id) {
             await db.collection("batoPramanitRecords").doc(id).delete();
             // डिलिट हुने बित्तिकै onSnapshot ले आफैं टेबल अपडेट गरिदिन्छ !
         } catch (e) {
-            console.error(e);
+
             alert("डिलिट गर्न समस्या भयो ।");
         }
     }
@@ -498,7 +498,7 @@ function initializeFiscalYear(bsYear, bsMonth) {
             fySelect.value = currFY;
         }
     } catch (error) {
-        console.error("Error initializing fiscal year:", error);
+
     }
 }
 
@@ -588,7 +588,7 @@ function initializeAutomaticDate() {
             window.fetchCurrentNepalSambat();
         }
     } catch (error) {
-        console.error("Error initializing automatic date:", error);
+
     }
 }
 

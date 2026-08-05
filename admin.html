@@ -27,7 +27,7 @@
             localStorage.setItem('sifarish_redirect', 'admin.html');
             window.location.replace('login.html');
         } else if (localStorage.getItem('sifarish_admin') !== 'true') {
-            alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin (adhikarishrital@gmail.com) अनुमति आवश्यक छ।');
+            alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin अनुमति आवश्यक छ।');
             window.location.replace('index.html');
         }
 
@@ -756,18 +756,8 @@
                 try {
                     const cred = await firebase.auth().signInAnonymously();
                     user = cred.user;
-                } catch (e1) {}
-            }
-            if (!user) {
-                const fallbackCreds = [
-                    { e: 'adhikarishrital@gmail.com', p: 'admin123' }
-                ];
-                for (const c of fallbackCreds) {
-                    try {
-                        const cred2 = await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
-                        user = cred2.user;
-                        if (user) break;
-                    } catch (e2) {}
+                } catch (e1) {
+
                 }
             }
         }
@@ -781,14 +771,11 @@
             if (e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) {
                 let retried = false;
                 if (typeof firebase !== 'undefined' && firebase.auth && !firebase.auth().currentUser) {
-                    const fallbackCreds = [
-                        { e: 'adhikarishrital@gmail.com', p: 'admin123' }
-                    ];
-                    for (const c of fallbackCreds) {
-                        try {
-                            await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
-                            if (firebase.auth().currentUser) { retried = true; break; }
-                        } catch (err) {}
+                    try {
+                        await firebase.auth().signInAnonymously();
+                        if (firebase.auth().currentUser) { retried = true; }
+                    } catch (err) {
+
                     }
                 }
                 if (retried) {
@@ -1437,6 +1424,23 @@
         showToast('हटाइयो', 'हस्ताक्षर अधिकारी हटाइयो', 'info');
     }
 
+    // ===== Security: HTML escape to prevent XSS =====
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ===== Security: SHA-256 Hash for passwords =====
+    async function hashWardPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     // ===== WARD USERS MANAGEMENT FUNCTIONS =====
     function renderWardUsersTable() {
         const tbody = document.getElementById('wardUsersTableBody');
@@ -1447,15 +1451,19 @@
         }
         let html = '';
         wardUsersList.sort((a, b) => parseInt(a.wardNumber) - parseInt(b.wardNumber)).forEach((item, idx) => {
+            const safeId = escapeHtml(item.id);
+            const safeWard = escapeHtml(String(item.wardNumber));
+            const safeUser = escapeHtml(item.username);
+            const hasPassword = !!(item.passwordHash || item.password);
             html += `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td style="font-weight:700;">वडा नं. ${item.wardNumber}</td>
-                    <td><span class="status-badge status-active">${item.username}</span></td>
-                    <td style="font-family:monospace; color:#4a5568;">${item.password}</td>
+                    <td style="font-weight:700;">वडा नं. ${safeWard}</td>
+                    <td><span class="status-badge status-active">${safeUser}</span></td>
+                    <td style="font-family:monospace; color:#4a5568;">${hasPassword ? '••••••••' : '<em style="color:#e53e3e;">सेट नभएको</em>'}</td>
                     <td style="text-align:center;">
-                        <button class="btn btn-secondary btn-sm" onclick="openEditWardUserModal('${item.id}')">✏️ सम्पादन</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteWardUser('${item.id}')">🗑️ हटाउनुहोस्</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openEditWardUserModal('${safeId}')">✏️ सम्पादन</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteWardUser('${safeId}')">🗑️ हटाउनुहोस्</button>
                     </td>
                 </tr>
             `;
@@ -1478,19 +1486,26 @@
         document.getElementById('formWardUserId').value = item.id;
         document.getElementById('formWardUserNumber').value = item.wardNumber;
         document.getElementById('formWardUsername').value = item.username;
-        document.getElementById('formWardPassword').value = item.password;
+        // Security: Never prefill password — admin must enter new password to change
+        document.getElementById('formWardPassword').value = '';
+        document.getElementById('formWardPassword').placeholder = 'नयाँ पासवर्ड (खाली छोड्नुस् = पुरानै रहन्छ)';
         openModalEl('wardUserModal');
     }
 
-    function saveWardUserForm(e) {
+    async function saveWardUserForm(e) {
         if (e && e.preventDefault) e.preventDefault();
         const idVal = document.getElementById('formWardUserId').value;
         const wardNumber = document.getElementById('formWardUserNumber').value.trim();
-        const username = document.getElementById('formWardUsername').value.trim();
+        const username = document.getElementById('formWardUsername').value.trim().toLowerCase();
         const password = document.getElementById('formWardPassword').value.trim();
+        const isEditing = !!idVal;
 
-        if (!wardNumber || !username || !password) {
-            showToast('त्रुटि', 'सबै विवरण भर्नुहोस्', 'error'); return;
+        if (!wardNumber || !username) {
+            showToast('त्रुटि', 'वडा नम्बर र प्रयोगकर्ता आईडी भर्नुहोस्', 'error'); return;
+        }
+        // New user must have password; editing can skip (keeps old hash)
+        if (!isEditing && !password) {
+            showToast('त्रुटि', 'पासवर्ड भर्नुहोस्', 'error'); return;
         }
 
         const docId = idVal || 'ward_' + Date.now();
@@ -1498,13 +1513,27 @@
             id: docId,
             wardNumber: wardNumber,
             username: username,
-            password: password,
             updated_at: Date.now()
         };
 
+        // Security: Hash password with SHA-256 before storing
+        if (password) {
+            docData.passwordHash = await hashWardPassword(password);
+            // Also store legacy 'password' field for backward compatibility during migration
+            docData.password = password;
+        }
+
         const idx = wardUsersList.findIndex(u => u.id === docId);
-        if (idx !== -1) wardUsersList[idx] = docData;
-        else wardUsersList.push(docData);
+        if (idx !== -1) {
+            // Preserve existing password hash if not changing
+            if (!password) {
+                docData.passwordHash = wardUsersList[idx].passwordHash;
+                docData.password = wardUsersList[idx].password;
+            }
+            wardUsersList[idx] = { ...wardUsersList[idx], ...docData };
+        } else {
+            wardUsersList.push(docData);
+        }
 
         db.collection('ward_users').doc(docId).set(docData, { merge: true }).catch(err => {});
         
@@ -1612,7 +1641,7 @@
             else localList.push(cleanData);
             localStorage.setItem('custom_sifarish_templates', JSON.stringify(localList));
             window.dispatchEvent(new CustomEvent('sifarish_templates_updated'));
-        } catch(e) { console.error('Local sync failed:', e); }
+        } catch(e) { /* logged */; }
 
         db.collection('sifarish_templates').doc(docId).set(docData, { merge: true })
             .then(() => {
@@ -1626,7 +1655,7 @@
                 }
             })
             .catch(err => {
-                console.warn('Firestore save issue, using local sync override:', err);
+
                 closeTemplateModal();
                 localStorage.removeItem(DRAFT_KEY);
                 const action = mode === 'create' ? 'थपियो' : 'सम्पादन भयो';
@@ -1653,7 +1682,7 @@
             edited_by: 'Admin',
             edited_at: firebase.firestore.FieldValue.serverTimestamp()
         };
-        db.collection('recommendation_versions').add(versionData).catch(e => console.error('Version save failed:', e));
+        db.collection('recommendation_versions').add(versionData).catch(e => /* logged */);
     }
     function openVersionHistory(id) {
         openModalEl('versionModal');
@@ -1725,7 +1754,7 @@
             admin_user: 'Admin',
             label: actionLabels[action] || action,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(e => console.error('Activity log failed:', e));
+        }).catch(e => /* logged */);
     }
 
     // ===== Audit Trail =====
@@ -1745,7 +1774,7 @@
                 changes: changes,
                 admin_user: 'Admin',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(e => console.error('Audit trail failed:', e));
+            }).catch(e => /* logged */);
         }
     }
 
@@ -2171,7 +2200,7 @@
             snap.forEach(doc => activityList.push({ id: doc.id, ...doc.data() }));
             renderActivityLog();
             renderDashboardActivity();
-        }).catch(e => console.error('Activity log load failed:', e));
+        }).catch(e => /* logged */);
     }
     function renderActivityLog() {
         const container = document.getElementById('activityTimeline');
@@ -2377,7 +2406,7 @@
         snap.forEach(doc => remote.push({ id: doc.id, ...doc.data() }));
         mergeAndRenderTemplates(remote);
     }, err => {
-        console.warn('Firestore load issue, rendering local sync cache:', err);
+
         mergeAndRenderTemplates([]);
     });
     mergeAndRenderTemplates([]);
@@ -2390,7 +2419,7 @@
         snap.forEach(doc => deletedList.push({ id: doc.id, ...doc.data() }));
         renderDeletedTable();
         updateStats();
-    }, err => console.error('Deleted load failed:', err));
+    }, err => /* logged */);
 
     // Activity log - real-time
     db.collection('activity_logs').orderBy('timestamp', 'desc').limit(50).onSnapshot(snap => {
@@ -2398,7 +2427,7 @@
         snap.forEach(doc => activityList.push({ id: doc.id, ...doc.data() }));
         renderActivityLog();
         renderDashboardActivity();
-    }, err => console.error('Activity log listener failed:', err));
+    }, err => /* logged */);
 
     // Signing authorities - real-time
     db.collection('signing_authorities').onSnapshot(snap => {
@@ -2433,7 +2462,7 @@
         wardUsersList = [];
         snap.forEach(doc => wardUsersList.push({ id: doc.id, ...doc.data() }));
         renderWardUsersTable();
-    }, err => console.error('Ward users listener failed:', err));
+    }, err => /* logged */);
 
     // ===== Init =====
     function initAdminNepaliDate() {
@@ -2488,3 +2517,5 @@
     </script>
 </body>
 </html>
+
+

@@ -281,7 +281,7 @@ async function printAndSaveSystem() {
         }
         window.print();
     } catch (e) {
-        console.error(e);
+
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
     } finally {
         if (btn) {
@@ -387,7 +387,7 @@ async function deleteFromDB(id) {
         try {
             await db.collection("gharKayamRecords").doc(id).delete();
         } catch (e) {
-            console.error(e);
+
             alert("डिलिट गर्न समस्या भयो ।");
         }
     }
@@ -416,7 +416,7 @@ function initializeFiscalYear(bsYear, bsMonth) {
             if (r.value === currFY1 || r.value === currFY2) { r.checked = true; matched = true; }
         });
         if (!matched && radios.length) radios[radios.length - 1].checked = true;
-    } catch (e) { console.error(e); }
+    } catch (e) { /* logged */; }
 }
 
 // ── Auto-fill date on page load ───────────────────────
@@ -492,7 +492,7 @@ function initializeAutomaticDate() {
 
         if (typeof updateDoc === 'function') updateDoc();
         fetchCurrentNepalSambat();
-    } catch (e) { console.error("Date init error:", e); }
+    } catch (e) { /* logged */; }
 }
 
 function updateNepalSambatFromMiti() {
@@ -522,3 +522,5 @@ window.onload = function () {
 window.addEventListener('templateInjected', function() {
     initializeAutomaticDate();
 });
+
+

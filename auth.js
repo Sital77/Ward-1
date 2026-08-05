@@ -137,6 +137,15 @@ function sanitizeHTML(html) {
 (function () {
     'use strict';
 
+    // Security: Validate redirect URL to prevent open redirect attacks
+    function getSafeRedirectUrl(url) {
+        if (!url || typeof url !== 'string') return 'login.html';
+        if (url.includes('://') || url.startsWith('//') || url.startsWith('data:') || url.startsWith('javascript:')) {
+            return 'login.html';
+        }
+        return url;
+    }
+
     // Check for valid session (new system)
     const hasValidSession = isSessionValid();
     const hasOldAuth = localStorage.getItem('sifarish_auth') === 'true';
@@ -160,7 +169,7 @@ function sanitizeHTML(html) {
         createSession(isAdmin, false);
     }
 
-    // Sync with Firebase Auth when loaded
+    // Sync with Firebase Auth when loaded + secondary auth verification
     window.addEventListener('DOMContentLoaded', function () {
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().onAuthStateChanged(function (user) {
@@ -170,20 +179,17 @@ function sanitizeHTML(html) {
                         createSession(isAdmin, true);
                     }
                 } else if (localStorage.getItem('sifarish_auth') === 'true' || isSessionValid()) {
-                    // Auto-authenticate in background so Firestore security rules (request.auth != null) are always satisfied
+                    // No Firebase user but local session exists — try anonymous auth
                     try {
-                        firebase.auth().signInAnonymously().catch(async function() {
-                            const fallbackCreds = [
-                                { e: 'adhikarishrital@gmail.com', p: 'admin123' }
-                            ];
-                            for (const c of fallbackCreds) {
+                        firebase.auth().signInAnonymously().catch(function(err) {
+                            // If anonymous auth fails, verify session is still legitimate
+                            // Give a grace period, then force re-login if still no Firebase user
+                            setTimeout(function() {
                                 if (!firebase.auth().currentUser) {
-                                    try {
-                                        await firebase.auth().signInWithEmailAndPassword(c.e, c.p);
-                                        if (firebase.auth().currentUser) break;
-                                    } catch(err) {}
+                                    clearSession();
+                                    window.location.replace('login.html');
                                 }
-                            }
+                            }, 5000);
                         });
                     } catch(e) {}
                 }

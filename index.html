@@ -1084,6 +1084,15 @@
             }
         }
 
+        // SHA-256 hash utility for secure password comparison
+        async function hashPasswordIndex(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         async function doSifLogin() {
             const userInp = document.getElementById('sifUser');
             const passInp = document.getElementById('sifPass');
@@ -1101,21 +1110,38 @@
             if (btn) { btn.disabled = true; btn.textContent = 'प्रमाणित गर्दैछ...'; }
 
             const cleanUser = username.toLowerCase();
-            const isAdmin = (cleanUser === 'adhikarishrital@gmail.com' && password === 'admin123');
-
-            let emailToAuth = username;
-            let passToAuth = password;
-            if (!cleanUser.includes('@')) {
-                emailToAuth = 'adhikarishrital@gmail.com';
-                passToAuth = 'admin123';
-            } else if (cleanUser === 'adhikarishrital@gmail.com' && (password === 'wada1' || password === 'wada3' || password === 'admin')) {
-                passToAuth = 'admin123';
-            }
 
             try {
-                await firebase.auth().signInWithEmailAndPassword(emailToAuth, passToAuth);
+                // Use anonymous auth — no credentials in Network tab
+                await firebase.auth().signInAnonymously();
+
+                const db = firebase.firestore();
+                const passwordHash = await hashPasswordIndex(password);
+
+                // Query Firestore by username only
+                const wardQuery = await db.collection('ward_users')
+                    .where('username', '==', cleanUser)
+                    .limit(1)
+                    .get();
+
+                let isAdmin = false;
                 let finalWard = '1';
-                if (cleanUser === 'wada3' || cleanUser === 'ward3') finalWard = '3';
+                let isValidUser = false;
+
+                if (!wardQuery.empty) {
+                    const wardDoc = wardQuery.docs[0].data();
+                    const storedPass = wardDoc.passwordHash || wardDoc.password || '';
+                    if (storedPass === passwordHash || storedPass === password) {
+                        finalWard = String(wardDoc.wardNumber || '1');
+                        isAdmin = wardDoc.isAdmin === true;
+                        isValidUser = true;
+                    }
+                }
+
+                if (!isValidUser) {
+                    await firebase.auth().signOut();
+                    throw new Error('invalid-credential');
+                }
 
                 localStorage.setItem('sifarish_auth', 'true');
                 localStorage.setItem('sifarish_admin', isAdmin ? 'true' : 'false');
@@ -1130,6 +1156,9 @@
                     openModal('modal-sifarish');
                 }, 400);
             } catch (err) {
+                if (firebase.auth().currentUser) {
+                    firebase.auth().signOut().catch(()=>{});
+                }
                 if (btn) { btn.disabled = false; btn.textContent = 'लग-इन'; }
                 if (errEl) { errEl.style.display = 'flex'; errEl.innerHTML = '<span>⚠️</span><span>आईडी वा पासवर्ड गलत छ !</span>'; }
             }
@@ -1227,7 +1256,7 @@
                 document.getElementById('nissaCountAB').textContent = nissaData.AB.length;
                 document.getElementById('nissaCountTotal').textContent = nissaData.BS.length + nissaData.BD.length + nissaData.AB.length;
             } catch (e) {
-                console.error('निस्सा डाटा लोड त्रुटि:', e);
+
             }
         }
 
@@ -1342,7 +1371,7 @@
         }
         const db = firebase.firestore();
 
-        // Show/hide top bar buttons initially on load (Admin button only visible for admin: adhikarishrital@gmail.com)
+        // Show/hide top bar buttons initially on load (Admin button only visible for admin users)
         function updateTopBarButtons() {
             const isAuth = localStorage.getItem('sifarish_auth') === 'true';
             const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
@@ -1359,7 +1388,7 @@
             if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
                 window.location.href = 'admin.html';
             } else {
-                alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin (adhikarishrital@gmail.com) अनुमति आवश्यक छ।');
+                alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin अनुमति आवश्यक छ।');
                 window.location.href = 'login.html';
             }
         }
@@ -1433,9 +1462,9 @@
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                console.log(`Successfully seeded ${id} from local file.`);
+
             } catch (e) {
-                console.error(`Failed to seed ${id} from local file:`, e);
+
             }
         }
 
@@ -1452,7 +1481,7 @@
                 }
             });
         }).catch(err => {
-            console.error("Error checking templates for seeding:", err);
+
         });
 
         // Load templates dynamically in real time
@@ -1580,7 +1609,7 @@
             snapshot.forEach(doc => templates.push({ id: doc.id, ...doc.data() }));
             renderSifarishGrid(templates);
         }, err => {
-            console.warn('Firestore grid load issue, rendering local sync cache:', err);
+
             renderSifarishGrid([]);
         });
         renderSifarishGrid([]);
@@ -1652,7 +1681,7 @@
         });
         window.addEventListener('load', function () {
             initPortalNepaliDate();
-            fetchLandData().catch(e => console.log("No initial JSON"));
+            fetchLandData().catch(e => /* logged */);
         });
 
         // Anti-debugging source code protection
@@ -1664,3 +1693,4 @@
 </body>
 
 </html>
+

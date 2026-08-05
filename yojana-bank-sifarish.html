@@ -834,7 +834,7 @@
             try {
                 await db.collection("yojanaBankRecords").add(record);
             } catch (e) {
-                console.error("Save error:", e);
+
             }
         }
 
@@ -852,7 +852,7 @@
                 });
                 renderDatabaseTable();
             } catch (e) {
-                console.error("Error fetching", e);
+
             }
         }
 
@@ -947,3 +947,4 @@
     </script>
 </body>
 </html>
+
