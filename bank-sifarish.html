@@ -857,7 +857,7 @@
             updateDoc();
         }
 
-        // ── Regex Parsing Logic ──────────────────────────────
+        // ── Enhanced Auto-Extract Parsing Logic ──────────────────────────────
         function processPastedContent() {
             const pastedText = document.getElementById('pasteTextarea').value;
             if (!pastedText.trim()) {
@@ -868,67 +868,139 @@
             const mode = (document.getElementById('currentMode') || {}).value || 'OPEN_ACCOUNT';
             const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
 
-            const nameRegex = /(?:देवनागरीमा|नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|Name)\s*(?:[:\-\t]+)\s*([^\r\n\t]+)/i;
-            const cardNoRegex = /(?:परिचयपत्र|परिचय\s*पत्र|भत्ता\s*कार्ड|कार्ड)\s*(?:नम्बर|नं\.?|No\.?)\s*(?:[:\-\t]+)\s*([^\r\n\t]+)/i;
-            const targetGroupRegex = /(?:लक्षित\s*समूह|लक्षित\s*वर्ग|समूह|Target\s*Group)\s*(?:[:\-\t]+)\s*([^\r\n\t]+)/i;
-            const citizenRegex = /(?:नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर|नागरिकता\s*नं\.?|जन्मदर्ता\s*नम्बर|जन्म\s*दर्ता\s*नम्बर|जन्म\s*दर्ता\s*नं\.?|नागरीकता\s*नम्बर|जन्मदर्ता\s*नं\.?|Citizenship\/Birth\s*Reg\.?\s*No\.?)\s*(?:[:\-\t]+)\s*([^\r\n\t,]+)(?:,\s*([^\r\n\t]+))?/i;
-            const nidRegex = /(?:राष्ट्रिय\s*परिचय\s*नम्बर|राष्ट्रिय\s*परिचयपत्र\s*नम्बर|राष्ट्रिय\s*परिचय\s*पत्र\s*नम्बर|राष्ट्रिय\s*परिचय\s*पत्र\s*नं\.?|राष्ट्रिय\s*परिचय\s*नं\.?|NID)(?:\s*लिएको\s*भए\s*सो\s*नम्बर)?\s*(?:[:\-\t]+)\s*([^\r\n\t]+)/i;
-            const accountNoRegex = /(?:खाता\s*नं\.?|Account\s*No\.?|Bank\s*Account\s*No\.?|खाता\s*नम्बर)\s*(?:[:\-\t]+)\s*([^\r\n\t]+)/i;
-            const bankRegex = /(?:भत्ता\s*वितरण\s*गर्ने\s*बैंकको\s*नाम|बैंकको\s*नाम|Bank\s*Name)\s*(?:[:\-\t]+)\s*([^\r\n\t]+)/i;
+            let parsedData = {
+                name: '',
+                citNo: '',
+                citDistrict: '',
+                nid: '',
+                cardNo: '',
+                accountNo: '',
+                targetGroup: '',
+                bankKey: ''
+            };
 
-            const nameMatch = pastedText.match(nameRegex);
-            const cardNoMatch = pastedText.match(cardNoRegex);
-            const targetGroupMatch = pastedText.match(targetGroupRegex);
-            const citizenMatch = pastedText.match(citizenRegex);
-            const nidMatch = pastedText.match(nidRegex);
-            const accountNoMatch = pastedText.match(accountNoRegex);
-            const bankMatch = pastedText.match(bankRegex);
+            // 1. Tab/Colon-separated Line-by-Line Parsing (Social Security MIS portal format)
+            const lines = pastedText.split(/\r?\n/);
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+
+                let parts = [];
+                if (trimmed.includes('\t')) {
+                    parts = trimmed.split('\t').map(p => p.trim()).filter(Boolean);
+                } else if (trimmed.includes(':')) {
+                    const idx = trimmed.indexOf(':');
+                    parts = [trimmed.substring(0, idx).trim(), trimmed.substring(idx + 1).trim()];
+                }
+
+                if (parts.length >= 2) {
+                    const k = parts[0];
+                    const v = parts[1];
+
+                    // Name matching (avoids बाबुको नाम, आमाको नाम, हजुरबुबाको नाम, बैंकको नाम, आदि)
+                    if (/^(?:नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|देवनागरीमा|Name)$/i.test(k)) {
+                        if (v && !parsedData.name) parsedData.name = v;
+                    }
+                    // Citizenship No
+                    else if (/^(?:नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)$/i.test(k)) {
+                        if (v && v !== '०' && v !== '0' && !parsedData.citNo) parsedData.citNo = v;
+                    }
+                    // National ID
+                    else if (/^(?:राष्ट्रिय\s*परिचय\s*नं\.?|राष्ट्रिय\s*परिचय\s*नम्बर|राष्ट्रिय\s*परिचयपत्र\s*नम्बर|NID)$/i.test(k)) {
+                        if (v && !parsedData.nid) parsedData.nid = v;
+                    }
+                    // Card No / Allowance Card No
+                    else if (/^(?:परिचयपत्र\s*नं\.?|परिचयपत्र\s*नम्बर|भत्ता\s*कार्ड\s*नं\.?|भत्ता\s*कार्ड\s*नम्बर|कार्ड\s*नम्बर)$/i.test(k)) {
+                        if (v && !parsedData.cardNo) parsedData.cardNo = v;
+                    }
+                    // Account No
+                    else if (/^(?:खाता\s*नं\.?|खाता\s*नम्बर|Account\s*No\.?|Bank\s*Account\s*No\.?)$/i.test(k)) {
+                        if (v && v !== 'NotStarted' && !parsedData.accountNo) parsedData.accountNo = v;
+                    }
+                    // Target Group / Allowance Type
+                    else if (/^(?:सामाजिक\s*सुरक्षा\s*भत्ताको\s*किसिम|भत्ताको\s*किसिम|लक्षित\s*समूह|लक्षित\s*वर्ग|Target\s*Group)$/i.test(k)) {
+                        if (v && !parsedData.targetGroup) parsedData.targetGroup = v;
+                    }
+                    // Bank Name
+                    else if (/^(?:भत्ता\s*वितरण\s*गर्ने\s*बैंकको\s*नाम|बैंकको\s*नाम|Bank\s*Name)$/i.test(k)) {
+                        if (v && !parsedData.bankKey) {
+                            if (v.includes('कृषि')) parsedData.bankKey = 'krishi';
+                            else if (v.includes('एन.आई.सी.') || v.includes('nic') || v.includes('NIC')) parsedData.bankKey = 'nic';
+                            else if (v.includes('प्राईम') || v.includes('prime') || v.includes('Prime')) parsedData.bankKey = 'prime';
+                            else if (v.includes('सिद्धार्थ') || v.includes('siddhartha') || v.includes('Siddhartha')) parsedData.bankKey = 'siddhartha';
+                        }
+                    }
+                }
+            });
+
+            // 2. Multiline / Regex fallback for unstructured text
+            if (!parsedData.name) {
+                const m = pastedText.match(/(?:^|[\r\n])\s*(?:देवनागरीमा|लाभग्राहीको\s*नाम|नाम,\s*थर|(?:(?<!बाबुको\s*|आमाको\s*|हजुरबुबाको\s*|बैंकको\s*|खातावालाको\s*|व्यक्तिगत\s*|व्यक्तिको\s*)नाम))\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m) parsedData.name = m[1].trim();
+            }
+            if (!parsedData.citNo) {
+                const m = pastedText.match(/(?:नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)\s*[\t:]+\s*([^\r\n\t,]+)(?:,\s*([^\r\n\t]+))?/i);
+                if (m && m[1].trim() !== '०' && m[1].trim() !== '0') {
+                    parsedData.citNo = m[1].trim();
+                    if (m[2]) parsedData.citDistrict = m[2].trim();
+                }
+            }
+            if (!parsedData.nid) {
+                const m = pastedText.match(/(?:राष्ट्रिय\s*परिचय\s*नं\.?|राष्ट्रिय\s*परिचय\s*नम्बर|राष्ट्रिय\s*परिचयपत्र\s*नम्बर|NID)(?:\s*लिएको\s*भए\s*सो\s*नम्बर)?\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m) parsedData.nid = m[1].trim();
+            }
+            if (!parsedData.cardNo) {
+                const m = pastedText.match(/(?:(?<!अपांगता\s*|राष्ट्रिय\s*)परिचयपत्र\s*नं\.?|भत्ता\s*कार्ड\s*नं\.?|कार्ड\s*नम्बर)\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m) parsedData.cardNo = m[1].trim();
+            }
+            if (!parsedData.accountNo) {
+                const m = pastedText.match(/(?:खाता\s*नं\.?|खाता\s*नम्बर|Account\s*No\.?)\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m && m[1].trim() !== 'NotStarted') parsedData.accountNo = m[1].trim();
+            }
+            if (!parsedData.targetGroup) {
+                const m = pastedText.match(/(?:सामाजिक\s*सुरक्षा\s*भत्ताको\s*किसिम|भत्ताको\s*किसिम|लक्षित\s*समूह|लक्षित\s*वर्ग|Target\s*Group)\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m) parsedData.targetGroup = m[1].trim();
+            }
+            if (!parsedData.bankKey) {
+                const m = pastedText.match(/(?:भत्ता\s*वितरण\s*गर्ने\s*बैंकको\s*नाम|बैंकको\s*नाम|Bank\s*Name)\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m) {
+                    const bStr = m[1].trim();
+                    if (bStr.includes('कृषि')) parsedData.bankKey = 'krishi';
+                    else if (bStr.includes('एन.आई.सी.') || bStr.includes('nic') || bStr.includes('NIC')) parsedData.bankKey = 'nic';
+                    else if (bStr.includes('प्राईम') || bStr.includes('prime') || bStr.includes('Prime')) parsedData.bankKey = 'prime';
+                    else if (bStr.includes('सिद्धार्थ') || bStr.includes('siddhartha') || bStr.includes('Siddhartha')) parsedData.bankKey = 'siddhartha';
+                }
+            }
 
             let extractCount = 0;
 
             if (isDeceased) {
-                // Populate deceased fields
-                if (nameMatch) {
-                    document.getElementById('inDeceasedName').value = nameMatch[1].trim();
+                // Populate DECEASED mode inputs
+                if (parsedData.name) {
+                    document.getElementById('inDeceasedName').value = parsedData.name;
                     extractCount++;
                 }
-                if (citizenMatch) {
-                    document.getElementById('inDeceasedCitNo').value = citizenMatch[1].trim();
+                if (parsedData.citNo) {
+                    document.getElementById('inDeceasedCitNo').value = parsedData.citNo;
                     extractCount++;
                 }
-                if (nidMatch) {
-                    let rawNid = nidMatch[1].trim();
+                if (parsedData.nid) {
+                    let rawNid = parsedData.nid;
                     if (/^[0-9०-९\s\-]+$/.test(rawNid) && /[0-9०-९]/.test(rawNid)) {
                         document.getElementById('inDeceasedNid').value = rawNid;
                         extractCount++;
-                    } else {
-                        document.getElementById('inDeceasedNid').value = '';
                     }
                 }
-                if (accountNoMatch) {
-                    let rawAcc = accountNoMatch[1].trim();
+                if (parsedData.accountNo) {
+                    let rawAcc = parsedData.accountNo;
                     if (/^[0-9०-९\s\-]+$/.test(rawAcc) && /[0-9०-९]/.test(rawAcc)) {
                         document.getElementById('inDeceasedAccountNo').value = rawAcc;
                         extractCount++;
-                    } else {
-                        document.getElementById('inDeceasedAccountNo').value = '';
                     }
                 }
-                if (bankMatch) {
-                    let bankText = bankMatch[1].trim();
-                    if (bankText.includes('कृषि')) {
-                        selectBank('krishi');
-                        extractCount++;
-                    } else if (bankText.includes('एन.आई.सी.') || bankText.includes('nic') || bankText.includes('NIC')) {
-                        selectBank('nic');
-                        extractCount++;
-                    } else if (bankText.includes('प्राईम') || bankText.includes('prime') || bankText.includes('Prime')) {
-                        selectBank('prime');
-                        extractCount++;
-                    } else if (bankText.includes('सिद्धार्थ') || bankText.includes('siddhartha') || bankText.includes('Siddhartha')) {
-                        selectBank('siddhartha');
-                        extractCount++;
-                    }
+                if (parsedData.bankKey) {
+                    selectBank(parsedData.bankKey);
+                    extractCount++;
                 }
 
                 if (extractCount > 0) {
@@ -938,39 +1010,39 @@
                 }
 
             } else {
-                // Original behavior for OPEN_ACCOUNT
-                if (nameMatch) {
-                    document.getElementById('inName').value = nameMatch[1].trim();
+                // Populate OPEN_ACCOUNT mode inputs
+                if (parsedData.name) {
+                    document.getElementById('inName').value = parsedData.name;
                     extractCount++;
                 }
-                if (cardNoMatch) {
-                    let rawCard = cardNoMatch[1].trim();
+                if (parsedData.cardNo) {
+                    let rawCard = parsedData.cardNo;
                     if (/^[0-9०-९\s\-]+$/.test(rawCard) && /[0-9०-९]/.test(rawCard)) {
                         document.getElementById('inCardNo').value = rawCard;
                         extractCount++;
-                    } else {
-                        document.getElementById('inCardNo').value = '';
                     }
                 }
-                if (targetGroupMatch) {
-                    document.getElementById('inTargetGroup').value = targetGroupMatch[1].trim();
+                if (parsedData.targetGroup) {
+                    document.getElementById('inTargetGroup').value = parsedData.targetGroup;
                     extractCount++;
                 }
-                if (citizenMatch) {
-                    document.getElementById('inCitNo').value = citizenMatch[1].trim();
+                if (parsedData.citNo) {
+                    document.getElementById('inCitNo').value = parsedData.citNo;
                     extractCount++;
-                    if (citizenMatch[2]) {
-                        document.getElementById('inCitDistrict').value = citizenMatch[2].trim();
+                    if (parsedData.citDistrict) {
+                        document.getElementById('inCitDistrict').value = parsedData.citDistrict;
                     }
                 }
-                if (nidMatch) {
-                    let rawNid = nidMatch[1].trim();
+                if (parsedData.nid) {
+                    let rawNid = parsedData.nid;
                     if (/^[0-9०-९\s\-]+$/.test(rawNid) && /[0-9०-९]/.test(rawNid)) {
                         document.getElementById('inNid').value = rawNid;
                         extractCount++;
-                    } else {
-                        document.getElementById('inNid').value = '';
                     }
+                }
+                if (parsedData.bankKey) {
+                    selectBank(parsedData.bankKey);
+                    extractCount++;
                 }
 
                 if (extractCount > 0) {
