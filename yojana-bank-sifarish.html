@@ -209,6 +209,17 @@
             </button>
         </div>
 
+        <!-- ══ AUTO EXTRACT / PASTE SECTION ══ -->
+        <div class="section-card paste-section" id="secPasteBox" style="background: #ebf8ff; border: 1.5px dashed #3182ce; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+            <div class="section-label" style="color: #2b6cb0; font-weight: 800; display:flex; align-items:center; gap:6px;">📋 कपी-पेस्ट बक्स (Auto-Extract)</div>
+            <div class="form-group" style="margin-bottom:0;">
+                <textarea id="pasteTextarea" class="paste-textarea" style="width: 100%; height: 95px; border: 1.5px solid #90cdf4; border-radius: 8px; padding: 10px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);" 
+                    placeholder="योजना सम्झौताको पत्र / टिप्पणीको पाठ यहाँ Ctrl+V (पेस्ट) गर्नुहोस्... (बजेटको प्रकार, योजनाको नाम, रकम, समिति र पदहरू स्वतः भरिनेछन्)"
+                    oninput="processYojanaPastedContent()"></textarea>
+                <div id="parseBadge" class="badge" style="display:none; margin-top:8px; font-size:0.85rem; padding:4px 12px; border-radius:6px; font-weight:700;"></div>
+            </div>
+        </div>
+
         <!-- ══ SECTION 0: LETTERHEAD SECTION ══ -->
         <div class="section-card lh-section">
             <div class="section-label">📄 लेटर हेड विवरण</div>
@@ -644,6 +655,162 @@
         function adjustSignaturePosition(val) {
             document.getElementById('sigSpacing').style.height = val + 'px';
             document.getElementById('marginVal').innerText = val + ' px';
+        }
+
+        function toNepaliDigit(num) {
+            const digits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            return String(num).replace(/[0-9]/g, w => digits[parseInt(w)]);
+        }
+
+        function showBadge(success, message) {
+            const badge = document.getElementById('parseBadge');
+            if (badge) {
+                badge.style.display = 'inline-flex';
+                badge.style.backgroundColor = success ? '#c6f6d5' : '#fed7d7';
+                badge.style.color = success ? '#22543d' : '#9b2c2c';
+                badge.innerText = message;
+            }
+        }
+
+        function clearBadge() {
+            const badge = document.getElementById('parseBadge');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function processYojanaPastedContent() {
+            const pastedText = document.getElementById('pasteTextarea').value;
+            if (!pastedText.trim()) {
+                clearBadge();
+                return;
+            }
+
+            let parsedData = {
+                budgetType: '',   // प्रदेश स्तरीय, नगर स्तरीय, वडा स्तरीय, or CUSTOM
+                projectName: '',  // जनता माध्यमिक विद्यालयमा फर्निचर खरिद तथा रंगरोगन
+                amountNum: '',    // ९,००,०००/-
+                amountWords: '',  // नौ लाख रुपैयाँ मात्र
+                committeeName: '',// जनता माध्यमिक विद्यालयमा फर्निचर खरिद तथा रंगरोगन निर्माण उपभोक्ता समिति, गौरादह -१ झापा
+                chairman: '',     // बुद्धिमान कार्की
+                secretary: '',    // भानुभक्त घिमिरे
+                treasurer: ''     // मिना राई
+            };
+
+            // A. Budget Type / Plan Level Extraction
+            if (/(?:कोशी\s*)?प्रदेश\s*(?:सरकार|स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'प्रदेश स्तरीय';
+            } else if (/नगर\s*(?:पालिका|स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'नगर स्तरीय';
+            } else if (/वडा\s*(?:स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'वडा स्तरीय';
+            }
+
+            // B. Project Name (योजनाको शिर्षक)
+            const quoteMatch = pastedText.match(/[“"']([^”"']+?)[”"']/);
+            if (quoteMatch) {
+                parsedData.projectName = quoteMatch[1].trim();
+            } else {
+                const titleMatch = pastedText.match(/([^\n\r]+?)\s*शिर्षकमा/i);
+                if (titleMatch) {
+                    parsedData.projectName = titleMatch[1].replace(/.*?अन्तर्गत\s*/, '').trim();
+                }
+            }
+
+            // C. Amount Figures (विनियोजन रकम रू.)
+            const amtMatch = pastedText.match(/(?:रकम\s*रू\.?|रु\.?)\s*([०-९0-9,]+(?:\/\-|\.-)?)/i);
+            if (amtMatch) {
+                parsedData.amountNum = amtMatch[1].trim();
+                if (!parsedData.amountNum.endsWith('/-') && !parsedData.amountNum.endsWith('.-')) {
+                    parsedData.amountNum += '/-';
+                }
+            }
+
+            // D. Amount Words (रकम अक्षरेपी)
+            const wordsMatch = pastedText.match(/\(अक्षरेपी\s*([^)]+)\)/i);
+            if (wordsMatch) {
+                parsedData.amountWords = wordsMatch[1].trim();
+            }
+
+            // E. Committee Name (उपभोक्ता समितिको नाम)
+            const commMatch = pastedText.match(/गठित\s+([^\n\r]+?उपभोक्ता\s*समिति[^\n\r,]*?(?:,\s*[^\n\r,]+)?)\s+सँग/i) ||
+                              pastedText.match(/([^\n\r]*?उपभोक्ता\s*समिति[^\n\r,]*?(?:,\s*[^\n\r,]+)?)\s+सँग/i) ||
+                              pastedText.match(/([^\n\r]*?उपभोक्ता\s*समिति[^\n\r]*)/i);
+            if (commMatch) {
+                parsedData.committeeName = commMatch[1].replace(/.*?गठित\s*/, '').trim();
+            }
+
+            // F. Committee Officials (अध्यक्ष, सचिव, कोषाध्यक्ष)
+            const lines = pastedText.split(/\r?\n/);
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const chairM = trimmed.match(/(?:•|\*|-)?\s*अध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
+                if (chairM && !parsedData.chairman) parsedData.chairman = chairM[1].trim();
+
+                const secM = trimmed.match(/(?:•|\*|-)?\s*सचिव\s*:\s*([^\n\r•\*]+)/i);
+                if (secM && !parsedData.secretary) parsedData.secretary = secM[1].trim();
+
+                const treasM = trimmed.match(/(?:•|\*|-)?\s*कोषाध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
+                if (treasM && !parsedData.treasurer) parsedData.treasurer = treasM[1].trim();
+            });
+
+            // Populate Form Inputs
+            let extractCount = 0;
+
+            // 1. Budget Type Radio
+            if (parsedData.budgetType) {
+                const radios = document.querySelectorAll('input[name="budgetTypeRadio"]');
+                radios.forEach(r => {
+                    if (r.value === parsedData.budgetType) {
+                        r.checked = true;
+                        onBudgetTypeRadioChange(r);
+                    }
+                });
+                extractCount++;
+            }
+
+            // 2. Project Name
+            if (parsedData.projectName) {
+                document.getElementById('inProjectName').value = parsedData.projectName;
+                extractCount++;
+            }
+
+            // 3. Amount
+            if (parsedData.amountNum) {
+                document.getElementById('inBudgetAmt').value = parsedData.amountNum;
+                extractCount++;
+                if (parsedData.amountWords) {
+                    document.getElementById('inBudgetWords').value = parsedData.amountWords;
+                } else {
+                    autoConvertAmtToWords();
+                }
+            }
+
+            // 4. Committee Name
+            if (parsedData.committeeName) {
+                document.getElementById('inCommitteeName').value = parsedData.committeeName;
+                extractCount++;
+            }
+
+            // 5. Officials
+            if (parsedData.chairman) {
+                document.getElementById('inChairman').value = parsedData.chairman;
+                extractCount++;
+            }
+            if (parsedData.secretary) {
+                document.getElementById('inSecretary').value = parsedData.secretary;
+                extractCount++;
+            }
+            if (parsedData.treasurer) {
+                document.getElementById('inTreasurer').value = parsedData.treasurer;
+                extractCount++;
+            }
+
+            if (extractCount > 0) {
+                showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू (बजेट प्रकार, योजनाको नाम, रकम, समिति र पदहरू) छानिए (Parsed)।`);
+            } else {
+                showBadge(false, `❌ मिल्ने विवरण फेला परेन। ढाँचा जाँच गर्नुहोस्।`);
+            }
+
+            updateDoc();
         }
 
         function setMode(mode) {
