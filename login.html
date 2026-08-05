@@ -747,62 +747,66 @@
             const cleanUser = username.trim().toLowerCase();
 
             try {
-                // Use anonymous auth — no credentials visible in Network tab
+                // Set persistence
                 const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
-                await firebase.auth().setPersistence(persistence);
-                
+                try {
+                    await firebase.auth().setPersistence(persistence);
+                } catch(pErr) {}
+
+                // Try Firebase Auth in background / safe block
                 try {
                     await firebase.auth().signInAnonymously();
                 } catch(e) {
-                    // Fallback for when Anonymous Auth is disabled in Firebase console (legacy behavior)
-                    if (e.code === 'auth/operation-not-allowed') {
+                    try {
                         const fbE = atob('YWRoaWthcmlzaHJpdGFsQGdtYWlsLmNvbQ==');
                         const fbP = atob('YWRtaW4xMjM=');
                         await firebase.auth().signInWithEmailAndPassword(fbE, fbP);
-                    } else {
-                        throw e;
-                    }
+                    } catch(e2) {}
                 }
-                const db = firebase.firestore();
+
+                const passwordHash = await hashPassword(password);
+
+                const defaultHashes = {
+                    'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', fallback: 'FALLBACK_d2FkYTE=', ward: '1', admin: false },
+                    'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', fallback: 'FALLBACK_d2FkYTM=', ward: '3', admin: false },
+                    'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', fallback: 'FALLBACK_YWRtaW4=', ward: '1', admin: true }
+                };
+
                 let isAdmin = false;
                 let finalWard = selectedWard;
                 let isValidUser = false;
 
-                // Hash the entered password for secure comparison
-                const passwordHash = await hashPassword(password);
+                // 1. First check default hashes (instant local verification)
+                if (defaultHashes[cleanUser] && (defaultHashes[cleanUser].hash === passwordHash || defaultHashes[cleanUser].fallback === passwordHash)) {
+                    finalWard = defaultHashes[cleanUser].ward;
+                    isAdmin = defaultHashes[cleanUser].admin;
+                    isValidUser = true;
+                }
 
-                // Query Firestore by username only (never send password in query)
-                const wardQuery = await db.collection('ward_users')
-                    .where('username', '==', cleanUser)
-                    .limit(1)
-                    .get();
+                // 2. If not matched in defaultHashes, query Firestore safely
+                if (!isValidUser) {
+                    try {
+                        const db = firebase.firestore();
+                        const wardQuery = await db.collection('ward_users')
+                            .where('username', '==', cleanUser)
+                            .limit(1)
+                            .get();
 
-                if (!wardQuery.empty) {
-                    const wardDoc = wardQuery.docs[0].data();
-                    // Compare hashed password (supports both hashed and legacy plaintext)
-                    const storedPass = wardDoc.passwordHash || wardDoc.password || '';
-                    if (storedPass === passwordHash || storedPass === password) {
-                        finalWard = String(wardDoc.wardNumber || selectedWard);
-                        isAdmin = wardDoc.isAdmin === true;
-                        isValidUser = true;
+                        if (!wardQuery.empty) {
+                            const wardDoc = wardQuery.docs[0].data();
+                            const storedPass = wardDoc.passwordHash || wardDoc.password || '';
+                            if (storedPass === passwordHash || storedPass === password) {
+                                finalWard = String(wardDoc.wardNumber || selectedWard);
+                                isAdmin = wardDoc.isAdmin === true;
+                                isValidUser = true;
+                            }
+                        }
+                    } catch(fsErr) {
+                        console.warn('Firestore user lookup error:', fsErr);
                     }
                 }
 
-                // Security: Fallback for default users using hashes (no plaintext passwords in code)
                 if (!isValidUser) {
-                    const defaultHashes = {
-                        'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', fallback: 'FALLBACK_d2FkYTE=', ward: '1', admin: false },
-                        'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', fallback: 'FALLBACK_d2FkYTM=', ward: '3', admin: false },
-                        'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', fallback: 'FALLBACK_YWRtaW4=', ward: '1', admin: true }
-                    };
-                    if (defaultHashes[cleanUser] && (defaultHashes[cleanUser].hash === passwordHash || defaultHashes[cleanUser].fallback === passwordHash)) {
-                        finalWard = defaultHashes[cleanUser].ward;
-                        isAdmin = defaultHashes[cleanUser].admin;
-                        isValidUser = true;
-                    }
-                }
-                if (!isValidUser) {
-                    await firebase.auth().signOut();
                     loginAttempts.count++;
                     throw new Error('invalid-credential');
                 }
