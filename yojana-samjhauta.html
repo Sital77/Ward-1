@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>योजना सम्झौता सिफारिस - गौरादह नगरपालिका वडा नं.१</title>
+    <link rel="stylesheet" href="charkilla.css">
+    <style>
+        .preview-panel .a4-page,
+        .preview-panel .a4-page * {
+            font-family: 'Mukta', sans-serif;
+        }
+
+        .letter-body-para {
+            font-size: 13pt;
+            line-height: 1.9;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .section-card {
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 18px;
+        }
+
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .body-section {
+            background: rgba(43, 108, 176, 0.05);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
+        }
+
+        .body-section .section-label {
+            color: #2b6cb0;
+        }
+
+        .budget-type-radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .budget-radio-card {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+
+        .budget-radio-card:hover {
+            border-color: #3182ce;
+            background: #ebf8ff;
+        }
+
+        .budget-radio-card.active {
+            border-color: #2b6cb0;
+            background: #ebf8ff;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
+            font-weight: 700;
+            color: #2b6cb0;
+        }
+
+        .btn-abhilekh {
+            background: #e2e8f0;
+            color: #2d3748;
+            padding: 6px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-abhilekh:hover {
+            background: #cbd5e0;
+        }
+
+        .member-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .btn-add-member {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px dashed #3182ce;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
+        .btn-add-member:hover {
+            background: #bee3f8;
+        }
+
+        .btn-remove-member {
+            background: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @media print {
+            .input-panel,
+            .top-bar-buttons,
+            .btn-abhilekh,
+            #abhilekhModal {
+                display: none !important;
+            }
+
+            .preview-panel {
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                border: none !important;
+                margin: 0 !important;
+                background: transparent !important;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            .a4-page {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="auth.js?v=2.3"></script>
+
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title">📑 योजना सम्झौता सिफारिस</h2>
+            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <!-- ══ AUTO EXTRACT / PASTE SECTION ══ -->
+        <div class="section-card paste-section" id="secPasteBox" style="background: #ebf8ff; border: 1.5px dashed #3182ce; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+            <div class="section-label" style="color: #2b6cb0; font-weight: 800; display:flex; align-items:center; gap:6px;">📋 कपी-पेस्ट बक्स (Auto-Extract)</div>
+            <div class="form-group" style="margin-bottom:0;">
+                <textarea id="pasteTextarea" class="paste-textarea" style="width: 100%; height: 95px; border: 1.5px solid #90cdf4; border-radius: 8px; padding: 10px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);" 
+                    placeholder="योजना सम्झौताको पत्र / टिप्पणीको पाठ यहाँ Ctrl+V (पेस्ट) गर्नुहोस्... (बजेटको प्रकार, योजनाको नाम, रकम, समिति र पदहरू स्वतः भरिनेछन्)"
+                    oninput="processYojanaPastedContent()"></textarea>
+                <div id="parseBadge" class="badge" style="display:none; margin-top:8px; font-size:0.85rem; padding:4px 12px; border-radius:6px; font-weight:700;"></div>
+            </div>
+        </div>
+
+        <!-- ══ SECTION 0: LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 लेटर हेड विवरण</div>
+
+            <div class="form-group">
+                <label>पत्र संख्या (प.सं.):</label>
+                <div class="radio-container">
+                    <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"><label for="ay1" class="radio-label">२०८१/०८२</label></div>
+                    <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()"><label for="ay2" class="radio-label">२०८२/०८३</label></div>
+                    <div class="radio-option"><input type="radio" id="ay3" name="ayRadio" value="२०८३/०८४" checked onchange="updateDoc()"><label for="ay3" class="radio-label">२०८३/०८४</label></div>
+                    <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()"><label for="ay4" class="radio-label">२०८४/०८५</label></div>
+                </div>
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="उदा: २०८३/०४/१५" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ने.सं. :</label>
+                <input type="text" id="inNepalSamvat" placeholder="उदा: ११४६" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ SECTION 1: PLAN & BUDGET DETAILS ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">📂 योजना तथा बजेट विवरण</div>
+
+            <div class="form-group">
+                <label style="font-weight:bold; margin-bottom:6px; display:block;">बजेटको स्रोत / प्रकार:</label>
+                <div class="budget-type-radio-group">
+                    <label class="budget-radio-card active" id="lblBudgetTypePradesh">
+                        <input type="radio" name="budgetTypeRadio" value="कोशी प्रदेश सरकारबाट विनियोजित बजेट" checked onchange="onBudgetTypeRadioChange(this)">
+                        <span>प्रदेश सरकार</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypeNagar">
+                        <input type="radio" name="budgetTypeRadio" value="गौरादह नगरपालिकाबाट विनियोजित बजेट" onchange="onBudgetTypeRadioChange(this)">
+                        <span>नगरपालिका</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypeWada">
+                        <input type="radio" name="budgetTypeRadio" value="वडा कार्यालयबाट विनियोजित बजेट" onchange="onBudgetTypeRadioChange(this)">
+                        <span>वडा कार्यालय</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypeCustom">
+                        <input type="radio" name="budgetTypeRadio" value="CUSTOM" onchange="onBudgetTypeRadioChange(this)">
+                        <span>✍️ आफैँ हाल्नुस (Custom)</span>
+                    </label>
+                </div>
+                <input type="text" id="inBudgetTypeCustom" placeholder="उदा: संघ सरकारबाट विनियोजित बजेट" style="display:none; margin-top:8px;" oninput="updateDoc()">
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+                <div>
+                    <label>चालू आर्थिक बर्ष:</label>
+                    <input type="text" id="inFiscalYear" placeholder="उदा: २०८२/०८३" value="२०८२/०८३" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>योजनाको शिर्षक:</label>
+                    <input type="text" id="inProjectName" placeholder="उदा: जनता माध्यमिक विद्यालयमा फर्निचर खरिद तथा रंगरोगन" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px;">
+                <div>
+                    <label>विनियोजन रकम रू. (अंकमा):</label>
+                    <input type="text" id="inBudgetAmt" placeholder="उदा: ९,००,०००/- वा 900000" oninput="autoConvertAmtToWords(); updateDoc()">
+                </div>
+                <div>
+                    <label>रकम (अक्षरेपी):</label>
+                    <input type="text" id="inBudgetWords" placeholder="उदा: नौ लाख रुपैयाँ मात्र" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ SECTION 2: CONSUMER COMMITTEE & TAPASIL MEMBERS ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">📋 उपभोक्ता समिति तथा तपसिल विवरण</div>
+
+            <div class="form-group">
+                <label>उपभोक्ता समितिको नाम:</label>
+                <input type="text" id="inCommitteeName" placeholder="उदा: जनता माध्यमिक विद्यालयमा फर्निचर खरिद तथा रंगरोगन निर्माण उपभोक्ता समिति, गौरादह -१ झापा" oninput="updateDoc()">
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>अध्यक्षको नाम:</label>
+                    <input type="text" id="inChairman" placeholder="उदा: बुद्धिमान कार्की" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>सचिवको नाम:</label>
+                    <input type="text" id="inSecretary" placeholder="उदा: भानुभक्त घिमिरे" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>कोषाध्यक्षको नाम:</label>
+                    <input type="text" id="inTreasurer" placeholder="उदा: मिना राई" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>अन्य सदस्यहरू (तपसिल):</label>
+                <div id="membersContainer">
+                    <!-- Dynamic member rows appended here -->
+                </div>
+                <button type="button" class="btn-add-member" onclick="addMemberInput()">➕ थप सदस्य थप्नुहोस्</button>
+            </div>
+        </div>
+
+        <!-- ══ SECTION 3: SIGNATURE AUTHORITY ══ -->
+        <div class="form-group" style="margin-top: 5px; background: #fff3f3; padding: 12px; border: 1px solid #feb2b2; border-radius: 8px;">
+            <label style="color: #c53030; font-weight:bold;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()" style="width:100%; padding:9px; border-radius:6px; border:1px solid #cbd5e0; margin-top:4px;">
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष" selected>वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अनिता अधिकारी|वडा सचिव">वडा सचिव - अनिता अधिकारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px; grid-template-columns: 1fr 1fr;">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40" oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ सिफारिस प्रिन्ट गर्नुहोस्</button>
+    </div>
+
+    <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ योजना सम्झौता सिफारिस अभिलेख</h3>
+            <div class="search-container">
+                <label>🔍 योजना वा समितिको नामबाट खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="खोज्नुपर्ने योजना वा समितिको नाम टाइप गर्नुस्..." oninput="renderDatabaseTable()">
+            </div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">मिति</th>
+                        <th>योजनाको नाम</th>
+                        <th>उपभोक्ता समिति</th>
+                        <th>रकम रू.</th>
+                        <th style="width: 90px; text-align: center;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody">
+                    <!-- Data injected via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ══════════════ PREVIEW PANEL ══════════════ -->
+    <div class="preview-panel">
+        <div class="a4-page">
+            <!-- 📄 Letterhead 📄 -->
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblAY"></span></div>
+                        <div>च.नं. <span id="lblChalani">..........</span></div>
+                    </div>
+                </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title">१ नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti">..............</span></div>
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat"></span></div>
+                </div>
+            </div>
+
+            <div class="header-red-line"></div>
+
+            <div class="receiver-block" style="margin-top: 10px; margin-bottom: 14px; line-height: 1.5; font-size: 13pt;">
+                <div style="font-weight:bold;">श्री गौरादह नगरपालिका</div>
+                <div>नगर कार्यपालिकाको कार्यालय</div>
+                <div>गौरादह, झापा ।</div>
+            </div>
+
+            <div class="subject-line" style="text-align: center; margin: 12px 0 16px 0; font-weight: bold; font-size: 13.5pt; text-decoration: underline;">
+                विषय: योजना सम्झौता गरिदिने सम्बन्धमा ।
+            </div>
+
+            <div class="letter-body" id="bodyText">
+                <!-- Dynamically Populated Text -->
+            </div>
+
+            <div class="signature-section" style="margin-top: 40px; text-align: right; margin-right: 40px; position: relative; height: 120px;">
+                <div id="sigSpacing" style="height: 40px;"></div>
+                <div id="lblSignName" style="font-weight: bold; font-size: 13pt;">नगेन्द्र भण्डारी</div>
+                <div id="lblSignTitle" style="font-size: 13pt;">वडा अध्यक्ष</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="font-settings.js?v=2.1"></script>
+
+    <script>
+        // Check Auth
+        if (localStorage.getItem('sifarish_auth') !== 'true') {
+            window.location.href = 'login.html';
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db  = firebase.firestore();
+
+        let memberCount = 0;
+
+        function addMemberInput(val = '') {
+            memberCount++;
+            const container = document.getElementById('membersContainer');
+            const row = document.createElement('div');
+            row.className = 'member-row';
+            row.id = `memberRow_${memberCount}`;
+            row.innerHTML = `
+                <span style="font-size:0.85rem; color:#4a5568; min-width:65px;">सदस्य ${memberCount}:</span>
+                <input type="text" id="inMember_${memberCount}" value="${val}" placeholder="सदस्यको नाम" oninput="updateDoc()" style="flex:1;">
+                <button type="button" class="btn-remove-member" onclick="removeMemberInput(${memberCount})">✕</button>
+            `;
+            container.appendChild(row);
+            updateDoc();
+        }
+
+        function removeMemberInput(id) {
+            const row = document.getElementById(`memberRow_${id}`);
+            if (row) {
+                row.remove();
+                updateDoc();
+            }
+        }
+
+        function toNepaliDigit(num) {
+            const digits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            return String(num).replace(/[0-9]/g, w => digits[parseInt(w)]);
+        }
+
+        function nepaliDigitsToAscii(str) {
+            const nepaliDigits = '०१२३४५६७८९';
+            return str.replace(/[०-९]/g, function(ch) {
+                return nepaliDigits.indexOf(ch).toString();
+            });
+        }
+
+        function convertNumberToNepaliWords(numberStr) {
+            if (!numberStr) return '';
+            let ascii = nepaliDigitsToAscii(numberStr);
+            let clean = ascii.replace(/[^0-9]/g, '');
+            let num = parseInt(clean, 10);
+            if (isNaN(num) || num <= 0) return '';
+
+            const ones = ['', 'एक', 'दुई', 'तीन', 'चार', 'पाँच', 'छ', 'सात', 'आठ', 'नौ', 'दस',
+                'एघार', 'बाह्र', 'तेह्र', 'चौध', 'पन्ध्र', 'सोह्र', 'सत्र', 'अठार', 'उन्नाइस', 'बीस',
+                'एकाइस', 'बाइस', 'त्रिइस', 'चौबिस', 'पच्चिस', 'छब्बिस', 'सत्ताइस', 'अठ्ठाइस', 'उनन्तीस', 'तीस',
+                'एकतीस', 'बत्तीस', 'तेत्तीस', 'चौत्तीस', 'पैंतीस', 'छत्तीस', 'सरतीस', 'अड्तीस', 'उनन्चालीस', 'चालीस',
+                'एकचालीस', 'बयालीस', 'त्रिचालीस', 'चौवालीस', 'पैंतालीस', 'छयालीस', 'सच्चालीस', 'अढ्चालीस', 'उनन्पचास', 'पचास',
+                'एकान्न', 'बाउन्न', 'त्रिपन्न', 'चौपन्न', 'पचपन्न', 'छप्पन्न', 'सन्तान्न', 'अन्ठाउन्न', 'उनन्साठ्ठी', 'साठ्ठी',
+                'एकसट्ठी', 'ब्यासट्ठी', 'त्रिसट्ठी', 'चौसट्ठी', 'पैंसट्ठी', 'छ्यासट्ठी', 'सत्सट्ठी', 'अड्सट्ठी', 'उनन्सत्तरी', 'सत्तरी',
+                'एकहत्तर', 'बहत्तर', 'त्रिहत्तर', 'चौहत्तर', 'पचहत्तर', 'छ्याहत्तर', 'सतहत्तर', 'अठहत्तर', 'उनासी', 'असी',
+                'एकासी', 'बयासी', 'त्रियासी', 'चौरासी', 'पचासी', 'छयासी', 'सत्तासी', 'अठासी', 'उनान्नब्बे', 'नब्बे',
+                'एकान्नब्बे', 'बयान्नब्बे', 'त्रियान्नब्बे', 'चौरान्नब्बे', 'पञ्चान्नब्बे', 'छयान्नब्बे', 'सन्तान्नब्बे', 'अन्ठान्नब्बे', 'उनान्सय'];
+
+            function twoDigits(n) {
+                if (n <= 0) return '';
+                return ones[n] || '';
+            }
+
+            let words = [];
+            let arab = Math.floor(num / 1000000000);
+            num %= 1000000000;
+            if (arab > 0) words.push(twoDigits(arab) + ' अर्ब');
+
+            let crore = Math.floor(num / 10000000);
+            num %= 10000000;
+            if (crore > 0) words.push(twoDigits(crore) + ' करोड');
+
+            let lakh = Math.floor(num / 100000);
+            num %= 100000;
+            if (lakh > 0) words.push(twoDigits(lakh) + ' लाख');
+
+            let thousand = Math.floor(num / 1000);
+            num %= 1000;
+            if (thousand > 0) words.push(twoDigits(thousand) + ' हजार');
+
+            let hundred = Math.floor(num / 100);
+            num %= 100;
+            if (hundred > 0) words.push(twoDigits(hundred) + ' सय');
+
+            if (num > 0) words.push(twoDigits(num));
+
+            return words.join(' ');
+        }
+
+        function autoConvertAmtToWords() {
+            const amtStr = document.getElementById('inBudgetAmt').value;
+            const words = convertNumberToNepaliWords(amtStr);
+            if (words) {
+                document.getElementById('inBudgetWords').value = words + ' रुपैयाँ मात्र';
+            } else {
+                document.getElementById('inBudgetWords').value = '';
+            }
+        }
+
+        function onBudgetTypeRadioChange(radio) {
+            document.querySelectorAll('.budget-radio-card').forEach(card => card.classList.remove('active'));
+            radio.closest('.budget-radio-card').classList.add('active');
+
+            const isCustom = radio.value === 'CUSTOM';
+            document.getElementById('inBudgetTypeCustom').style.display = isCustom ? 'block' : 'none';
+            updateDoc();
+        }
+
+        function toggleCustomSign() {
+            const val = document.getElementById('inSignAuthority').value;
+            document.getElementById('customSignBox').style.display = val === 'CUSTOM' ? 'grid' : 'none';
+        }
+
+        function adjustSignaturePosition(val) {
+            document.getElementById('sigSpacing').style.height = val + 'px';
+            document.getElementById('marginVal').innerText = val + ' px';
+        }
+
+        function showBadge(success, message) {
+            const badge = document.getElementById('parseBadge');
+            if (badge) {
+                badge.style.display = 'inline-flex';
+                badge.style.backgroundColor = success ? '#c6f6d5' : '#fed7d7';
+                badge.style.color = success ? '#22543d' : '#9b2c2c';
+                badge.innerText = message;
+            }
+        }
+
+        function clearBadge() {
+            const badge = document.getElementById('parseBadge');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function processYojanaPastedContent() {
+            const pastedText = document.getElementById('pasteTextarea').value;
+            if (!pastedText.trim()) {
+                clearBadge();
+                return;
+            }
+
+            let parsedData = {
+                budgetType: '',
+                fiscalYear: '',
+                projectName: '',
+                amountNum: '',
+                amountWords: '',
+                committeeName: '',
+                chairman: '',
+                secretary: '',
+                treasurer: '',
+                members: []
+            };
+
+            // A. Budget Type Extraction
+            if (/(?:कोशी\s*)?प्रदेश\s*(?:सरकार|स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'कोशी प्रदेश सरकारबाट विनियोजित बजेट';
+            } else if (/नगर\s*(?:पालिका|स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'गौरादह नगरपालिकाबाट विनियोजित बजेट';
+            } else if (/वडा\s*(?:स्तर|स्तरीय|कार्यालय)/i.test(pastedText)) {
+                parsedData.budgetType = 'वडा कार्यालयबाट विनियोजित बजेट';
+            }
+
+            // B. Fiscal Year
+            const fyMatch = pastedText.match(/आर्थिक\s*बर्ष\.?\s*[:\-\s]*([२०८९०-९0-9\/]+)/i);
+            if (fyMatch) {
+                parsedData.fiscalYear = fyMatch[1].trim();
+            }
+
+            // C. Project Name
+            const quoteMatch = pastedText.match(/[“"']([^”"']+?)[”"']/);
+            if (quoteMatch) {
+                parsedData.projectName = quoteMatch[1].trim();
+            } else {
+                const titleMatch = pastedText.match(/([^\n\r]+?)\s*शिर्षकमा/i);
+                if (titleMatch) {
+                    parsedData.projectName = titleMatch[1].replace(/.*?अन्तर्गत\s*/, '').trim();
+                }
+            }
+
+            // D. Amount Num
+            const amtMatch = pastedText.match(/(?:रकम\s*रू\.?|रु\.?)\s*([०-९0-9,]+(?:\/\-|\.-)?)/i);
+            if (amtMatch) {
+                parsedData.amountNum = amtMatch[1].trim();
+                if (!parsedData.amountNum.endsWith('/-') && !parsedData.amountNum.endsWith('.-')) {
+                    parsedData.amountNum += '/-';
+                }
+            }
+
+            // E. Amount Words
+            const wordsMatch = pastedText.match(/\(अक्षरेपी\s*([^)]+)\)/i);
+            if (wordsMatch) {
+                parsedData.amountWords = wordsMatch[1].trim();
+            }
+
+            // F. Committee Name
+            const commMatch = pastedText.match(/गठित\s+([^\n\r]+?उपभोक्ता\s*समिति[^\n\r,]*?(?:,\s*[^\n\r,]+)?)\s+सँग/i) ||
+                              pastedText.match(/([^\n\r]*?उपभोक्ता\s*समिति[^\n\r,]*?(?:,\s*[^\n\r,]+)?)\s+सँग/i) ||
+                              pastedText.match(/([^\n\r]*?उपभोक्ता\s*समिति[^\n\r]*)/i);
+            if (commMatch) {
+                parsedData.committeeName = commMatch[1].replace(/.*?गठित\s*/, '').trim();
+            }
+
+            // G. Committee Members (अध्यक्ष, सचिव, कोषाध्यक्ष, सदस्यहरू)
+            const lines = pastedText.split(/\r?\n/);
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const chairM = trimmed.match(/(?:•|\*|-)?\s*अध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
+                if (chairM && !parsedData.chairman) parsedData.chairman = chairM[1].trim();
+
+                const secM = trimmed.match(/(?:•|\*|-)?\s*सचिव\s*:\s*([^\n\r•\*]+)/i);
+                if (secM && !parsedData.secretary) parsedData.secretary = secM[1].trim();
+
+                const treasM = trimmed.match(/(?:•|\*|-)?\s*कोषाध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
+                if (treasM && !parsedData.treasurer) parsedData.treasurer = treasM[1].trim();
+
+                const memM = trimmed.match(/(?:•|\*|-)?\s*सदस्य\s*:\s*([^\n\r•\*]+)/i);
+                if (memM) {
+                    const mName = memM[1].trim();
+                    if (mName && !parsedData.members.includes(mName)) {
+                        parsedData.members.push(mName);
+                    }
+                }
+            });
+
+            // Populate Form Inputs
+            let extractCount = 0;
+
+            if (parsedData.budgetType) {
+                const radios = document.querySelectorAll('input[name="budgetTypeRadio"]');
+                radios.forEach(r => {
+                    if (r.value === parsedData.budgetType) {
+                        r.checked = true;
+                        onBudgetTypeRadioChange(r);
+                    }
+                });
+                extractCount++;
+            }
+
+            if (parsedData.fiscalYear) {
+                document.getElementById('inFiscalYear').value = parsedData.fiscalYear;
+                extractCount++;
+            }
+
+            if (parsedData.projectName) {
+                document.getElementById('inProjectName').value = parsedData.projectName;
+                extractCount++;
+            }
+
+            if (parsedData.amountNum) {
+                document.getElementById('inBudgetAmt').value = parsedData.amountNum;
+                extractCount++;
+                if (parsedData.amountWords) {
+                    document.getElementById('inBudgetWords').value = parsedData.amountWords;
+                } else {
+                    autoConvertAmtToWords();
+                }
+            }
+
+            if (parsedData.committeeName) {
+                document.getElementById('inCommitteeName').value = parsedData.committeeName;
+                extractCount++;
+            }
+
+            if (parsedData.chairman) {
+                document.getElementById('inChairman').value = parsedData.chairman;
+                extractCount++;
+            }
+            if (parsedData.secretary) {
+                document.getElementById('inSecretary').value = parsedData.secretary;
+                extractCount++;
+            }
+            if (parsedData.treasurer) {
+                document.getElementById('inTreasurer').value = parsedData.treasurer;
+                extractCount++;
+            }
+
+            if (parsedData.members.length > 0) {
+                document.getElementById('membersContainer').innerHTML = '';
+                memberCount = 0;
+                parsedData.members.forEach(mName => {
+                    addMemberInput(mName);
+                });
+                extractCount += parsedData.members.length;
+            }
+
+            if (extractCount > 0) {
+                showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू (बजेट, शिर्षक, रकम, समिति र सदस्यहरू) छानिए (Parsed)।`);
+            } else {
+                showBadge(false, `❌ मिल्ने विवरण फेला परेन। ढाँचा जाँच गर्नुहोस्।`);
+            }
+
+            updateDoc();
+        }
+
+        function getSelectedAY() {
+            const radios = document.querySelectorAll('input[name="ayRadio"]');
+            for (const r of radios) { if (r.checked) return r.value; }
+            return '२०८३/०८४';
+        }
+
+        function getSelectedBudgetType() {
+            const radios = document.querySelectorAll('input[name="budgetTypeRadio"]');
+            for (const r of radios) {
+                if (r.checked) {
+                    if (r.value === 'CUSTOM') {
+                        return document.getElementById('inBudgetTypeCustom').value.trim() || 'विनियोजित बजेट';
+                    }
+                    return r.value;
+                }
+            }
+            return 'कोशी प्रदेश सरकारबाट विनियोजित बजेट';
+        }
+
+        function updateDoc() {
+            const ay = getSelectedAY();
+            const chalani = document.getElementById('inChalani').value.trim();
+            document.getElementById('lblAY').innerText = ay;
+            document.getElementById('lblChalani').innerText = chalani || '..........';
+            document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
+            document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value.trim() || '';
+
+            const budgetTypeStr = getSelectedBudgetType();
+            const fiscalYearStr = document.getElementById('inFiscalYear').value.trim() || '२०८२/०८३';
+            const projectNameStr = document.getElementById('inProjectName').value.trim() || '...............................................................';
+            const budgetAmtStr = document.getElementById('inBudgetAmt').value.trim() || '................/-';
+            const budgetWordsStr = document.getElementById('inBudgetWords').value.trim() || '................................';
+            const committeeNameStr = document.getElementById('inCommitteeName').value.trim() || '...............................................................';
+
+            const pChair = document.getElementById('inChairman').value.trim();
+            const pSec = document.getElementById('inSecretary').value.trim();
+            const pTreas = document.getElementById('inTreasurer').value.trim();
+
+            // Collect dynamic members
+            let otherMembers = [];
+            for (let i = 1; i <= memberCount; i++) {
+                const inputEl = document.getElementById(`inMember_${i}`);
+                if (inputEl && inputEl.value.trim()) {
+                    otherMembers.push(inputEl.value.trim());
+                }
+            }
+
+            let tapasilHtml = `
+                <div style="margin-top: 14px; font-weight: bold; font-size: 13pt;">तपसिल:</div>
+                <ul style="list-style-type: disc; margin-left: 24px; margin-top: 6px; font-size: 12.5pt; line-height: 1.8;">
+                    <li>अध्यक्ष: <span style="font-weight:bold;">${pChair || '....................'}</span></li>
+                    <li>सचिव: <span style="font-weight:bold;">${pSec || '....................'}</span></li>
+                    <li>कोषाध्यक्ष: <span style="font-weight:bold;">${pTreas || '....................'}</span></li>
+            `;
+
+            otherMembers.forEach(memName => {
+                tapasilHtml += `<li>सदस्य: <span style="font-weight:bold;">${memName}</span></li>`;
+            });
+
+            tapasilHtml += `</ul>`;
+
+            const bodyTextEl = document.getElementById('bodyText');
+            bodyTextEl.innerHTML = `
+                <div class="letter-body-para">
+                    उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक बर्ष ${fiscalYearStr} को ${budgetTypeStr} अन्तर्गत <strong>“${projectNameStr}”</strong> शिर्षकमा विनियोजन भएको रकम रू.<strong>${budgetAmtStr}</strong> (अक्षरेपी ${budgetWordsStr}) बाट योजना कार्यन्वयन गर्नको लागि गठित <strong>${committeeNameStr}</strong> सँग तहाँ कार्यालयको नियमानुसार योजना सम्झौता गरिदिनुहुन सिफारिस साथ अनुरोध छ।
+                </div>
+                ${tapasilHtml}
+            `;
+
+            // Signature Logic
+            const sigAuthVal = document.getElementById('inSignAuthority').value;
+            const lblSignName = document.getElementById('lblSignName');
+            const lblSignTitle = document.getElementById('lblSignTitle');
+
+            if (sigAuthVal === 'BLANK') {
+                lblSignName.innerText = '';
+                lblSignTitle.innerText = '';
+            } else if (sigAuthVal === 'CUSTOM') {
+                lblSignName.innerText = document.getElementById('inCustomSignName').value.trim();
+                lblSignTitle.innerText = document.getElementById('inCustomSignTitle').value.trim();
+            } else {
+                const parts = sigAuthVal.split('|');
+                lblSignName.innerText = parts[0] || '';
+                lblSignTitle.innerText = parts[1] || '';
+            }
+        }
+
+        // Initialize Date & Initial State
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof initPortalNepaliDate === 'function') initPortalNepaliDate();
+
+            // Default sample members
+            addMemberInput('लेखकृष्ण घिमिरे');
+            addMemberInput('धर्म कुमारी सुवेदी');
+            addMemberInput('कृष्ण शर्मा');
+            addMemberInput('अप्सरा कार्की');
+
+            renderDatabaseTable();
+            updateDoc();
+        });
+
+        // ── Abhilekh & Firestore Database Logic ──
+        function toggleModal(show) {
+            document.getElementById('abhilekhModal').style.display = show ? 'flex' : 'none';
+            if (show) renderDatabaseTable();
+        }
+
+        async function printAndSaveSystem() {
+            const record = {
+                miti: document.getElementById('inMiti').value.trim(),
+                chalani: document.getElementById('inChalani').value.trim(),
+                projectName: document.getElementById('inProjectName').value.trim(),
+                committeeName: document.getElementById('inCommitteeName').value.trim(),
+                chairman: document.getElementById('inChairman').value.trim(),
+                amount: document.getElementById('inBudgetAmt').value.trim(),
+                timestamp: Date.now()
+            };
+
+            try {
+                await db.collection("yojanaSamjhautaRecords").add(record);
+            } catch (e) {
+                console.warn("Save record warning:", e);
+            }
+
+            window.print();
+        }
+
+        async function renderDatabaseTable() {
+            const tbody = document.getElementById('dbTableBody');
+            const search = (document.getElementById('searchField').value || '').trim().toLowerCase();
+
+            try {
+                const snap = await db.collection("yojanaSamjhautaRecords").orderBy("timestamp", "desc").limit(50).get();
+                let html = '';
+
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (!search || (data.committeeName && data.committeeName.toLowerCase().includes(search)) || (data.projectName && data.projectName.toLowerCase().includes(search))) {
+                        html += `
+                            <tr>
+                                <td>${data.miti || '-'}</td>
+                                <td><strong>${data.projectName || '-'}</strong></td>
+                                <td>${data.committeeName || '-'}</td>
+                                <td>रू. ${data.amount || '-'}</td>
+                                <td style="text-align:center;">
+                                    <button onclick="deleteRecord('${doc.id}')" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">हटाइयो</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding:15px; color:#718096;">कुनै अभिलेख भेटिएन ।</td></tr>';
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#ef4444;">अभिलेख लोड गर्न सकिएन ।</td></tr>';
+            }
+        }
+
+        async function deleteRecord(id) {
+            if (confirm('के तपाईं यो अभिलेख हटाउन चाहनुहुन्छ?')) {
+                try {
+                    await db.collection("yojanaSamjhautaRecords").doc(id).delete();
+                    renderDatabaseTable();
+                } catch(e) {
+                    alert('हटाउन समस्या भयो।');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
