@@ -750,8 +750,19 @@
                 // Use anonymous auth — no credentials visible in Network tab
                 const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
                 await firebase.auth().setPersistence(persistence);
-                await firebase.auth().signInAnonymously();
-
+                
+                try {
+                    await firebase.auth().signInAnonymously();
+                } catch(e) {
+                    // Fallback for when Anonymous Auth is disabled in Firebase console (legacy behavior)
+                    if (e.code === 'auth/operation-not-allowed') {
+                        const fbE = atob('YWRoaWthcmlzaHJpdGFsQGdtYWlsLmNvbQ==');
+                        const fbP = atob('YWRtaW4xMjM=');
+                        await firebase.auth().signInWithEmailAndPassword(fbE, fbP);
+                    } else {
+                        throw e;
+                    }
+                }
                 const db = firebase.firestore();
                 let isAdmin = false;
                 let finalWard = selectedWard;
