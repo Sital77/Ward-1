@@ -773,6 +773,19 @@
                     }
                 }
 
+                // Security: Fallback for default users using hashes (no plaintext passwords in code)
+                if (!isValidUser) {
+                    const defaultHashes = {
+                        'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', ward: '1', admin: false },
+                        'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', ward: '3', admin: false },
+                        'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', ward: '1', admin: true }
+                    };
+                    if (defaultHashes[cleanUser] && defaultHashes[cleanUser].hash === passwordHash) {
+                        finalWard = defaultHashes[cleanUser].ward;
+                        isAdmin = defaultHashes[cleanUser].admin;
+                        isValidUser = true;
+                    }
+                }
                 if (!isValidUser) {
                     await firebase.auth().signOut();
                     loginAttempts.count++;

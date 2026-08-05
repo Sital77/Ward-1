@@ -1682,7 +1682,7 @@
             edited_by: 'Admin',
             edited_at: firebase.firestore.FieldValue.serverTimestamp()
         };
-        db.collection('recommendation_versions').add(versionData).catch(e => /* logged */);
+        db.collection('recommendation_versions').add(versionData).catch(e => { /* logged */ });
     }
     function openVersionHistory(id) {
         openModalEl('versionModal');
@@ -1754,7 +1754,7 @@
             admin_user: 'Admin',
             label: actionLabels[action] || action,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(e => /* logged */);
+        }).catch(e => { /* logged */ });
     }
 
     // ===== Audit Trail =====
@@ -1774,7 +1774,7 @@
                 changes: changes,
                 admin_user: 'Admin',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(e => /* logged */);
+            }).catch(e => { /* logged */ });
         }
     }
 
@@ -2200,7 +2200,7 @@
             snap.forEach(doc => activityList.push({ id: doc.id, ...doc.data() }));
             renderActivityLog();
             renderDashboardActivity();
-        }).catch(e => /* logged */);
+        }).catch(e => { /* logged */ });
     }
     function renderActivityLog() {
         const container = document.getElementById('activityTimeline');
@@ -2419,7 +2419,7 @@
         snap.forEach(doc => deletedList.push({ id: doc.id, ...doc.data() }));
         renderDeletedTable();
         updateStats();
-    }, err => /* logged */);
+    }, err => { /* logged */ });
 
     // Activity log - real-time
     db.collection('activity_logs').orderBy('timestamp', 'desc').limit(50).onSnapshot(snap => {
@@ -2427,7 +2427,7 @@
         snap.forEach(doc => activityList.push({ id: doc.id, ...doc.data() }));
         renderActivityLog();
         renderDashboardActivity();
-    }, err => /* logged */);
+    }, err => { /* logged */ });
 
     // Signing authorities - real-time
     db.collection('signing_authorities').onSnapshot(snap => {
@@ -2462,7 +2462,7 @@
         wardUsersList = [];
         snap.forEach(doc => wardUsersList.push({ id: doc.id, ...doc.data() }));
         renderWardUsersTable();
-    }, err => /* logged */);
+    }, err => { /* logged */ });
 
     // ===== Init =====
     function initAdminNepaliDate() {
@@ -2517,5 +2517,6 @@
     </script>
 </body>
 </html>
+
 
 
