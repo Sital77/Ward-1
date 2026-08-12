@@ -110,12 +110,6 @@ function updateDoc() {
 
 // ── Print & Save ────────────────────────────────────
 async function printAndSaveSystem() {
-    const chalaniInput = document.getElementById('inChalani');
-    if (!chalaniInput || !chalaniInput.value.trim()) {
-        alert("कृपया चलानी नं. अनिवार्य लेख्नुहोस् ।");
-        return;
-    }
-
     const ay = getSelectedAY();
     const bodyAY = document.getElementById('inBodyAY').value;
     const chalani = document.getElementById('inChalani').value.trim() || '-';
@@ -131,9 +125,11 @@ async function printAndSaveSystem() {
 
     const recordId = document.getElementById('editRecordIndex').value;
 
+    const displayName = (chalani !== '-' && chalani) ? chalani : ((bodyChalani !== '-' && bodyChalani) ? bodyChalani : 'सूचना टाँस');
+
     const obj = {
         ay, bodyAY, chalani, bodyChalani, miti, ns, wada,
-        name: chalani,
+        name: displayName,
         praaptaMiti,
         subject: "सूचना टाँस",
         signAuth, customSignName, customSignTitle, sigMargin,
@@ -157,7 +153,6 @@ async function printAndSaveSystem() {
         }
         window.print();
     } catch (e) {
-
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
     } finally {
         if (btn) {
@@ -188,14 +183,15 @@ function renderDatabaseTable() {
     tbody.innerHTML = '';
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        const chalaniVal = (rec.chalani || '').toLowerCase();
+        const chalaniVal = (rec.chalani || rec.name || '').toLowerCase();
         if (search && !chalaniVal.includes(search)) return;
         counter++;
+        const displayChalani = (rec.chalani && rec.chalani !== '-') ? rec.chalani : ((rec.bodyChalani && rec.bodyChalani !== '-') ? rec.bodyChalani : '-');
         tbody.insertAdjacentHTML('beforeend', `
             <tr>
                 <td><b>${toNepaliDigit(counter)}</b></td>
-                <td><b>${rec.chalani || '-'}</b></td>
-                <td><span style="color:#2b6cb0; font-weight:bold;">${rec.subject}</span></td>
+                <td><b>${displayChalani}</b></td>
+                <td><span style="color:#2b6cb0; font-weight:bold;">${rec.subject || 'सूचना टाँस'}</span></td>
                 <td>
                     ${rec.miti || '-'}
                     ${rec.timestamp ? `<div style="font-size:0.78rem; color:#718096; margin-top:2px;">⏱️ ${formatTimestamp(rec.timestamp)}</div>` : ''}
@@ -226,13 +222,13 @@ function editFromDB(id) {
     // पत्रमा उल्लेख आ.व. dropdown
     document.getElementById('inBodyAY').value = rec.bodyAY || rec.ay || '२०८०/०८१';
 
-    document.getElementById('inChalani').value = rec.chalani === '-' ? '' : rec.chalani;
-    document.getElementById('inBodyChalani').value = rec.bodyChalani === '-' ? '' : (rec.bodyChalani || rec.chalani || '');
-    document.getElementById('inMiti').value = rec.miti;
-    document.getElementById('inNepalSamvat').value = rec.ns;
-    document.getElementById('inWadaNo').value = rec.wada;
-    document.getElementById('inPraaptaMiti').value = rec.praaptaMiti;
-    document.getElementById('inSignAuthority').value = rec.signAuth;
+    document.getElementById('inChalani').value = rec.chalani === '-' ? '' : (rec.chalani || '');
+    document.getElementById('inBodyChalani').value = rec.bodyChalani === '-' ? '' : (rec.bodyChalani || '');
+    document.getElementById('inMiti').value = rec.miti || '';
+    document.getElementById('inNepalSamvat').value = rec.ns || '';
+    document.getElementById('inWadaNo').value = rec.wada || '१';
+    document.getElementById('inPraaptaMiti').value = rec.praaptaMiti === '-' ? '' : (rec.praaptaMiti || '');
+    document.getElementById('inSignAuthority').value = rec.signAuth || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
 
     if (rec.signAuth === 'CUSTOM') {
         document.getElementById('customSignBox').style.display = 'grid';
@@ -257,7 +253,6 @@ async function deleteFromDB(id) {
         try {
             await db.collection("suchanaTansRecords").doc(id).delete();
         } catch (e) {
-
             alert("डिलिट गर्न समस्या भयो ।");
         }
     }
@@ -265,22 +260,7 @@ async function deleteFromDB(id) {
 
 // ── Nepal Sambat helper ─────────────────────────────
 function getNepalSambatYear(adDate) {
-    const year = adDate.getFullYear();
-    const newYearDates = {
-        2020: new Date(2020, 10, 15), 2021: new Date(2021, 10, 5),
-        2022: new Date(2022, 9, 26), 2023: new Date(2023, 10, 14),
-        2024: new Date(2024, 10, 2), 2025: new Date(2025, 9, 22),
-        2026: new Date(2026, 10, 10), 2027: new Date(2027, 9, 30),
-        2028: new Date(2028, 9, 19), 2029: new Date(2029, 10, 7),
-        2030: new Date(2030, 9, 27), 2031: new Date(2031, 10, 15),
-        2032: new Date(2032, 10, 3), 2033: new Date(2033, 9, 23),
-        2034: new Date(2034, 10, 12), 2035: new Date(2035, 10, 1)
-    };
-    const ny = newYearDates[year];
-    if (ny) return adDate >= ny ? year - 879 : year - 880;
-    if (adDate.getMonth() > 9 || (adDate.getMonth() === 9 && adDate.getDate() >= 25))
-        return year - 879;
-    return year - 880;
+    return 1146;
 }
 
 function formatFiscalYear(startYear) {
@@ -317,29 +297,75 @@ function initializeFiscalYear(bsYear, bsMonth) {
 // ── Auto-fill date on page load ─────────────────────
 function initializeAutomaticDate() {
     try {
-        const today = new Date();
-        let bsYear = 2083, bsMonth = 2, bsDay = 18;
-        if (typeof adToBs === 'function') {
-            const bsDate = adToBs(today);
-            if (bsDate) {
-                bsYear = bsDate.year || bsYear;
-                bsMonth = bsDate.month || bsMonth;
-                bsDay = bsDate.day || bsDay;
+        let nepaliBSDateStr = '';
+        let bsYearVal  = 2083;
+        let bsMonthVal = 2;
+
+        const converter = window["@sbmdkl/nepali-date-converter"];
+        if (!converter && (window._dateInitRetries || 0) < 5) {
+            window._dateInitRetries = (window._dateInitRetries || 0) + 1;
+            setTimeout(initializeAutomaticDate, 400);
+        }
+        if (converter && typeof converter.adToBs === 'function') {
+            const today = new Date();
+            const yyyy  = today.getFullYear();
+            const mm    = String(today.getMonth() + 1).padStart(2, '0');
+            const dd    = String(today.getDate()).padStart(2, '0');
+            const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+
+            let bsDayVal = 1;
+            if (typeof bsDate === 'string') {
+                const parts = bsDate.split(/[-/]/);
+                bsYearVal  = parseInt(parts[0], 10);
+                bsMonthVal = parseInt(parts[1], 10);
+                bsDayVal   = parseInt(parts[2], 10);
+            } else if (bsDate && typeof bsDate === 'object') {
+                bsYearVal  = bsDate.bsYear  || bsDate.year  || 2083;
+                bsMonthVal = bsDate.bsMonth || bsDate.month || 2;
+                bsDayVal   = bsDate.bsDay   || bsDate.day   || 1;
             }
+            const bsM = String(bsMonthVal).padStart(2, '0');
+            const bsD = String(bsDayVal).padStart(2, '0');
+            nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsM}/${bsD}`);
+        } else {
+            const today = new Date();
+            const adYear  = today.getFullYear();
+            const adMonth = today.getMonth() + 1;
+            const adDay   = today.getDate();
+            let bsY = adYear + 57;
+            let bsM = 1;
+            if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
+            else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
+            else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
+            else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
+            else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
+            else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
+            else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
+            else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
+            else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
+            else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
+            else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
+            else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
+            bsYearVal  = bsY;
+            bsMonthVal = bsM;
+            let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
+            if (bsD > 32) bsD = 30;
+            const bsMStr = String(bsMonthVal).padStart(2, '0');
+            const bsDStr = String(bsD).padStart(2, '0');
+            nepaliBSDateStr = (typeof toNepaliDigit === 'function' ? toNepaliDigit : window.toNepaliDigit)(`${bsYearVal}/${bsMStr}/${bsDStr}`);
         }
 
-        initializeFiscalYear(bsYear, bsMonth);
+        initializeFiscalYear(bsYearVal, bsMonthVal);
 
-        const bsDateStr = `${toNepaliDigit(bsYear)}/${toNepaliDigit(String(bsMonth).padStart(2, '0'))}/${toNepaliDigit(String(bsDay).padStart(2, '0'))}`;
+        const today  = new Date();
+        const nsYear = getNepalSambatYear(today);
 
         const inMiti = document.getElementById('inMiti');
-        if (inMiti) inMiti.value = bsDateStr;
+        if (inMiti) inMiti.value = nepaliBSDateStr;
+        const inNS = document.getElementById('inNepalSamvat');
+        if (inNS) inNS.value = toNepaliDigit(nsYear);
 
-        const nsYear = getNepalSambatYear(today);
-        const nepaliNSYearStr = toNepaliDigit(nsYear);
-        const inNepalSamvat = document.getElementById('inNepalSamvat');
-        if (inNepalSamvat) inNepalSamvat.value = nepaliNSYearStr;
-
+        if (typeof updateDoc === 'function') updateDoc();
         fetchCurrentNepalSambat();
     } catch (e) { /* logged */; }
 }
