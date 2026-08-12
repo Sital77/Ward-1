@@ -296,6 +296,8 @@
                             isOutdated = true;
                         } else if (templateId === 'suchana-tans' && (data.template_content.includes('किताामा') || data.template_content.includes('पूजी'))) {
                             isOutdated = true;
+                        } else if (templateId === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
+                            isOutdated = true;
                         }
 
                         if (isOutdated) {
@@ -347,14 +349,14 @@
         // Insert new database-managed HTML elements
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
-        if (!tempDiv.querySelector('#lblReceiverAddress')) {
+        if (!tempDiv.querySelector('#lblReceiverAddress') && !tempDiv.querySelector('#receiverAddressContainer')) {
             const firstChild = tempDiv.firstElementChild;
             if (firstChild) {
-                firstChild.id = 'receiverBlock';
+                if (!firstChild.id) firstChild.id = 'receiverBlock';
                 if (firstChild.children && firstChild.children.length > 0) {
-                    firstChild.children[0].id = 'lblReceiverAddress';
+                    if (!firstChild.children[0].id) firstChild.children[0].id = 'lblReceiverAddress';
                 } else {
-                    firstChild.id = 'lblReceiverAddress';
+                    if (!firstChild.id) firstChild.id = 'lblReceiverAddress';
                 }
             }
         }

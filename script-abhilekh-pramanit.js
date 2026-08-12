@@ -236,7 +236,7 @@ function updateDoc() {
     if (lblNS) lblNS.innerText = ns || '........';
 
     // Recipient address & Subject
-    const receiverAddressContainer = document.getElementById('receiverAddressContainer');
+    const receiverAddressContainer = document.getElementById('receiverAddressContainer') || document.getElementById('lblReceiverAddress') || document.querySelector('.receiver-address-block');
     const lblSubject = document.getElementById('lblSubject');
 
     if (mode === 'transfer') {
@@ -248,10 +248,12 @@ function updateDoc() {
         }
     } else {
         const targetMuniType = getSelectedMuniType();
-        const targetMuniName = document.getElementById('inMuniName').value || '..................';
-        const targetWadaNo = document.getElementById('inTargetWadaNo').value || '...';
+        const targetMuniName = document.getElementById('inMuniName').value.trim() || '..................';
+        const targetWadaNo = document.getElementById('inTargetWadaNo').value.trim() || '...';
+        const targetWadaFormatted = (targetWadaNo === '...' || !targetWadaNo) ? '...' : toNepaliDigit(targetWadaNo);
+
         if (receiverAddressContainer) {
-            receiverAddressContainer.innerHTML = `श्री स्थानीय पञ्जिकाधिकारीज्यू<br><span id="lblTargetOffice">${targetMuniName} ${targetMuniType}, वडा नं. ${toNepaliDigit(targetWadaNo)} ।</span>`;
+            receiverAddressContainer.innerHTML = `श्री स्थानीय पञ्जिकाधिकारीज्यू<br><span id="lblTargetOffice">${targetMuniName} ${targetMuniType}, वडा नं. ${targetWadaFormatted} ।</span>`;
         }
         if (lblSubject) {
             lblSubject.innerText = "अभिलेख प्रमाणित गरि पठाईदिने बारे ।";

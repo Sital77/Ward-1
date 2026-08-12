@@ -1573,6 +1573,9 @@
                     if (doc.id === 'bank-sifarish' && (!data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
                         seedTemplateFromLocalFile('bank-sifarish');
                     }
+                    if (doc.id === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
+                        seedTemplateFromLocalFile('abhilekh-pramanit');
+                    }
                 }
             });
 
