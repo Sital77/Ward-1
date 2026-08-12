@@ -40,10 +40,6 @@ function createSession(isAdmin, rememberMe) {
     localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
     localStorage.setItem(AUTH_CONFIG.AUTH_KEY, 'true');
     localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, isAdmin ? 'true' : 'false');
-
-    if (!rememberMe) {
-        sessionStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
-    }
 }
 
 /**
@@ -147,10 +143,17 @@ function sanitizeHTML(html) {
     }
 
     // Check for valid session (new system)
-    const hasValidSession = isSessionValid();
+    let hasValidSession = isSessionValid();
     const hasOldAuth = localStorage.getItem('sifarish_auth') === 'true';
 
-    if (!hasValidSession && !hasOldAuth) {
+    // If old auth exists but no new session token, migrate to new session system
+    if (!hasValidSession && hasOldAuth) {
+        const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
+        createSession(isAdmin, false);
+        hasValidSession = true; // Session just created
+    }
+
+    if (!hasValidSession) {
         // Save the page the user was trying to reach
         localStorage.setItem(AUTH_CONFIG.REDIRECT_KEY, window.location.href);
         window.location.replace('login.html');
@@ -161,12 +164,6 @@ function sanitizeHTML(html) {
     if (window.location.pathname.includes('admin.html') && !isAdminSession() && localStorage.getItem('sifarish_admin') !== 'true') {
         window.location.replace('index.html');
         return;
-    }
-
-    // If old auth exists but no new session, migrate
-    if (hasOldAuth && !hasValidSession) {
-        const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
-        createSession(isAdmin, false);
     }
 
     // Sync with Firebase Auth when loaded + secondary auth verification

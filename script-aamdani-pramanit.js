@@ -7,7 +7,7 @@ const firebaseConfig = {
     appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let landRowCounter = 0;

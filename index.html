@@ -1223,6 +1223,16 @@
                 localStorage.setItem('sifarish_ward', finalWard);
                 localStorage.setItem('sifarish_user', username);
 
+                // Create 24-hour session token
+                const session = {
+                    token: 'sif_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 8),
+                    createdAt: Date.now(),
+                    expiresAt: Date.now() + (24 * 60 * 60 * 1000),
+                    isAdmin: isAdmin,
+                    rememberMe: false
+                };
+                localStorage.setItem('sifarish_session', JSON.stringify(session));
+
                 if (btn) btn.textContent = '✅ सफल';
                 setTimeout(() => {
                     closeModal('modal-sif-login');
@@ -1247,6 +1257,8 @@
             localStorage.removeItem('sifarish_admin');
             localStorage.removeItem('sifarish_session');
             localStorage.removeItem('sifarish_ward');
+            localStorage.removeItem('sifarish_redirect');
+            localStorage.removeItem('sifarish_user');
             sessionStorage.removeItem('sifarish_session');
             updateTopBarButtons();
             closeModal('modal-sifarish');

@@ -9,7 +9,7 @@ const firebaseConfig = {
 };
 
 // २. क्लाउड डाटाबेस चालु गर्ने
-const app = firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];

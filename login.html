@@ -519,9 +519,6 @@
             localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
             localStorage.setItem(AUTH_CONFIG.AUTH_KEY, 'true');
             localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, isAdmin ? 'true' : 'false');
-            if (!rememberMe) {
-                sessionStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
-            }
         }
 
         function isSessionValid() {
