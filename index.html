@@ -1562,6 +1562,18 @@
             const existingIds = [];
             snapshot.forEach(doc => {
                 existingIds.push(doc.id);
+                const data = doc.data();
+                if (data && data.template_content) {
+                    if (doc.id === 'ghar-kayam' && (!data.template_content.includes('पूर्जा/सेस्तामा') || data.template_content.includes('पूजी') || data.template_content.includes('किताामा'))) {
+                        seedTemplateFromLocalFile('ghar-kayam');
+                    }
+                    if (doc.id === 'suchana-tans' && (data.template_content.includes('किताामा') || data.template_content.includes('पूजी'))) {
+                        seedTemplateFromLocalFile('suchana-tans');
+                    }
+                    if (doc.id === 'bank-sifarish' && (!data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
+                        seedTemplateFromLocalFile('bank-sifarish');
+                    }
+                }
             });
 
             defaultTemplateIds.forEach(id => {

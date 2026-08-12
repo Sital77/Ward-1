@@ -272,6 +272,11 @@
                 try {
                     const localList = JSON.parse(localStorage.getItem('custom_sifarish_templates') || '[]');
                     localOverride = localList.find(t => t.id === templateId);
+                    if (localOverride && localOverride.template_content) {
+                        if (localOverride.template_content.includes('पूजी') || localOverride.template_content.includes('किताामा')) {
+                            localOverride = null;
+                        }
+                    }
                 } catch(e) {}
 
                 if (localOverride && (localOverride.status === 'Active' || localOverride.status === 'Published' || !localOverride.status) && localOverride.template_content) {
@@ -283,12 +288,17 @@
                     if (doc.exists) {
                         const data = doc.data();
                         let isOutdated = false;
-                        if (templateId === 'bank-sifarish' && (!data.template_content || !data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
+                        if (!data.template_content) {
+                            isOutdated = true;
+                        } else if (templateId === 'bank-sifarish' && (!data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'ghar-kayam' && (!data.template_content.includes('पूर्जा/सेस्तामा') || data.template_content.includes('पूजी') || data.template_content.includes('किताामा'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'suchana-tans' && (data.template_content.includes('किताामा') || data.template_content.includes('पूजी'))) {
                             isOutdated = true;
                         }
 
-                        if (isOutdated && !localOverride) {
-
+                        if (isOutdated) {
                             seedLocalContent(db, templateId)
                                 .then(resolveTemplatePromise)
                                 .catch(resolveTemplatePromise);
