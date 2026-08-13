@@ -276,6 +276,9 @@
                         if (localOverride.template_content.includes('पूजी') || localOverride.template_content.includes('किताामा')) {
                             localOverride = null;
                         }
+                        if (localOverride && templateId === 'charkilla' && localOverride.template_content.includes('नाममा तहाँ') && !localOverride.template_content.includes('श्री भुमी प्रशासन')) {
+                            localOverride = null;
+                        }
                     }
                 } catch(e) {}
 
@@ -297,6 +300,8 @@
                         } else if (templateId === 'suchana-tans' && (data.template_content.includes('किताामा') || data.template_content.includes('पूजी'))) {
                             isOutdated = true;
                         } else if (templateId === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'charkilla' && data.template_content.includes('नाममा तहाँ') && !data.template_content.includes('श्री भुमी प्रशासन')) {
                             isOutdated = true;
                         }
 
