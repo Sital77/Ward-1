@@ -31,7 +31,8 @@
         'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
         'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' },
         'yojana-bank-sifarish': { collection: 'yojanaBankRecords', title: 'योजनाको बैंक खाता सिफारिस' },
-        'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' }
+        'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' },
+        'aamdani-pramanit': { collection: 'aamdaniPramanitRecords', title: 'आम्दानी प्रमाणित सिफारिस' }
     };
 
     // Intercept firebase initializeApp to prevent duplicate app errors
@@ -216,6 +217,7 @@
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
     else if (path.includes('nabalak-parichayapatra.html')) templateId = 'nabalak-parichayapatra';
     else if (path.includes('jaggadhani-pratilipi.html')) templateId = 'jaggadhani-pratilipi';
+    else if (path.includes('aamdani-pramanit.html')) templateId = 'aamdani-pramanit';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
         isDynamic = true;
@@ -572,7 +574,8 @@
                 'abhilekh-pramanit': 'अभिलेख प्रमाणित',
                 'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
                 'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
-                'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस'
+                'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
+                'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस'
             };
 
             const categories = {
@@ -588,7 +591,8 @@
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
                 'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',
                 'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
-                'bank-sifarish': 'व्यक्तिगत प्रमाणित'
+                'bank-sifarish': 'व्यक्तिगत प्रमाणित',
+                'aamdani-pramanit': 'व्यक्तिगत प्रमाणित'
             };
 
             await db.collection('sifarish_templates').doc(id).set({
@@ -981,82 +985,92 @@
         // Apply styles initially
         applyStyles(savedSize, savedItalic, savedColor);
 
-        // 5. Create Controls UI widget
-        const card = document.createElement('div');
-        card.className = 'font-settings-card';
-        card.innerHTML = `
-            <div class="font-settings-title">
-                🎨 अक्षर र सजावट सेटिङ (Font & Styling)
-            </div>
-            <div class="font-settings-row">
-                <span class="font-settings-label">अक्षरको साइज (Size):</span>
-                <div class="font-settings-control">
-                    <input type="range" class="font-settings-slider" id="fsSlider" min="10" max="26" value="${savedSize}">
-                    <span class="font-settings-val" id="fsVal">${savedSize} pt</span>
+        // 5. Create Controls UI widget safely (prevent duplicates)
+        let card = document.getElementById('fontSettingsCard');
+        if (!card) {
+            card = document.createElement('div');
+            card.id = 'fontSettingsCard';
+            card.className = 'font-settings-card';
+            card.innerHTML = `
+                <div class="font-settings-title">
+                    🎨 अक्षर र सजावट सेटिङ (Font & Styling)
                 </div>
-            </div>
-            <div class="font-settings-row">
-                <span class="font-settings-label">छड्के अक्षर (Italic):</span>
-                <div class="font-settings-control">
-                    <label class="font-settings-switch">
-                        <input type="checkbox" id="fsItalic" ${savedItalic ? 'checked' : ''}>
-                        <span class="slider-toggle"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="font-settings-row">
-                <span class="font-settings-label">अक्षरको रङ्ग (Color):</span>
-                <div class="font-settings-control">
-                    <div class="color-presets">
-                        <div class="color-preset" style="background-color: #000000;" data-color="#000000" title="Black"></div>
-                        <div class="color-preset" style="background-color: #1e3a8a;" data-color="#1e3a8a" title="Dark Blue"></div>
-                        <div class="color-preset" style="background-color: #7f1d1d;" data-color="#7f1d1d" title="Dark Red"></div>
-                        <div class="color-preset" style="background-color: #064e3b;" data-color="#064e3b" title="Dark Green"></div>
+                <div class="font-settings-row">
+                    <span class="font-settings-label">अक्षरको साइज (Size):</span>
+                    <div class="font-settings-control">
+                        <input type="range" class="font-settings-slider" id="fsSlider" min="10" max="26" value="${savedSize}">
+                        <span class="font-settings-val" id="fsVal">${savedSize} pt</span>
                     </div>
-                    <input type="color" class="font-settings-color" id="fsColor" value="${savedColor}">
                 </div>
-            </div>
-        `;
+                <div class="font-settings-row">
+                    <span class="font-settings-label">छड्के अक्षर (Italic):</span>
+                    <div class="font-settings-control">
+                        <label class="font-settings-switch">
+                            <input type="checkbox" id="fsItalic" ${savedItalic ? 'checked' : ''}>
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-settings-row">
+                    <span class="font-settings-label">अक्षरको रङ्ग (Color):</span>
+                    <div class="font-settings-control">
+                        <div class="color-presets">
+                            <div class="color-preset" style="background-color: #000000;" data-color="#000000" title="Black"></div>
+                            <div class="color-preset" style="background-color: #1e3a8a;" data-color="#1e3a8a" title="Dark Blue"></div>
+                            <div class="color-preset" style="background-color: #7f1d1d;" data-color="#7f1d1d" title="Dark Red"></div>
+                            <div class="color-preset" style="background-color: #064e3b;" data-color="#064e3b" title="Dark Green"></div>
+                        </div>
+                        <input type="color" class="font-settings-color" id="fsColor" value="${savedColor}">
+                    </div>
+                </div>
+            `;
 
-        // Insert widget above print button in the sidebar panel
-        if (btnPrint.parentNode) {
-            btnPrint.parentNode.insertBefore(card, btnPrint);
-        }
+            // Insert widget above print button in the sidebar panel
+            if (btnPrint.parentNode) {
+                btnPrint.parentNode.insertBefore(card, btnPrint);
+            }
 
-        // 6. Bind events
-        const slider = document.getElementById('fsSlider');
-        const valLabel = document.getElementById('fsVal');
-        const italicCheckbox = document.getElementById('fsItalic');
-        const colorPicker = document.getElementById('fsColor');
+            // 6. Bind events (once)
+            const slider = document.getElementById('fsSlider');
+            const valLabel = document.getElementById('fsVal');
+            const italicCheckbox = document.getElementById('fsItalic');
+            const colorPicker = document.getElementById('fsColor');
 
-        slider.addEventListener('input', (e) => {
-            const sz = e.target.value;
-            valLabel.textContent = `${sz} pt`;
-            localStorage.setItem('doc_font_size_' + (templateId || 'global'), sz);
-            localStorage.setItem('doc_font_size', sz);
-            applyStyles(sz, italicCheckbox.checked, colorPicker.value);
-        });
+            if (slider) {
+                slider.addEventListener('input', (e) => {
+                    const sz = e.target.value;
+                    if (valLabel) valLabel.textContent = `${sz} pt`;
+                    localStorage.setItem('doc_font_size_' + (templateId || 'global'), sz);
+                    localStorage.setItem('doc_font_size', sz);
+                    applyStyles(sz, italicCheckbox ? italicCheckbox.checked : false, colorPicker ? colorPicker.value : '#000000');
+                });
+            }
 
-        italicCheckbox.addEventListener('change', (e) => {
-            const it = e.target.checked;
-            localStorage.setItem('doc_font_style', it ? 'italic' : 'normal');
-            applyStyles(slider.value, it, colorPicker.value);
-        });
+            if (italicCheckbox) {
+                italicCheckbox.addEventListener('change', (e) => {
+                    const it = e.target.checked;
+                    localStorage.setItem('doc_font_style', it ? 'italic' : 'normal');
+                    applyStyles(slider ? slider.value : savedSize, it, colorPicker ? colorPicker.value : '#000000');
+                });
+            }
 
-        colorPicker.addEventListener('input', (e) => {
-            const col = e.target.value;
-            localStorage.setItem('doc_text_color', col);
-            applyStyles(slider.value, italicCheckbox.checked, col);
-        });
+            if (colorPicker) {
+                colorPicker.addEventListener('input', (e) => {
+                    const col = e.target.value;
+                    localStorage.setItem('doc_text_color', col);
+                    applyStyles(slider ? slider.value : savedSize, italicCheckbox ? italicCheckbox.checked : false, col);
+                });
+            }
 
-        document.querySelectorAll('.color-preset').forEach(preset => {
-            preset.addEventListener('click', () => {
-                const col = preset.getAttribute('data-color');
-                colorPicker.value = col;
-                localStorage.setItem('doc_text_color', col);
-                applyStyles(slider.value, italicCheckbox.checked, col);
+            card.querySelectorAll('.color-preset').forEach(preset => {
+                preset.addEventListener('click', () => {
+                    const col = preset.getAttribute('data-color');
+                    if (colorPicker) colorPicker.value = col;
+                    localStorage.setItem('doc_text_color', col);
+                    applyStyles(slider ? slider.value : savedSize, italicCheckbox ? italicCheckbox.checked : false, col);
+                });
             });
-        });
+        }
 
         // 7. Automatic Nepali Date Banner Badge Display
         try {
