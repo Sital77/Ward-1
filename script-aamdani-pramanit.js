@@ -313,11 +313,135 @@ window.updateDoc = function() {
     }
 };
 
-// Initial Add 1 Land and 1 Income Row
+function formatFiscalYear(startYear) {
+    const endYear = startYear + 1;
+    const endYearSuffix = String(endYear).slice(-2);
+    const englishFY = `${startYear}/0${endYearSuffix}`;
+    return window.toNepaliDigit(englishFY);
+}
+
+function initializeFiscalYear(bsYear, bsMonth) {
+    try {
+        let currentStartYear = bsYear;
+        if (bsMonth < 4) {
+            currentStartYear = bsYear - 1;
+        }
+        
+        const fySelect = document.getElementById('inPatraSankhya');
+        if (fySelect) {
+            fySelect.innerHTML = '';
+            
+            const prevFY = formatFiscalYear(currentStartYear - 1);
+            const currFY = formatFiscalYear(currentStartYear);
+            const nextFY = formatFiscalYear(currentStartYear + 1);
+            
+            fySelect.insertAdjacentHTML('beforeend', `<option value="${prevFY}">${prevFY}</option>`);
+            fySelect.insertAdjacentHTML('beforeend', `<option value="${currFY}" selected>${currFY}</option>`);
+            fySelect.insertAdjacentHTML('beforeend', `<option value="${nextFY}">${nextFY}</option>`);
+            fySelect.value = currFY;
+        }
+    } catch (error) {}
+}
+
+function getNepalSambatYear(adDate) {
+    return 1146;
+}
+
+window.initializeAutomaticDate = function() {
+    try {
+        let nepaliBSDateStr = "";
+        let nepaliNSYearStr = "";
+        let bsYearVal = 2083;
+        let bsMonthVal = 2;
+
+        const converter = window["@sbmdkl/nepali-date-converter"];
+        if (!converter && (window._dateInitRetries || 0) < 5) {
+            window._dateInitRetries = (window._dateInitRetries || 0) + 1;
+            setTimeout(window.initializeAutomaticDate, 400);
+        }
+        if (converter && typeof converter.adToBs === 'function') {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const adDateStr = `${yyyy}-${mm}-${dd}`;
+            
+            const bsDate = converter.adToBs(adDateStr);
+            let bsDayVal = 27;
+            if (typeof bsDate === 'string') {
+                const parts = bsDate.split(/[-/]/);
+                bsYearVal = parseInt(parts[0], 10);
+                bsMonthVal = parseInt(parts[1], 10);
+                bsDayVal = parseInt(parts[2], 10);
+            } else if (bsDate && typeof bsDate === 'object') {
+                bsYearVal = bsDate.bsYear || bsDate.year || bsDate.currentYear || 2083;
+                bsMonthVal = bsDate.bsMonth || bsDate.month || bsDate.currentMonth || 2;
+                bsDayVal = bsDate.bsDay || bsDate.day || bsDate.currentDay || 27;
+            }
+
+            const bsYear = bsYearVal;
+            const bsMonth = String(bsMonthVal).padStart(2, '0');
+            const bsDay = String(bsDayVal).padStart(2, '0');
+            const englishBSDateStr = `${bsYear}/${bsMonth}/${bsDay}`;
+            nepaliBSDateStr = window.toNepaliDigit(englishBSDateStr);
+        } else {
+            const today = new Date();
+            const adYear  = today.getFullYear();
+            const adMonth = today.getMonth() + 1;
+            const adDay   = today.getDate();
+            let bsY = adYear + 57;
+            let bsM = 1;
+            if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
+            else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
+            else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
+            else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
+            else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
+            else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
+            else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
+            else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
+            else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
+            else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
+            else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
+            else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
+            bsYearVal  = bsY;
+            bsMonthVal = bsM;
+            let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
+            if (bsD > 32) bsD = 30;
+            const bsMStr = String(bsMonthVal).padStart(2, '0');
+            const bsDStr = String(bsD).padStart(2, '0');
+            nepaliBSDateStr = window.toNepaliDigit(`${bsYearVal}/${bsMStr}/${bsDStr}`);
+        }
+
+        initializeFiscalYear(bsYearVal, bsMonthVal);
+
+        const today = new Date();
+        const nsYear = getNepalSambatYear(today);
+        nepaliNSYearStr = window.toNepaliDigit(nsYear);
+
+        const inMiti = document.getElementById('inMiti');
+        if (inMiti) {
+            inMiti.value = nepaliBSDateStr;
+        }
+
+        const inNepalSamvat = document.getElementById('inNepalSamvat');
+        if (inNepalSamvat) {
+            inNepalSamvat.value = nepaliNSYearStr;
+        }
+
+        if (typeof window.updateDoc === 'function') window.updateDoc();
+    } catch (error) {}
+};
+
+// Initial Add 1 Land and 1 Income Row and initialize automatic date
 window.onload = function() {
+    window.initializeAutomaticDate();
     addLandRow();
     addIncomeRow();
 };
+
+window.addEventListener('templateInjected', function() {
+    window.initializeAutomaticDate();
+});
 
 window.renderDatabaseTable = function() {
     const tbody = document.getElementById('dbTableBody');
