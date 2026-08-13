@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>जरिवाना हिसाब प्रणाली | Fine Calculation System</title>
+    <meta name="description" content="गौरादह नगरपालिका - जरिवाना हिसाब प्रणाली। मूल रकममा १०%, २०% र ३०% जरिवाना हिसाब गर्नुहोस्।">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============ CSS Variables & Design Tokens ============ */
+        :root {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --input-border: #cbd5e0;
+            --input-focus: #4299e1;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.1);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-teal: linear-gradient(135deg, #38b2ac 0%, #319795 50%, #2c7a7b 100%);
+            --gradient-orange: linear-gradient(135deg, #ed8936 0%, #dd6b20 50%, #c05621 100%);
+            --gradient-red: linear-gradient(135deg, #fc8181 0%, #e53e3e 50%, #c53030 100%);
+            --card-teal-bg: rgba(56, 178, 172, 0.06);
+            --card-orange-bg: rgba(237, 137, 54, 0.06);
+            --card-red-bg: rgba(229, 62, 62, 0.06);
+            --teal: #319795;
+            --orange: #dd6b20;
+            --red: #e53e3e;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark Mode Variables */
+        body.dark-mode {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.9);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --input-border: #475569;
+            --input-focus: #60a5fa;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --card-teal-bg: rgba(56, 178, 172, 0.1);
+            --card-orange-bg: rgba(237, 137, 54, 0.1);
+            --card-red-bg: rgba(229, 62, 62, 0.1);
+        }
+
+        /* ============ Reset & Base ============ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Mukta', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 0;
+            transition: background var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        /* ============ Background Decoration ============ */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-decoration .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.25;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-decoration .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #667eea;
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-decoration .orb-2 {
+            width: 350px;
+            height: 350px;
+            background: #38b2ac;
+            bottom: -80px;
+            left: -80px;
+            animation-delay: -7s;
+        }
+
+        .bg-decoration .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: #ed8936;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -14s;
+        }
+
+        body.dark-mode .bg-decoration .orb {
+            opacity: 0.12;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -40px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(15px, 35px) scale(1.02); }
+        }
+
+        /* ============ Main Container ============ */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px 50px;
+        }
+
+        /* ============ Top Navigation Bar ============ */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            transition: all var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--input-focus);
+            border-color: var(--input-focus);
+            transform: translateX(-3px);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: var(--border-color);
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background var(--transition);
+            flex-shrink: 0;
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform var(--transition), background var(--transition);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #4299e1;
+        }
+
+        body.dark-mode .theme-toggle::after {
+            transform: translateX(24px);
+            background: #1e293b;
+        }
+
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            transition: opacity var(--transition);
+        }
+
+        .theme-toggle .icon-sun {
+            left: 6px;
+            opacity: 1;
+        }
+
+        .theme-toggle .icon-moon {
+            right: 6px;
+            opacity: 0.5;
+        }
+
+        body.dark-mode .theme-toggle .icon-sun {
+            opacity: 0.5;
+        }
+
+        body.dark-mode .theme-toggle .icon-moon {
+            opacity: 1;
+        }
+
+        /* ============ Hero Header ============ */
+        .hero-header {
+            text-align: center;
+            padding: 35px 20px 30px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .hero-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 18px;
+            background: var(--gradient-hero);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
+            animation: pulse-icon 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35); transform: scale(1); }
+            50% { box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5); transform: scale(1.03); }
+        }
+
+        .hero-icon svg {
+            width: 36px;
+            height: 36px;
+            color: #fff;
+        }
+
+        .hero-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-header p {
+            font-size: 15px;
+            color: var(--text-muted);
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ============ Input Section ============ */
+        .input-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition);
+        }
+
+        .input-card:focus-within {
+            border-color: var(--input-focus);
+            box-shadow: var(--shadow-md), 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+        }
+
+        .input-label .label-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #ebf4ff, #bee3f8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        body.dark-mode .input-label .label-icon {
+            background: linear-gradient(135deg, #1e3a5f, #2b4c7e);
+        }
+
+        .input-label .label-icon svg {
+            width: 20px;
+            height: 20px;
+            color: #3182ce;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .currency-prefix {
+            position: absolute;
+            left: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-muted);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #totalInput {
+            width: 100%;
+            padding: 16px 20px 16px 55px;
+            font-size: 22px;
+            font-weight: 600;
+            font-family: 'Mukta', sans-serif;
+            border: 2px solid var(--input-border);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            outline: none;
+            transition: all var(--transition);
+            -moz-appearance: textfield;
+        }
+
+        #totalInput::-webkit-outer-spin-button,
+        #totalInput::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #totalInput::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 17px;
+        }
+
+        #totalInput:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.12);
+        }
+
+        .input-hint {
+            display: block;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ============ Results Grid ============ */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* ============ Fine Card ============ */
+        .fine-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardSlideIn 0.6s ease forwards;
+        }
+
+        .fine-card:nth-child(1) { animation-delay: 0.1s; }
+        .fine-card:nth-child(2) { animation-delay: 0.25s; }
+        .fine-card:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes cardSlideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fine-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Card Header Strip */
+        .card-header {
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 22px;
+            right: 22px;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .card-10 .card-header { background: var(--card-teal-bg); }
+        .card-20 .card-header { background: var(--card-orange-bg); }
+        .card-30 .card-header { background: var(--card-red-bg); }
+
+        .card-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .card-10 .card-badge { background: var(--gradient-teal); box-shadow: 0 4px 12px rgba(49, 151, 149, 0.35); }
+        .card-20 .card-badge { background: var(--gradient-orange); box-shadow: 0 4px 12px rgba(221, 107, 32, 0.35); }
+        .card-30 .card-badge { background: var(--gradient-red); box-shadow: 0 4px 12px rgba(229, 62, 62, 0.35); }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .card-10 .card-title { color: var(--teal); }
+        .card-20 .card-title { color: var(--orange); }
+        .card-30 .card-title { color: var(--red); }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Card Body */
+        .card-body {
+            padding: 20px 22px 22px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 14.5px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .detail-row .label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .detail-row .label .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .card-10 .detail-row .label .dot { background: var(--teal); }
+        .card-20 .detail-row .label .dot { background: var(--orange); }
+        .card-30 .detail-row .label .dot { background: var(--red); }
+
+        .detail-row .value {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        .detail-row .fine-value {
+            font-weight: 700;
+        }
+
+        .card-10 .detail-row .fine-value { color: var(--teal); }
+        .card-20 .detail-row .fine-value { color: var(--orange); }
+        .card-30 .detail-row .fine-value { color: var(--red); }
+
+        /* Total Section */
+        .total-section {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-10 .total-section { background: var(--card-teal-bg); border: 1px solid rgba(56, 178, 172, 0.2); }
+        .card-20 .total-section { background: var(--card-orange-bg); border: 1px solid rgba(237, 137, 54, 0.2); }
+        .card-30 .total-section { background: var(--card-red-bg); border: 1px solid rgba(229, 62, 62, 0.2); }
+
+        .total-section .total-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .total-section .total-value {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .card-10 .total-section .total-value { color: var(--teal); }
+        .card-20 .total-section .total-value { color: var(--orange); }
+        .card-30 .total-section .total-value { color: var(--red); }
+
+        /* ============ Footer ============ */
+        .footer-note {
+            text-align: center;
+            margin-top: 35px;
+            padding: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            line-height: 1.7;
+        }
+
+        .footer-note strong {
+            color: var(--text-secondary);
+        }
+
+        /* ============ Value Change Animation ============ */
+        .value-animate {
+            animation: valueFlash 0.35s ease;
+        }
+
+        @keyframes valueFlash {
+            0% { opacity: 0.4; transform: scale(0.95); }
+            60% { opacity: 1; transform: scale(1.04); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* ============ Responsive Design ============ */
+        @media (max-width: 900px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .page-wrapper {
+                padding: 20px 14px 40px;
+            }
+
+            .hero-header h1 {
+                font-size: 23px;
+            }
+
+            .hero-header p {
+                font-size: 14px;
+            }
+
+            .input-card {
+                padding: 22px 20px;
+            }
+
+            #totalInput {
+                font-size: 19px;
+                padding: 14px 18px 14px 50px;
+            }
+
+            .card-header {
+                padding: 14px 18px;
+            }
+
+            .card-body {
+                padding: 16px 18px 18px;
+            }
+
+            .total-section .total-value {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-icon {
+                width: 58px;
+                height: 58px;
+                border-radius: 16px;
+            }
+
+            .hero-icon svg {
+                width: 28px;
+                height: 28px;
+            }
+
+            .hero-header h1 {
+                font-size: 20px;
+            }
+
+            .card-badge {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+                border-radius: 10px;
+            }
+
+            .card-title {
+                font-size: 15px;
+            }
+
+            .detail-row {
+                font-size: 13.5px;
+            }
+
+            .detail-row .value {
+                font-size: 14px;
+            }
+        }
+
+        /* ============ Print Styles ============ */
+        @media print {
+            .bg-decoration, .top-nav, .footer-note { display: none; }
+            body { background: white !important; padding: 0; }
+            .page-wrapper { padding: 0; }
+            .fine-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+            .results-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Orbs -->
+    <div class="bg-decoration" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="page-wrapper">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <a href="index.html" class="back-link" title="मुख्य पृष्ठमा जानुहोस्">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                मुख्य पृष्ठ
+            </a>
+            <button class="theme-toggle" onclick="toggleDarkMode()" title="डार्क/लाइट मोड" aria-label="Toggle dark mode">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#f59e0b"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#60a5fa"><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+            </button>
+        </nav>
+
+        <!-- Hero Header -->
+        <header class="hero-header">
+            <div class="hero-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25v-.008zm2.25-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008v-.008zm2.25-2.25h.008v.008H15v-.008zm0 2.25h.008v.008H15v-.008zM3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v2.526c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-2.526a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"/></svg>
+            </div>
+            <h1>जरिवाना हिसाब प्रणाली</h1>
+            <p>मूल रकम प्रविष्ट गर्नुहोस् र १०%, २०% तथा ३०% जरिवानाको विस्तृत हिसाब तुरुन्तै हेर्नुहोस्।</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="input-card" id="inputCard">
+            <div class="input-label">
+                <div class="label-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
+                </div>
+                <div>
+                    <span>मूल / जम्मा रकम राख्नुहोस्</span>
+                </div>
+            </div>
+            <div class="input-wrapper">
+                <span class="currency-prefix">रू.</span>
+                <input type="number" id="totalInput" placeholder="उदा: ५,०००" oninput="calculateAll()" min="0" step="any" autocomplete="off">
+            </div>
+            <small class="input-hint">💡 रकम टाइप गर्ने बित्तिकै जरिवानाको हिसाब स्वतः देखिनेछ।</small>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="results-grid" id="resultsGrid">
+
+            <!-- १०% Card -->
+            <div class="fine-card card-10">
+                <div class="card-header">
+                    <div class="card-badge">१०%</div>
+                    <div>
+                        <div class="card-title">१०% जरिवाना</div>
+                        <div class="card-subtitle">न्यूनतम दर</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="detail-row">
+                        <span class="label"><span class="dot"></span> मूल रकम</span>
+                        <span class="value" id="base10">रू. ०</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label"><span class="dot"></span> जरिवाना रकम (१०%)</span>
+                        <span class="value fine-value" id="fine10">रू. ०</span>
+                    </div>
+                    <div class="total-section">
+                        <span class="total-label">जम्मा तिर्नुपर्ने</span>
+                        <span class="total-value" id="total10">रू. ०</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- २०% Card -->
+            <div class="fine-card card-20">
+                <div class="card-header">
+                    <div class="card-badge">२०%</div>
+                    <div>
+                        <div class="card-title">२०% जरिवाना</div>
+                        <div class="card-subtitle">मध्यम दर</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="detail-row">
+                        <span class="label"><span class="dot"></span> मूल रकम</span>
+                        <span class="value" id="base20">रू. ०</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label"><span class="dot"></span> जरिवाना रकम (२०%)</span>
+                        <span class="value fine-value" id="fine20">रू. ०</span>
+                    </div>
+                    <div class="total-section">
+                        <span class="total-label">जम्मा तिर्नुपर्ने</span>
+                        <span class="total-value" id="total20">रू. ०</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ३०% Card (एकमुष्ट) -->
+            <div class="fine-card card-30">
+                <div class="card-header">
+                    <div class="card-badge">३०%</div>
+                    <div>
+                        <div class="card-title">३०% एकमुष्ट जरिवाना</div>
+                        <div class="card-subtitle">अधिकतम दर</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="detail-row">
+                        <span class="label"><span class="dot"></span> मूल रकम</span>
+                        <span class="value" id="base30">रू. ०</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label"><span class="dot"></span> जरिवाना रकम (३०%)</span>
+                        <span class="value fine-value" id="fine30">रू. ०</span>
+                    </div>
+                    <div class="total-section">
+                        <span class="total-label">जम्मा तिर्नुपर्ने</span>
+                        <span class="total-value" id="total30">रू. ०</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-note">
+            <strong>गौरादह नगरपालिका</strong> · जरिवाना हिसाब प्रणाली<br>
+            यो प्रणाली अनुमानित हिसाबको लागि मात्र हो। अन्तिम रकम सम्बन्धित निकायबाट पुष्टि गर्नुहोस्।
+        </div>
+    </div>
+
+    <script>
+        /**
+         * नेपाली अंक Map
+         */
+        const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+
+        /**
+         * Number लाई नेपाली अंक र Indian/Nepali comma ढाँचामा Format गर्ने
+         * उदा: 15000 → १५,०००  |  1234567.5 → १२,३४,५६७.५
+         */
+        function formatNepali(num) {
+            if (num === 0) return '०';
+
+            // दशमलव भाग छुट्याउने
+            let parts = num.toString().split('.');
+            let intPart = parts[0];
+            let decPart = parts[1] || '';
+
+            // Indian/Nepali comma system: पछिल्लो ३ अंक, त्यसपछि २-२ अंक
+            let lastThree = intPart.slice(-3);
+            let remaining = intPart.slice(0, -3);
+            let formatted = lastThree;
+            if (remaining.length > 0) {
+                // २-२ अंकमा comma
+                formatted = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + formatted;
+            }
+
+            // दशमलव थप्ने (अधिकतम २ अंक)
+            if (decPart) {
+                decPart = decPart.substring(0, 2);
+                formatted += '.' + decPart;
+            }
+
+            // Latin अंकलाई नेपाली अंकमा बदल्ने
+            return formatted.replace(/[0-9]/g, function(d) {
+                return nepaliDigits[parseInt(d)];
+            });
+        }
+
+        /**
+         * Value अपडेट गर्दा animation थप्ने
+         */
+        function updateWithAnimation(element, text) {
+            element.textContent = text;
+            element.classList.remove('value-animate');
+            // Trigger reflow to restart animation
+            void element.offsetWidth;
+            element.classList.add('value-animate');
+        }
+
+        /**
+         * सबै जरिवाना हिसाब गर्ने मुख्य Function
+         * Input Event मा Real-time कल हुन्छ
+         */
+        function calculateAll() {
+            const rawValue = document.getElementById('totalInput').value;
+            const amount = parseFloat(rawValue) || 0;
+
+            // Define all fine percentages
+            const fines = [
+                { rate: 0.10, baseId: 'base10', fineId: 'fine10', totalId: 'total10' },
+                { rate: 0.20, baseId: 'base20', fineId: 'fine20', totalId: 'total20' },
+                { rate: 0.30, baseId: 'base30', fineId: 'fine30', totalId: 'total30' }
+            ];
+
+            fines.forEach(function(f) {
+                const fineAmount = amount * f.rate;
+                const totalAmount = amount + fineAmount;
+
+                updateWithAnimation(
+                    document.getElementById(f.baseId),
+                    'रू. ' + formatNepali(amount)
+                );
+                updateWithAnimation(
+                    document.getElementById(f.fineId),
+                    'रू. ' + formatNepali(fineAmount)
+                );
+                updateWithAnimation(
+                    document.getElementById(f.totalId),
+                    'रू. ' + formatNepali(totalAmount)
+                );
+            });
+        }
+
+        /**
+         * Dark Mode Toggle
+         */
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('jaribana-dark-mode', isDark ? 'true' : 'false');
+        }
+
+        // Restore dark mode preference on load
+        (function() {
+            if (localStorage.getItem('jaribana-dark-mode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+    </script>
+</body>
+
+</html>
