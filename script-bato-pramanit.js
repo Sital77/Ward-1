@@ -123,9 +123,15 @@ function reindexFormRows() {
     });
 }
 
-function generateLandDetailsText(lands) {
+function generateLandDetailsText(lands, landUseZone = 'NONE') {
     if (!lands || lands.length === 0) {
-        return `दर्ता कायम रहेको कित्ता नं. <span class="fill-space">.......</span> को क्षेत्रफल: <span class="fill-space">.......</span> व.मि जग्गाको <span class="fill-space">.......</span> तर्फ <span class="fill-space">....</span> फुटे <span class="fill-space">.......</span> बाटो भएको व्यहोरा प्रमाणित गरिन्छ ।`;
+        let baseNoLand = `दर्ता कायम रहेको कित्ता नं. <span class="fill-space">.......</span> को क्षेत्रफल: <span class="fill-space">.......</span> व.मि जग्गाको <span class="fill-space">.......</span> तर्फ <span class="fill-space">....</span> फुटे <span class="fill-space">.......</span> बाटो भएको`;
+        if (landUseZone && landUseZone !== 'NONE') {
+            const formattedZone = landUseZone.includes('क्षेत्र') ? landUseZone : landUseZone + ' क्षेत्र';
+            return baseNoLand + ` तथा भूउपयोग ऐन २०७६ को दफा २० र गौरादह नगरपालिकाको मिति: २०७९/१०/२६ को निर्णय अनुसार उक्त जग्गा <span style="text-decoration: underline; font-weight: bold;">${formattedZone}</span> भित्र पर्न आएको व्यहोरा प्रमाणित गरिन्छ ।`;
+        } else {
+            return baseNoLand + ` व्यहोरा प्रमाणित गरिन्छ ।`;
+        }
     }
     
     let parts = [];
@@ -148,7 +154,13 @@ function generateLandDetailsText(lands) {
         const lastPart = parts.pop();
         text += parts.join(", ") + " तथा " + lastPart;
     }
-    text += " व्यहोरा प्रमाणित गरिन्छ ।";
+
+    if (landUseZone && landUseZone !== 'NONE') {
+        const formattedZone = landUseZone.includes('क्षेत्र') ? landUseZone : landUseZone + ' क्षेत्र';
+        text += ` तथा भूउपयोग ऐन २०७६ को दफा २० र गौरादह नगरपालिकाको मिति: २०७९/१०/२६ को निर्णय अनुसार उक्त जग्गा <span style="text-decoration: underline; font-weight: bold;">${formattedZone}</span> भित्र पर्न आएको व्यहोरा प्रमाणित गरिन्छ ।`;
+    } else {
+        text += " व्यहोरा प्रमाणित गरिन्छ ।";
+    }
     return text;
 }
 
@@ -200,7 +212,11 @@ window.updateDoc = function () {
         }
     });
 
-    const landDetailsText = generateLandDetailsText(lands);
+    // Land Use Act Statement Controller
+    const landUseSelect = document.getElementById('inLandUseZone');
+    const selectedZone = landUseSelect ? landUseSelect.value : 'NONE';
+
+    const landDetailsText = generateLandDetailsText(lands, selectedZone);
 
     if (changeAddress) {
         document.getElementById('lblCustDistrict').innerText = document.getElementById('inCustDistrict').value || '..........';
@@ -247,9 +263,6 @@ window.updateDoc = function () {
         }
     }
 
-    // Land Use Act Statement Controller
-    const landUseSelect = document.getElementById('inLandUseZone');
-    const selectedZone = landUseSelect ? landUseSelect.value : 'NONE';
     const stmtBox = document.getElementById('lblLandUseStatement');
     const lblSelectedZone = document.getElementById('lblSelectedZone');
     if (stmtBox) {
@@ -257,7 +270,10 @@ window.updateDoc = function () {
             stmtBox.style.display = 'none';
         } else {
             stmtBox.style.display = 'block';
-            if (lblSelectedZone) lblSelectedZone.innerText = selectedZone;
+            if (lblSelectedZone) {
+                const formattedZone = selectedZone.includes('क्षेत्र') ? selectedZone : selectedZone + ' क्षेत्र';
+                lblSelectedZone.innerText = formattedZone;
+            }
         }
     }
 

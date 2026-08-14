@@ -138,7 +138,7 @@
         <div class="form-group"
             style="margin-top: 15px; background: #f0fff4; padding: 12px; border: 1px solid #c6f6d5; border-radius: 6px;">
             <label style="color: #22543d;">🗺️ भूउपयोग क्षेत्र वर्गीकरण (ऐन व्यहोरा):</label>
-            <select id="inLandUseZone" onchange="updateDoc()">
+            <select id="inLandUseZone" onchange="updateDoc()" oninput="updateDoc()">
                 <option value="NONE">-- ऐनको व्यहोरा उल्लेख नगर्ने --</option>
                 <option value="आवासीय क्षेत्र">आवासीय क्षेत्र</option>
                 <option value="व्यवसायिक शहरी क्षेत्र">व्यवसायिक शहरी क्षेत्र</option>
@@ -256,10 +256,10 @@
             </div>
 
             <div class="landuse-container" id="lblLandUseStatement"
-                style="text-align: justify; text-justify: inter-word; font-size: 12.5pt; line-height: 1.5; margin-top: 20px; display: none;">
+                style="text-align: justify; text-justify: inter-word; font-size: 12.5pt; line-height: 1.5; margin-top: 15px; display: none;">
                 उक्त माथि रहेको कित्ता नम्बरको जग्गा भूउपयोग ऐन २०७६ को दफा २० र गौरादह नगरपालिकाको मिति: २०७९/१०/२६ को
                 निर्णय अनुसार उक्त जग्गा <span id="lblSelectedZone"
-                    style="text-decoration: underline;">............</span> क्षेत्र भित्र पर्न
+                    style="text-decoration: underline; font-weight: bold;">............</span> भित्र पर्न
                 व्यहोरा अनुरोध छ ।
             </div>
 
