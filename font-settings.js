@@ -281,6 +281,9 @@
                         if (localOverride && templateId === 'charkilla' && localOverride.template_content.includes('नाममा तहाँ') && !localOverride.template_content.includes('श्री भुमी प्रशासन')) {
                             localOverride = null;
                         }
+                        if (localOverride && templateId === 'aamdani-pramanit' && (!localOverride.template_content.includes('globalLandAddr') || localOverride.template_content.includes('width: 250px;'))) {
+                            localOverride = null;
+                        }
                     }
                 } catch(e) {}
 
@@ -304,6 +307,8 @@
                         } else if (templateId === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
                             isOutdated = true;
                         } else if (templateId === 'charkilla' && data.template_content.includes('नाममा तहाँ') && !data.template_content.includes('श्री भुमी प्रशासन')) {
+                            isOutdated = true;
+                        } else if (templateId === 'aamdani-pramanit' && (!data.template_content.includes('globalLandAddr') || data.template_content.includes('width: 250px;') || !data.template_content.includes('lblLandDetails'))) {
                             isOutdated = true;
                         }
 

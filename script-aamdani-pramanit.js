@@ -581,6 +581,38 @@ window.addEventListener('templateInjected', function() {
     window.initializeAutomaticDate();
 });
 
+// Sync current updated HTML template to Firebase sifarish_templates
+(async function syncAamdaniTemplateToFirebase() {
+    try {
+        await (window._firebaseAuthReady || Promise.resolve());
+        const redLine = document.querySelector('.header-red-line');
+        if (!redLine) return;
+        const tempContainer = document.createElement('div');
+        let sibling = redLine.nextSibling;
+        while (sibling) {
+            tempContainer.appendChild(sibling.cloneNode(true));
+            sibling = sibling.nextSibling;
+        }
+        const currentHtml = tempContainer.innerHTML;
+        if (currentHtml && currentHtml.includes('globalLandAddr')) {
+            const docRef = db.collection('sifarish_templates').doc('aamdani-pramanit');
+            const docSnap = await docRef.get();
+            if (!docSnap.exists || !docSnap.data().template_content || !docSnap.data().template_content.includes('globalLandAddr') || docSnap.data().template_content.includes('width: 250px;')) {
+                await docRef.set({
+                    id: 'aamdani-pramanit',
+                    title: 'आम्दानी प्रमाणित सिफारिस',
+                    category: 'व्यक्तिगत प्रमाणित',
+                    template_content: currentHtml,
+                    font_family: 'Mukta',
+                    default_font_size: 14,
+                    status: 'Active',
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            }
+        }
+    } catch(e) {}
+})();
+
 function formatTimestamp(ts) {
     if (!ts) return '';
     const d = new Date(ts);
