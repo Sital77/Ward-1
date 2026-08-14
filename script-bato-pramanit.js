@@ -247,6 +247,20 @@ window.updateDoc = function () {
         }
     }
 
+    // Land Use Act Statement Controller
+    const landUseSelect = document.getElementById('inLandUseZone');
+    const selectedZone = landUseSelect ? landUseSelect.value : 'NONE';
+    const stmtBox = document.getElementById('lblLandUseStatement');
+    const lblSelectedZone = document.getElementById('lblSelectedZone');
+    if (stmtBox) {
+        if (selectedZone === 'NONE') {
+            stmtBox.style.display = 'none';
+        } else {
+            stmtBox.style.display = 'block';
+            if (lblSelectedZone) lblSelectedZone.innerText = selectedZone;
+        }
+    }
+
     const signSelect = document.getElementById('inSignAuthority').value;
     let sigName = "", sigTitle = "";
     const lblSigName = document.getElementById('lblSigName');
@@ -320,6 +334,7 @@ window.printAndSaveSystem = async function () {
         roadWidth: lands[0] ? lands[0].roadWidth : '',
         roadType: lands[0] ? lands[0].roadType : 'पक्की',
         landDetails: lands,
+        landUseZone: document.getElementById('inLandUseZone') ? document.getElementById('inLandUseZone').value : 'NONE',
         signAuth: document.getElementById('inSignAuthority').value,
         customSignName: document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
@@ -442,6 +457,10 @@ window.editFromDB = function (id) {
         document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
     } else {
         document.getElementById('customSignBox').style.display = 'none';
+    }
+
+    if (document.getElementById('inLandUseZone')) {
+        document.getElementById('inLandUseZone').value = rec.landUseZone || 'NONE';
     }
 
     if (rec.sigMargin) {
