@@ -43,6 +43,13 @@ window.toEnglishNumber = function(numStr) {
     return numStr.toString().split('').map(char => neToEn[char] || char).join('');
 };
 
+window.parseAmount = function(str) {
+    if (!str) return 0;
+    const engStr = window.toEnglishNumber(str).replace(/,/g, '').trim();
+    const val = parseFloat(engStr);
+    return isNaN(val) ? 0 : val;
+};
+
 window.formatNepaliCurrency = function(num) {
     if (isNaN(num)) return "०";
     let n = num.toString().split(".");
@@ -156,6 +163,29 @@ window.updateNepalSambatFromMiti = function() {
     }
 };
 
+function generateLandDetailsText() {
+    if (activeLandRowIds.length === 0) {
+        return "सिट नं. ..... कि.नं. ..... को ज.वि. .....";
+    }
+    const parts = [];
+    activeLandRowIds.forEach((id) => {
+        const block = document.getElementById(id);
+        if (block) {
+            const sitInput = block.querySelector('.input-sit');
+            const kittaInput = block.querySelector('.input-kitta');
+            const areaInput = block.querySelector('.input-area');
+
+            const s = sitInput && sitInput.value.trim() ? sitInput.value.trim() : '';
+            const k = kittaInput && kittaInput.value.trim() ? kittaInput.value.trim() : '.....';
+            const a = areaInput && areaInput.value.trim() ? areaInput.value.trim() : '.....';
+
+            const sitText = s ? `सिट नं. ${s} ` : '';
+            parts.push(`${sitText}कि.नं. ${k} को ज.वि. ${a}`);
+        }
+    });
+    return parts.join(" तथा ");
+}
+
 // Main sync engine
 window.updateDoc = function() {
     const patraSankhya = document.getElementById('inPatraSankhya');
@@ -218,26 +248,7 @@ window.updateDoc = function() {
     }
 
     // Build Land Details sentence
-    let landDetailsText = "";
-    if (activeLandRowIds.length === 0) {
-        landDetailsText = "सिट नं. ..... कि.नं. ..... को ज.वि. .....";
-    } else {
-        const parts = [];
-        activeLandRowIds.forEach((id) => {
-            const block = document.getElementById(id);
-            if (block) {
-                const sitInput = block.querySelector('.input-sit');
-                const kittaInput = block.querySelector('.input-kitta');
-                const areaInput = block.querySelector('.input-area');
-
-                const s = sitInput && sitInput.value ? sitInput.value : '.....';
-                const k = kittaInput && kittaInput.value ? kittaInput.value : '.....';
-                const a = areaInput && areaInput.value ? areaInput.value : '.....';
-                parts.push(`सिट नं. ${s} कि.नं. ${k} को ज.वि. ${a}`);
-            }
-        });
-        landDetailsText = parts.join(" तथा ");
-    }
+    const landDetailsText = generateLandDetailsText();
     safeSetText('lblLandDetails', landDetailsText);
 
     // Build Income Table and Calculate Total
@@ -261,12 +272,12 @@ window.updateDoc = function() {
                     const bNameInput = block.querySelector('.input-business');
                     const bAmtInput = block.querySelector('.input-amount');
 
-                    const bName = bNameInput && bNameInput.value ? bNameInput.value : '-';
-                    const bAmtStr = bAmtInput && bAmtInput.value ? bAmtInput.value : '0';
-                    const bAmt = parseFloat(window.toEnglishNumber(bAmtStr)) || 0;
+                    const bName = bNameInput && bNameInput.value ? bNameInput.value.trim() : '-';
+                    const bAmtStr = bAmtInput && bAmtInput.value ? bAmtInput.value.trim() : '';
+                    const bAmt = window.parseAmount(bAmtStr);
                     totalIncome += bAmt;
                     
-                    const formattedAmt = bAmt > 0 ? window.formatNepaliCurrency(bAmt) + '/-' : (bAmtStr.trim() !== '' ? window.toNepaliDigit(bAmtStr) + '/-' : '-');
+                    const formattedAmt = bAmt > 0 ? window.formatNepaliCurrency(bAmt) + '/-' : (bAmtStr !== '' ? window.toNepaliDigit(bAmtStr) + '/-' : '-');
                     
                     const rowHtml = `
                         <tr>
@@ -437,11 +448,25 @@ window.onload = function() {
     window.initializeAutomaticDate();
     addLandRow();
     addIncomeRow();
+    window.adjustSignaturePosition(40);
 };
 
 window.addEventListener('templateInjected', function() {
     window.initializeAutomaticDate();
 });
+
+function formatTimestamp(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hr = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const formatted = `${y}/${m}/${day} ${hr}:${min}`;
+    return window.toNepaliDigit(formatted);
+}
 
 window.renderDatabaseTable = function() {
     const tbody = document.getElementById('dbTableBody');
@@ -450,41 +475,43 @@ window.renderDatabaseTable = function() {
     const searchField = document.getElementById('searchField');
     const searchVal = searchField ? searchField.value.trim().toLowerCase() : '';
     tbody.innerHTML = '';
-    
-    let displayList = globalDatabase;
-    if (searchVal) {
-        displayList = displayList.filter(d => (d.name || '').toLowerCase().includes(searchVal));
-    }
 
-    if (displayList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">कुनै डाटा भेटिएन</td></tr>';
-        return;
-    }
-
-    displayList.forEach((data, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${window.toNepaliDigit(index + 1)}</td>
-            <td style="font-weight:600; color:#2c5282;">${data.name || '-'}</td>
-            <td>आम्दानी प्रमाणित</td>
-            <td>${data.miti || '-'}</td>
-            <td>
-                <button class="btn-action-small" onclick="loadRecordForEdit('${data.id}')" style="background:#3182ce; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✏️ हेर्नुस्</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
+    let counter = 0;
+    globalDatabase.forEach((rec) => {
+        if (searchVal && !(rec.name || '').toLowerCase().includes(searchVal)) return;
+        counter++;
+        tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td><b>${window.toNepaliDigit(counter)}</b></td>
+                <td><b>${rec.name || '-'}</b></td>
+                <td><span style="color:#2b6cb0; font-weight:bold;">आम्दानी प्रमाणित</span></td>
+                <td>
+                    ${window.toNepaliDigit(rec.miti || '')}
+                    ${rec.timestamp ? `<div style="font-size:0.78rem; color:#718096; margin-top:2px;">⏱️ ${formatTimestamp(rec.timestamp)}</div>` : ''}
+                </td>
+                <td>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn-action btn-edit-db" onclick="editFromDB('${rec.id}')">📝</button>
+                        <button class="btn-action btn-del-db" onclick="deleteFromDB('${rec.id}')">❌</button>
+                    </div>
+                </td>
+            </tr>
+        `);
     });
 };
 
-window.loadRecordForEdit = function(recordId) {
+window.editFromDB = function(recordId) {
     const record = globalDatabase.find(r => r.id === recordId);
     if (!record) return;
 
     const editField = document.getElementById('editRecordIndex');
     if (editField) editField.value = recordId;
 
+    const formTitle = document.getElementById('formMainTitle');
+    if (formTitle) formTitle.innerText = "🔄 सम्पादन मोड";
+
     if (document.getElementById('inPatraSankhya')) document.getElementById('inPatraSankhya').value = record.patraSankhya || '२०८३/०८४';
-    if (document.getElementById('inChalani')) document.getElementById('inChalani').value = record.chalani || '';
+    if (document.getElementById('inChalani')) document.getElementById('inChalani').value = record.chalani === '-' ? '' : (record.chalani || '');
     if (document.getElementById('inMiti')) document.getElementById('inMiti').value = record.miti || '';
     if (document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = record.nepalSamvat || '';
     
@@ -503,6 +530,20 @@ window.loadRecordForEdit = function(recordId) {
     
     if (document.getElementById('inIncomeType')) document.getElementById('inIncomeType').value = record.incomeType || 'कृषि तथा पशुपालन';
     if (document.getElementById('inTotalWords')) document.getElementById('inTotalWords').value = record.totalWords || '';
+
+    if (document.getElementById('inSignAuthority')) document.getElementById('inSignAuthority').value = record.signAuth || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
+    if (record.signAuth === 'CUSTOM') {
+        if (document.getElementById('customSignBox')) document.getElementById('customSignBox').style.display = 'grid';
+        if (document.getElementById('inCustomSignName')) document.getElementById('inCustomSignName').value = record.customSignName || '';
+        if (document.getElementById('inCustomSignTitle')) document.getElementById('inCustomSignTitle').value = record.customSignTitle || '';
+    } else {
+        if (document.getElementById('customSignBox')) document.getElementById('customSignBox').style.display = 'none';
+    }
+
+    if (record.sigMargin) {
+        if (document.getElementById('inSigMargin')) document.getElementById('inSigMargin').value = record.sigMargin;
+        window.adjustSignaturePosition(record.sigMargin);
+    }
 
     // Clear existing dynamic rows
     const landContainer = document.getElementById('landRowsContainer');
@@ -525,16 +566,33 @@ window.loadRecordForEdit = function(recordId) {
         addIncomeRow();
     }
 
-    toggleModal(false);
-    updateDoc();
-    alert('✅ रेकर्ड लोड भयो !');
+    window.toggleModal(false);
+    window.updateDoc();
+};
+window.loadRecordForEdit = window.editFromDB;
+
+window.deleteFromDB = async function(id) {
+    if (confirm("के तपाईं यो रेकर्ड क्लाउड डेटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
+        try {
+            await db.collection("aamdaniPramanitRecords").doc(id).delete();
+        } catch (e) {
+            alert("डिलिट गर्न समस्या भयो: " + e.message);
+        }
+    }
 };
 
 window.printAndSaveSystem = async function() {
     const nameEl = document.getElementById('inName');
     if (!nameEl || !nameEl.value.trim()) {
-        alert("⚠️ कृपया निवेदकको नाम लेख्नुहोस् !");
+        alert("⚠️ कृपया निवेदकको नाम अनिवार्य लेख्नुहोस् !");
         return;
+    }
+
+    const btn = document.querySelector('.btn-print');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⏳ सुरक्षित हुँदैछ...";
     }
 
     const editIdEl = document.getElementById('editRecordIndex');
@@ -575,50 +633,32 @@ window.printAndSaveSystem = async function() {
         landWada: document.getElementById('inLandWada') ? document.getElementById('inLandWada').value : '',
         incomeType: document.getElementById('inIncomeType') ? document.getElementById('inIncomeType').value : '',
         totalWords: document.getElementById('inTotalWords') ? document.getElementById('inTotalWords').value : '',
+        signAuth: document.getElementById('inSignAuthority') ? document.getElementById('inSignAuthority').value : '',
+        customSignName: document.getElementById('inCustomSignName') ? document.getElementById('inCustomSignName').value : '',
+        customSignTitle: document.getElementById('inCustomSignTitle') ? document.getElementById('inCustomSignTitle').value : '',
+        sigMargin: document.getElementById('inSigMargin') ? document.getElementById('inSigMargin').value : '40',
         landRows: landRowsData,
         incomeRows: incomeRowsData,
-        timestamp: editId ? undefined : Date.now()
+        timestamp: Date.now()
     };
 
     try {
-        if (editId) {
+        if (editId !== '') {
             await db.collection("aamdaniPramanitRecords").doc(editId).update(docData);
         } else {
-            await db.collection("aamdaniPramanitRecords").add(docData);
+            const docRef = await db.collection("aamdaniPramanitRecords").add(docData);
+            if (editIdEl) editIdEl.value = docRef.id;
+            const formTitle = document.getElementById('formMainTitle');
+            if (formTitle) formTitle.innerText = "🔄 सम्पादन मोड";
         }
         
-        // Hide panel & Print
-        const panel = document.querySelector('.input-panel');
-        if (panel) panel.style.display = 'none';
         window.print();
-        setTimeout(() => {
-            if (panel) panel.style.display = 'block';
-            if (editIdEl) editIdEl.value = '';
-            if (!editId) {
-                // Clear out form for next entry
-                if (document.getElementById('inChalani')) document.getElementById('inChalani').value = '';
-                if (document.getElementById('inName')) document.getElementById('inName').value = '';
-                if (document.getElementById('inCitNo')) document.getElementById('inCitNo').value = '';
-                if (document.getElementById('inCitDate')) document.getElementById('inCitDate').value = '';
-                if (document.getElementById('inTotalWords')) document.getElementById('inTotalWords').value = '';
-                
-                const landCont = document.getElementById('landRowsContainer');
-                if (landCont) landCont.innerHTML = '';
-                activeLandRowIds = [];
-                addLandRow();
-                
-                const incCont = document.getElementById('incomeRowsContainer');
-                if (incCont) incCont.innerHTML = '';
-                activeIncomeRowIds = [];
-                addIncomeRow();
-                
-                updateDoc();
-            }
-        }, 1000);
-
     } catch (e) {
-        alert("Error saving record: " + e.message);
+        alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो: " + e.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 };
-
-
