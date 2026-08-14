@@ -2,6 +2,28 @@
 (function () {
     'use strict';
 
+    // Ensure Nepal emblem favicon is present across all pages
+    (function ensureFavicon() {
+        const faviconUrl = 'https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg';
+        let link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            link.type = 'image/svg+xml';
+            link.href = faviconUrl;
+            document.head.appendChild(link);
+        } else {
+            link.href = faviconUrl;
+        }
+        let appleTouch = document.querySelector("link[rel='apple-touch-icon']");
+        if (!appleTouch) {
+            appleTouch = document.createElement('link');
+            appleTouch.rel = 'apple-touch-icon';
+            appleTouch.href = faviconUrl;
+            document.head.appendChild(appleTouch);
+        }
+    })();
+
     function protectSourceCode() {
         // Safe inspection enabled: devtools and right-click allowed
     }

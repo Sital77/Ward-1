@@ -5,6 +5,18 @@
  * The main portal (index.html) does NOT include this file.
  */
 
+(function () {
+    const faviconUrl = 'https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg';
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/svg+xml';
+        link.href = faviconUrl;
+        document.head.appendChild(link);
+    }
+})();
+
 const AUTH_CONFIG = {
     SESSION_KEY: 'sifarish_session',
     ADMIN_KEY: 'sifarish_admin',
