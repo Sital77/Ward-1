@@ -243,7 +243,7 @@
 
         <div class="form-group" style="margin-top: 15px;">
             <label>जम्मा आम्दानी (अक्षरेपी - अटोमेटिक रूपान्तरण हुन्छ):</label>
-            <input type="text" id="inTotalWords" placeholder="उदा: पाँच लाख चालिस हजार" oninput="window._userEditedWords = true; updateDoc();">
+            <input type="text" id="inTotalWords" placeholder="उदा: पाँच लाख पचास हजार रुपैयाँ" oninput="if (!this.value.trim()) window._userEditedWords = false; else window._userEditedWords = true; updateDoc();">
             <small style="color:#718096;">*अङ्क अनुसार अटोमेटिक अक्षरेपी आउँछ, आवश्यक परे आफैँ सच्याउन पनि सकिन्छ।</small>
         </div>
 
@@ -339,7 +339,7 @@
             </div>
 
             <div class="letter-body">
-                उपरोक्त सम्बन्धमा <span id="lblDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblWadaBody" class="fill-space" style="min-width:20px;">१</span> का स्थायी बसोबास गर्ने <span id="lblOwnerName" class="fill-space" style="font-weight: bold; min-width:180px;">.......</span> <span id="lblCitBlock" style="display:none;">(ना.प्र.नं: <span id="lblCitNo" class="fill-space" style="min-width:100px;"></span>, जारी मिति: <span id="lblCitDate" class="fill-space" style="min-width:80px;"></span>) </span>ले यस वडा कार्यालयमा दिनुभएको निवेदन माग अनुसार निज निवेदकको नाममा <span id="lblLandDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblLandPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblLandWada" class="fill-space" style="min-width:20px;">१</span> मा दर्ता कायम रहेको <span id="lblLandDetails">सिट नं. ..... कि.नं. ..... को ज.वि. .....</span> क्षेत्रफल भएको जग्गामा तपशिल अनुसार <span id="lblIncomeType" class="fill-space" style="min-width:150px;">कृषि तथा पशुपालन</span> गरी वार्षिक रू.<span id="lblTotalAmt" class="fill-space" style="min-width:100px; font-weight:bold;">...........</span>।- (अक्षरेपी <span id="lblTotalWords" class="fill-space" style="min-width:200px;">..........................</span> मात्र) आम्दानी गर्ने गरेको व्यहोरा प्रमाणित गरिन्छ ।
+                उपरोक्त सम्बन्धमा <span id="lblDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblWadaBody" class="fill-space" style="min-width:20px;">१</span> का स्थायी बसोबास गर्ने <span id="lblOwnerName" class="fill-space" style="font-weight: bold; min-width:180px;">.......</span> <span id="lblCitBlock" style="display:none;">(ना.प्र.नं: <span id="lblCitNo" class="fill-space" style="min-width:100px;"></span>, जारी मिति: <span id="lblCitDate" class="fill-space" style="min-width:80px;"></span>) </span>ले यस वडा कार्यालयमा दिनुभएको निवेदन माग अनुसार निज निवेदकको नाममा <span id="globalLandAddr"><span id="lblLandDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblLandPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblLandWada" class="fill-space" style="min-width:20px;">१</span> मा दर्ता कायम रहेको </span><span id="lblLandDetails">सिट नं. ..... कि.नं. ..... को ज.वि. .....</span> क्षेत्रफल भएको जग्गामा तपशिल अनुसार <span id="lblIncomeType" class="fill-space" style="min-width:150px;">कृषि तथा पशुपालन</span> गरी वार्षिक रू.<span id="lblTotalAmt" class="fill-space" style="min-width:100px; font-weight:bold;">...........</span>।- (अक्षरेपी <span id="lblTotalWords" class="fill-space" style="min-width:200px;">..........................</span> मात्र) आम्दानी गर्ने गरेको व्यहोरा प्रमाणित गरिन्छ ।
                 <br><br>
                 <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 10px;">तपसिल:</div>
                 <table class="print-table">
@@ -363,8 +363,8 @@
             </div>
 
             <div class="doc-footer" id="docFooterSection" style="margin-top: 40px; display: flex; justify-content: flex-end;">
-                <div class="signature-block" style="text-align: center; width: 250px;">
-                    <div class="sig-name" id="lblSigName" style="font-weight: bold; font-size: 14pt; border-top: 1.5px dashed #000; padding-top: 5px;">नगेन्द्र भण्डारी</div>
+                <div class="signature-block" style="text-align: center;">
+                    <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
                     <div class="sig-title" id="lblSigTitle" style="font-size: 12pt;">वडा अध्यक्ष</div>
                 </div>
             </div>
@@ -375,7 +375,7 @@
     <!-- Main Logic & Font Settings Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="font-settings.js"></script>
-    <script src="script-aamdani-pramanit.js?v=2.0"></script>
+    <script src="script-aamdani-pramanit.js?v=2.1"></script>
 </body>
 
 </html>

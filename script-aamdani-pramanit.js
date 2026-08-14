@@ -240,46 +240,62 @@ window.updateNepalSambatFromMiti = function() {
 
 function generateLandDetailsText() {
     if (activeLandRowIds.length === 0) {
-        return "सिट नं. ..... कि.नं. ..... को ज.वि. .....";
+        return { text: "सिट नं. ..... कि.नं. ..... को ज.वि. .....", hasCustomAddr: false };
     }
 
     const globalDist = document.getElementById('inLandDist') ? document.getElementById('inLandDist').value.trim() : '';
     const globalPalika = document.getElementById('inLandPalika') ? document.getElementById('inLandPalika').value.trim() : '';
     const globalWada = document.getElementById('inLandWada') ? document.getElementById('inLandWada').value.trim() : '';
 
-    const parts = [];
+    // First pass: check if ANY land row has a per-row custom address specified
+    let anyCustomAddr = false;
+    const landData = [];
     activeLandRowIds.forEach((id) => {
         const block = document.getElementById(id);
-        if (block) {
-            const sitInput = block.querySelector('.input-sit');
-            const kittaInput = block.querySelector('.input-kitta');
-            const areaInput = block.querySelector('.input-area');
+        if (!block) return;
 
-            const distInput = block.querySelector('.input-land-dist');
-            const palikaInput = block.querySelector('.input-land-palika');
-            const wadaInput = block.querySelector('.input-land-wada');
+        const sitInput = block.querySelector('.input-sit');
+        const kittaInput = block.querySelector('.input-kitta');
+        const areaInput = block.querySelector('.input-area');
+        const distInput = block.querySelector('.input-land-dist');
+        const palikaInput = block.querySelector('.input-land-palika');
+        const wadaInput = block.querySelector('.input-land-wada');
 
-            const s = sitInput && sitInput.value.trim() ? sitInput.value.trim() : '';
-            const k = kittaInput && kittaInput.value.trim() ? kittaInput.value.trim() : '.....';
-            const a = areaInput && areaInput.value.trim() ? areaInput.value.trim() : '.....';
+        const s = sitInput && sitInput.value.trim() ? sitInput.value.trim() : '';
+        const k = kittaInput && kittaInput.value.trim() ? kittaInput.value.trim() : '.....';
+        const a = areaInput && areaInput.value.trim() ? areaInput.value.trim() : '.....';
+        const rDist = distInput && distInput.value.trim() ? distInput.value.trim() : '';
+        const rPalika = palikaInput && palikaInput.value.trim() ? palikaInput.value.trim() : '';
+        const rWada = wadaInput && wadaInput.value.trim() ? wadaInput.value.trim() : '';
 
-            const rDist = distInput && distInput.value.trim() ? distInput.value.trim() : '';
-            const rPalika = palikaInput && palikaInput.value.trim() ? palikaInput.value.trim() : '';
-            const rWada = wadaInput && wadaInput.value.trim() ? wadaInput.value.trim() : '';
-
-            let prefixAddr = '';
-            if (rDist || rPalika || rWada) {
-                const targetDist = rDist || globalDist || '.......';
-                const targetPalika = rPalika || globalPalika || '.......';
-                const targetWada = rWada || globalWada || '...';
-                prefixAddr = `${targetDist} जिल्ला ${targetPalika} वडा नं. ${targetWada} स्थित `;
-            }
-
-            const sitText = s ? `सिट नं. ${s} ` : '';
-            parts.push(`${prefixAddr}${sitText}कि.नं. ${k} को ज.वि. ${a}`);
+        if (rDist || rPalika || rWada) {
+            anyCustomAddr = true;
         }
+
+        landData.push({ s, k, a, rDist, rPalika, rWada });
     });
-    return parts.join(" तथा ");
+
+    const parts = [];
+    if (anyCustomAddr) {
+        // When different addresses exist, prefix each land item with its full address
+        landData.forEach((row) => {
+            const targetDist = row.rDist || globalDist || '.......';
+            const targetPalika = row.rPalika || globalPalika || '.......';
+            const targetWada = row.rWada || globalWada || '...';
+
+            const addrPrefix = `${targetDist} जिल्ला ${targetPalika} वडा नं. ${targetWada} मा दर्ता कायम रहेको `;
+            const sitText = row.s ? `सिट नं. ${row.s} ` : '';
+            parts.push(`${addrPrefix}${sitText}कि.नं. ${row.k} को ज.वि. ${row.a}`);
+        });
+    } else {
+        // When all lands share the default address, the globalLandAddr element handles the prefix
+        landData.forEach((row) => {
+            const sitText = row.s ? `सिट नं. ${row.s} ` : '';
+            parts.push(`${sitText}कि.नं. ${row.k} को ज.वि. ${row.a}`);
+        });
+    }
+
+    return { text: parts.join(" तथा "), hasCustomAddr: anyCustomAddr };
 }
 
 // Main sync engine
@@ -341,8 +357,14 @@ window.updateDoc = function() {
     }
 
     // Build Land Details sentence
-    const landDetailsText = generateLandDetailsText();
-    safeSetText('lblLandDetails', landDetailsText);
+    const landResult = generateLandDetailsText();
+    safeSetText('lblLandDetails', landResult.text);
+
+    // Toggle global land address visibility based on whether custom addresses are used
+    const globalLandAddrEl = document.getElementById('globalLandAddr');
+    if (globalLandAddrEl) {
+        globalLandAddrEl.style.display = landResult.hasCustomAddr ? 'none' : 'inline';
+    }
 
     // Build Income Table and Calculate Total
     const tbody = document.getElementById('outputTableBody');
@@ -391,7 +413,9 @@ window.updateDoc = function() {
         const totalWordsInput = document.getElementById('inTotalWords');
         if (totalWordsInput && (!window._userEditedWords || !totalWordsInput.value.trim())) {
             if (totalIncome > 0) {
-                totalWordsInput.value = window.convertNumberToNepaliWords(totalIncome);
+                totalWordsInput.value = window.convertNumberToNepaliWords(totalIncome) + " रुपैयाँ";
+            } else {
+                totalWordsInput.value = '';
             }
         }
         safeSetText('lblTotalWords', totalWordsInput && totalWordsInput.value ? totalWordsInput.value : '..........................');
