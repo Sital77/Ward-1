@@ -242,9 +242,9 @@
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
-            <label>जम्मा आम्दानी (अक्षरेपी - म्यानुअल लेख्नुस्):</label>
-            <input type="text" id="inTotalWords" placeholder="उदा: पाँच लाख चालिस हजार" oninput="updateDoc()">
-            <small style="color:#718096;">*अङ्कमा आफैं हिसाब हुन्छ, यहाँ अक्षरेपी मात्र लेख्नुहोस्।</small>
+            <label>जम्मा आम्दानी (अक्षरेपी - अटोमेटिक रूपान्तरण हुन्छ):</label>
+            <input type="text" id="inTotalWords" placeholder="उदा: पाँच लाख चालिस हजार" oninput="window._userEditedWords = true; updateDoc();">
+            <small style="color:#718096;">*अङ्क अनुसार अटोमेटिक अक्षरेपी आउँछ, आवश्यक परे आफैँ सच्याउन पनि सकिन्छ।</small>
         </div>
 
         <div class="form-group"
@@ -375,7 +375,7 @@
     <!-- Main Logic & Font Settings Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="font-settings.js"></script>
-    <script src="script-aamdani-pramanit.js"></script>
+    <script src="script-aamdani-pramanit.js?v=2.0"></script>
 </body>
 
 </html>

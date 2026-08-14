@@ -62,6 +62,74 @@ window.formatNepaliCurrency = function(num) {
     return window.toNepaliDigit(formatted);
 };
 
+// Nepali Number-to-Words Converter
+const nepaliWords0to99 = [
+    "शून्य", "एक", "दुई", "तीन", "चार", "पाँच", "छ", "सात", "आठ", "नौ", "दस",
+    "एघार", "बाह्र", "तेह्र", "चौध", "पन्ध्र", "सोह्र", "सत्र", "अठार", "उन्नाइस", "बीस",
+    "एकाइस", "बाइस", "तैस", "चौबिस", "पच्चिस", "छब्बिस", "सत्ताइस", "अठ्ठाइस", "उनन्तीस", "तीस",
+    "एकतीस", "बत्तीस", "तेत्तीस", "चौँतीस", "पैँतीस", "छत्तीस", "सैँतीस", "अठतीस", "उनन्चालीस", "चालीस",
+    "एकचालीस", "बयालीस", "त्रिचालीस", "चौवालिस", "पैँतालीस", "छियालीस", "सत्चालीस", "अठचालीस", "उनन्पचास", "पचास",
+    "एकपन्न", "बाउन्न", "त्रिपन्न", "चौवन", "पचपन्न", "छप्पन्न", "सन्ताउन्न", "अन्ठाउन्न", "उनन्साठ्ठी", "साठ्ठी",
+    "एकसाठ्ठी", "बासाठ्ठी", "त्रिसाठ्ठी", "चौँसाठ्ठी", "पैँसाठ्ठी", "छियासाठ्ठी", "सत्साठ्ठी", "अठसाठ्ठी", "उनन्सत्तारी", "सत्तरी",
+    "एकहत्तर", "बहत्तर", "त्रिहत्तर", "चौहत्तर", "पचहत्तर", "छियत्तर", "सतहत्तर", "अठहत्तर", "उनासी", "असी",
+    "एकासी", "बयासी", "त्रियासी", "चौरासी", "पचासी", "छियासी", "सत्तासी", "अठासी", "उनान्नब्बे", "नब्बे",
+    "एकान्नब्बे", "बयानब्बे", "त्रियान्नब्बे", "चौरान्नब्बे", "पञ्चान्नब्बे", "छियान्नब्बे", "सन्थान्नब्बे", "अन्ठान्नब्बे", "उनान्सय"
+];
+
+window.convertNumberToNepaliWords = function(num) {
+    if (isNaN(num) || num <= 0) return "";
+    num = Math.floor(num);
+
+    function get99Words(n) {
+        if (n <= 0) return "";
+        return nepaliWords0to99[n] || "";
+    }
+
+    let parts = [];
+
+    // Arab (10^9)
+    if (num >= 1000000000) {
+        let arab = Math.floor(num / 1000000000);
+        num %= 1000000000;
+        parts.push(get99Words(arab) + " अरब");
+    }
+
+    // Crore (10^7)
+    if (num >= 10000000) {
+        let crore = Math.floor(num / 10000000);
+        num %= 10000000;
+        parts.push(get99Words(crore) + " करोड");
+    }
+
+    // Lakh (10^5)
+    if (num >= 100000) {
+        let lakh = Math.floor(num / 100000);
+        num %= 100000;
+        parts.push(get99Words(lakh) + " लाख");
+    }
+
+    // Thousand (10^3)
+    if (num >= 1000) {
+        let thousand = Math.floor(num / 1000);
+        num %= 1000;
+        parts.push(get99Words(thousand) + " हजार");
+    }
+
+    // Hundred (10^2)
+    if (num >= 100) {
+        let hundred = Math.floor(num / 100);
+        num %= 100;
+        parts.push(get99Words(hundred) + " सय");
+    }
+
+    // Remaining 1-99
+    if (num > 0) {
+        parts.push(get99Words(num));
+    }
+
+    return parts.join(" ");
+};
+
 // Controls Abhilekh Popup
 window.toggleModal = function(show) {
     const modal = document.getElementById('abhilekhModal');
@@ -88,7 +156,7 @@ function safeSetText(id, text) {
     return el;
 }
 
-// Dynamic Land Rows
+// Dynamic Land Rows with Optional Address Fields
 window.addLandRow = function(data = null) {
     landRowCounter++;
     const rowId = 'land_row_' + landRowCounter;
@@ -98,11 +166,18 @@ window.addLandRow = function(data = null) {
     if (!container) return;
 
     const rowHtml = `
-        <div class="builder-row" id="${rowId}">
-            <input type="text" class="input-sit" placeholder="सिट नं." value="${data && data.sit ? data.sit : ''}" oninput="updateDoc()">
-            <input type="text" class="input-kitta" placeholder="कि.नं." value="${data && data.kitta ? data.kitta : ''}" oninput="updateDoc()">
-            <input type="text" class="input-area" placeholder="क्षेत्रफल" value="${data && data.area ? data.area : ''}" oninput="updateDoc()">
-            <button type="button" class="btn-remove" onclick="removeLandRow('${rowId}')">❌</button>
+        <div class="builder-row-land" id="${rowId}" style="background:#fff; padding:10px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05); border:1px solid #edf2f7; margin-bottom:10px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:6px;">
+                <input type="text" class="input-sit" placeholder="सिट नं." value="${data && data.sit ? data.sit : ''}" oninput="updateDoc()">
+                <input type="text" class="input-kitta" placeholder="कि.नं." value="${data && data.kitta ? data.kitta : ''}" oninput="updateDoc()">
+                <input type="text" class="input-area" placeholder="क्षेत्रफल" value="${data && data.area ? data.area : ''}" oninput="updateDoc()">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center;">
+                <input type="text" class="input-land-dist" placeholder="जिल्ला (फरक भएमा)" value="${data && data.dist ? data.dist : ''}" oninput="updateDoc()">
+                <input type="text" class="input-land-palika" placeholder="पालिका (फरक भएमा)" value="${data && data.palika ? data.palika : ''}" oninput="updateDoc()">
+                <input type="text" class="input-land-wada" placeholder="वडा (फरक भएमा)" value="${data && data.wada ? data.wada : ''}" oninput="updateDoc()">
+                <button type="button" class="btn-remove" onclick="removeLandRow('${rowId}')">❌</button>
+            </div>
         </div>
     `;
     container.insertAdjacentHTML('beforeend', rowHtml);
@@ -167,6 +242,11 @@ function generateLandDetailsText() {
     if (activeLandRowIds.length === 0) {
         return "सिट नं. ..... कि.नं. ..... को ज.वि. .....";
     }
+
+    const globalDist = document.getElementById('inLandDist') ? document.getElementById('inLandDist').value.trim() : '';
+    const globalPalika = document.getElementById('inLandPalika') ? document.getElementById('inLandPalika').value.trim() : '';
+    const globalWada = document.getElementById('inLandWada') ? document.getElementById('inLandWada').value.trim() : '';
+
     const parts = [];
     activeLandRowIds.forEach((id) => {
         const block = document.getElementById(id);
@@ -175,12 +255,28 @@ function generateLandDetailsText() {
             const kittaInput = block.querySelector('.input-kitta');
             const areaInput = block.querySelector('.input-area');
 
+            const distInput = block.querySelector('.input-land-dist');
+            const palikaInput = block.querySelector('.input-land-palika');
+            const wadaInput = block.querySelector('.input-land-wada');
+
             const s = sitInput && sitInput.value.trim() ? sitInput.value.trim() : '';
             const k = kittaInput && kittaInput.value.trim() ? kittaInput.value.trim() : '.....';
             const a = areaInput && areaInput.value.trim() ? areaInput.value.trim() : '.....';
 
+            const rDist = distInput && distInput.value.trim() ? distInput.value.trim() : '';
+            const rPalika = palikaInput && palikaInput.value.trim() ? palikaInput.value.trim() : '';
+            const rWada = wadaInput && wadaInput.value.trim() ? wadaInput.value.trim() : '';
+
+            let prefixAddr = '';
+            if (rDist || rPalika || rWada) {
+                const targetDist = rDist || globalDist || '.......';
+                const targetPalika = rPalika || globalPalika || '.......';
+                const targetWada = rWada || globalWada || '...';
+                prefixAddr = `${targetDist} जिल्ला ${targetPalika} वडा नं. ${targetWada} स्थित `;
+            }
+
             const sitText = s ? `सिट नं. ${s} ` : '';
-            parts.push(`${sitText}कि.नं. ${k} को ज.वि. ${a}`);
+            parts.push(`${prefixAddr}${sitText}कि.नं. ${k} को ज.वि. ${a}`);
         }
     });
     return parts.join(" तथा ");
@@ -226,9 +322,6 @@ window.updateDoc = function() {
 
     const incomeType = document.getElementById('inIncomeType');
     safeSetText('lblIncomeType', incomeType && incomeType.value ? incomeType.value : '......................');
-
-    const totalWords = document.getElementById('inTotalWords');
-    safeSetText('lblTotalWords', totalWords && totalWords.value ? totalWords.value : '..........................');
 
     // Citizenship block logic
     const citNoEl = document.getElementById('inCitNo');
@@ -293,6 +386,15 @@ window.updateDoc = function() {
         
         safeSetText('lblTotalAmt', totalIncome > 0 ? window.formatNepaliCurrency(totalIncome) : '...........');
         safeSetText('lblTotalTableAmount', totalIncome > 0 ? window.formatNepaliCurrency(totalIncome) + '/-' : '/-');
+
+        // Auto-convert total income number to Nepali Words
+        const totalWordsInput = document.getElementById('inTotalWords');
+        if (totalWordsInput && (!window._userEditedWords || !totalWordsInput.value.trim())) {
+            if (totalIncome > 0) {
+                totalWordsInput.value = window.convertNumberToNepaliWords(totalIncome);
+            }
+        }
+        safeSetText('lblTotalWords', totalWordsInput && totalWordsInput.value ? totalWordsInput.value : '..........................');
     }
 
     // Signature logic
@@ -530,6 +632,7 @@ window.editFromDB = function(recordId) {
     
     if (document.getElementById('inIncomeType')) document.getElementById('inIncomeType').value = record.incomeType || 'कृषि तथा पशुपालन';
     if (document.getElementById('inTotalWords')) document.getElementById('inTotalWords').value = record.totalWords || '';
+    window._userEditedWords = true;
 
     if (document.getElementById('inSignAuthority')) document.getElementById('inSignAuthority').value = record.signAuth || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
     if (record.signAuth === 'CUSTOM') {
@@ -596,14 +699,17 @@ window.printAndSaveSystem = async function() {
     }
 
     const editIdEl = document.getElementById('editRecordIndex');
-    const editId = editIdEl ? editIdEl.value : '';
+    const editId = editIdEl ? editIdEl.value.trim() : '';
     
     const landRowsData = activeLandRowIds.map(id => {
         const block = document.getElementById(id);
         return {
             sit: block && block.querySelector('.input-sit') ? block.querySelector('.input-sit').value : '',
             kitta: block && block.querySelector('.input-kitta') ? block.querySelector('.input-kitta').value : '',
-            area: block && block.querySelector('.input-area') ? block.querySelector('.input-area').value : ''
+            area: block && block.querySelector('.input-area') ? block.querySelector('.input-area').value : '',
+            dist: block && block.querySelector('.input-land-dist') ? block.querySelector('.input-land-dist').value : '',
+            palika: block && block.querySelector('.input-land-palika') ? block.querySelector('.input-land-palika').value : '',
+            wada: block && block.querySelector('.input-land-wada') ? block.querySelector('.input-land-wada').value : ''
         };
     });
     
@@ -642,8 +748,15 @@ window.printAndSaveSystem = async function() {
         timestamp: Date.now()
     };
 
+    // Sanitize object to remove any undefined properties
+    Object.keys(docData).forEach(key => {
+        if (docData[key] === undefined) {
+            delete docData[key];
+        }
+    });
+
     try {
-        if (editId !== '') {
+        if (editId) {
             await db.collection("aamdaniPramanitRecords").doc(editId).update(docData);
         } else {
             const docRef = await db.collection("aamdaniPramanitRecords").add(docData);
