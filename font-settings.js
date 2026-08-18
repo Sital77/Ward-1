@@ -54,7 +54,10 @@
         'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' },
         'yojana-bank-sifarish': { collection: 'yojanaBankRecords', title: 'योजनाको बैंक खाता सिफारिस' },
         'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' },
-        'aamdani-pramanit': { collection: 'aamdaniPramanitRecords', title: 'आम्दानी प्रमाणित सिफारिस' }
+        'aamdani-pramanit': { collection: 'aamdaniPramanitRecords', title: 'आम्दानी प्रमाणित सिफारिस' },
+        'bargikaran-sifarish': { collection: 'bargikaranSifarishRecords', title: 'जग्गा वर्गीकरण सिफारिस' },
+        'jaggadhani-pratilipi': { collection: 'jaggadhaniPratilipiRecords', title: 'धनीपूर्जा प्रतिलिपि सिफारिस' },
+        'nabalak-parichayapatra': { collection: 'nabalakRecords', title: 'नाबालक परिचय पत्र सिफारिस' }
     };
 
     // Intercept firebase initializeApp to prevent duplicate app errors
@@ -240,6 +243,7 @@
     else if (path.includes('nabalak-parichayapatra.html')) templateId = 'nabalak-parichayapatra';
     else if (path.includes('jaggadhani-pratilipi.html')) templateId = 'jaggadhani-pratilipi';
     else if (path.includes('aamdani-pramanit.html')) templateId = 'aamdani-pramanit';
+    else if (path.includes('bargikaran-sifarish.html')) templateId = 'bargikaran-sifarish';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
         isDynamic = true;
@@ -602,7 +606,10 @@
                 'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
                 'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
                 'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
-                'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस'
+                'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस',
+                'bargikaran-sifarish': 'जग्गा वर्गीकरण सिफारिस',
+                'jaggadhani-pratilipi': 'धनीपूर्जा प्रतिलिपि सिफारिस',
+                'nabalak-parichayapatra': 'नाबालक परिचय पत्र सिफारिस'
             };
 
             const categories = {
@@ -619,7 +626,10 @@
                 'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',
                 'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
                 'bank-sifarish': 'व्यक्तिगत प्रमाणित',
-                'aamdani-pramanit': 'व्यक्तिगत प्रमाणित'
+                'aamdani-pramanit': 'व्यक्तिगत प्रमाणित',
+                'bargikaran-sifarish': 'जग्गा सम्बन्धि',
+                'jaggadhani-pratilipi': 'जग्गा सम्बन्धि',
+                'nabalak-parichayapatra': 'व्यक्तिगत प्रमाणित'
             };
 
             await db.collection('sifarish_templates').doc(id).set({

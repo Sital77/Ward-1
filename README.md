@@ -49,11 +49,13 @@ Ward-1/
 ├── gharbato.html                 # घर बाटो प्रमाणित form
 ├── charkilla.html                # चार किल्ला प्रमाणित form
 ├── bato-pramanit.html            # बाटो प्रमाणित form
+├── bargikaran-sifarish.html      # जग्गा वर्गीकरण सिफारिस form
 ├── pariwarik-bibaran.html        # पारिवारिक विवरण form
 │
 ├── script.js                     # Main portal scripts
 ├── charkilla.js                  # Charkilla form logic
 ├── script-bato-pramanit.js       # Bato Pramanit form logic
+├── script-bargikaran-sifarish.js # Bargikaran Sifarish form logic
 ├── script-pariwarik-bibaran.js   # Pariwarik Bibaran form logic
 ├── script-suchana-tans.js        # Suchana Tans form logic
 │
