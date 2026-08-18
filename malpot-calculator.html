@@ -4,81 +4,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>मालपोत तथा भूमिकर हिसाब प्रणाली | गौरादह नगरपालिका</title>
-    <meta name="description" content="गौरादह नगरपालिका - जग्गाको मालपोत तथा भूमिकर स्वतः हिसाब गर्ने आधुनिक अनलाइन प्रणाली।">
+    <meta name="description" content="गौरादह नगरपालिका - जग्गाको मालपोत तथा भूमिकर दररेट परिक्षण तथा स्वतः हिसाब गर्ने अनलाइन प्रणाली।">
     <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #f0f4f8;
+            --bg-primary: #f1f5f9;
             --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #475569;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
             --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --input-bg: #f8fafc;
-            --input-border: #cbd5e1;
+            --border-color: #cbd5e1;
+            --border-focus: #2563eb;
+            --input-bg: #ffffff;
+            --input-border: #94a3b8;
+            
             --primary: #1e40af;
-            --primary-hover: #1d4ed8;
+            --primary-light: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
             --secondary: #0d9488;
+            --secondary-gradient: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
             --accent: #e11d48;
-            --accent-bg: #ffe4e6;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-            --header-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            --accent-bg: rgba(225, 29, 72, 0.08);
+            --gold: #d97706;
+            
+            --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+            --card-shadow-hover: 0 20px 35px -5px rgba(15, 23, 42, 0.12);
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 18px;
+            --radius-xl: 24px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body.dark-mode {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #1e293b;
+            --bg-primary: #0b0f19;
+            --bg-secondary: #131b2e;
+            --bg-card: rgba(19, 27, 46, 0.95);
             --text-primary: #f8fafc;
             --text-secondary: #cbd5e1;
             --text-muted: #94a3b8;
-            --border-color: #334155;
+            --border-color: #2e3d5a;
+            --border-focus: #60a5fa;
             --input-bg: #0f172a;
             --input-border: #475569;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            --accent-bg: rgba(225, 29, 72, 0.15);
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45);
+            --accent-bg: rgba(225, 29, 72, 0.18);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Mukta', sans-serif;
+            font-family: 'Mukta', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
             background-color: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
+            padding: 20px 15px 40px;
             transition: background 0.3s, color 0.3s;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Animated Mesh Background */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.22;
+            animation: orbFloat 22s ease-in-out infinite alternate;
+        }
+
+        body.dark-mode .orb {
+            opacity: 0.15;
+        }
+
+        .orb-1 {
+            width: 450px;
+            height: 450px;
+            background: #2563eb;
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: #0d9488;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 320px;
+            height: 320px;
+            background: #e11d48;
+            top: 40%;
+            left: 60%;
+            animation-delay: -14s;
+        }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.08); }
+            100% { transform: translate(-30px, 35px) scale(0.95); }
         }
 
         .container {
-            max-width: 1280px;
+            max-width: 1340px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Municipal Header */
+        /* Top Header Card */
         .muni-header-card {
-            background: var(--header-gradient);
+            background: var(--primary-gradient);
             color: #ffffff;
-            border-radius: var(--radius-lg);
-            padding: 25px 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 15px 30px rgba(30, 58, 138, 0.2);
+            border-radius: var(--radius-xl);
+            padding: 22px 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 16px 36px rgba(30, 58, 138, 0.25);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(12px);
         }
 
         .muni-info {
@@ -88,17 +159,17 @@
         }
 
         .muni-logo {
-            width: 75px;
-            height: 75px;
+            width: 80px;
+            height: 80px;
             object-fit: contain;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.25));
         }
 
         .muni-titles h1 {
-            font-size: 1.8rem;
+            font-size: 1.95rem;
             font-weight: 800;
-            line-height: 1.2;
-            letter-spacing: 0.5px;
+            line-height: 1.15;
+            letter-spacing: -0.2px;
         }
 
         .muni-titles h2 {
@@ -109,59 +180,117 @@
 
         .muni-sub {
             font-size: 0.95rem;
-            opacity: 0.85;
+            opacity: 0.88;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .muni-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .header-actions {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
             flex-wrap: wrap;
         }
 
-        .btn-action {
+        .btn-header {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.35);
             color: #ffffff;
-            padding: 10px 18px;
+            padding: 9px 16px;
             border-radius: 50px;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 700;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.2s ease;
+            transition: var(--transition);
         }
 
-        .btn-action:hover {
+        .btn-header:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
         }
 
-        /* Layout Grid */
+        /* Forms & Inputs */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .req-star {
+            color: var(--accent);
+            margin-left: 3px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--input-bg);
+            border: 1.5px solid var(--input-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.18);
+            background: var(--bg-secondary);
+        }
+
+        /* Two Column Main Calculator Grid */
         .calc-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 24px;
+            align-items: start;
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 1024px) {
             .calc-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* Cards */
         .calc-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            border: 1.5px solid var(--border-color);
             border-radius: var(--radius-lg);
-            padding: 28px;
+            padding: 26px;
             box-shadow: var(--card-shadow);
-            transition: background 0.3s, border-color 0.3s;
+            transition: var(--transition);
+        }
+
+        .calc-card:hover {
+            box-shadow: var(--card-shadow-hover);
         }
 
         .card-header {
@@ -174,8 +303,8 @@
         }
 
         .card-title {
-            font-size: 1.35rem;
-            font-weight: 700;
+            font-size: 1.3rem;
+            font-weight: 800;
             color: var(--primary);
             display: flex;
             align-items: center;
@@ -186,117 +315,133 @@
             color: #60a5fa;
         }
 
-        /* Form Controls */
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            background: var(--input-bg);
-            border: 1.5px solid var(--input-border);
+        /* Rate Inspection Badge */
+        .rate-preview-box {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(13, 148, 136, 0.08) 100%);
+            border: 1.5px dashed var(--primary-light);
             border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: var(--text-primary);
-            font-size: 1rem;
-            font-weight: 500;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+        .rate-pill {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 800;
         }
 
         /* Unit Tabs */
-        .unit-tabs {
+        .unit-nav {
             display: flex;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
+            background: var(--bg-primary);
+            border: 1.5px solid var(--border-color);
             border-radius: var(--radius-md);
             padding: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
+            gap: 4px;
         }
 
-        .unit-tab {
+        .unit-tab-btn {
             flex: 1;
-            padding: 8px 12px;
+            padding: 9px 12px;
             border: none;
             background: transparent;
             color: var(--text-secondary);
             font-weight: 700;
             font-size: 0.95rem;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: var(--transition);
+            text-align: center;
         }
 
-        .unit-tab.active {
+        .unit-tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .unit-tab-btn.active {
             background: var(--primary);
             color: #ffffff;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(30, 64, 175, 0.25);
         }
 
-        .area-inputs-bigha {
+        .area-grid-bigha {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 12px;
         }
 
-        .area-live-badge {
-            background: rgba(13, 148, 136, 0.1);
-            color: var(--secondary);
-            border: 1px dashed var(--secondary);
-            padding: 10px 14px;
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
+        .area-grid-ropani {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
         }
 
-        /* Buttons */
+        /* Live Area Summary Badge */
+        .live-area-badge {
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(13, 148, 136, 0.05) 100%);
+            color: var(--secondary);
+            border: 1.5px solid var(--secondary);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 800;
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Primary Add Button */
         .btn-add-kitta {
             width: 100%;
-            background: var(--primary);
+            background: var(--primary-gradient);
             color: #ffffff;
             border: none;
             padding: 14px;
             border-radius: var(--radius-md);
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1.18rem;
+            font-weight: 800;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
-            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+            gap: 10px;
+            margin-top: 18px;
+            box-shadow: 0 8px 20px rgba(30, 64, 175, 0.28);
         }
 
         .btn-add-kitta:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(30, 64, 175, 0.4);
+            filter: brightness(1.05);
         }
 
-        /* Kitta Table & List */
+        .btn-add-kitta:active {
+            transform: translateY(0);
+        }
+
+        /* Table & Lists */
         .kitta-table-wrapper {
-            max-height: 250px;
+            max-height: 290px;
             overflow-y: auto;
-            border: 1px solid var(--border-color);
+            border: 1.5px solid var(--border-color);
             border-radius: var(--radius-md);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+            background: var(--bg-secondary);
         }
 
         .kitta-table {
@@ -307,62 +452,284 @@
         }
 
         .kitta-table th {
-            background: var(--input-bg);
+            background: var(--bg-primary);
             color: var(--text-secondary);
-            font-weight: 700;
-            padding: 10px 14px;
-            border-bottom: 1.5px solid var(--border-color);
+            font-weight: 800;
+            padding: 11px 12px;
+            border-bottom: 2px solid var(--border-color);
             position: sticky;
             top: 0;
+            z-index: 2;
+            font-size: 0.9rem;
         }
 
         .kitta-table td {
-            padding: 10px 14px;
+            padding: 10px 12px;
             border-bottom: 1px solid var(--border-color);
             color: var(--text-primary);
+            vertical-align: middle;
         }
 
-        .btn-del {
+        .kitta-table tbody tr:hover {
+            background: rgba(37, 99, 235, 0.03);
+        }
+
+        .btn-action-del {
             background: #ef4444;
-            color: white;
+            color: #ffffff;
             border: none;
-            padding: 4px 10px;
+            padding: 5px 10px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 700;
+            transition: var(--transition);
         }
 
-        .btn-del:hover {
+        .btn-action-del:hover {
             background: #dc2626;
+            transform: scale(1.05);
         }
 
-        /* Total Result Display */
-        .result-box {
+        /* Grand Total Card */
+        .result-summary-card {
             background: var(--accent-bg);
             border: 2px dashed var(--accent);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-lg);
             padding: 20px;
             text-align: center;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .result-amount {
-            font-size: 2.3rem;
-            font-weight: 800;
+            font-size: 2.5rem;
+            font-weight: 900;
             color: var(--accent);
-            margin: 8px 0;
+            margin: 6px 0;
             line-height: 1.1;
         }
 
-        .rule-note {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+        .result-in-words {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.6);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
             margin-top: 10px;
-            line-height: 1.5;
+            display: inline-block;
+            border: 1px solid rgba(225, 29, 72, 0.2);
+        }
+
+        body.dark-mode .result-in-words {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-pills {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(225, 29, 72, 0.2);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .stat-pill {
             background: var(--bg-card);
-            padding: 10px;
+            padding: 8px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-color);
+        }
+
+        /* Action Buttons Grid */
+        .action-btns-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-card-action {
+            padding: 11px 16px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-print-main {
+            background: var(--secondary-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+        }
+
+        .btn-print-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.45);
+        }
+
+        .btn-copy-summary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-color);
+        }
+
+        .btn-copy-summary:hover {
+            background: var(--bg-primary);
+            border-color: var(--primary);
+        }
+
+        .btn-reset-all {
+            background: var(--bg-secondary);
+            color: #ef4444;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-reset-all:hover {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: #ef4444;
+        }
+
+        /* Municipal Calculation Rule Card */
+        .rule-note {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            margin-top: 16px;
+            line-height: 1.5;
+            background: var(--bg-secondary);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--gold);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            animation: slideInUp 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        body.dark-mode .modal-title {
+            color: #60a5fa;
+        }
+
+        .modal-close {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
         }
 
         /* Printable Receipt */
@@ -371,68 +738,154 @@
         }
 
         @media print {
-            body * {
-                visibility: hidden;
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
             }
-            #printableReceipt, #printableReceipt * {
-                visibility: visible;
+
+            .no-print, .bg-orbs, .toast-container, .modal-overlay {
+                display: none !important;
             }
+
             #printableReceipt {
                 display: block !important;
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
-                padding: 30px;
-                background: white;
-                color: black;
+                padding: 35px 45px;
+                background: #ffffff !important;
+                color: #000000 !important;
             }
-            .no-print {
-                display: none !important;
+
+            .print-header {
+                text-align: center;
+                border-bottom: 2.5px solid #000;
+                padding-bottom: 14px;
+                margin-bottom: 18px;
+                position: relative;
+            }
+
+            .print-logo {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 75px;
+                height: 75px;
+                object-fit: contain;
+            }
+
+            .print-title-lg {
+                font-size: 1.75rem;
+                font-weight: 800;
+                line-height: 1.15;
+            }
+
+            .print-title-sub {
+                font-size: 1.15rem;
+                font-weight: 600;
+            }
+
+            .print-voucher-title {
+                margin-top: 10px;
+                font-size: 1.35rem;
+                font-weight: 800;
+                text-decoration: underline;
+                letter-spacing: 0.5px;
+            }
+
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 16px;
+                font-size: 0.98rem;
+            }
+
+            .print-table th, .print-table td {
+                border: 1.5px solid #000;
+                padding: 8px 10px;
+            }
+
+            .print-table th {
+                background: #f1f5f9 !important;
+                font-weight: 800;
+                text-align: center;
+            }
+
+            .print-summary-box {
+                border: 1.5px solid #000;
+                border-radius: 6px;
+                padding: 12px 16px;
+                margin-top: 10px;
+                font-size: 1.1rem;
+                line-height: 1.5;
+            }
+
+            .print-signatures {
+                margin-top: 55px;
+                display: flex;
+                justify-content: space-between;
+                font-size: 1rem;
+                padding-top: 20px;
+            }
+
+            .sig-block {
+                text-align: center;
+                border-top: 1px dashed #000;
+                width: 200px;
+                padding-top: 6px;
             }
         }
     </style>
 </head>
 <body>
 
+    <!-- Ambient Floating Orbs -->
+    <div class="bg-orbs no-print">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <div class="container no-print">
-        <!-- Municipal Header Card -->
-        <div class="muni-header-card">
+        <!-- Top Municipal Header Card -->
+        <header class="muni-header-card">
             <div class="muni-info">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem" class="muni-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Government Emblem" class="muni-logo">
                 <div class="muni-titles">
                     <h1>गौरादह नगरपालिका</h1>
                     <h2>नगर कार्यपालिकाको कार्यालय, झापा</h2>
-                    <div class="muni-sub">कोशी प्रदेश, नेपाल | मालपोत तथा भूमिकर हिसाब प्रणाली</div>
+                    <div class="muni-sub">
+                        <span>कोशी प्रदेश, नेपाल</span>
+                        <span class="muni-badge">मालपोत तथा भूमिकर हिसाब प्रणाली</span>
+                        <span class="muni-badge" id="liveMitiBadge">मिति: २०८३-...</span>
+                    </div>
                 </div>
             </div>
             <div class="header-actions">
-                <a href="index.html" class="btn-action">🏠 होम पोर्टल</a>
-                <button class="btn-action" onclick="toggleDarkMode()">☀️/🌙 मोड</button>
-                <button class="btn-action" onclick="printReceipt()" style="background: rgba(13, 148, 136, 0.4);">🖨️ रसीद प्रिन्ट</button>
+                <a href="index.html" class="btn-header" title="गृहपृष्ठ पोर्टलमा जानुहोस्">🏠 गृहपृष्ठ</a>
+                <button type="button" class="btn-header" onclick="openRatesModal()" title="नगरपालिकाको आधिकारिक दररेट हेर्नुहोस्">📖 दररेट तालिका</button>
+                <button type="button" class="btn-header" onclick="toggleDarkMode()" title="डार्क / लाइट मोड बदल्नुहोस्">☀️/🌙</button>
+                <button type="button" class="btn-header" onclick="printReceipt()" style="background: rgba(13, 148, 136, 0.45); border-color: #2dd4bf;" title="आधिकारिक भूमिकर रसीद भौचर प्रिन्ट गर्नुहोस्">🖨️ रसीद प्रिन्ट</button>
             </div>
-        </div>
+        </header>
 
-        <!-- Calculator Main Grid -->
-        <div class="calc-grid">
-            <!-- Input Form Card -->
+        <!-- Main Two Column Calculator Grid -->
+        <main class="calc-grid">
+            <!-- Left Column: Kitta Parcel & Area Entry Form -->
             <div class="calc-card">
                 <div class="card-header">
-                    <div class="card-title">📝 जग्गाको विवरण प्रविष्टि</div>
-                    <span style="font-size:0.9rem; color:var(--text-muted);">JSON दररेट-२०८३</span>
+                    <div class="card-title">📝 जग्गाको विवरण तथा क्षेत्रफल प्रविष्टि</div>
+                    <span style="font-size:0.9rem; color:var(--text-muted); font-weight:700;">आर्थिक ऐन दररेट-२०८३</span>
                 </div>
 
                 <form id="malpotForm" onsubmit="event.preventDefault(); addKittaParcel();">
+                    <!-- 1. Ward Selection (Default Ward 1 selected) -->
                     <div class="form-group">
-                        <label>जग्गाधनीको नाम (ऐच्छिक):</label>
-                        <input type="text" id="ownerName" class="form-control" placeholder="उदाहरण: रामबहादुर श्रेष्ठ">
-                    </div>
-
-                    <div class="form-group">
-                        <label>वडा छनौट गर्नुहोस्:</label>
-                        <select id="wardSelect" class="form-control" required onchange="updateSubCategories()">
-                            <option value="">-- वडा छान्नुहोस् --</option>
-                            <option value="1">वडा नं. १ (समूह १)</option>
+                        <label for="wardSelect">वडा छनौट गर्नुहोस्:<span class="req-star">*</span></label>
+                        <select id="wardSelect" class="form-control" required onchange="onWardOrCategoryChange()">
+                            <option value="1" selected>वडा नं. १ (समूह १ - गौरादह बजार)</option>
                             <option value="2">वडा नं. २ (समूह १)</option>
                             <option value="3">वडा नं. ३ (समूह १)</option>
                             <option value="4">वडा नं. ४ (समूह २)</option>
@@ -444,142 +897,263 @@
                         </select>
                     </div>
 
+                    <!-- 2. Land Category Selection -->
                     <div class="form-group">
-                        <label>जग्गाको क्षेत्र / वर्ग छनौट:</label>
-                        <select id="categorySelect" class="form-control" required onchange="updateSubCategories()">
+                        <label for="categorySelect">जग्गाको क्षेत्र / वर्ग छनौट:<span class="req-star">*</span></label>
+                        <select id="categorySelect" class="form-control" required onchange="onWardOrCategoryChange()">
                             <option value="">-- वर्ग छान्नुहोस् --</option>
                         </select>
                     </div>
 
+                    <!-- 3. Road / SubCategory Selection -->
                     <div class="form-group">
-                        <label>सडकको प्रकार / विवरण छनौट:</label>
-                        <select id="subCategorySelect" class="form-control" required onchange="calculateLiveArea()">
+                        <label for="subCategorySelect">सडकको प्रकार / विवरण छनौट:<span class="req-star">*</span></label>
+                        <select id="subCategorySelect" class="form-control" required onchange="updateRatePreview()">
                             <option value="">-- सडकको विवरण छान्नुहोस् --</option>
                         </select>
                     </div>
 
+                    <!-- Live Dynamic Rate Inspector Box -->
+                    <div class="rate-preview-box" id="ratePreviewBox">
+                        <div>
+                            <span>लागू दररेट: </span>
+                            <span id="ratePreviewText" style="color: var(--primary);">लोड हुँदैछ...</span>
+                        </div>
+                        <span class="rate-pill" id="rateBadgePill">वडा नं. १</span>
+                    </div>
+
+                    <!-- 4. Area Unit Switcher Navigation (Square Meters first) -->
                     <div class="form-group">
-                        <label>क्षेत्रफल प्रविष्टि एकाइ (Unit):</label>
-                        <div class="unit-tabs">
-                            <button type="button" class="unit-tab active" id="tabBigha" onclick="switchUnit('bigha')">बिघा - कट्ठा - धुर</button>
-                            <button type="button" class="unit-tab" id="tabSqm" onclick="switchUnit('sqm')">वर्ग मिटर (m²)</button>
+                        <label>क्षेत्रफल प्रविष्टि एकाइ (Unit):<span class="req-star">*</span></label>
+                        <div class="unit-nav">
+                            <button type="button" class="unit-tab-btn active" id="tabSqm" onclick="switchUnit('sqm')">📐 वर्ग मिटर (m²)</button>
+                            <button type="button" class="unit-tab-btn" id="tabBigha" onclick="switchUnit('bigha')">🌾 बिघा - कट्ठा - धुर</button>
+                            <button type="button" class="unit-tab-btn" id="tabRopani" onclick="switchUnit('ropani')">🏔️ रोपनी - आना</button>
+                            <button type="button" class="unit-tab-btn" id="tabSqft" onclick="switchUnit('sqft')">📏 वर्ग फिट (sq.ft)</button>
                         </div>
                     </div>
 
-                    <!-- Bigha Kattha Dhur Section -->
-                    <div id="bighaSection">
-                        <div class="area-inputs-bigha">
+                    <!-- 1. Sqm Section (Default Active) -->
+                    <div id="sqmSection">
+                        <div class="form-group">
+                            <label for="inputSqm" style="font-size:0.95rem;">कुल वर्ग मिटर (Square Meters - m²):</label>
+                            <input type="number" id="inputSqm" class="form-control" min="0" placeholder="उदा: ३३८.६३" step="0.01" oninput="calculateLiveArea()" autofocus>
+                        </div>
+                    </div>
+
+                    <!-- 2. Bigha Kattha Dhur Section -->
+                    <div id="bighaSection" style="display: none;">
+                        <div class="area-grid-bigha">
                             <div class="form-group">
-                                <label style="font-size:0.9rem;">बिघा:</label>
+                                <label for="inputBigha" style="font-size:0.9rem;">बिघा:</label>
                                 <input type="number" id="inputBigha" class="form-control" min="0" value="0" step="1" oninput="calculateLiveArea()">
                             </div>
                             <div class="form-group">
-                                <label style="font-size:0.9rem;">कट्ठा:</label>
+                                <label for="inputKattha" style="font-size:0.9rem;">कट्ठा:</label>
                                 <input type="number" id="inputKattha" class="form-control" min="0" value="0" step="1" oninput="calculateLiveArea()">
                             </div>
                             <div class="form-group">
-                                <label style="font-size:0.9rem;">धुर:</label>
-                                <input type="number" id="inputDhur" class="form-control" min="0" value="0" step="0.1" oninput="calculateLiveArea()">
+                                <label for="inputDhur" style="font-size:0.9rem;">धुर / कान्वा:</label>
+                                <input type="number" id="inputDhur" class="form-control" min="0" value="0" step="0.01" oninput="calculateLiveArea()">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Sqm Section -->
-                    <div id="sqmSection" style="display: none;">
-                        <div class="form-group">
-                            <label style="font-size:0.9rem;">कुल वर्ग मिटर (m²):</label>
-                            <input type="number" id="inputSqm" class="form-control" min="0" placeholder="उदा: ३३८.६३" step="0.01" oninput="calculateLiveArea()">
+                    <!-- 3. Ropani Section -->
+                    <div id="ropaniSection" style="display: none;">
+                        <div class="area-grid-ropani">
+                            <div class="form-group">
+                                <label for="inputRopani" style="font-size:0.85rem;">रोपनी:</label>
+                                <input type="number" id="inputRopani" class="form-control" min="0" value="0" step="1" oninput="calculateLiveArea()">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputAana" style="font-size:0.85rem;">आना:</label>
+                                <input type="number" id="inputAana" class="form-control" min="0" value="0" step="1" oninput="calculateLiveArea()">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPaisa" style="font-size:0.85rem;">पैसा:</label>
+                                <input type="number" id="inputPaisa" class="form-control" min="0" value="0" step="1" oninput="calculateLiveArea()">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputDaam" style="font-size:0.85rem;">दाम:</label>
+                                <input type="number" id="inputDaam" class="form-control" min="0" value="0" step="0.01" oninput="calculateLiveArea()">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="area-live-badge" id="liveAreaBadge">
-                        <span>कुल क्षेत्रफल:</span>
-                        <span id="liveAreaText">० धुर (० कट्ठा)</span>
+                    <!-- 4. Sqft Section -->
+                    <div id="sqftSection" style="display: none;">
+                        <div class="form-group">
+                            <label for="inputSqft" style="font-size:0.9rem;">कुल वर्ग फिट (Square Feet - sq.ft):</label>
+                            <input type="number" id="inputSqft" class="form-control" min="0" placeholder="उदा: ३६४५" step="0.1" oninput="calculateLiveArea()">
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn-add-kitta">➕ कित्ता थप्नुहोस्</button>
+                    <!-- Live Conversion Summary Badge -->
+                    <div class="live-area-badge" id="liveAreaBadge">
+                        <span>📐 कुल क्षेत्रफल:</span>
+                        <span id="liveAreaText">० m² (० धुर | ० कट्ठा)</span>
+                    </div>
+
+                    <button type="submit" class="btn-add-kitta">➕ थप्नुस् (रकम हिसाब गर्नुहोस्)</button>
                 </form>
             </div>
 
-            <!-- Result & Parcel List Card -->
+            <!-- Right Column: Parcels List & Tax Summary -->
             <div class="calc-card">
                 <div class="card-header">
-                    <div class="card-title">📊 थपिएका कित्ताहरू र भूमिकर हिसाब</div>
-                    <button class="btn-del" onclick="clearAllKittas()" style="background:#64748b;">🔄 रिसेट</button>
+                    <div class="card-title">📊 थपिएका जग्गाहरू र भूमिकर हिसाब</div>
+                    <button type="button" class="btn-action-del" onclick="clearAllKittas()" style="background:#64748b; padding: 6px 12px;" title="सबै खाली गर्नुहोस्">
+                        🔄 रिसेट
+                    </button>
                 </div>
 
+                <!-- Table of Kittas -->
                 <div class="kitta-table-wrapper">
                     <table class="kitta-table" id="kittaTable">
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>वडा</th>
-                                <th>वर्ग/सडक</th>
+                                <th>क्षेत्र / सडक विवरण</th>
                                 <th>क्षेत्रफल</th>
-                                <th>कर (रु.)</th>
+                                <th>दररेट हिसाब</th>
+                                <th>भूमिकर (रु.)</th>
                                 <th>कार्य</th>
                             </tr>
                         </thead>
                         <tbody id="kittaTableBody">
                             <tr>
-                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 25px;">
-                                    कुनै पनि कित्ता थपिएको छैन। देब्रेपट्टीको फारम भरेर "+ कित्ता थप्नुहोस्" क्लिक गर्नुहोस्।
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 35px 15px;">
+                                    <div style="font-size: 2rem; margin-bottom: 8px;">🌾</div>
+                                    कुनै पनि जग्गा थपिएको छैन। देब्रेपट्टीको फारम भरेर <strong>"➕ थप्नुस्"</strong> क्लिक गर्नुहोस्।
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="result-box">
-                    <div style="font-size:1.1rem; font-weight:700; color:var(--text-secondary);">बुझाउनुपर्ने जम्मा मालपोत/भूमिकर</div>
+                <!-- Total Amount Summary Card -->
+                <div class="result-summary-card">
+                    <div class="result-title">बुझाउनुपर्ने जम्मा मालपोत / भूमिकर</div>
                     <div class="result-amount" id="grandTotalTax">रु. ०</div>
-                    <div style="display:flex; justify-content:space-around; font-size:0.95rem; font-weight:700; margin-top:8px; border-top:1px solid rgba(0,0,0,0.1); padding-top:8px;">
-                        <span>जम्मा कित्ता: <strong id="totalKittaCount">०</strong> वटा</span>
-                        <span>कुल धुर: <strong id="totalDhurCount">०</strong> धुर</span>
+                    <div class="result-in-words" id="grandTotalInWords">अक्षरमा: शून्य रुपैयाँ मात्र</div>
+
+                    <div class="stat-pills">
+                        <div class="stat-pill">
+                            <div style="font-size:0.8rem; color:var(--text-muted);">जम्मा कित्ता/जग्गा</div>
+                            <div style="font-size:1.15rem; font-weight:800; color:var(--primary);" id="totalKittaCount">० वटा</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div style="font-size:0.8rem; color:var(--text-muted);">कुल वर्ग मिटर</div>
+                            <div style="font-size:1.15rem; font-weight:800; color:var(--gold);" id="totalSqmCount">० m²</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div style="font-size:0.8rem; color:var(--text-muted);">कुल क्षेत्रफल (धुर)</div>
+                            <div style="font-size:1.15rem; font-weight:800; color:var(--secondary);" id="totalDhurCount">० धुर</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="rule-note" id="calculationDetailNote">
-                    💡 <strong>नियम तथा हिसाब विधि:</strong> १० धुर सम्मको जग्गाको लागि आधारभूत दर (Base Rate) लागू हुन्छ। १० धुर भन्दा बढी भएमा बाँकी प्रत्येक धुरको लागि निर्धारण गरिएको अतिरिक्त दर (Extra Rate) गुणन गरी हिसाब गरिन्छ।
+                <!-- Action Button Controls -->
+                <div class="action-btns-grid">
+                    <button type="button" class="btn-card-action btn-print-main" onclick="printReceipt()">
+                        🖨️ आधिकारिक भौचर प्रिन्ट
+                    </button>
+                    <button type="button" class="btn-card-action btn-copy-summary" onclick="copyCalculationSummary()">
+                        📋 हिसाब विवरण कपी
+                    </button>
+                    <button type="button" class="btn-card-action btn-copy-summary" onclick="openRatesModal()">
+                        📖 दररेट तालिका हेर्नुस्
+                    </button>
+                    <button type="button" class="btn-card-action btn-reset-all" onclick="clearAllKittas()">
+                        🗑️ नयाँ हिसाब सुरु
+                    </button>
+                </div>
+
+                <!-- Municipal Tax Calculation Rule Note -->
+                <div class="rule-note">
+                    💡 <strong>नियम तथा हिसाब विधि:</strong> १० धुर सम्मको जग्गाको लागि आधारभूत दर (Base Rate) लागू हुन्छ। १० धुर भन्दा बढी भएमा बाँकी प्रत्येक धुरको लागि निर्धारित अतिरिक्त दर (Extra Rate) गुणन गरी स्वतः हिसाब गरिन्छ।
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Printable Receipt Section (Targeted during window.print()) -->
+    <!-- Printable Official Government Voucher -->
     <div id="printableReceipt">
-        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
-            <h2 style="font-size: 1.6rem;">गौरादह नगरपालिका</h2>
-            <h4 style="font-size: 1.1rem; font-weight: normal;">नगर कार्यपालिकाको कार्यालय, झापा, कोशी प्रदेश</h4>
-            <h3 style="margin-top: 8px; text-decoration: underline;">मालपोत / भूमिकर हिसाब भौचर</h3>
+        <div class="print-header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem" class="print-logo">
+            <div class="print-title-lg">गौरादह नगरपालिका</div>
+            <div class="print-title-sub">नगर कार्यपालिकाको कार्यालय, झापा</div>
+            <div style="font-size: 0.95rem;">कोशी प्रदेश, नेपाल</div>
+            <div class="print-voucher-title">मालपोत तथा भूमिकर हिसाब भौचर / रसीद</div>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1rem;">
-            <div><strong>जग्गाधनीको नाम:</strong> <span id="printOwnerName">-</span></div>
-            <div><strong>मिति:</strong> <span id="printDate">-</span></div>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.05rem;">
+            <div><strong>मिति (BS):</strong> <span id="printDate">-</span></div>
+            <div><strong>भौचर नं.:</strong> <span id="printVoucherNo" style="font-weight: 700;">-</span></div>
         </div>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 0.95rem;" border="1" cellpadding="6">
+
+        <table class="print-table">
             <thead>
-                <tr style="background: #f1f5f9;">
-                    <th>क्र.सं.</th>
-                    <th>वडा नं.</th>
-                    <th>क्षेत्र / सडक प्रकार</th>
-                    <th>क्षेत्रफल (बिघा-कट्ठा-धुर)</th>
-                    <th>आधार दर</th>
-                    <th>अतिरिक्त दर</th>
-                    <th>जम्मा कर (रु.)</th>
+                <tr>
+                    <th style="width: 6%;">क्र.सं.</th>
+                    <th style="width: 10%;">वडा नं.</th>
+                    <th style="width: 34%;">क्षेत्र / सडक विवरण</th>
+                    <th style="width: 20%;">क्षेत्रफल</th>
+                    <th style="width: 15%;">दररेट हिसाब</th>
+                    <th style="width: 15%;">जम्मा कर (रु.)</th>
                 </tr>
             </thead>
             <tbody id="printTableBody">
             </tbody>
         </table>
-        <div style="text-align: right; font-size: 1.2rem; font-weight: bold; margin-top: 15px;">
-            जम्मा बुझाउनुपर्ने भूमिकर रकम: <span id="printGrandTotal" style="color: #e11d48;">रु. ०</span>
+
+        <div class="print-summary-box">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.25rem; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
+                <span>जम्मा बुझाउनुपर्ने भूमिकर रकम:</span>
+                <span id="printGrandTotal" style="color: #000;">रु. ०</span>
+            </div>
+            <div>
+                <strong>अक्षरमा:</strong> <span id="printGrandTotalWords" style="font-style: italic;">शून्य रुपैयाँ मात्र</span>
+            </div>
+            <div style="font-size: 0.95rem; margin-top: 4px; color: #333;">
+                कुल कित्ता संख्या: <strong id="printTotalKittas">०</strong> | कुल क्षेत्रफल: <strong id="printTotalArea">०</strong>
+            </div>
         </div>
-        <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 0.9rem;">
-            <div>तयार पार्नेको दस्तखत: ...........................</div>
-            <div>कार्यालयको छाप: ...........................</div>
+
+        <div class="print-signatures">
+            <div class="sig-block">
+                <div>तयार गर्ने (फाँटवाला)</div>
+                <div style="font-size: 0.85rem; margin-top: 2px;">दस्तखत / मिति</div>
+            </div>
+            <div class="sig-block" style="border-top: none; display: flex; align-items: center; justify-content: center;">
+                <div style="border: 1.5px dashed #000; padding: 15px 25px; border-radius: 50%; font-size: 0.85rem;">
+                    कार्यालयको छाप
+                </div>
+            </div>
+            <div class="sig-block">
+                <div>कर सङ्कलनकर्ता / अधिकृत</div>
+                <div style="font-size: 0.85rem; margin-top: 2px;">दस्तखत / मिति</div>
+            </div>
         </div>
     </div>
+
+    <!-- Modal: Municipal Rates Sheet Modal -->
+    <div class="modal-overlay" id="ratesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📖 गौरादह नगरपालिका - मालपोत तथा भूमिकर दररेट सूची (आर्थिक वर्ष २०८३)</div>
+                <button type="button" class="modal-close" onclick="closeRatesModal()">×</button>
+            </div>
+            <div id="ratesModalBody">
+                <p style="text-align: center; color: var(--text-muted);">दररेट लोड हुँदैछ...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <!-- Script File -->
     <script src="script-malpot-calculator.js"></script>
