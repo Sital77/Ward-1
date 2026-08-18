@@ -14,18 +14,18 @@
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 18px;
+            padding: 14px;
+            margin-bottom: 14px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
         }
 
         .section-label {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
             color: #1e3a8a;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border-bottom: 1.5px solid #edf2f7;
-            padding-bottom: 6px;
+            padding-bottom: 5px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -35,8 +35,8 @@
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
             position: relative;
         }
 
@@ -44,24 +44,24 @@
             display: inline-block;
             background: #1e40af;
             color: #fff;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: bold;
-            padding: 3px 10px;
+            padding: 2px 9px;
             border-radius: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .btn-delete-row {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
             background: #ef4444;
             color: #ffffff;
             border: none;
-            padding: 4px 10px;
+            padding: 3px 9px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: bold;
             transition: all 0.2s;
         }
@@ -75,9 +75,9 @@
             background: #eff6ff;
             color: #1e40af;
             border: 1.5px dashed #3b82f6;
-            padding: 10px;
+            padding: 9px;
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -91,17 +91,31 @@
             background: #dbeafe;
         }
 
+        /* Tapasheel Box & Table Styling (Tight & Attached) */
+        .tapasheel-container {
+            margin-top: 4px;
+            margin-bottom: 6px;
+        }
+
+        .tapasheel-label {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-bottom: 2px;
+            line-height: 1.2;
+            color: #000;
+        }
+
         .tapasheel-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 16px 0;
-            font-size: 12.5pt;
+            margin: 0;
+            font-size: 12pt;
         }
 
         .tapasheel-table th,
         .tapasheel-table td {
             border: 1.5px solid #000;
-            padding: 7px 9px;
+            padding: 4px 6px;
             text-align: center;
             vertical-align: middle;
         }
@@ -109,6 +123,7 @@
         .tapasheel-table th {
             background-color: #f1f5f9;
             font-weight: 700;
+            padding: 5px 6px;
         }
 
         .signature-block {
@@ -121,16 +136,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 10px;
+            margin-top: 4px;
         }
 
         .sig-name {
             font-weight: bold;
             border-top: 1.5px dashed #000;
-            padding-top: 6px;
+            padding-top: 4px;
             display: inline-block;
             min-width: 120px;
             text-align: center;
+            font-size: 13pt;
         }
 
         .fill-space {
@@ -141,16 +157,115 @@
         .letter-body-para {
             text-align: justify;
             text-justify: inter-word;
-            font-size: 13.5pt;
-            line-height: 1.85;
+            font-size: 13pt;
+            line-height: 1.7;
+            margin-bottom: 6px;
+        }
+
+        /* Quick Import Banner */
+        .quick-import-card {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 1.5px dashed #3b82f6;
+            border-radius: 10px;
+            padding: 10px 12px;
             margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-import-card:hover {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            transform: translateY(-1px);
+        }
+
+        .btn-import-header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(37,99,235,0.25);
+        }
+
+        .btn-import-header:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        /* Filter Tabs for Import Modal */
+        .filter-tab {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .filter-tab.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+        }
+
+        /* Source Badge */
+        .source-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-charkilla { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .badge-bato { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-gharbato { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+        /* Floating Toast */
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media print {
             .input-panel,
             .modal-overlay,
             #themeToggle,
-            .no-print {
+            .no-print,
+            #toastContainer {
                 display: none !important;
             }
 
@@ -165,7 +280,7 @@
                 box-shadow: none !important;
                 margin: 0 !important;
                 width: 100% !important;
-                padding: 10mm 15mm !important;
+                padding: 8mm 12mm !important;
             }
 
             body {
@@ -180,9 +295,20 @@
 
     <!-- ══════════════ INPUT PANEL ══════════════ -->
     <div class="input-panel">
-        <div class="header-action-container">
-            <h2 class="panel-title" id="formMainTitle">🗺️ जग्गा वर्गीकरण सिफारिस प्रविष्टि</h2>
-            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        <div class="header-action-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 class="panel-title" id="formMainTitle" style="font-size: 1.25rem;">🗺️ जग्गा वर्गीकरण सिफारिस</h2>
+            <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn-import-header" onclick="openImportModal()" title="चारकिल्ला वा बाटो प्रमाणितबाट डाटा तान्नुहोस्">📥 डाटा तान्नुस्</button>
+                <button type="button" class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+            </div>
+        </div>
+
+        <!-- Quick Import Banner -->
+        <div class="quick-import-card" onclick="openImportModal()">
+            <div style="font-size: 0.86rem; color: #1e40af; font-weight: 600;">
+                ⚡ <strong>चारकिल्ला</strong> / <strong>बाटो</strong> बाट सिधै विवरण भर्नुस्
+            </div>
+            <span style="background: #2563eb; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; white-space: nowrap;">📥 खोज्नुस्</span>
         </div>
 
         <input type="hidden" id="editRecordIndex" value="">
@@ -213,7 +339,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label>नेपाल संवत् (ने.स.):</label>
                 <input type="text" id="inNepalSamvat" value="११४६" oninput="updateDoc()">
             </div>
@@ -228,7 +354,7 @@
                 <input type="text" id="inReceiver" value="श्री यो जोजस सँग सम्बन्धित छ ।" placeholder="उदा: श्री यो जोजस सँग सम्बन्धित छ ।" oninput="updateDoc()">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label>विषय:</label>
                 <input type="text" id="inSubject" value="वर्गीकरण सिफारिस सम्बन्धमा ।" oninput="updateDoc()">
             </div>
@@ -254,7 +380,7 @@
                 </div>
             </div>
 
-            <div class="row-grid" style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 12px;">
+            <div class="row-grid" style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 10px;">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size: 0.85rem;">नागरिकता नं. (वैकल्पिक):</label>
                     <input type="text" id="inCitNo" placeholder="उदा: ०४-०१-७९-..." oninput="updateDoc()">
@@ -266,14 +392,14 @@
             </div>
 
             <!-- Custom Address Checkbox -->
-            <div class="form-group" style="margin-bottom: 6px;">
-                <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; font-size: 0.92rem;">
+            <div class="form-group" style="margin-bottom: 4px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
                     <input type="checkbox" id="chkChangeAddress" onchange="toggleAddressFields(); updateDoc();" style="width: 16px; height: 16px;">
                     <span>ठेगाना फेर्नुस् (अन्य जिल्ला/पालिकाबाट भए)</span>
                 </label>
             </div>
 
-            <div id="custAddressBox" style="display: none; background: #f1f5f9; padding: 10px; border-radius: 8px; border: 1px dashed #94a3b8; margin-top: 10px;" class="row-grid">
+            <div id="custAddressBox" style="display: none; background: #f1f5f9; padding: 10px; border-radius: 8px; border: 1px dashed #94a3b8; margin-top: 8px;" class="row-grid">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size: 0.85rem;">जिल्ला:</label>
                     <input type="text" id="inCustDistrict" placeholder="उदा: मोरङ" oninput="updateDoc()">
@@ -321,7 +447,7 @@
                 <input type="text" id="inDecisionDate" value="२०७९/१०/२६" placeholder="२०७९/१०/२६" oninput="updateDoc()">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label>व्यहोरामा देखिने मुख्य वर्गीकरण क्षेत्र:</label>
                 <input type="text" id="inMainZoneDisplay" value="व्यवसायिक शहरी क्षेत्र" placeholder="उदा: व्यवसायिक शहरी क्षेत्र" oninput="updateDoc()">
             </div>
@@ -349,15 +475,52 @@
                 <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
             </div>
 
-            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+            <div style="margin-top: 10px; border-top: 1px dashed #feb2b2; padding-top: 6px;">
                 <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
-                    <span>↔️ हस्ताक्षरको दुरी (Top Margin):</span><span id="marginVal">६० px</span>
+                    <span>↔️ हस्ताक्षरको दुरी (Top Margin):</span><span id="marginVal">३५ px</span>
                 </label>
-                <input type="range" id="inSigMargin" min="10" max="250" value="60" oninput="adjustSignaturePosition(this.value)">
+                <input type="range" id="inSigMargin" min="10" max="200" value="35" oninput="adjustSignaturePosition(this.value)">
             </div>
         </div>
 
         <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र सुरक्षित गर्नुस्</button>
+    </div>
+
+    <!-- ══════════════ DATA IMPORT MODAL (चार किल्ला / बाटो प्रमाणित) ══════════════ -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal-content" style="max-width: 950px; width: 95%;">
+            <button class="modal-close" onclick="closeImportModal()">×</button>
+            <h3 class="modal-title" style="color: #1e40af; border-bottom: 2px solid #bfdbfe; padding-bottom: 8px; margin-bottom: 12px;">
+                📥 पूर्व सिफारिसबाट विवरण तान्नुहोस् (Auto Import)
+            </h3>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                <button type="button" class="filter-tab active" id="tabAll" onclick="setImportFilter('all')">📋 सबै सिफारिसहरू</button>
+                <button type="button" class="filter-tab" id="tabCharkilla" onclick="setImportFilter('charkilla')">🗺️ चार किल्ला प्रमाणित</button>
+                <button type="button" class="filter-tab" id="tabBato" onclick="setImportFilter('bato')">🛣️ बाटो प्रमाणित</button>
+                <button type="button" class="filter-tab" id="tabGharbato" onclick="setImportFilter('gharbato')">🏠 घर बाटो प्रमाणित</button>
+            </div>
+
+            <div class="search-container" style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <input type="text" id="importSearchField" placeholder="🔍 निवेदकको नाम, कित्ता नम्बर, वा चलानी नं. बाट खोज्नुहोस्..." oninput="renderImportTable()" style="flex: 1; padding: 9px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
+                <button type="button" class="btn-abhilekh" onclick="reloadImportSources()" style="white-space: nowrap; background: #0284c7;">🔄 रिफ्रेस</button>
+            </div>
+
+            <div style="max-height: 52vh; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table class="db-table" style="margin: 0; width: 100%;">
+                    <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 2;">
+                        <tr>
+                            <th style="width: 15%;">स्रोत सिफारिस</th>
+                            <th style="width: 25%;">निवेदकको नाम</th>
+                            <th style="width: 28%;">कित्ता र क्षेत्रफल</th>
+                            <th style="width: 16%;">मिति / चलानी</th>
+                            <th style="width: 16%;">कार्य</th>
+                        </tr>
+                    </thead>
+                    <tbody id="importTableBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- ══════════════ ABHILEKH / RECORDS MODAL ══════════════ -->
@@ -389,7 +552,7 @@
     <div class="preview-panel">
         <div class="a4-page">
             <!-- Letterhead -->
-            <div class="letterhead-container">
+            <div class="letterhead-container" style="margin-bottom: 0;">
                 <div class="lh-left">
                     <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
                     <div class="lh-meta">
@@ -410,16 +573,16 @@
                 </div>
             </div>
 
-            <div class="header-red-line"></div>
+            <div class="header-red-line" style="margin-top: 4px; margin-bottom: 6px;"></div>
 
             <!-- Receiver -->
-            <div class="address-to" id="lblReceiver" style="font-weight: bold; font-size: 14pt; margin-top: 10px; margin-bottom: 20px;">
+            <div class="address-to" id="lblReceiver" style="font-weight: bold; font-size: 13pt; margin-top: 4px; margin-bottom: 6px;">
                 श्री यो जोजस सँग सम्बन्धित छ ।
             </div>
 
             <!-- Subject -->
-            <div class="subject-container" style="text-align: center; margin: 15px 0 25px 0;">
-                <div class="subject-title" style="font-size: 16pt; font-weight: bold; text-decoration: underline; display: inline-block;">
+            <div class="subject-container" style="text-align: center; margin: 6px 0 10px 0;">
+                <div class="subject-title" style="font-size: 15pt; font-weight: bold; text-decoration: underline; display: inline-block;">
                     <span style="color: #e51a23;">विषय:</span> <span id="lblSubject">वर्गीकरण सिफारिस सम्बन्धमा ।</span>
                 </div>
             </div>
@@ -429,49 +592,53 @@
                 प्रस्तुत विषयमा <span id="lblPalikaSpan">गौरादह नगरपालिका</span> वडा नं. <span id="lblWadaSpan">१</span> मा स्थायी बसोवास गर्ने <span id="lblApplicantName" style="font-weight: bold;">बुद्धिमान कार्की</span><span id="lblCitInfoSpan"></span>ले यस वडा कार्यालयमा पेश गर्नु भएको निवेदन माग अनुसार निजको नाममा दर्ता कायम रहेको तपशिल अनुसारको कि.नं. र क्षेत्रफल भएको जग्गा वर्गिकरण अनुसार प्रमाणित गरिन्छ ।
             </div>
 
-            <!-- Tapasheel Table Header -->
-            <div style="font-size: 13.5pt; font-weight: bold; margin-top: 12px; margin-bottom: 4px;">तपसिल:</div>
-
-            <table class="tapasheel-table">
-                <thead>
-                    <tr>
-                        <th style="width: 8%;">सि.नं.</th>
-                        <th style="width: 25%;">साबिकको वडा नं.</th>
-                        <th style="width: 25%;">हालको वडा नं.</th>
-                        <th style="width: 14%;">कि.नं.</th>
-                        <th style="width: 14%;">क्षेत्रफल (ब.मि.)</th>
-                        <th style="width: 24%;">कैफियत</th>
-                    </tr>
-                </thead>
-                <tbody id="lblTapasheelTableBody">
-                    <tr>
-                        <td>१.</td>
-                        <td>गौरादह गाविस ९</td>
-                        <td>गौरादह वडा नं. १</td>
-                        <td>१६९८</td>
-                        <td>३३८.६३</td>
-                        <td>व्यावसायिक शहरी क्षेत्र</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Tapasheel Section (Label directly on top of table with zero gap) -->
+            <div class="tapasheel-container">
+                <div class="tapasheel-label">तपसिल:</div>
+                <table class="tapasheel-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 7%;">सि.नं.</th>
+                            <th style="width: 25%;">साबिकको वडा नं.</th>
+                            <th style="width: 25%;">हालको वडा नं.</th>
+                            <th style="width: 14%;">कि.नं.</th>
+                            <th style="width: 14%;">क्षेत्रफल (ब.मि.)</th>
+                            <th style="width: 23%;">कैफियत</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lblTapasheelTableBody">
+                        <tr>
+                            <td>१.</td>
+                            <td>गौरादह गाविस ९</td>
+                            <td>गौरादह वडा नं. १</td>
+                            <td>१६९८</td>
+                            <td>३३८.६३</td>
+                            <td>व्यावसायिक शहरी क्षेत्र</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Paragraph 2 (Decision / Act Clause) -->
-            <div class="letter-body-para" id="lblParagraph2" style="margin-top: 16px;">
+            <div class="letter-body-para" id="lblParagraph2" style="margin-top: 6px; margin-bottom: 8px;">
                 उक्त माथि उल्लेखित कित्ता नम्बरको जग्गा <span id="lblActClause" style="font-weight: 600;">भू-उपयोग ऐन २०७६ को दफा २०</span> र गौरादह नगरपालिकाको मिति: <span id="lblDecisionDate" style="font-weight: 600;">२०७९/१०/२६</span> को निर्णय अनुसार उक्त जग्गा <span id="lblMainZoneSpan" style="font-weight: bold; text-decoration: underline;">व्यवसायिक शहरी क्षेत्र</span> भित्र पर्न व्यहोरा अनुरोध छ ।
             </div>
 
             <!-- Signature Section -->
-            <div class="doc-footer" id="docFooterSection" style="margin-top: 60px;">
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 35px;">
                 <div class="signature-block">
-                    <div class="sig-space" style="height: 35px;"></div>
+                    <div class="sig-space" style="height: 25px;"></div>
                     <div class="sig-title-line">
                         <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
-                        <div class="sig-title" id="lblSigTitle" style="font-weight: normal; font-size: 13pt;">वडा अध्यक्ष</div>
+                        <div class="sig-title" id="lblSigTitle" style="font-weight: normal; font-size: 12.5pt;">वडा अध्यक्ष</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Floating Toast Notification -->
+    <div id="toastContainer"></div>
 
     <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
