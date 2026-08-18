@@ -1,6 +1,6 @@
 // ============================================================================
 // मालपोत तथा भूमिकर हिसाब प्रणाली - गौरादह नगरपालिका
-// Instant Real-Time Tax Calculator Engine
+// Multi-Kitta Calculator & Landscape Rate Sheet Controller
 // ============================================================================
 
 // 1. JSON दररेट डाटा (आधिकारिक दररेट २०८३)
@@ -205,6 +205,7 @@ let malpotRatesData = [
 
 // Global State
 let currentUnitMode = 'sqm'; // 'sqm' or 'bigha'
+let kittaList = [];
 const SQM_PER_DHUR = 16.9315; // 1 Kattha = 338.63 m² = 20 Dhur => 1 Dhur = 16.9315 m²
 
 // 2. Initialization
@@ -315,7 +316,7 @@ function initCategoryDropdown() {
     if (subSelect.options.length > 0) {
         subSelect.selectedIndex = 0;
     }
-    calculateInstantTax();
+    calculateLiveArea();
 }
 
 function onWardOrCategoryChange() {
@@ -324,7 +325,7 @@ function onWardOrCategoryChange() {
     if (subSelect.options.length > 0) {
         subSelect.selectedIndex = 0;
     }
-    calculateInstantTax();
+    calculateLiveArea();
 }
 
 function updateSubCategories() {
@@ -353,7 +354,7 @@ function switchUnit(unit) {
     document.getElementById('sqmSection').style.display = (unit === 'sqm') ? 'block' : 'none';
     document.getElementById('bighaSection').style.display = (unit === 'bigha') ? 'block' : 'none';
 
-    calculateInstantTax();
+    calculateLiveArea();
 }
 
 function getCurrentTotalDhur() {
@@ -384,25 +385,28 @@ function formatBKDString(totalDhur) {
     return parts.join(' ');
 }
 
-// 7. Instant Automatic Calculation Function (Runs live on input/change)
-function calculateInstantTax() {
+function calculateLiveArea() {
+    const totalDhur = getCurrentTotalDhur();
+    const totalKattha = (totalDhur / 20).toFixed(2);
+    const totalSqm = (totalDhur * SQM_PER_DHUR).toFixed(2);
+    const bkdText = formatBKDString(totalDhur);
+
+    const liveBadge = document.getElementById('liveAreaText');
+    if (liveBadge) {
+        liveBadge.textContent = `${toNepaliDigit(totalSqm)} m² (${toNepaliDigit(totalDhur.toFixed(1))} धुर | ${bkdText})`;
+    }
+}
+
+// 7. Add Kitta Parcel to List
+function addKittaParcel() {
     const wardVal = document.getElementById('wardSelect').value || "1";
     const catIndex = document.getElementById('categorySelect').value;
     const subCatId = document.getElementById('subCategorySelect').value;
     const totalDhur = getCurrentTotalDhur();
 
-    const taxDisplay = document.getElementById('instantTotalTax');
-    const wordsDisplay = document.getElementById('instantTotalWords');
-    const areaDisplay = document.getElementById('instantAreaDisplay');
-    const bkdDisplay = document.getElementById('instantBkdDisplay');
-    const breakdownBox = document.getElementById('instantBreakdownBox');
-
     if (catIndex === "" || !subCatId || totalDhur <= 0) {
-        taxDisplay.textContent = 'रु. ०';
-        wordsDisplay.textContent = 'अक्षरमा: शून्य रुपैयाँ मात्र';
-        areaDisplay.textContent = '० m²';
-        bkdDisplay.textContent = '० धुर';
-        breakdownBox.textContent = 'क्षेत्रफल प्रविष्टि गर्नासाथ यहाँ स्वतः दररेट र हिसाब विवरण देखिनेछ।';
+        alert("⚠️ कृपया जग्गाको सही क्षेत्रफल (वर्गमिटर वा बिघा-कट्ठा-धुर) हाल्नुहोस्!");
+        if (currentUnitMode === 'sqm') document.getElementById('inputSqm').focus();
         return;
     }
 
@@ -426,21 +430,244 @@ function calculateInstantTax() {
     const totalTax = Math.round(baseTax + extraTax);
     const totalSqm = (totalDhur * SQM_PER_DHUR).toFixed(2);
     const bkdText = formatBKDString(totalDhur);
-    const words = convertNumberToNepaliWords(totalTax);
 
-    taxDisplay.textContent = `रु. ${formatCurrency(totalTax)}`;
-    wordsDisplay.textContent = `अक्षरमा: ${words} रुपैयाँ मात्र`;
-    areaDisplay.textContent = `${toNepaliDigit(totalSqm)} m²`;
-    bkdDisplay.textContent = `${bkdText} (${toNepaliDigit(totalDhur.toFixed(1))} धुर)`;
+    const newKitta = {
+        id: Date.now(),
+        ward: wardVal,
+        categoryName: categoryObj.category,
+        subCatId: subCatId,
+        subCatDesc: subCatObj.description,
+        totalDhur: totalDhur,
+        totalSqm: totalSqm,
+        bkdString: bkdText,
+        baseRate: rateInfo.base_rate,
+        extraRate: rateInfo.per_dhur_extra,
+        extraDhur: extraDhur,
+        extraTax: extraTax,
+        parcelTax: totalTax
+    };
 
-    let breakdownText = `वडा नं. ${toNepaliDigit(wardVal)} | १० धुरसम्म आधार दर: रु. ${toNepaliDigit(rateInfo.base_rate)}`;
-    if (extraDhur > 0) {
-        breakdownText += ` + बाँकी ${toNepaliDigit(extraDhur.toFixed(1))} धुरको (रु. ${toNepaliDigit(rateInfo.per_dhur_extra)} का दरले): रु. ${toNepaliDigit(extraTax.toFixed(1))}`;
-    }
-    breakdownBox.textContent = breakdownText;
+    kittaList.push(newKitta);
+    renderKittaTable();
+    resetParcelInputs();
 }
 
-// 8. Dark Mode Toggle
+function resetParcelInputs() {
+    if (document.getElementById('inputSqm')) document.getElementById('inputSqm').value = '';
+    if (document.getElementById('inputBigha')) document.getElementById('inputBigha').value = '0';
+    if (document.getElementById('inputKattha')) document.getElementById('inputKattha').value = '0';
+    if (document.getElementById('inputDhur')) document.getElementById('inputDhur').value = '0';
+    calculateLiveArea();
+    if (currentUnitMode === 'sqm') document.getElementById('inputSqm').focus();
+}
+
+function removeKitta(index) {
+    kittaList.splice(index, 1);
+    renderKittaTable();
+}
+
+function clearAllKittas() {
+    if (kittaList.length === 0) return;
+    if (confirm("के तपाईं सबै कित्ताहरू हटाउन चाहनुहुन्छ?")) {
+        kittaList = [];
+        resetParcelInputs();
+        renderKittaTable();
+    }
+}
+
+// 8. Render Table & Grand Total Summary
+function renderKittaTable() {
+    const tbody = document.getElementById('kittaTableBody');
+    tbody.innerHTML = '';
+
+    if (kittaList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px 15px;">
+                    कुनै पनि कित्ता थपिएको छैन। देब्रेपट्टीको फारम भरेर <strong>"➕ कित्ता थप्नुस्"</strong> क्लिक गर्नुहोस्।
+                </td>
+            </tr>
+        `;
+        document.getElementById('grandTotalTax').textContent = 'रु. ०';
+        document.getElementById('grandTotalWords').textContent = 'अक्षरमा: शून्य रुपैयाँ मात्र';
+        document.getElementById('totalKittaCount').textContent = '०';
+        document.getElementById('totalSqmCount').textContent = '०';
+        document.getElementById('totalDhurCount').textContent = '०';
+        return;
+    }
+
+    let grandTotal = 0;
+    let grandDhur = 0;
+    let grandSqm = 0;
+
+    kittaList.forEach((kitta, idx) => {
+        grandTotal += kitta.parcelTax;
+        grandDhur += kitta.totalDhur;
+        grandSqm += parseFloat(kitta.totalSqm);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${toNepaliDigit(idx + 1)}</strong></td>
+            <td><strong>वडा ${toNepaliDigit(kitta.ward)}</strong></td>
+            <td>
+                <div style="font-weight:700; font-size:0.92rem;">${kitta.categoryName}</div>
+                <div style="font-size:0.82rem; color:var(--text-muted);">${kitta.subCatId} (${kitta.subCatDesc})</div>
+            </td>
+            <td>
+                <div style="font-weight:800; color:var(--primary);">${toNepaliDigit(kitta.totalSqm)} m²</div>
+                <div style="font-size:0.82rem; color:var(--secondary); font-weight:700;">${kitta.bkdString} (${toNepaliDigit(kitta.totalDhur.toFixed(1))} धुर)</div>
+            </td>
+            <td>
+                <strong style="color:var(--accent); font-size:1.05rem;">रु. ${formatCurrency(kitta.parcelTax)}</strong>
+            </td>
+            <td>
+                <button type="button" class="btn-del" onclick="removeKitta(${idx})" title="हटाउनुहोस्">हटाउनुस्</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    const words = convertNumberToNepaliWords(grandTotal);
+    document.getElementById('grandTotalTax').textContent = `रु. ${formatCurrency(grandTotal)}`;
+    document.getElementById('grandTotalWords').textContent = `अक्षरमा: ${words} रुपैयाँ मात्र`;
+    document.getElementById('totalKittaCount').textContent = `${toNepaliDigit(kittaList.length)}`;
+    document.getElementById('totalSqmCount').textContent = `${toNepaliDigit(grandSqm.toFixed(1))}`;
+    document.getElementById('totalDhurCount').textContent = `${toNepaliDigit(grandDhur.toFixed(1))}`;
+}
+
+// 9. Landscape Rates Modal & Printing Logic
+function openRatesModal() {
+    renderRatesLandscapeHTML();
+    document.getElementById('ratesModal').classList.add('active');
+}
+
+function closeRatesModal() {
+    document.getElementById('ratesModal').classList.remove('active');
+}
+
+function renderRatesLandscapeHTML() {
+    const container = document.getElementById('ratesModalTableContainer');
+    let html = `
+        <table class="rates-table-grid">
+            <thead>
+                <tr>
+                    <th style="width: 38%; text-align: left;">सडक तथा जग्गाको विवरण</th>
+                    <th style="width: 12.4%;">वडा १, २, ३<br><small>(समूह १)</small></th>
+                    <th style="width: 12.4%;">वडा ४, ५<br><small>(समूह २)</small></th>
+                    <th style="width: 12.4%;">वडा ७<br><small>(समूह ३)</small></th>
+                    <th style="width: 12.4%;">वडा ६, ८<br><small>(समूह ४)</small></th>
+                    <th style="width: 12.4%;">वडा ९<br><small>(समूह ५)</small></th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    malpotRatesData.forEach(cat => {
+        html += `
+            <tr class="cat-heading-row">
+                <td colspan="6">${cat.category}</td>
+            </tr>
+        `;
+
+        cat.subCategories.forEach(sub => {
+            html += `
+                <tr>
+                    <td><strong>${sub.id}</strong> ${sub.description}</td>
+                    <td style="text-align: center;">
+                        <div><strong>रु. ${toNepaliDigit(sub.rates.ward_1_2_3.base_rate)}</strong></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">+रु. ${toNepaliDigit(sub.rates.ward_1_2_3.per_dhur_extra)}/धुर</div>
+                    </td>
+                    <td style="text-align: center;">
+                        <div><strong>रु. ${toNepaliDigit(sub.rates.ward_4_5.base_rate)}</strong></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">+रु. ${toNepaliDigit(sub.rates.ward_4_5.per_dhur_extra)}/धुर</div>
+                    </td>
+                    <td style="text-align: center;">
+                        <div><strong>रु. ${toNepaliDigit(sub.rates.ward_7.base_rate)}</strong></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">+रु. ${toNepaliDigit(sub.rates.ward_7.per_dhur_extra)}/धुर</div>
+                    </td>
+                    <td style="text-align: center;">
+                        <div><strong>रु. ${toNepaliDigit(sub.rates.ward_6_8.base_rate)}</strong></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">+रु. ${toNepaliDigit(sub.rates.ward_6_8.per_dhur_extra)}/धुर</div>
+                    </td>
+                    <td style="text-align: center;">
+                        <div><strong>रु. ${toNepaliDigit(sub.rates.ward_9.base_rate)}</strong></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">+रु. ${toNepaliDigit(sub.rates.ward_9.per_dhur_extra)}/धुर</div>
+                    </td>
+                </tr>
+            `;
+        });
+    });
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = html;
+    document.getElementById('printRatesContent').innerHTML = html;
+}
+
+function printRatesLandscape() {
+    renderRatesLandscapeHTML();
+    document.body.classList.remove('printing-receipt');
+    document.body.classList.add('printing-rates');
+    window.print();
+    setTimeout(() => {
+        document.body.classList.remove('printing-rates');
+    }, 1000);
+}
+
+// 10. Printable Receipt for Kittas Assessment
+function printReceipt() {
+    if (kittaList.length === 0) {
+        alert("⚠️ प्रिन्ट गर्नु अघि कम्तिमा एउटा कित्ता थप्नुहोस्!");
+        return;
+    }
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+    const voucherNo = `GRD-MK-${Date.now().toString().slice(-6)}`;
+
+    document.getElementById('printDate').textContent = toNepaliDigit(formattedDate);
+    document.getElementById('printVoucherNo').textContent = toNepaliDigit(voucherNo);
+
+    const printTbody = document.getElementById('printReceiptTableBody');
+    printTbody.innerHTML = '';
+    let totalTax = 0;
+
+    kittaList.forEach((kitta, idx) => {
+        totalTax += kitta.parcelTax;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="text-align:center;">${toNepaliDigit(idx + 1)}</td>
+            <td style="text-align:center;">वडा ${toNepaliDigit(kitta.ward)}</td>
+            <td>
+                <div>${kitta.categoryName}</div>
+                <div style="font-size:0.85rem; color:#444;">${kitta.subCatId} - ${kitta.subCatDesc}</div>
+            </td>
+            <td>
+                <strong>${toNepaliDigit(kitta.totalSqm)} m²</strong>
+                <div style="font-size:0.85rem;">(${kitta.bkdString} / ${toNepaliDigit(kitta.totalDhur.toFixed(1))} धुर)</div>
+            </td>
+            <td style="text-align:right;"><strong>रु. ${formatCurrency(kitta.parcelTax)}</strong></td>
+        `;
+        printTbody.appendChild(tr);
+    });
+
+    const words = convertNumberToNepaliWords(totalTax);
+    document.getElementById('printReceiptGrandTotal').textContent = `रु. ${formatCurrency(totalTax)}`;
+    document.getElementById('printReceiptGrandTotalWords').textContent = `${words} रुपैयाँ मात्र`;
+
+    document.body.classList.remove('printing-rates');
+    document.body.classList.add('printing-receipt');
+    window.print();
+    setTimeout(() => {
+        document.body.classList.remove('printing-receipt');
+    }, 1000);
+}
+
+// 11. Dark Mode Toggle
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
