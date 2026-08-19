@@ -920,6 +920,9 @@
 
             const bodyTextEl = document.getElementById('bodyText');
 
+            const loggedWard = localStorage.getItem('sifarish_ward') || '1';
+            const wardNep = toNepaliDigit(loggedWard);
+
             if (isClosing) {
                 // CLOSING TEXT
                 document.getElementById('lblSubject').innerText = "बैंक खाता बन्द गरिदिने सम्बन्धमा";
@@ -928,7 +931,7 @@
                 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ स्थित ${committeeName} 
+                        उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.${wardNep} स्थित ${committeeName} 
                         ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको खाता नं. ${accNo} तहाँ कार्यालयको नियमानुसार उक्त खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
                     </div>
                 `;
@@ -953,7 +956,7 @@
 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.१ को चालू आर्थिक वर्ष ${ayText} को स्वीकृत ${budgetType} योजना तथा कार्यक्रम अन्तर्गत “${projName}” शीर्षकमा विनियोजन भएको रकम रू. ${amtNum} (अक्षरेपी ${amtWords} मात्र) बाट योजना कार्यन्वयन गर्नको लागि गठित ${committeeName} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियमानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
+                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.${wardNep} को चालू आर्थिक वर्ष ${ayText} को स्वीकृत ${budgetType} योजना तथा कार्यक्रम अन्तर्गत “${projName}” शीर्षकमा विनियोजन भएको रकम रू. ${amtNum} (अक्षरेपी ${amtWords} मात्र) बाट योजना कार्यन्वयन गर्नको लागि गठित ${committeeName} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियमानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                     </div>
                 `;
             }

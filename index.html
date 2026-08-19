@@ -1293,6 +1293,7 @@
                 setTimeout(() => {
                     closeModal('modal-sif-login');
                     updateTopBarButtons();
+                    updateDashboardWardDisplay();
                     renderSifarishGrid([]);
                     openModal('modal-sifarish');
                 }, 400);
@@ -1317,6 +1318,7 @@
             localStorage.removeItem('sifarish_user');
             sessionStorage.removeItem('sifarish_session');
             updateTopBarButtons();
+            updateDashboardWardDisplay();
             closeModal('modal-sifarish');
         }
 
@@ -1823,22 +1825,26 @@
             } catch (e) { }
         }
 
+        function updateDashboardWardDisplay() {
+            try {
+                const wWard = localStorage.getItem('sifarish_ward') || '1';
+                const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
+                const nepWard = toNep(wWard);
+                document.querySelectorAll('.wada-title').forEach(el => {
+                    if (el.innerText.includes('वडा कार्यालय') || el.innerText.includes('नं. वडा')) {
+                        el.innerText = nepWard + ' नं. वडा कार्यालयको';
+                    }
+                });
+                document.querySelectorAll('.system-footer').forEach(el => {
+                    el.innerText = `गौरादह नगरपालिका वडा नं.${nepWard} • डिजिटल प्रणाली ©Sital Adhikari`;
+                });
+                document.title = `गौरादह नगरपालिका वडा नं. ${nepWard} - डिजिटल सेवा तथा सिफारिस व्यवस्थापन पोर्टल`;
+            } catch (e) {}
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initPortalNepaliDate();
-
-            // Dynamic Ward Display on Dashboard
-            try {
-                const wWard = localStorage.getItem('sifarish_ward');
-                if (wWard) {
-                    const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
-                    const nepWard = toNep(wWard);
-                    document.querySelectorAll('.wada-title').forEach(el => {
-                        if (el.innerText.includes('वडा कार्यालयको')) {
-                            el.innerText = 'वडा नं. ' + nepWard + ' कार्यालयको';
-                        }
-                    });
-                }
-            } catch (e) {}
+            updateDashboardWardDisplay();
 
             if (window.location.search.includes('open=sifarish') && localStorage.getItem('sifarish_auth') === 'true') {
                 openModal('modal-sifarish');
@@ -1847,6 +1853,7 @@
         });
         window.addEventListener('load', function () {
             initPortalNepaliDate();
+            updateDashboardWardDisplay();
             fetchLandData().catch(e => { /* logged */ });
         });
 

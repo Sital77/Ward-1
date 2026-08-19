@@ -155,8 +155,10 @@ function updateDoc() {
     const ay      = getSelectedAY();
     const chalani = document.getElementById('inChalani').value     || '';
     const miti    = document.getElementById('inMiti').value         || '';
-    const ns      = document.getElementById('inNepalSamvat').value  || '';
-    const wada    = document.getElementById('inWadaNo').value.trim()|| '१';
+    const ns      = document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value : '';
+    const loggedWard = localStorage.getItem('sifarish_ward') || '1';
+    const loggedWardNep = toNepaliDigit(loggedWard);
+    const wada    = document.getElementById('inWadaNo').value.trim() || loggedWardNep;
     const name    = document.getElementById('inName').value         || '';
     const business= document.getElementById('inBusiness').value     || '';
 
@@ -178,6 +180,9 @@ function updateDoc() {
     document.getElementById('lblChalani').innerText     = chalani;
     document.getElementById('lblMiti').innerText        = miti;
     document.getElementById('lblNepalSamvat').innerText = ns;
+    if (document.getElementById('lblSifarisWada')) {
+        document.getElementById('lblSifarisWada').innerText = wada;
+    }
 
     // Recipient Address update
     let receiverOffice = 'gauradaha';

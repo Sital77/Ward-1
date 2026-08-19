@@ -1271,15 +1271,17 @@
             document.getElementById('lblReceiverLocation').innerText = recLoc;
 
             // Applicant Address Calculation
+            const loggedWard = localStorage.getItem('sifarish_ward') || '1';
+            const loggedWardNep = toNepaliDigit(loggedWard);
             let appDist = "झापा";
             let appPalika = "गौरादह नगरपालिका";
-            let appWada = "१";
+            let appWada = loggedWardNep;
 
             const chkAddr = document.getElementById('chkCustomAddress');
             if (chkAddr && chkAddr.checked) {
                 appDist = document.getElementById('inApplicantDistrict').value.trim() || "झापा";
                 appPalika = document.getElementById('inApplicantPalika').value.trim() || "गौरादह नगरपालिका";
-                appWada = document.getElementById('inApplicantWadaNo').value.trim() || "१";
+                appWada = document.getElementById('inApplicantWadaNo').value.trim() || loggedWardNep;
             }
 
             const bodyTextEl = document.getElementById('bodyText');

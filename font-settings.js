@@ -420,40 +420,106 @@
         const ward = localStorage.getItem('sifarish_ward') || '1';
         const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
         const wardNep = toNep(ward);
-
-        const searchDigit = (ward === '1') ? '३' : '१';
         const replaceDigit = wardNep;
 
-        const titleRegex = new RegExp(`${searchDigit}\\s*न[ं]?\\s*[\\.\\-]*\\s*वडा`, 'g');
-        const wardRegex = new RegExp(`वडा\\s*न[ं]?\\s*[\\.\\-]*\\s*${searchDigit}`, 'g');
+        // 1. Document Title
+        if (document.title) {
+            document.title = document.title
+                .replace(/वडा\s*न[ं]?\s*[\.\-]*\s*[०-९\d]+/g, "वडा नं. " + replaceDigit)
+                .replace(/Ward\s*\d+/gi, "Ward " + ward);
+        }
 
-        // Document Title
-        document.title = document.title.replace(new RegExp(`वडा\\s*न[ं]?\\s*[\\.\\-]*\\s*${searchDigit}`, 'g'), "वडा नं. " + replaceDigit);
-
-        // Replace wada-title (e.g. "१ नं. वडा कार्यालय" -> "३ नं. वडा कार्यालय")
+        // 2. Header & Title Elements
         document.querySelectorAll('.wada-title').forEach(el => {
             el.innerHTML = el.innerHTML
-                .replace(titleRegex, `${replaceDigit} नं. वडा`)
-                .replace(new RegExp(`${searchDigit} नं वडा`, 'g'), `${replaceDigit} नं वडा`);
+                .replace(/[१३२४५६७८९\d]+\s*न[ं]?\s*[\.\-]*\s*वडा/g, `${replaceDigit} नं. वडा`)
+                .replace(/वडा\s*न[ं]?\s*[\.\-]*\s*[१३२४५६७८९\d]+/g, `वडा नं. ${replaceDigit}`);
         });
 
-        // Replace muni-wada-line
         document.querySelectorAll('.muni-wada-line').forEach(el => {
-            el.innerHTML = el.innerHTML.replace(wardRegex, `वडा नं. ${replaceDigit}`);
+            el.innerHTML = el.innerHTML.replace(/वडा\s*न[ं]?\s*[\.\-]*\s*[१३२४५६७८९\d]+/g, `वडा नं. ${replaceDigit}`);
         });
 
-        // Replace ward numbers inside preview letter paragraph text
-        const selectors = ['.letter-body-para', '.letter-body', '#bodyText', '#bodyTextJanma', '#bodyTextBibaha', '#bodyTextTransfer'];
-        selectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => {
-                el.innerHTML = el.innerHTML.replace(wardRegex, `वडा नं. ${replaceDigit}`);
-            });
-        });
-
-        // Replace email
+        // Email address
         const email = (ward === '3') ? 'gauradahaward3@gmail.com' : 'ward1.gauradaha@gmail.com';
         document.querySelectorAll('.email-t').forEach(el => {
             el.innerText = `Email: ${email}`;
+        });
+
+        // Stamps & System Footers
+        const nabalakStamp = document.getElementById('lblNabalakOfficeStamp');
+        if (nabalakStamp) {
+            nabalakStamp.innerText = 'गौरादह नगरपालिका वडा नं. ' + replaceDigit + ' कार्यालय';
+        }
+        document.querySelectorAll('.system-footer').forEach(el => {
+            el.innerText = `गौरादह नगरपालिका वडा नं.${replaceDigit} • डिजिटल प्रणाली ©Sital Adhikari`;
+        });
+
+        // 3. Form Default Inputs & Selects for Ward
+        const wardInputIds = [
+            'inApplicantWadaNo', 'inWadaNo', 'inResidentWada', 'inLandWada', 
+            'inWada', 'inSabikWada', 'inHalWada', 'inCustWada', 'wardSelect'
+        ];
+        wardInputIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (el.tagName === 'SELECT') {
+                    const opt = Array.from(el.options).find(o => 
+                        o.value === ward || 
+                        o.value === replaceDigit || 
+                        o.text.includes(`वडा नं. ${replaceDigit}`) || 
+                        o.text.includes(`वडा नं. ${ward}`) || 
+                        o.text.includes(`वडा ${replaceDigit}`) ||
+                        o.text.includes(replaceDigit)
+                    );
+                    if (opt && el.value !== opt.value) {
+                        el.value = opt.value;
+                        if (typeof onWardOrCategoryChange === 'function') {
+                            try { onWardOrCategoryChange(); } catch(e){}
+                        }
+                    }
+                } else if (el.tagName === 'INPUT') {
+                    if (!el.dataset.userEdited) {
+                        if (!el.value || el.value === '१' || el.value === '1' || el.value === '३' || el.value === '3') {
+                            el.value = replaceDigit;
+                        }
+                    }
+                    if (el.placeholder && (el.placeholder.includes('१') || el.placeholder.includes('३'))) {
+                        el.placeholder = el.placeholder.replace(/[१३]/g, replaceDigit);
+                    }
+                    el.addEventListener('input', () => { el.dataset.userEdited = 'true'; }, { once: true });
+                }
+            }
+        });
+
+        // Row input classes (.inp-hal-wada, .input-hal)
+        document.querySelectorAll('.inp-hal-wada, .input-hal').forEach(el => {
+            if (!el.dataset.userEdited && (!el.value || el.value === '१' || el.value === '३' || el.value.includes('गौरादह न.पा वडा नं.'))) {
+                el.value = `गौरादह न.पा वडा नं.${replaceDigit}`;
+            }
+            el.addEventListener('input', () => { el.dataset.userEdited = 'true'; }, { once: true });
+        });
+
+        // 4. Letter Body Paragraphs in Preview
+        const selectors = [
+            '.letter-body-para', '.letter-body', '#bodyText', '#bodyTextJanma', 
+            '#bodyTextBibaha', '#bodyTextTransfer', '#bodyBanda', '#bodyKholne'
+        ];
+        selectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                el.innerHTML = el.innerHTML
+                    .replace(/वडा\s*न[ं]?\s*[\.\-]*\s*[१३](?!\d)/g, `वडा नं.${replaceDigit}`)
+                    .replace(/[१३]\s*न[ं]?\s*[\.\-]*\s*वडा/g, `${replaceDigit} नं. वडा`);
+            });
+        });
+
+        // 5. Preview Spans
+        const wardSpans = ['lblWadaBody', 'lblWadaBodyBanda', 'lblWadaSpan', 'lblLandWada', 'lblResidentWada', 'lblSifarisWada'];
+        wardSpans.forEach(id => {
+            const sp = document.getElementById(id);
+            if (sp && (!sp.innerText || sp.innerText === '१' || sp.innerText === '३' || sp.innerText === '....' || sp.innerText === '...')) {
+                sp.innerText = replaceDigit;
+            }
         });
     }
 
@@ -1176,28 +1242,34 @@
             }
             badge.innerHTML = `<span>🗓️ <strong>स्वचालित नेपाली मिति:</strong></span> <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; letter-spacing: 0.5px;">${dateStr}</span>`;
 
-            // Dynamic Ward Number Display based on Login Session
+            // Dynamic Ward Number & Signatures Initialization
             try {
-                const loggedWard = localStorage.getItem('sifarish_ward');
-                if (loggedWard) {
-                    const nepWard = String(loggedWard).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
-                    
-                    document.querySelectorAll('.wada-title').forEach(el => {
-                        if (el.innerText.includes('१ नं.')) {
-                            el.innerText = el.innerText.replace('१', nepWard);
-                        } else if (el.innerText === '१ नं. वडा कार्यालय') {
-                            el.innerText = nepWard + ' नं. वडा कार्यालय';
-                        }
-                    });
-
-                    const nabalakStamp = document.getElementById('lblNabalakOfficeStamp');
-                    if (nabalakStamp) {
-                        nabalakStamp.innerText = 'गौरादह नगरपालिका वडा नं. ' + nepWard + ' कार्यालय';
-                    }
+                localizePageForWard();
+                setupDynamicSignatures();
+                if (typeof updateDoc === 'function') {
+                    try { updateDoc(); } catch(e) {}
                 }
-            } catch(e) { /* logged */; }
+            } catch(e) { /* logged */ }
         } catch(e) {}
     }
+
+    // Run ward localization and signature setup on all lifecycle stages
+    window.addEventListener('templateInjected', () => {
+        try {
+            localizePageForWard();
+            setupDynamicSignatures();
+            if (typeof updateDoc === 'function') {
+                try { updateDoc(); } catch(e) {}
+            }
+        } catch(e) {}
+    });
+
+    window.addEventListener('load', () => {
+        try {
+            localizePageForWard();
+            setupDynamicSignatures();
+        } catch(e) {}
+    });
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initFontSettings);

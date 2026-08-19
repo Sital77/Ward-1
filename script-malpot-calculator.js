@@ -210,6 +210,12 @@ const SQM_PER_DHUR = 16.9315; // 1 Kattha = 338.63 m² = 20 Dhur => 1 Dhur = 16.
 
 // 2. Initialization
 document.addEventListener('DOMContentLoaded', () => {
+    const loggedWard = localStorage.getItem('sifarish_ward') || '1';
+    const wardSelect = document.getElementById('wardSelect');
+    if (wardSelect) {
+        wardSelect.value = loggedWard;
+    }
+
     fetch('./malpot-rates.json')
         .then(res => res.json())
         .then(data => {

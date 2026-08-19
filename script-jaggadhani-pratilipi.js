@@ -152,10 +152,13 @@ function updateDoc() {
     document.getElementById('lblNepalSamvat').innerText = ns;
 
     // Applicant & Residence
+    const loggedWard = localStorage.getItem('sifarish_ward') || '1';
+    const loggedWardNep = toNepaliDigit(loggedWard);
+
     const district      = document.getElementById('inDistrict').value.trim()     || '........';
     const palikaType    = document.getElementById('inPalikaType').value          || 'नगरपालिका';
     const palikaName    = document.getElementById('inPalikaName').value.trim()   || '........';
-    const residentWada  = document.getElementById('inResidentWada').value.trim() || '....';
+    const residentWada  = document.getElementById('inResidentWada').value.trim() || loggedWardNep;
     const applicantName = document.getElementById('inApplicantName').value.trim()|| '....................';
 
     document.getElementById('lblDistrict').innerText      = district;
@@ -163,6 +166,9 @@ function updateDoc() {
     document.getElementById('lblPalikaName').innerText    = palikaName;
     document.getElementById('lblResidentWada').innerText  = residentWada;
     document.getElementById('lblApplicantName').innerText = applicantName;
+    if (document.getElementById('lblLandWada')) {
+        document.getElementById('lblLandWada').innerText = loggedWardNep;
+    }
 
     // Citizenship details
     const citNo   = document.getElementById('inCitNo').value.trim();

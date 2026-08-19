@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ne">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +15,7 @@
             border-radius: 8px;
             transition: all 0.2s;
         }
-        
+
         .form-group-dynamic:hover {
             border-color: #cbd5e0;
             background-color: #f1f5f9;
@@ -30,6 +31,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Authentication Guard -->
@@ -52,13 +54,16 @@
         </div>
 
         <!-- Signature Authority Section -->
-        <div class="form-group" style="margin-top: 20px; background: #fff3f3; padding: 12px; border: 1px solid #feb2b2; border-radius: 8px;">
+        <div class="form-group"
+            style="margin-top: 20px; background: #fff3f3; padding: 12px; border: 1px solid #feb2b2; border-radius: 8px;">
             <label style="color: #c53030; font-weight: 700;">🖋️ हस्ताक्षर अधिकारी (Signature):</label>
             <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
                 <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
                 <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
-                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
-                <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी
+                    विश्वकर्मा</option>
+                <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास
+                    भुजेल</option>
                 <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
                 <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
                 <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
@@ -74,7 +79,8 @@
                     <span>↔️ हस्ताक्षरको दुरी (स्थान) मिलाउनुस्:</span>
                     <span id="marginVal">४० px</span>
                 </label>
-                <input type="range" id="inSigMargin" min="10" max="250" value="40" oninput="adjustSignaturePosition(this.value)">
+                <input type="range" id="inSigMargin" min="10" max="250" value="40"
+                    oninput="adjustSignaturePosition(this.value)">
             </div>
         </div>
 
@@ -88,8 +94,10 @@
             <h3 class="modal-title">🗄️ सिफारिस अभिलेख (Database Records)</h3>
 
             <div class="search-container" style="margin-bottom: 20px;">
-                <label style="font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">🔍 नामबाट खोज्नुहोस् (Search Name):</label>
-                <input type="text" id="searchField" class="input-field" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..." oninput="renderRecordsTable()">
+                <label style="font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">🔍 नामबाट
+                    खोज्नुहोस् (Search Name):</label>
+                <input type="text" id="searchField" class="input-field" placeholder="खोज्नुपर्ने नाम टाइप गर्नुस्..."
+                    oninput="renderRecordsTable()">
             </div>
 
             <table class="db-table" style="width:100%; border-collapse:collapse; font-size:0.95rem;">
@@ -103,7 +111,8 @@
                 </thead>
                 <tbody id="dbTableBody">
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 20px; color:#64748b;">अभिलेख लोड हुँदैछ...</td>
+                        <td colspan="4" style="text-align: center; padding: 20px; color:#64748b;">अभिलेख लोड हुँदैछ...
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -116,7 +125,8 @@
             <!-- Standard Municipal Letterhead -->
             <div class="letterhead-container">
                 <div class="lh-left">
-                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg"
+                        alt="Nepal Emblem">
                     <div class="lh-meta">
                         <div>प.सं. <span id="lblPatraSankhya">२०८३/०८४</span></div>
                         <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
@@ -130,8 +140,10 @@
                     <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
                 </div>
                 <div class="lh-right">
-                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;"></span></div>
-                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;"></span></div>
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space"
+                            style="min-width: 90px;"></span></div>
+                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space"
+                            style="min-width: 50px;"></span></div>
                 </div>
             </div>
 
@@ -146,9 +158,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="font-settings.js"></script>
-    
+
     <script>
         // Parse template ID from query parameter
         const urlParams = new URLSearchParams(window.location.search);
@@ -168,7 +181,7 @@
             messagingSenderId: "905617778132",
             appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
         };
-        
+
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -185,13 +198,13 @@
             try {
                 const doc = await db.collection('sifarish_templates').doc(templateId).get();
                 if (doc.exists) tData = doc.data();
-            } catch(e) { /* logged */; }
-            
+            } catch (e) { /* logged */; }
+
             if (!tData) {
                 try {
                     const localList = JSON.parse(localStorage.getItem('custom_sifarish_templates') || '[]');
                     tData = localList.find(t => t.id === templateId);
-                } catch(e) {}
+                } catch (e) { }
             }
 
             if (!tData) {
@@ -199,7 +212,7 @@
                 window.location.replace('index.html');
                 return;
             }
-            
+
             templateData = tData;
             document.title = `${templateData.title} - गौरादह नगरपालिका`;
             document.getElementById('formMainTitle').innerText = `📝 ${templateData.title}`;
@@ -210,7 +223,7 @@
 
             // Process the template to find variables and placeholders
             parsePlaceholders();
-            
+
             // Generate form input fields
             renderInputs();
 
@@ -234,7 +247,7 @@
 
             // Find elements with ID starting with "lbl" (like lblOwnerName)
             const lblElements = container.querySelectorAll('[id^="lbl"]');
-            
+
             // Exclude header fields which are filled automatically
             const excludeIds = ['lblMiti', 'lblNepalSamvat', 'lblPatraSankhya', 'lblChalani', 'lblSigName', 'lblSigTitle'];
 
@@ -256,7 +269,7 @@
             const regex = /\{\{([^}]+)\}\}/g;
             let match;
             const bracketKeys = [];
-            
+
             while ((match = regex.exec(textContent)) !== null) {
                 const varName = match[1].trim();
                 if (!bracketKeys.includes(varName)) {
@@ -399,7 +412,7 @@
 
         // Convert English digit to Nepali unicode
         function toNepaliDigit(num) {
-            const nd = ['०','१','२','३','४','५','६','७','८','९'];
+            const nd = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
             return num.toString().split('').map(d => nd[d] || d).join('');
         }
 
@@ -418,7 +431,7 @@
         function initializeAutomaticDate() {
             try {
                 let nepaliBSDateStr = '';
-                let bsYearVal  = 2083;
+                let bsYearVal = 2083;
                 let bsMonthVal = 2;
 
                 const converter = window["@sbmdkl/nepali-date-converter"];
@@ -428,30 +441,30 @@
                 }
                 if (converter && typeof converter.adToBs === 'function') {
                     const today = new Date();
-                    const yyyy  = today.getFullYear();
-                    const mm    = String(today.getMonth() + 1).padStart(2, '0');
-                    const dd    = String(today.getDate()).padStart(2, '0');
+                    const yyyy = today.getFullYear();
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const dd = String(today.getDate()).padStart(2, '0');
                     const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
 
                     let bsDayVal = 1;
                     if (typeof bsDate === 'string') {
                         const parts = bsDate.split(/[-/]/);
-                        bsYearVal  = parseInt(parts[0], 10);
+                        bsYearVal = parseInt(parts[0], 10);
                         bsMonthVal = parseInt(parts[1], 10);
-                        bsDayVal   = parseInt(parts[2], 10);
+                        bsDayVal = parseInt(parts[2], 10);
                     } else if (bsDate && typeof bsDate === 'object') {
-                        bsYearVal  = bsDate.bsYear  || bsDate.year  || 2083;
+                        bsYearVal = bsDate.bsYear || bsDate.year || 2083;
                         bsMonthVal = bsDate.bsMonth || bsDate.month || 2;
-                        bsDayVal   = bsDate.bsDay   || bsDate.day   || 1;
+                        bsDayVal = bsDate.bsDay || bsDate.day || 1;
                     }
                     const bsM = String(bsMonthVal).padStart(2, '0');
                     const bsD = String(bsDayVal).padStart(2, '0');
                     nepaliBSDateStr = toNepaliDigit(`${bsYearVal}/${bsM}/${bsD}`);
                 } else {
                     const today = new Date();
-                    const adYear  = today.getFullYear();
+                    const adYear = today.getFullYear();
                     const adMonth = today.getMonth() + 1;
-                    const adDay   = today.getDate();
+                    const adDay = today.getDate();
                     let bsY = adYear + 57;
                     let bsM = 1;
                     if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
@@ -466,7 +479,7 @@
                     else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
                     else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
                     else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
-                    bsYearVal  = bsY;
+                    bsYearVal = bsY;
                     bsMonthVal = bsM;
                     let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
                     if (bsD > 32) bsD = 30;
@@ -533,7 +546,7 @@
                     snapshot.forEach(doc => {
                         globalRecords.push({ id: doc.id, ...doc.data() });
                     });
-                    globalRecords.sort((a,b) => b.timestamp - a.timestamp);
+                    globalRecords.sort((a, b) => b.timestamp - a.timestamp);
                     renderRecordsTable();
                 });
         }
@@ -689,6 +702,5 @@
         }
     </script>
 </body>
+
 </html>
-
-

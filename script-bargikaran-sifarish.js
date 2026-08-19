@@ -357,8 +357,9 @@ window.updateDoc = function () {
     const name = (nameEl ? nameEl.value.trim() : '') || '.......................';
     
     const isCustomAddr = document.getElementById('chkChangeAddress') ? document.getElementById('chkChangeAddress').checked : false;
+    const loggedWard = localStorage.getItem('sifarish_ward') || '1';
     let palikaText = (document.getElementById('inPalika') ? document.getElementById('inPalika').value.trim() : '') || 'गौरादह नगरपालिका';
-    let wadaText = (document.getElementById('inWadaNo') ? document.getElementById('inWadaNo').value.trim() : '') || '१';
+    let wadaText = (document.getElementById('inWadaNo') ? document.getElementById('inWadaNo').value.trim() : '') || window.toNepaliDigit(loggedWard);
 
     if (isCustomAddr) {
         const custDist = document.getElementById('inCustDistrict') ? document.getElementById('inCustDistrict').value.trim() : '';
