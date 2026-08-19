@@ -356,15 +356,53 @@
                         <span id="lblInputCitLabelSpan">नागरिकता नं. (वैकल्पिक):</span>
                     </label>
                     <input type="text" id="inCitNo" placeholder="उदा: ०४-०१-७५-१२३४५" oninput="updateDoc()">
-                    <div id="childChkBoxWrapper" style="margin-top: 4px; font-size: 0.85rem; color: #2b6cb0;">
-                        <label style="cursor:pointer; font-weight: normal; display: inline-flex; align-items: center; gap: 4px;">
-                            <input type="checkbox" id="chkIsChild" onchange="updateDoc()"> बालबालिका (जन्म दर्ता नं. देखाउनुहोस्)
+                    <div id="childChkBoxWrapper" style="margin-top: 6px; font-size: 0.88rem; color: #2b6cb0; font-weight: 600;">
+                        <label style="cursor:pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" id="chkIsChild" onchange="toggleChildFields(); updateDoc()"> 👶 बालबालिका (जन्म दर्ता नं. र संरक्षकको विवरण देखाउनुहोस्)
                         </label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label id="lblInputCitDistLabel">नागरिकता जारी जिल्ला (वैकल्पिक):</label>
                     <input type="text" id="inCitDistrict" placeholder="उदा: झापा" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- ── GUARDIAN DETAILS SECTION (SHOWN WHEN CHILD IS CHECKED) ── -->
+            <div id="secGuardianDetails" style="display:none; background: #ebf8ff; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #90cdf4; margin-bottom: 14px;">
+                <div style="font-size: 0.85rem; font-weight: 800; color: #2b6cb0; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                    🛡️ संरक्षकको विवरण (Guardian Details)
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label style="font-size: 0.85rem; color: #2c5282;">संरक्षकको पुरा नाम, थर:</label>
+                    <input type="text" id="inGuardianName" placeholder="उदा: सीता देवी श्रेष्ठ" oninput="updateDoc()">
+                </div>
+                <div class="row-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.85rem; color:#2c5282;">संरक्षकको ना.प्र.नं.:</label>
+                        <input type="text" id="inGuardianCitNo" placeholder="उदा: ०४-०१-७५-१२३४५" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.85rem; color:#2c5282;">ना.प्र. जारी जिल्ला (वैकल्पिक):</label>
+                        <input type="text" id="inGuardianCitDistrict" placeholder="उदा: झापा" oninput="updateDoc()">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.85rem; color: #2c5282;">संरक्षकको नाता (वैकल्पिक):</label>
+                    <select id="inGuardianRelationSelect" class="bank-select-dropdown" style="padding: 7px 10px; font-size: 0.9rem;" onchange="toggleCustomGuardianRelation(); updateDoc()">
+                        <option value="" selected>👨‍👩‍👧‍👦 नाता छान्नुहोस् (वैकल्पिक)</option>
+                        <option value="आमा">आमा</option>
+                        <option value="बाबु">बाबु</option>
+                        <option value="हजुरबुबा">हजुरबुबा</option>
+                        <option value="हजुरआमा">हजुरआमा</option>
+                        <option value="काका">काका</option>
+                        <option value="काकी">काकी</option>
+                        <option value="दाजु">दाजु</option>
+                        <option value="दिदी">दिदी</option>
+                        <option value="संरक्षक">संरक्षक</option>
+                        <option value="CUSTOM">✍️ आफैँ नाता लेख्नुहोस् (Custom)</option>
+                    </select>
+                    <input type="text" id="inGuardianRelation" placeholder="नाता लेख्नुहोस्..." style="display:none; margin-top:8px;" oninput="updateDoc()">
                 </div>
             </div>
 
@@ -737,6 +775,41 @@
             if (show) renderDatabaseTable();
         }
 
+        // ── Child / Guardian Toggle Handler ────────────────────
+        function toggleChildFields() {
+            const chk = document.getElementById('chkIsChild');
+            const sec = document.getElementById('secGuardianDetails');
+            const lblCitSpan = document.getElementById('lblInputCitLabelSpan');
+            const inCit = document.getElementById('inCitNo');
+            const isChild = !!(chk && chk.checked);
+
+            if (sec) {
+                sec.style.display = isChild ? 'block' : 'none';
+            }
+            if (lblCitSpan) {
+                lblCitSpan.innerText = isChild ? "जन्म दर्ता नं. (नाबालकको):" : "नागरिकता नं. (वैकल्पिक):";
+            }
+            if (inCit) {
+                inCit.placeholder = isChild ? "उदा: २०७८०११५०१२३४" : "उदा: ०४-०१-७५-१२३४५";
+            }
+            updateDoc();
+        }
+
+        function toggleCustomGuardianRelation() {
+            const selEl = document.getElementById('inGuardianRelationSelect');
+            const customInput = document.getElementById('inGuardianRelation');
+            if (selEl && customInput) {
+                if (selEl.value === 'CUSTOM') {
+                    customInput.style.display = 'block';
+                    customInput.focus();
+                } else {
+                    customInput.style.display = 'none';
+                    customInput.value = selEl.value;
+                }
+            }
+            updateDoc();
+        }
+
         // ── Address Toggle Handler ──────────────────────────────
         function toggleCustomAddress() {
             const chk = document.getElementById('chkCustomAddress');
@@ -797,6 +870,13 @@
             document.getElementById('secOpenAccount').style.display = isDeceased ? 'none' : 'block';
             document.getElementById('secDeceasedAccount').style.display = isDeceased ? 'block' : 'none';
             document.getElementById('childChkBoxWrapper').style.display = isDeceased ? 'none' : 'block';
+            
+            const chkIsChild = document.getElementById('chkIsChild');
+            const secGuardian = document.getElementById('secGuardianDetails');
+            if (secGuardian) {
+                secGuardian.style.display = (!isDeceased && chkIsChild && chkIsChild.checked) ? 'block' : 'none';
+            }
+
             document.getElementById('secPasteBox').style.display = 'block';
 
             // Ensure bank dropdown is visible for both modes
@@ -870,7 +950,11 @@
                 accountNo: '',
                 targetGroup: '',
                 deathDate: '',
-                bankKey: ''
+                bankKey: '',
+                guardianName: '',
+                guardianCitNo: '',
+                guardianCitDistrict: '',
+                guardianRelation: ''
             };
 
             // Helper to format date into YYYY/MM/DD with Nepali digits
@@ -898,12 +982,24 @@
                     const k = parts[0];
                     const v = parts[1];
 
-                    // Name matching (avoids बाबुको नाम, आमाको नाम, हजुरबुबाको नाम, बैंकको नाम, आदि)
-                    if (/^(?:नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|देवनागरीमा|Name)$/i.test(k)) {
+                    // Name matching (avoids बाबुको नाम, आमाको नाम, हजुरबुबाको नाम, संरक्षकको नाम, बैंकको नाम, आदि)
+                    if (/^(?:नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|देवनागरीमा|Beneficiary\s*Name|Name)$/i.test(k)) {
                         if (v && !parsedData.name) parsedData.name = v;
                     }
-                    // Citizenship No
-                    else if (/^(?:नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)$/i.test(k)) {
+                    // Guardian Name
+                    else if (/^(?:संरक्षकको\s*नाम|संरक्षकको\s*नाम,\s*थर|संरक्षक|Guardian\s*Name)$/i.test(k)) {
+                        if (v && !parsedData.guardianName) parsedData.guardianName = v;
+                    }
+                    // Guardian Citizenship No
+                    else if (/^(?:संरक्षकको\s*नागरिकता\s*नं\.?|संरक्षकको\s*नागरिकता\s*नम्बर|संरक्षकको\s*ना\.प्र\.नं\.?|संरक्षकको\s*नागरिकता|Guardian\s*Citizenship\s*No\.?)$/i.test(k)) {
+                        if (v && v !== '०' && v !== '0' && !parsedData.guardianCitNo) parsedData.guardianCitNo = v;
+                    }
+                    // Guardian Relation
+                    else if (/^(?:संरक्षकको\s*नाता|संरक्षकसँगको\s*नाता)$/i.test(k)) {
+                        if (v && !parsedData.guardianRelation) parsedData.guardianRelation = v;
+                    }
+                    // Citizenship No / Birth Registration No
+                    else if (/^(?:नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|जन्मदर्ता\s*नं\.?|जन्मदर्ता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)$/i.test(k)) {
                         if (v && v !== '०' && v !== '0' && !parsedData.citNo) parsedData.citNo = v;
                     }
                     // National ID
@@ -953,11 +1049,26 @@
 
             // 2. Multiline / Regex fallback for unstructured text
             if (!parsedData.name) {
-                const m = pastedText.match(/(?:^|[\r\n])\s*(?:देवनागरीमा|लाभग्राहीको\s*नाम|नाम,\s*थर|(?:(?<!बाबुको\s*|आमाको\s*|हजुरबुबाको\s*|बैंकको\s*|खातावालाको\s*|व्यक्तिगत\s*|व्यक्तिको\s*)नाम))\s*[\t:]+\s*([^\r\n\t]+)/i);
+                const m = pastedText.match(/(?:^|[\r\n])\s*(?:देवनागरीमा|लाभग्राहीको\s*नाम|नाम,\s*थर|(?:(?<!बाबुको\s*|आमाको\s*|हजुरबुबाको\s*|संरक्षकको\s*|बैंकको\s*|खातावालाको\s*|व्यक्तिगत\s*|व्यक्तिको\s*)नाम))\s*[\t:]+\s*([^\r\n\t]+)/i);
                 if (m) parsedData.name = m[1].trim();
             }
+            if (!parsedData.guardianName) {
+                const m = pastedText.match(/(?:संरक्षकको\s*नाम(?:,\s*थर)?|Guardian\s*Name)\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m) parsedData.guardianName = m[1].trim();
+            }
+            if (!parsedData.guardianCitNo) {
+                const m = pastedText.match(/(?:संरक्षकको\s*(?:नागरिकता|ना\.प्र\.)\s*नं\.?|संरक्षकको\s*नागरिकता\s*नम्बर)\s*[\t:]+\s*([^\r\n\t,]+)(?:,\s*([^\r\n\t]+))?/i);
+                if (m && m[1].trim() !== '०' && m[1].trim() !== '0') {
+                    parsedData.guardianCitNo = m[1].trim();
+                    if (m[2] && !parsedData.guardianCitDistrict) parsedData.guardianCitDistrict = m[2].trim();
+                }
+            }
+            if (!parsedData.guardianRelation) {
+                const m = pastedText.match(/(?:संरक्षकको\s*नाता|संरक्षकसँगको\s*नाता)\s*[\t:]+\s*([^\r\n\t]+)/i);
+                if (m) parsedData.guardianRelation = m[1].trim();
+            }
             if (!parsedData.citNo) {
-                const m = pastedText.match(/(?:नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)\s*[\t:]+\s*([^\r\n\t,]+)(?:,\s*([^\r\n\t]+))?/i);
+                const m = pastedText.match(/(?:नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|जन्मदर्ता\s*नं\.?|जन्मदर्ता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)\s*[\t:]+\s*([^\r\n\t,]+)(?:,\s*([^\r\n\t]+))?/i);
                 if (m && m[1].trim() !== '०' && m[1].trim() !== '0') {
                     parsedData.citNo = m[1].trim();
                     if (m[2]) parsedData.citDistrict = m[2].trim();
@@ -1044,6 +1155,15 @@
 
             } else {
                 // Populate OPEN_ACCOUNT mode inputs
+                const isChildTarget = (parsedData.targetGroup && /बालबालिका|बाल\s*पोषण|नाबालक/i.test(parsedData.targetGroup)) || Boolean(parsedData.guardianName || parsedData.guardianCitNo);
+                if (isChildTarget) {
+                    const chkIsChild = document.getElementById('chkIsChild');
+                    if (chkIsChild) {
+                        chkIsChild.checked = true;
+                        toggleChildFields();
+                    }
+                }
+
                 if (parsedData.name) {
                     document.getElementById('inName').value = parsedData.name;
                     extractCount++;
@@ -1071,6 +1191,32 @@
                     if (/^[0-9०-९\s\-]+$/.test(rawNid) && /[0-9०-९]/.test(rawNid)) {
                         document.getElementById('inNid').value = rawNid;
                         extractCount++;
+                    }
+                }
+                if (parsedData.guardianName && document.getElementById('inGuardianName')) {
+                    document.getElementById('inGuardianName').value = parsedData.guardianName;
+                    extractCount++;
+                }
+                if (parsedData.guardianCitNo && document.getElementById('inGuardianCitNo')) {
+                    document.getElementById('inGuardianCitNo').value = parsedData.guardianCitNo;
+                    extractCount++;
+                }
+                if (parsedData.guardianCitDistrict && document.getElementById('inGuardianCitDistrict')) {
+                    document.getElementById('inGuardianCitDistrict').value = parsedData.guardianCitDistrict;
+                }
+                if (parsedData.guardianRelation) {
+                    const gRelSel = document.getElementById('inGuardianRelationSelect');
+                    const gRelInput = document.getElementById('inGuardianRelation');
+                    if (gRelSel) {
+                        const hasOpt = Array.from(gRelSel.options).some(o => o.value === parsedData.guardianRelation);
+                        if (hasOpt) {
+                            gRelSel.value = parsedData.guardianRelation;
+                            if (gRelInput) gRelInput.style.display = 'none';
+                        } else if (gRelInput) {
+                            gRelSel.value = 'CUSTOM';
+                            gRelInput.style.display = 'block';
+                            gRelInput.value = parsedData.guardianRelation;
+                        }
                     }
                 }
                 if (parsedData.bankKey) {
@@ -1252,11 +1398,35 @@
 
                 const lblInputCitLabelSpan = document.getElementById('lblInputCitLabelSpan');
                 if (lblInputCitLabelSpan) {
-                    lblInputCitLabelSpan.innerText = isChild ? "जन्म दर्ता नं. (वैकल्पिक):" : "नागरिकता नं. (वैकल्पिक):";
+                    lblInputCitLabelSpan.innerText = isChild ? "जन्म दर्ता नं. (नाबालकको):" : "नागरिकता नं. (वैकल्पिक):";
                 }
 
                 let citString = citNo.trim();
                 if (citString && citDistrict.trim()) citString += `, ${citDistrict.trim()}`;
+
+                // Guardian info
+                let guardianName = (document.getElementById('inGuardianName') || {}).value || '';
+                let guardianCitNo = (document.getElementById('inGuardianCitNo') || {}).value || '';
+                let guardianCitDistrict = (document.getElementById('inGuardianCitDistrict') || {}).value || '';
+                let guardianRelation = '';
+                const gRelSel = document.getElementById('inGuardianRelationSelect');
+                if (gRelSel) {
+                    guardianRelation = (gRelSel.value === 'CUSTOM')
+                        ? ((document.getElementById('inGuardianRelation') || {}).value || '')
+                        : gRelSel.value;
+                } else {
+                    guardianRelation = (document.getElementById('inGuardianRelation') || {}).value || '';
+                }
+
+                let guardianCitString = guardianCitNo.trim();
+                if (guardianCitString && guardianCitDistrict.trim()) {
+                    guardianCitString += `, ${guardianCitDistrict.trim()}`;
+                }
+
+                let guardianNameDisplay = guardianName.trim();
+                if (guardianNameDisplay && guardianRelation.trim()) {
+                    guardianNameDisplay += ` (${guardianRelation.trim()})`;
+                }
 
                 document.getElementById('tapasilHeaderBlock').innerText = "तपसिल:";
                 document.getElementById('tapasilTable').innerHTML = `
@@ -1286,6 +1456,17 @@
                         <td class="label-col">परिचय पत्र नम्बर</td>
                         <td class="sep-col">:</td>
                         <td class="val-col"><span id="lblTapasilCardNo">${cardNo.trim()}</span></td>
+                    </tr>` : ''}
+                    ${isChild ? `
+                    <tr id="rowTapasilGuardianName">
+                        <td class="label-col" id="lblTapasilGuardianNameLabel">संरक्षकको नाम</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><span id="lblTapasilGuardianName">${guardianNameDisplay ? guardianNameDisplay : '..................'}</span></td>
+                    </tr>
+                    <tr id="rowTapasilGuardianCitNo">
+                        <td class="label-col" id="lblTapasilGuardianCitLabel">संरक्षकको ना.प्र.नं.</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><span id="lblTapasilGuardianCitNo">${guardianCitString ? guardianCitString : '..................'}</span></td>
                     </tr>` : ''}
                 `;
             }
@@ -1346,6 +1527,19 @@
             const applicantPalika   = isCustomAddress ? (document.getElementById('inApplicantPalika').value.trim() || 'गौरादह नगरपालिका') : 'गौरादह नगरपालिका';
             const applicantWadaNo   = isCustomAddress ? (document.getElementById('inApplicantWadaNo').value.trim() || '१') : '१';
 
+            const chkChildEl = document.getElementById('chkIsChild');
+            const isChild = !!(chkChildEl && chkChildEl.checked);
+
+            let guardianRelation = "";
+            const gRelSel = document.getElementById('inGuardianRelationSelect');
+            if (gRelSel) {
+                guardianRelation = (gRelSel.value === 'CUSTOM')
+                    ? ((document.getElementById('inGuardianRelation') || {}).value || '').trim()
+                    : gRelSel.value;
+            } else {
+                guardianRelation = ((document.getElementById('inGuardianRelation') || {}).value || '').trim();
+            }
+
             const obj = {
                 sifarishMode:        mode,
                 ay:                  (document.getElementById('inPatraSankhya') || {}).value || '',
@@ -1367,6 +1561,11 @@
                 applicantWadaNo:     applicantWadaNo,
                 
                 // Account Opening specific
+                isChild:             isChild,
+                guardianName:        isChild ? (document.getElementById('inGuardianName').value.trim() || '') : '',
+                guardianCitNo:       isChild ? (document.getElementById('inGuardianCitNo').value.trim() || '') : '',
+                guardianCitDistrict: isChild ? (document.getElementById('inGuardianCitDistrict').value.trim() || '') : '',
+                guardianRelation:    isChild ? guardianRelation : '',
                 cardNo:              document.getElementById('inCardNo').value.trim()        || '',
                 targetGroup:         document.getElementById('inTargetGroup').value.trim()   || '',
                 nid:                 document.getElementById('inNid').value.trim()           || '',
@@ -1428,9 +1627,14 @@
                 if (search && !(rec.name || '').toLowerCase().includes(search) && !(rec.deceasedName || '').toLowerCase().includes(search)) return;
                 counter++;
                 const isDeceased = rec.sifarishMode === 'CLOSE_ACCOUNT_DECEASED';
-                const desc = isDeceased 
-                    ? `<span style="color:#e53e3e; font-weight:bold;">⚰️ खाता बन्द (${rec.deceasedName || 'मृतक'})</span>`
-                    : `<span style="color:#2b6cb0; font-weight:bold;">🏦 खाता खोल्ने (${rec.targetGroup || 'सा.सु.'})</span>`;
+                let desc = '';
+                if (isDeceased) {
+                    desc = `<span style="color:#e53e3e; font-weight:bold;">⚰️ खाता बन्द (${rec.deceasedName || 'मृतक'})</span>`;
+                } else if (rec.isChild) {
+                    desc = `<span style="color:#319795; font-weight:bold;">👶 बालबालिका (${rec.guardianName ? 'संरक्षक: ' + rec.guardianName : (rec.targetGroup || 'सा.सु.')})</span>`;
+                } else {
+                    desc = `<span style="color:#2b6cb0; font-weight:bold;">🏦 खाता खोल्ने (${rec.targetGroup || 'सा.सु.'})</span>`;
+                }
 
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
@@ -1498,6 +1702,50 @@
             document.getElementById('inCardNo').value             = rec.cardNo || '';
             document.getElementById('inTargetGroup').value        = rec.targetGroup || '';
             document.getElementById('inNid').value                = rec.nid || '';
+
+            // Restore Child & Guardian details
+            const isChildRec = !!rec.isChild;
+            const chkIsChild = document.getElementById('chkIsChild');
+            if (chkIsChild) {
+                chkIsChild.checked = isChildRec;
+                toggleChildFields();
+            }
+            if (document.getElementById('inGuardianName')) {
+                document.getElementById('inGuardianName').value = rec.guardianName || '';
+            }
+            if (document.getElementById('inGuardianCitNo')) {
+                document.getElementById('inGuardianCitNo').value = rec.guardianCitNo || '';
+            }
+            if (document.getElementById('inGuardianCitDistrict')) {
+                document.getElementById('inGuardianCitDistrict').value = rec.guardianCitDistrict || '';
+            }
+            const gRelVal = rec.guardianRelation || '';
+            const gRelSelect = document.getElementById('inGuardianRelationSelect');
+            const customGRelInput = document.getElementById('inGuardianRelation');
+            if (gRelSelect) {
+                const options = Array.from(gRelSelect.options).map(o => o.value);
+                if (options.includes(gRelVal) && gRelVal !== 'CUSTOM') {
+                    gRelSelect.value = gRelVal;
+                    if (customGRelInput) {
+                        customGRelInput.style.display = 'none';
+                        customGRelInput.value = gRelVal;
+                    }
+                } else if (gRelVal) {
+                    gRelSelect.value = 'CUSTOM';
+                    if (customGRelInput) {
+                        customGRelInput.style.display = 'block';
+                        customGRelInput.value = gRelVal;
+                    }
+                } else {
+                    gRelSelect.selectedIndex = 0;
+                    if (customGRelInput) {
+                        customGRelInput.style.display = 'none';
+                        customGRelInput.value = '';
+                    }
+                }
+            } else if (customGRelInput) {
+                customGRelInput.value = gRelVal;
+            }
 
             document.getElementById('inApplicantCitDate').value   = rec.applicantCitDate || '';
             
