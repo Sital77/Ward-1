@@ -159,6 +159,41 @@ window.toggleCustomSign = function () {
     document.getElementById('customSignBox').style.display = (val === 'CUSTOM') ? 'grid' : 'none';
 }
 
+window.toggleLandUseSection = function () {
+    const chk = document.getElementById('chkLandUseZone');
+    const container = document.getElementById('landUseZoneContainer');
+    if (chk && container) {
+        container.style.display = chk.checked ? 'block' : 'none';
+    }
+};
+
+function getSelectedLandUseZone() {
+    const chk = document.getElementById('chkLandUseZone');
+    if (!chk || !chk.checked) return 'NONE';
+    const radios = document.getElementsByName('zoneRadio');
+    for (let r of radios) {
+        if (r.checked) return r.value;
+    }
+    return 'व्यवसायिक शहरी क्षेत्र';
+}
+
+function setSelectedLandUseZone(val) {
+    const chk = document.getElementById('chkLandUseZone');
+    if (!chk) return;
+    if (!val || val === 'NONE') {
+        chk.checked = false;
+    } else {
+        chk.checked = true;
+        const radios = document.getElementsByName('zoneRadio');
+        for (let r of radios) {
+            if (r.value === val) {
+                r.checked = true;
+            }
+        }
+    }
+    window.toggleLandUseSection();
+}
+
 window.toggleAddressFields = function() {
     const isChecked = document.getElementById('chkChangeAddress').checked;
     document.getElementById('custAddressBox').style.display = isChecked ? 'grid' : 'none';
@@ -203,8 +238,7 @@ window.updateDoc = function () {
     });
 
     // Land Use Act Statement Controller
-    const landUseSelect = document.getElementById('inLandUseZone');
-    const selectedZone = landUseSelect ? landUseSelect.value : 'NONE';
+    const selectedZone = getSelectedLandUseZone();
 
     const landDetailsText = generateLandDetailsText(lands);
 
@@ -346,7 +380,7 @@ window.printAndSaveSystem = async function () {
         roadWidth: lands[0] ? lands[0].roadWidth : '',
         roadType: lands[0] ? lands[0].roadType : 'पक्की',
         landDetails: lands,
-        landUseZone: document.getElementById('inLandUseZone') ? document.getElementById('inLandUseZone').value : 'NONE',
+        landUseZone: getSelectedLandUseZone(),
         signAuth: document.getElementById('inSignAuthority').value,
         customSignName: document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
@@ -471,9 +505,7 @@ window.editFromDB = function (id) {
         document.getElementById('customSignBox').style.display = 'none';
     }
 
-    if (document.getElementById('inLandUseZone')) {
-        document.getElementById('inLandUseZone').value = rec.landUseZone || 'NONE';
-    }
+    setSelectedLandUseZone(rec.landUseZone || 'NONE');
 
     if (rec.sigMargin) {
         document.getElementById('inSigMargin').value = rec.sigMargin;

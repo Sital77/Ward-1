@@ -107,6 +107,42 @@ function removeKittaRow(rowId) {
     updateDoc();
 }
 
+window.toggleLandUseSection = function () {
+    const chk = document.getElementById('chkLandUseZone');
+    const container = document.getElementById('landUseZoneContainer');
+    if (chk && container) {
+        container.style.display = chk.checked ? 'block' : 'none';
+        updateDoc();
+    }
+};
+
+function getSelectedLandUseZone() {
+    const chk = document.getElementById('chkLandUseZone');
+    if (!chk || !chk.checked) return 'NONE';
+    const radios = document.getElementsByName('zoneRadio');
+    for (let r of radios) {
+        if (r.checked) return r.value;
+    }
+    return 'व्यवसायिक शहरी क्षेत्र';
+}
+
+function setSelectedLandUseZone(val) {
+    const chk = document.getElementById('chkLandUseZone');
+    if (!chk) return;
+    if (!val || val === 'NONE') {
+        chk.checked = false;
+    } else {
+        chk.checked = true;
+        const radios = document.getElementsByName('zoneRadio');
+        for (let r of radios) {
+            if (r.value === val) {
+                r.checked = true;
+            }
+        }
+    }
+    window.toggleLandUseSection();
+}
+
 // Automatically recalculates loop serialization counts
 function reindexFormRows() {
     activeRowIds.forEach((id, index) => {
@@ -140,7 +176,7 @@ function updateDoc() {
     safeSetText('lblOwnerName', document.getElementById('inName').value || '...........................');
 
     // Land Use Act Statement Controller
-    const selectedZone = document.getElementById('inLandUseZone').value;
+    const selectedZone = getSelectedLandUseZone();
     const stmtBox = document.getElementById('lblLandUseStatement');
     if (stmtBox) {
         if (selectedZone === 'NONE') {
@@ -240,7 +276,7 @@ async function printAndSaveSystem() {
         customSignName: document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin: document.getElementById('inSigMargin').value,
-        landUseZone: document.getElementById('inLandUseZone').value,
+        landUseZone: getSelectedLandUseZone(),
         kittas: kittaRecords,
         timestamp: Date.now()
     };
@@ -342,7 +378,7 @@ function editFromDB(id) {
         document.getElementById('customSignBox').style.display = 'none';
     }
 
-    document.getElementById('inLandUseZone').value = rec.landUseZone || 'NONE';
+    setSelectedLandUseZone(rec.landUseZone || 'NONE');
 
     if (rec.sigMargin) {
         document.getElementById('inSigMargin').value = rec.sigMargin;

@@ -115,6 +115,41 @@ function reindexFormRows() {
     });
 }
 
+window.toggleLandUseSection = function () {
+    const chk = document.getElementById('chkLandUseZone');
+    const container = document.getElementById('landUseZoneContainer');
+    if (chk && container) {
+        container.style.display = chk.checked ? 'block' : 'none';
+    }
+};
+
+function getSelectedLandUseZone() {
+    const chk = document.getElementById('chkLandUseZone');
+    if (!chk || !chk.checked) return 'NONE';
+    const radios = document.getElementsByName('zoneRadio');
+    for (let r of radios) {
+        if (r.checked) return r.value;
+    }
+    return 'व्यवसायिक शहरी क्षेत्र';
+}
+
+function setSelectedLandUseZone(val) {
+    const chk = document.getElementById('chkLandUseZone');
+    if (!chk) return;
+    if (!val || val === 'NONE') {
+        chk.checked = false;
+    } else {
+        chk.checked = true;
+        const radios = document.getElementsByName('zoneRadio');
+        for (let r of radios) {
+            if (r.value === val) {
+                r.checked = true;
+            }
+        }
+    }
+    window.toggleLandUseSection();
+}
+
 function updateDoc() {
     document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
     document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '';
@@ -127,7 +162,7 @@ function updateDoc() {
 
     document.getElementById('lblOwnerName').innerText = document.getElementById('inName').value || '...........................';
 
-    const selectedZone = document.getElementById('inLandUseZone').value;
+    const selectedZone = getSelectedLandUseZone();
     const stmtBox = document.getElementById('lblLandUseStatement');
     if (selectedZone === 'NONE') {
         stmtBox.style.display = 'none';
@@ -222,7 +257,7 @@ async function printAndSaveSystem() {
         customSignName: document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin: document.getElementById('inSigMargin').value,
-        landUseZone: document.getElementById('inLandUseZone').value, 
+        landUseZone: getSelectedLandUseZone(), 
         kittas: kittaRecords,
         timestamp: Date.now()
     };
@@ -316,7 +351,7 @@ function editFromDB(id) {
     } else {
         document.getElementById('customSignBox').style.display = 'none';
     }
-    document.getElementById('inLandUseZone').value = rec.landUseZone || 'NONE';
+    setSelectedLandUseZone(rec.landUseZone || 'NONE');
     
     if(rec.sigMargin) {
         document.getElementById('inSigMargin').value = rec.sigMargin;

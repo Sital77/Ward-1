@@ -81,15 +81,31 @@
                 थप्नुहोस्</button>
         </div>
 
+        <!-- ══ भूउपयोग ऐन तथा निर्णय व्यहोरा ══ -->
         <div class="form-group"
-            style="margin-top: 15px; background: #f0fff4; padding: 12px; border: 1px solid #c6f6d5; border-radius: 6px;">
-            <label style="color: #22543d;">🗺️ भूउपयोग क्षेत्र वर्गीकरण (ऐन व्यहोरा):</label>
-            <select id="inLandUseZone" onchange="updateDoc()">
-                <option value="NONE">-- ऐनको व्यहोरा उल्लेख नगर्ने --</option>
-                <option value="आवासीय क्षेत्र">आवासीय क्षेत्र</option>
-                <option value="व्यवसायिक शहरी क्षेत्र">व्यवसायिक शहरी क्षेत्र</option>
-                <option value="कृषि क्षेत्र">कृषि क्षेत्र</option>
-            </select>
+            style="margin-top: 15px; background: #f0fff4; padding: 12px; border: 1.5px solid #c6f6d5; border-radius: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; color: #22543d; margin-bottom: 0;">
+                <input type="checkbox" id="chkLandUseZone" onchange="toggleLandUseSection(); updateDoc();" style="width: 18px; height: 18px; cursor: pointer;">
+                <span>🗺️ ऐन तथा निर्णय व्यहोरा खुलाउने</span>
+            </label>
+
+            <div id="landUseZoneContainer" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #bbf7d0;">
+                <label style="font-size: 0.88rem; color: #166534; font-weight: 700; margin-bottom: 8px; display: block;">वर्गीकरण क्षेत्रको ३ प्रकार (कुनै एक रोज्नुहोस्):</label>
+                <div class="radio-container" style="background: #dcfce7; border: 1px solid #bbf7d0;">
+                    <div class="radio-option">
+                        <input type="radio" id="zone1_char" name="zoneRadio" value="व्यवसायिक शहरी क्षेत्र" onchange="updateDoc()" checked>
+                        <label for="zone1_char" class="radio-label" style="font-size: 0.85rem; font-weight: 700; padding: 8px 3px;">🏢 व्यवसायिक शहरी</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="zone2_char" name="zoneRadio" value="आवासीय क्षेत्र" onchange="updateDoc()">
+                        <label for="zone2_char" class="radio-label" style="font-size: 0.85rem; font-weight: 700; padding: 8px 3px;">🏠 आवासीय</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="zone3_char" name="zoneRadio" value="कृषि क्षेत्र" onchange="updateDoc()">
+                        <label for="zone3_char" class="radio-label" style="font-size: 0.85rem; font-weight: 700; padding: 8px 3px;">🌾 कृषि</label>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="form-group"
