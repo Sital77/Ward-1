@@ -445,7 +445,11 @@
 
             <div class="form-group" style="margin-bottom: 0;">
                 <label>व्यहोरामा देखिने मुख्य वर्गीकरण क्षेत्र:</label>
-                <input type="text" id="inMainZoneDisplay" value="व्यवसायिक शहरी क्षेत्र" placeholder="उदा: व्यवसायिक शहरी क्षेत्र" oninput="updateDoc()">
+                <select id="inMainZoneDisplay" onchange="updateDoc()" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
+                    <option value="व्यवसायिक शहरी क्षेत्र" selected>व्यवसायिक शहरी क्षेत्र</option>
+                    <option value="आवासीय क्षेत्र">आवासीय क्षेत्र</option>
+                    <option value="कृषि क्षेत्र">कृषि क्षेत्र</option>
+                </select>
             </div>
         </div>
 
