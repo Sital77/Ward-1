@@ -134,6 +134,12 @@ function updateDoc() {
     } else {
         stmtBox.style.display = 'block';
         document.getElementById('lblSelectedZone').innerText = selectedZone;
+        const kittaCount = activeRowIds.length;
+        const landText = kittaCount > 1 ? 'जग्गाहरू' : 'जग्गा';
+        const lp1 = document.getElementById('lblLandPlural1');
+        const lp2 = document.getElementById('lblLandPlural2');
+        if (lp1) lp1.innerText = landText;
+        if (lp2) lp2.innerText = landText;
     }
 
     const signSelect = document.getElementById('inSignAuthority').value;

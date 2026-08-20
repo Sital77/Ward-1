@@ -274,6 +274,12 @@ window.updateDoc = function () {
                 const formattedZone = selectedZone.includes('क्षेत्र') ? selectedZone : selectedZone + ' क्षेत्र';
                 lblSelectedZone.innerText = formattedZone;
             }
+            const kittaCount = activeRowIds.length;
+            const landText = kittaCount > 1 ? 'जग्गाहरू' : 'जग्गा';
+            const lp1 = document.getElementById('lblLandPlural1');
+            const lp2 = document.getElementById('lblLandPlural2');
+            if (lp1) lp1.innerText = landText;
+            if (lp2) lp2.innerText = landText;
         }
     }
 

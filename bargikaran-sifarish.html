@@ -345,19 +345,15 @@
             </div>
         </div>
 
-        <!-- ══ 2. RECIPIENT & SUBJECT ══ -->
+        <!-- ══ 2. RECIPIENT ══ -->
         <div class="section-card">
-            <div class="section-label">✉️ सम्बोधन र विषय</div>
+            <div class="section-label">✉️ पत्र सम्बोधन</div>
             
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label>सम्बोधन (Receiver):</label>
                 <input type="text" id="inReceiver" value="श्री यो जोजस सँग सम्बन्धित छ ।" placeholder="उदा: श्री यो जोजस सँग सम्बन्धित छ ।" oninput="updateDoc()">
             </div>
-
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>विषय:</label>
-                <input type="text" id="inSubject" value="वर्गीकरण सिफारिस सम्बन्धमा ।" oninput="updateDoc()">
-            </div>
+            <input type="hidden" id="inSubject" value="वर्गीकरण सिफारिस सम्बन्धमा ।">
         </div>
 
         <!-- ══ 3. APPLICANT DETAILS ══ -->
@@ -366,7 +362,7 @@
 
             <div class="form-group">
                 <label>निवेदकको पुरा नाम:</label>
-                <input type="text" id="inName" placeholder="उदा: बुद्धिमान कार्की" value="बुद्धिमान कार्की" oninput="updateDoc()">
+                <input type="text" id="inName" placeholder="उदा: राम बहादुर श्रेष्ठ" value="" oninput="updateDoc()">
             </div>
 
             <div class="row-grid">
@@ -589,7 +585,7 @@
 
             <!-- Paragraph 1 -->
             <div class="letter-body-para" id="lblParagraph1">
-                प्रस्तुत विषयमा <span id="lblPalikaSpan">गौरादह नगरपालिका</span> वडा नं. <span id="lblWadaSpan">१</span> मा स्थायी बसोवास गर्ने <span id="lblApplicantName" style="font-weight: bold;">बुद्धिमान कार्की</span><span id="lblCitInfoSpan"></span>ले यस वडा कार्यालयमा पेश गर्नु भएको निवेदन माग अनुसार निजको नाममा दर्ता कायम रहेको तपशिल अनुसारको कि.नं. र क्षेत्रफल भएको जग्गा वर्गिकरण अनुसार प्रमाणित गरिन्छ ।
+                प्रस्तुत विषयमा <span id="lblPalikaSpan">गौरादह नगरपालिका</span> वडा नं. <span id="lblWadaSpan">१</span> मा स्थायी बसोवास गर्ने <span id="lblApplicantName" style="font-weight: bold;">.......................</span><span id="lblCitInfoSpan"></span>ले यस वडा कार्यालयमा पेश गर्नु भएको निवेदन माग अनुसार निजको नाममा दर्ता कायम रहेको तपशिल अनुसारको कि.नं. र क्षेत्रफल भएको जग्गा वर्गिकरण अनुसार प्रमाणित गरिन्छ ।
             </div>
 
             <!-- Tapasheel Section (Label directly on top of table with zero gap) -->
@@ -611,8 +607,8 @@
                             <td>१.</td>
                             <td>गौरादह गाविस ९</td>
                             <td>गौरादह वडा नं. १</td>
-                            <td>१६९८</td>
-                            <td>३३८.६३</td>
+                            <td></td>
+                            <td></td>
                             <td>व्यावसायिक शहरी क्षेत्र</td>
                         </tr>
                     </tbody>
@@ -621,7 +617,7 @@
 
             <!-- Paragraph 2 (Decision / Act Clause) -->
             <div class="letter-body-para" id="lblParagraph2" style="margin-top: 6px; margin-bottom: 8px;">
-                उक्त माथि उल्लेखित कित्ता नम्बरको जग्गा <span id="lblActClause" style="font-weight: 600;">भू-उपयोग ऐन २०७६ को दफा २०</span> र गौरादह नगरपालिकाको मिति: <span id="lblDecisionDate" style="font-weight: 600;">२०७९/१०/२६</span> को निर्णय अनुसार उक्त जग्गा <span id="lblMainZoneSpan" style="font-weight: bold; text-decoration: underline;">व्यवसायिक शहरी क्षेत्र</span> भित्र पर्न व्यहोरा अनुरोध छ ।
+                उक्त माथि उल्लेखित कित्ता नम्बरको <span id="lblLandPlural1">जग्गा</span> <span id="lblActClause" style="font-weight: 600;">भू-उपयोग ऐन २०७६ को दफा २०</span> र गौरादह नगरपालिकाको मिति: <span id="lblDecisionDate" style="font-weight: 600;">२०७९/१०/२६</span> को निर्णय अनुसार उक्त <span id="lblLandPlural2">जग्गा</span> <span id="lblMainZoneSpan" style="font-weight: bold; text-decoration: underline;">व्यवसायिक शहरी क्षेत्र</span> भित्र पर्न व्यहोरा अनुरोध छ ।
             </div>
 
             <!-- Signature Section -->

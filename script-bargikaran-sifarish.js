@@ -194,8 +194,8 @@ window.addKittaRow = function (data = null) {
 
     const defaultSabik = data ? (data.sabikWada || 'गौरादह गाविस ९') : 'गौरादह गाविस ९';
     const defaultHal = data ? (data.halWada || 'गौरादह वडा नं. १') : 'गौरादह वडा नं. १';
-    const defaultKitta = data ? (data.kitta || '') : (rowCounter === 1 ? '१६९८' : '');
-    const defaultArea = data ? (data.area || '') : (rowCounter === 1 ? '३३८.६३' : '');
+    const defaultKitta = data ? (data.kitta || '') : '';
+    const defaultArea = data ? (data.area || '') : '';
     const defaultKaifiyat = data ? (data.kaifiyat || 'व्यावसायिक शहरी क्षेत्र') : 'व्यावसायिक शहरी क्षेत्र';
 
     const container = document.getElementById('kittaRowsContainer');
@@ -403,8 +403,8 @@ window.updateDoc = function () {
                     <td>१.</td>
                     <td>गौरादह गाविस ९</td>
                     <td>गौरादह वडा नं. १</td>
-                    <td>१६९८</td>
-                    <td>३३८.६३</td>
+                    <td></td>
+                    <td></td>
                     <td>व्यावसायिक शहरी क्षेत्र</td>
                 </tr>
             `;
@@ -415,8 +415,8 @@ window.updateDoc = function () {
                     <td><strong>${window.toNepaliDigit(index + 1)}.</strong></td>
                     <td>${item.sabikWada || '-'}</td>
                     <td>${item.halWada || '-'}</td>
-                    <td><strong>${window.toNepaliDigit(item.kitta) || '-'}</strong></td>
-                    <td>${window.toNepaliDigit(item.area) || '-'}</td>
+                    <td><strong>${window.toNepaliDigit(item.kitta) || ''}</strong></td>
+                    <td>${window.toNepaliDigit(item.area) || ''}</td>
                     <td><strong>${item.kaifiyat || '-'}</strong></td>
                 `;
                 tableBody.appendChild(tr);
@@ -429,6 +429,10 @@ window.updateDoc = function () {
     const decisionDate = (document.getElementById('inDecisionDate') ? document.getElementById('inDecisionDate').value.trim() : '') || '२०७९/१०/२६';
     const mainZone = (document.getElementById('inMainZoneDisplay') ? document.getElementById('inMainZoneDisplay').value.trim() : '') || (kittaList[0] ? kittaList[0].kaifiyat : 'व्यवसायिक शहरी क्षेत्र');
 
+    const validKittas = kittaList.filter(k => k.kitta && k.kitta.trim() !== '');
+    const kittaCount = validKittas.length > 0 ? validKittas.length : kittaList.length;
+    const landText = kittaCount > 1 ? 'जग्गाहरू' : 'जग्गा';
+
     const lblAct = document.getElementById('lblActClause');
     if (lblAct) lblAct.innerText = actName;
 
@@ -437,6 +441,12 @@ window.updateDoc = function () {
 
     const lblZone = document.getElementById('lblMainZoneSpan');
     if (lblZone) lblZone.innerText = mainZone;
+
+    const lblLandPlural1 = document.getElementById('lblLandPlural1');
+    if (lblLandPlural1) lblLandPlural1.innerText = landText;
+
+    const lblLandPlural2 = document.getElementById('lblLandPlural2');
+    if (lblLandPlural2) lblLandPlural2.innerText = landText;
 
     // 5. Signature Section
     const signAuth = document.getElementById('inSignAuthority') ? document.getElementById('inSignAuthority').value : 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
@@ -955,8 +965,8 @@ window.onload = function () {
         addKittaRow({
             sabikWada: 'गौरादह गाविस ९',
             halWada: 'गौरादह वडा नं. १',
-            kitta: '१६९८',
-            area: '३३८.६३',
+            kitta: '',
+            area: '',
             kaifiyat: 'व्यावसायिक शहरी क्षेत्र'
         });
     }

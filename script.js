@@ -148,6 +148,10 @@ function updateDoc() {
         } else {
             stmtBox.style.display = 'block';
             safeSetText('lblSelectedZone', selectedZone);
+            const kittaCount = activeRowIds.length;
+            const landText = kittaCount > 1 ? 'जग्गाहरू' : 'जग्गा';
+            safeSetText('lblLandPlural1', landText);
+            safeSetText('lblLandPlural2', landText);
         }
     }
 
