@@ -1538,25 +1538,31 @@
             }
         }
 
+        const nepaliTitleMap = {
+            'gharbato': 'घर बाटो प्रमाणित',
+            'charkilla': 'चार किल्ला प्रमाणित',
+            'bato-pramanit': 'बाटो प्रमाणित',
+            'bargikaran-sifarish': 'जग्गा वर्गीकरण सिफारिस',
+            'jaggadhani-pratilipi': 'धनीपूर्जा प्रतिलिपि सिफारिस',
+            'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस',
+            'pariwarik-bibaran': 'पारिवारिक विवरण प्रमाणित',
+            'suchana-tans': 'सूचना टाँस सिफारिस',
+            'ghar-kayam': 'घर कायम सिफारिस',
+            'pan-sifarish': 'स्थायी लेखा नं. (PAN) सिफारिस',
+            'abibahit-pramanit': 'अविवाहित प्रमाणित',
+            'bibaha-pramanit': 'विवाह प्रमाणित',
+            'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
+            'abhilekh-pramanit': 'अभिलेख प्रमाणित',
+            'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
+            'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
+            'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
+            'yojana-samjhauta': 'योजना सम्झौता सिफारिस',
+            'nabalak-parichayapatra': 'नाबालक परिचय पत्र सिफारिस'
+        };
+
         // Automatic Background Seeding of all missing templates
         async function seedTemplateFromLocalFile(id) {
-            const titles = {
-                'gharbato': 'घर बाटो प्रमाणित',
-                'charkilla': 'चार किल्ला प्रमाणित',
-                'bato-pramanit': 'बाटो प्रमाणित',
-                'pariwarik-bibaran': 'पारिवारिक विवरण प्रमाणित',
-                'suchana-tans': 'सूचना टाँस पत्र',
-                'ghar-kayam': 'घर कायम सिफारिस',
-                'pan-sifarish': 'स्थायी लेखा नं. सिफारिस',
-                'abibahit-pramanit': 'अविवाहित प्रमाणित',
-                'bibaha-pramanit': 'विवाह प्रमाणित',
-                'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
-                'abhilekh-pramanit': 'अभिलेख प्रमाणित',
-                'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
-                'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
-                'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस',
-                'yojana-samjhauta': 'योजना सम्झौता सिफारिस'
-            };
+            const titles = nepaliTitleMap;
             const categories = {
                 'gharbato': 'जग्गा सम्बन्धि',
                 'charkilla': 'जग्गा सम्बन्धि',
@@ -1572,7 +1578,11 @@
                 'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',
                 'bank-sifarish': 'व्यक्तिगत प्रमाणित',
                 'aamdani-pramanit': 'व्यक्तिगत प्रमाणित',
-                'yojana-samjhauta': 'कार्यालय/प्रशासन'
+                'bargikaran-sifarish': 'जग्गा सम्बन्धि',
+                'jaggadhani-pratilipi': 'जग्गा सम्बन्धि',
+                'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
+                'yojana-samjhauta': 'कार्यालय/प्रशासन',
+                'nabalak-parichayapatra': 'व्यक्तिगत प्रमाणित'
             };
 
             try {
@@ -1606,7 +1616,7 @@
                     category: categories[id] || 'अन्य',
                     template_content: templateContent,
                     font_family: 'Mukta',
-                    default_font_size: 13,
+                    default_font_size: (id === 'nabalak-parichayapatra') ? 11 : 14,
                     status: 'Active',
                     created_at: firebase.firestore.FieldValue.serverTimestamp(),
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
@@ -1617,12 +1627,26 @@
             }
         }
 
-        const defaultTemplateIds = ['gharbato', 'charkilla', 'bato-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'aamdani-pramanit', 'yojana-samjhauta'];
+        const defaultTemplateIds = [
+            'gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish',
+            'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran',
+            'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit',
+            'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit',
+            'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish',
+            'yojana-samjhauta', 'nabalak-parichayapatra'
+        ];
+
         db.collection('sifarish_templates').get().then(snapshot => {
             const existingIds = [];
             snapshot.forEach(doc => {
                 existingIds.push(doc.id);
                 const data = doc.data();
+                // Auto-correct any legacy English titles in Firestore
+                if (nepaliTitleMap[doc.id] && data.title !== nepaliTitleMap[doc.id]) {
+                    db.collection('sifarish_templates').doc(doc.id).update({
+                        title: nepaliTitleMap[doc.id]
+                    }).catch(() => {});
+                }
                 if (data && data.template_content) {
                     if (doc.id === 'ghar-kayam' && (!data.template_content.includes('पूर्जा/सेस्तामा') || data.template_content.includes('पूजी') || data.template_content.includes('किताामा'))) {
                         seedTemplateFromLocalFile('ghar-kayam');
@@ -1696,16 +1720,16 @@
 
         const defaultBuiltInList = [
             { id: 'gharbato', title: 'घर बाटो प्रमाणित', category: 'जग्गा सम्बन्धि', status: 'Active' },
-            { id: 'charkilla', title: 'चारकिल्ला प्रमाणित', category: 'जग्गा सम्बन्धि', status: 'Active' },
+            { id: 'charkilla', title: 'चार किल्ला प्रमाणित', category: 'जग्गा सम्बन्धि', status: 'Active' },
             { id: 'bato-pramanit', title: 'बाटो प्रमाणित', category: 'जग्गा सम्बन्धि', status: 'Active' },
             { id: 'bargikaran-sifarish', title: 'जग्गा वर्गीकरण सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' },
             { id: 'pariwarik-bibaran', title: 'पारिवारिक विवरण प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'suchana-tans', title: 'सूचना टाँस सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
             { id: 'ghar-kayam', title: 'घर कायम सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' },
-            { id: 'pan-sifarish', title: 'प्यान (PAN) सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
+            { id: 'pan-sifarish', title: 'स्थायी लेखा नं. (PAN) सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
             { id: 'abibahit-pramanit', title: 'अविवाहित प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'bibaha-pramanit', title: 'विवाह प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
-            { id: 'apangata-sifarish', title: 'अपाङ्गता सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'apangata-sifarish', title: 'अपाङ्गता परिचयपत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'abhilekh-pramanit', title: 'अभिलेख प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'arko-bibaha-nagareko', title: 'अर्को विवाह नगरेको प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'bank-sifarish', title: 'सामाजिक सुरक्षा बैंक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
@@ -1748,6 +1772,7 @@
                 container.innerHTML = `<div style="text-align: center; padding: 20px; color: #a0aec0; grid-column: span 2;">कुनै सिफारिसहरू उपलब्ध छैनन्।</div>`;
             } else {
                 templates.forEach(t => {
+                    const displayName = nepaliTitleMap[t.id] || (t.title && !/^[a-zA-Z0-9_\-\s]+$/.test(t.title) ? t.title : (nepaliTitleMap[t.id] || t.title));
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
                     const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'nabalak-parichayapatra'];
@@ -1761,10 +1786,21 @@
                     card.style.borderColor = borderColor;
                     card.href = 'javascript:void(0)';
                     card.onclick = () => openSifarishLink(targetUrl);
-                    card.innerHTML = `<span class="emoji">${emoji}</span> ${t.title}`;
+                    card.innerHTML = `<span class="emoji">${emoji}</span> ${displayName}`;
                     container.appendChild(card);
                 });
             }
+
+            // Show admin quick add button if admin logged in
+            if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
+                const addCard = document.createElement('a');
+                addCard.className = 'sifarish-link-card';
+                addCard.style.cssText = 'border-color: #3182ce; background: linear-gradient(135deg, #ebf8ff, #bee3f8); border-style: dashed; border-width: 2px; font-weight: bold; color: #2b6cb0;';
+                addCard.href = 'admin.html?action=create';
+                addCard.innerHTML = `<span class="emoji">➕</span> नयाँ सिफारिस थप्नुहोस् (Admin Panel)`;
+                container.appendChild(addCard);
+            }
+        }
 
             // Show admin quick add button if admin logged in
             if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
