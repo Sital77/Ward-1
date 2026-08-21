@@ -315,13 +315,17 @@ function updateDoc() {
     }
 
     // ── Wife details in Preview ──
-    const wDist = document.getElementById('inWifeDistrict').value.trim() || 'झापा';
-    const wMuni = document.getElementById('inWifeMuni').value.trim() || 'कमल गाउँपालिका';
-    const wWada = document.getElementById('inWifeWada').value.trim() || '६';
+    const wDist = document.getElementById('inWifeDistrict').value.trim();
+    const wMuni = document.getElementById('inWifeMuni').value.trim();
+    const wWada = document.getElementById('inWifeWada').value.trim();
     const wName = document.getElementById('inWifeName').value.trim() || '....................';
 
     if (document.getElementById('lblWifeAddress')) {
-        document.getElementById('lblWifeAddress').innerText = `${wDist} जिल्ला ${wMuni} वडा नं.${toNepaliDigit(wWada)}`;
+        if (wDist || wMuni || wWada) {
+            document.getElementById('lblWifeAddress').innerText = `${wDist || '....'} जिल्ला ${wMuni || '....'} वडा नं.${toNepaliDigit(wWada || '..')}`;
+        } else {
+            document.getElementById('lblWifeAddress').innerText = '....................';
+        }
     }
     if (document.getElementById('lblWifeName')) {
         document.getElementById('lblWifeName').innerText = wName;
