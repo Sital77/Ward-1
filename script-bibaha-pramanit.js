@@ -17,6 +17,10 @@ const db = firebase.firestore();
 
 let globalDatabase = [];
 
+// Track if user explicitly edited husband or wife sections directly
+let husbandDirectlyEdited = false;
+let wifeDirectlyEdited = false;
+
 // Auth ready भएपछि मात्र snapshot listener start गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
     db.collection("bibahaRecords").onSnapshot((snapshot) => {
@@ -97,6 +101,14 @@ function toggleWifeCit() {
     if (sec) sec.style.display = chk.checked ? 'block' : 'none';
 }
 
+function togglePhotoClauseSection() {
+    const chk = document.getElementById('chkPhotoClause');
+    const coupleSec = document.getElementById('marriageCoupleSection');
+    if (coupleSec) {
+        coupleSec.style.display = (chk && chk.checked) ? 'flex' : 'none';
+    }
+}
+
 function toggleCustomSign() {
     const val = document.getElementById('inSignAuthority').value;
     const box = document.getElementById('customSignBox');
@@ -110,59 +122,91 @@ function adjustSignaturePosition(value) {
     if (sec) sec.style.marginTop = value + "px";
 }
 
-// ── Applicant Type Sync Handler ──────────────────────
-function handleApplicantTypeChange() {
-    const appType = getSelectedApplicantType();
-    const inAppName = document.getElementById('inApplicantName');
-    const inAppDist = document.getElementById('inApplicantDistrict');
-    const inAppMuni = document.getElementById('inApplicantMuni');
-    const inAppWada = document.getElementById('inApplicantWada');
-    const inAppCit  = document.getElementById('inApplicantCitNo');
-
-    if (appType === 'wife') {
-        const wName = document.getElementById('inWifeName').value.trim();
-        const hDist = document.getElementById('inHusbandDistrict').value.trim();
-        const hMuni = document.getElementById('inHusbandMuni').value.trim();
-        const hWada = document.getElementById('inHusbandWada').value.trim();
-        const wCit  = document.getElementById('inWifeCitNo').value.trim();
-
-        if (!inAppName.dataset.customEdited) inAppName.value = wName;
-        if (!inAppDist.dataset.customEdited) inAppDist.value = hDist || 'झापा';
-        if (!inAppMuni.dataset.customEdited) inAppMuni.value = hMuni || 'गौरादह नगरपालिका';
-        if (!inAppWada.dataset.customEdited) inAppWada.value = hWada || '१';
-        if (!inAppCit.dataset.customEdited) inAppCit.value = wCit;
-    } else if (appType === 'husband') {
+// ── Smart Sync Between Applicant & Couple ──────────────
+function handleApplicantRadioClick(type) {
+    if (type === 'husband') {
         const hName = document.getElementById('inHusbandName').value.trim();
         const hDist = document.getElementById('inHusbandDistrict').value.trim();
         const hMuni = document.getElementById('inHusbandMuni').value.trim();
         const hWada = document.getElementById('inHusbandWada').value.trim();
         const hCit  = document.getElementById('inHusbandCitNo').value.trim();
 
-        if (!inAppName.dataset.customEdited) inAppName.value = hName;
-        if (!inAppDist.dataset.customEdited) inAppDist.value = hDist || 'झापा';
-        if (!inAppMuni.dataset.customEdited) inAppMuni.value = hMuni || 'गौरादह नगरपालिका';
-        if (!inAppWada.dataset.customEdited) inAppWada.value = hWada || '१';
-        if (!inAppCit.dataset.customEdited) inAppCit.value = hCit;
+        if (hName) document.getElementById('inApplicantName').value = hName;
+        if (hDist) document.getElementById('inApplicantDistrict').value = hDist;
+        if (hMuni) document.getElementById('inApplicantMuni').value = hMuni;
+        if (hWada) document.getElementById('inApplicantWada').value = hWada;
+        if (hCit)  document.getElementById('inApplicantCitNo').value = hCit;
+    } else if (type === 'wife') {
+        const wName = document.getElementById('inWifeName').value.trim();
+        const hDist = document.getElementById('inHusbandDistrict').value.trim();
+        const wDist = document.getElementById('inWifeDistrict').value.trim();
+        const hMuni = document.getElementById('inHusbandMuni').value.trim();
+        const wMuni = document.getElementById('inWifeMuni').value.trim();
+        const hWada = document.getElementById('inHusbandWada').value.trim();
+        const wWada = document.getElementById('inWifeWada').value.trim();
+        const wCit  = document.getElementById('inWifeCitNo').value.trim();
+
+        if (wName) document.getElementById('inApplicantName').value = wName;
+        document.getElementById('inApplicantDistrict').value = hDist || wDist || 'झापा';
+        document.getElementById('inApplicantMuni').value     = hMuni || wMuni || 'गौरादह नगरपालिका';
+        document.getElementById('inApplicantWada').value     = hWada || wWada || '१';
+        if (wCit)  document.getElementById('inApplicantCitNo').value = wCit;
     }
 }
 
-function handleHusbandNameInput() {
+function handleApplicantFieldInput(field) {
     const appType = getSelectedApplicantType();
-    if (appType === 'husband') {
-        const inAppName = document.getElementById('inApplicantName');
-        if (inAppName && !inAppName.dataset.customEdited) {
-            inAppName.value = document.getElementById('inHusbandName').value.trim();
+
+    if (appType === 'husband' && !husbandDirectlyEdited) {
+        if (field === 'name') {
+            document.getElementById('inHusbandName').value = document.getElementById('inApplicantName').value;
+        } else if (field === 'district') {
+            document.getElementById('inHusbandDistrict').value = document.getElementById('inApplicantDistrict').value;
+        } else if (field === 'muni') {
+            document.getElementById('inHusbandMuni').value = document.getElementById('inApplicantMuni').value;
+        } else if (field === 'wada') {
+            document.getElementById('inHusbandWada').value = document.getElementById('inApplicantWada').value;
+        } else if (field === 'citNo') {
+            document.getElementById('inHusbandCitNo').value = document.getElementById('inApplicantCitNo').value;
+        }
+    } else if (appType === 'wife' && !wifeDirectlyEdited) {
+        if (field === 'name') {
+            document.getElementById('inWifeName').value = document.getElementById('inApplicantName').value;
+        } else if (field === 'citNo') {
+            document.getElementById('inWifeCitNo').value = document.getElementById('inApplicantCitNo').value;
         }
     }
 }
 
-function handleWifeNameInput() {
-    const appType = getSelectedApplicantType();
-    if (appType === 'wife') {
-        const inAppName = document.getElementById('inApplicantName');
-        if (inAppName && !inAppName.dataset.customEdited) {
-            inAppName.value = document.getElementById('inWifeName').value.trim();
-        }
+function handleHusbandDirectInput(field) {
+    husbandDirectlyEdited = true;
+}
+
+function handleWifeDirectInput(field) {
+    wifeDirectlyEdited = true;
+}
+
+// ── Smart Marriage Date Formatter ─────────────────────
+function formatMarriageDateText(inputDate) {
+    if (!inputDate || !inputDate.trim()) {
+        return { dateStr: '....................', suffixStr: 'गते' };
+    }
+
+    let val = inputDate.trim();
+
+    // If user already typed explicit 'सालमा' or 'गते'
+    if (val.includes('सालमा') || val.includes('गते')) {
+        return { dateStr: val, suffixStr: '' };
+    }
+
+    // Check if input is Year Only (e.g. 2048, २०४८, २०४८ साल)
+    const isYearOnly = /^[०-९0-9]{4}(\s*साल)?$/.test(val) || val.endsWith('साल');
+
+    if (isYearOnly) {
+        const cleanYear = val.replace(/\s*साल$/, '');
+        return { dateStr: `${cleanYear} सालमा`, suffixStr: '' };
+    } else {
+        return { dateStr: val, suffixStr: 'गते' };
     }
 }
 
@@ -222,7 +266,7 @@ function updateDoc() {
         document.getElementById('lblHusbandName').innerText = hName;
     }
 
-    // Husband Lineage (Grandpa without 'बाजे' prefix)
+    // Husband Lineage (Grandpa directly without 'बाजे' prefix)
     const hasHGrandpa = document.getElementById('chkHusbandGrandpa').checked;
     const hGrandpaName = document.getElementById('inHusbandGrandpaName').value.trim();
     const hasHParents = document.getElementById('chkHusbandParents').checked;
@@ -278,7 +322,7 @@ function updateDoc() {
         document.getElementById('lblWifeName').innerText = wName;
     }
 
-    // Wife Lineage (Grandpa without 'बाजे' prefix)
+    // Wife Lineage (Grandpa directly without 'बाजे' prefix)
     const hasWGrandpa = document.getElementById('chkWifeGrandpa').checked;
     const wGrandpaName = document.getElementById('inWifeGrandpaName').value.trim();
     const hasWParents = document.getElementById('chkWifeParents').checked;
@@ -321,16 +365,27 @@ function updateDoc() {
         document.getElementById('lblWifeCit').innerText = wCitPara;
     }
 
-    // ── Marriage details in Preview ──
-    const marrMiti = document.getElementById('inMarriageMiti').value.trim() || '....................';
-    const marrType = document.getElementById('inMarriageType').value.trim() || 'सामाजिक परम्परा अनुसार';
+    // ── Marriage details & Dynamic Date Suffix in Preview ──
+    const rawMarrMiti = document.getElementById('inMarriageMiti').value;
+    const marrDateObj = formatMarriageDateText(rawMarrMiti);
+    const marrType    = document.getElementById('inMarriageType').value.trim() || 'सामाजिक परम्परा अनुसार';
     const hasPhotoClause = document.getElementById('chkPhotoClause').checked;
 
-    if (document.getElementById('lblMarriageMiti')) document.getElementById('lblMarriageMiti').innerText = marrMiti;
-    if (document.getElementById('lblMarriageType')) document.getElementById('lblMarriageType').innerText = marrType;
+    if (document.getElementById('lblMarriageMiti')) {
+        document.getElementById('lblMarriageMiti').innerText = marrDateObj.dateStr;
+    }
+    if (document.getElementById('lblMarriageMitiSuffix')) {
+        document.getElementById('lblMarriageMitiSuffix').innerText = marrDateObj.suffixStr;
+    }
+    if (document.getElementById('lblMarriageType')) {
+        document.getElementById('lblMarriageType').innerText = marrType;
+    }
     if (document.getElementById('lblPhotoClause')) {
         document.getElementById('lblPhotoClause').innerText = hasPhotoClause ? 'निज दुवैको फोटो टाँस गरी, ' : '';
     }
+
+    // Couple photo section toggle
+    togglePhotoClauseSection();
 
     // ── Couple Identification Cards (Bottom Section - Name only under photo box) ──
     if (document.getElementById('lblHusbandCardName')) {
@@ -523,6 +578,10 @@ function editFromDB(id) {
     document.getElementById('editRecordIndex').value = id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड (विवाह प्रमाणित)";
 
+    // Reset direct edit flags
+    husbandDirectlyEdited = false;
+    wifeDirectlyEdited = false;
+
     // Letterhead
     if (rec.ay || rec.patra) {
         document.getElementById('inPatraSankhya').value = rec.ay || rec.patra || '२०८३/०८४';
@@ -640,7 +699,7 @@ function updateNepalSambatFromMiti() {
             const m = parseInt(parts[1], 10);
             const d = parseInt(parts[2], 10);
             if (!isNaN(y) && !isNaN(m) && !isNaN(d) && window.NepaliFunctions) {
-                // If converter is available
+                // Converter available
             }
         }
     } catch (e) {}
@@ -648,14 +707,5 @@ function updateNepalSambatFromMiti() {
 
 // ── Page Initialization ────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-    // Listen for custom edits on applicant inputs
-    const appInputs = ['inApplicantName', 'inApplicantDistrict', 'inApplicantMuni', 'inApplicantWada', 'inApplicantCitNo'];
-    appInputs.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', () => { el.dataset.customEdited = 'true'; });
-        }
-    });
-
     updateDoc();
 });
