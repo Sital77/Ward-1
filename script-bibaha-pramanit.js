@@ -189,24 +189,29 @@ function handleWifeDirectInput(field) {
 // ── Smart Marriage Date Formatter ─────────────────────
 function formatMarriageDateText(inputDate) {
     if (!inputDate || !inputDate.trim()) {
-        return { dateStr: '....................', suffixStr: 'गते' };
+        return '.................... गतेमा';
     }
 
     let val = inputDate.trim();
 
-    // If user already typed explicit 'सालमा' or 'गते'
-    if (val.includes('सालमा') || val.includes('गते')) {
-        return { dateStr: val, suffixStr: '' };
+    // If user already typed explicit 'सालमा' or 'गतेमा'
+    if (val.includes('सालमा') || val.includes('गतेमा')) {
+        return val;
+    }
+    if (val.endsWith('गते')) {
+        return val.replace(/गते$/, 'गतेमा');
+    }
+    if (val.endsWith('साल')) {
+        return val.replace(/साल$/, 'सालमा');
     }
 
-    // Check if input is Year Only (e.g. 2048, २०४८, २०४८ साल)
-    const isYearOnly = /^[०-९0-9]{4}(\s*साल)?$/.test(val) || val.endsWith('साल');
+    // Check if input is Year Only (e.g. 4 digits like 2078, २०७८, 2048, २०४८)
+    const isYearOnly = /^[०-९0-9]{4}$/.test(val);
 
     if (isYearOnly) {
-        const cleanYear = val.replace(/\s*साल$/, '');
-        return { dateStr: `${cleanYear} सालमा`, suffixStr: '' };
+        return `${val} सालमा`;
     } else {
-        return { dateStr: val, suffixStr: 'गते' };
+        return `${val} गतेमा`;
     }
 }
 
@@ -367,15 +372,12 @@ function updateDoc() {
 
     // ── Marriage details & Dynamic Date Suffix in Preview ──
     const rawMarrMiti = document.getElementById('inMarriageMiti').value;
-    const marrDateObj = formatMarriageDateText(rawMarrMiti);
+    const formattedMiti = formatMarriageDateText(rawMarrMiti);
     const marrType    = document.getElementById('inMarriageType').value.trim() || 'सामाजिक परम्परा अनुसार';
     const hasPhotoClause = document.getElementById('chkPhotoClause').checked;
 
     if (document.getElementById('lblMarriageMiti')) {
-        document.getElementById('lblMarriageMiti').innerText = marrDateObj.dateStr;
-    }
-    if (document.getElementById('lblMarriageMitiSuffix')) {
-        document.getElementById('lblMarriageMitiSuffix').innerText = marrDateObj.suffixStr;
+        document.getElementById('lblMarriageMiti').innerText = formattedMiti;
     }
     if (document.getElementById('lblMarriageType')) {
         document.getElementById('lblMarriageType').innerText = marrType;
