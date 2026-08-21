@@ -504,8 +504,8 @@
             ADMIN_KEY: 'sifarish_admin',
             AUTH_KEY: 'sifarish_auth',
             REDIRECT_KEY: 'sifarish_redirect',
-            DEFAULT_EXPIRY_HOURS: 24,
-            REMEMBER_EXPIRY_HOURS: 168
+            DEFAULT_EXPIRY_HOURS: 8760, // 365 days — permanent login
+            REMEMBER_EXPIRY_HOURS: 8760 // 365 days — permanent login
         };
 
         function generateSessionToken(rememberMe) {
@@ -746,10 +746,9 @@
             const cleanUser = username.trim().toLowerCase();
 
             try {
-                // Set persistence
-                const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+                // Always use LOCAL persistence for permanent login
                 try {
-                    await firebase.auth().setPersistence(persistence);
+                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                 } catch(pErr) {}
 
                 // Try Firebase Auth in background / safe block

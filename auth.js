@@ -22,8 +22,8 @@ const AUTH_CONFIG = {
     ADMIN_KEY: 'sifarish_admin',
     AUTH_KEY: 'sifarish_auth',
     REDIRECT_KEY: 'sifarish_redirect',
-    DEFAULT_EXPIRY_HOURS: 24,
-    REMEMBER_EXPIRY_HOURS: 168, // 7 days
+    DEFAULT_EXPIRY_HOURS: 8760, // 365 days — permanent login
+    REMEMBER_EXPIRY_HOURS: 8760, // 365 days — permanent login
     TOKEN_PREFIX: 'sif_'
 };
 
@@ -178,8 +178,19 @@ function sanitizeHTML(html) {
         return;
     }
 
-    // Sync with Firebase Auth when loaded + secondary auth verification
+    // Sync with Firebase Auth when loaded (no forced logout on auth failure)
     window.addEventListener('DOMContentLoaded', function () {
+        // Auto-renew session expiry on each page load if session is valid
+        if (isSessionValid()) {
+            try {
+                const sessionStr = localStorage.getItem(AUTH_CONFIG.SESSION_KEY);
+                const session = JSON.parse(sessionStr);
+                // Extend session by another 365 days from now
+                session.expiresAt = Date.now() + (AUTH_CONFIG.DEFAULT_EXPIRY_HOURS * 60 * 60 * 1000);
+                localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
+            } catch(e) {}
+        }
+
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().onAuthStateChanged(function (user) {
                 if (user) {
@@ -188,17 +199,11 @@ function sanitizeHTML(html) {
                         createSession(isAdmin, true);
                     }
                 } else if (localStorage.getItem('sifarish_auth') === 'true' || isSessionValid()) {
-                    // No Firebase user but local session exists — try anonymous auth
+                    // No Firebase user but local session exists — try anonymous auth silently
                     try {
                         firebase.auth().signInAnonymously().catch(function(err) {
-                            // If anonymous auth fails, verify session is still legitimate
-                            // Give a grace period, then force re-login if still no Firebase user
-                            setTimeout(function() {
-                                if (!firebase.auth().currentUser) {
-                                    clearSession();
-                                    window.location.replace('login.html');
-                                }
-                            }, 5000);
+                            // Silent failure — do NOT clear session or redirect
+                            // Local session is still valid, user should not be kicked out
                         });
                     } catch(e) {}
                 }
