@@ -49,6 +49,7 @@
         'ghar-kayam': { collection: 'gharKayamRecords', title: 'घर कायम सिफारिस' },
         'pan-sifarish': { collection: 'panRecords', title: 'स्थायी लेखा नं. सिफारिस' },
         'abibahit-pramanit': { collection: 'abibahitRecords', title: 'अविवाहित प्रमाणित' },
+        'bibaha-pramanit': { collection: 'bibahaRecords', title: 'विवाह प्रमाणित' },
         'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' },
         'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
         'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' },
@@ -232,6 +233,7 @@
     else if (path.includes('bato-pramanit.html')) templateId = 'bato-pramanit';
     else if (path.includes('apangata-sifarish.html')) templateId = 'apangata-sifarish';
     else if (path.includes('abibahit-pramanit.html')) templateId = 'abibahit-pramanit';
+    else if (path.includes('bibaha-pramanit.html')) templateId = 'bibaha-pramanit';
     else if (path.includes('ghar-kayam.html')) templateId = 'ghar-kayam';
     else if (path.includes('pan-sifarish.html')) templateId = 'pan-sifarish';
     else if (path.includes('pariwarik-bibaran.html')) templateId = 'pariwarik-bibaran';
@@ -667,6 +669,7 @@
                 'ghar-kayam': 'घर कायम सिफारिस',
                 'pan-sifarish': 'स्थायी लेखा नं. सिफारिस',
                 'abibahit-pramanit': 'अविवाहित प्रमाणित',
+                'bibaha-pramanit': 'विवाह प्रमाणित',
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
                 'abhilekh-pramanit': 'अभिलेख प्रमाणित',
                 'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
@@ -687,6 +690,7 @@
                 'ghar-kayam': 'जग्गा सम्बन्धि',
                 'pan-sifarish': 'कार्यालय/प्रशासन',
                 'abibahit-pramanit': 'व्यक्तिगत प्रमाणित',
+                'bibaha-pramanit': 'व्यक्तिगत प्रमाणित',
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
                 'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',

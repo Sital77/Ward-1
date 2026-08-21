@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>विवाह प्रमाणित - गौरादह नगरपालिका वडा नं.१</title>
+    <link rel="stylesheet" href="charkilla.css">
+    <style>
+        .preview-panel .a4-page,
+        .preview-panel .a4-page * {
+            font-family: 'Mukta', sans-serif;
+        }
+
+        .letter-body-para {
+            font-size: 13pt;
+            line-height: 1.95;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .section-card {
+            border-radius: 10px;
+            padding: 14px 14px 6px 14px;
+            margin-bottom: 18px;
+        }
+
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lh-section {
+            background: #f7fafc;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .lh-section .section-label {
+            color: #4a5568;
+        }
+
+        .body-section {
+            background: rgba(43, 108, 176, 0.07);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
+        }
+
+        .body-section .section-label {
+            color: #2b6cb0;
+        }
+
+        .husband-section {
+            background: #ebf8ff;
+            border: 1.5px solid #bee3f8;
+        }
+
+        .husband-section .section-label {
+            color: #2b6cb0;
+        }
+
+        .wife-section {
+            background: #fff5f7;
+            border: 1.5px solid #fed7e2;
+        }
+
+        .wife-section .section-label {
+            color: #b83280;
+        }
+
+        .marriage-section {
+            background: #faf5ff;
+            border: 1.5px solid #e9d8fd;
+        }
+
+        .marriage-section .section-label {
+            color: #6b46c1;
+        }
+
+        .optional-toggle {
+            font-size: 0.84rem;
+            color: #2d3748;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            user-select: none;
+            font-weight: 600;
+        }
+
+        .optional-toggle input {
+            cursor: pointer;
+            accent-color: #2b6cb0;
+        }
+
+        /* Print Couple Cards */
+        .marriage-couple-table {
+            margin: 22px auto 10px auto;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .couple-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 44%;
+        }
+
+        .photo-box-print {
+            box-sizing: border-box;
+            background: #ffffff;
+            width: 115px;
+            height: 140px;
+            border: 1.5px dashed #4a5568;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        @media print {
+            .input-panel {
+                display: none !important;
+            }
+
+            .preview-panel {
+                width: 100% !important;
+                margin-left: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+            }
+
+            .modal-overlay {
+                display: none !important;
+            }
+
+            .a4-page {
+                box-shadow: none !important;
+                width: 100% !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="auth.js"></script>
+
+    <!-- ══════════════ INPUT PANEL ══════════════ -->
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">💑 विवाह प्रमाणित</h2>
+            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+
+        <!-- ══ 1. LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 लेटर हेड विवरण</div>
+
+            <div class="form-group">
+                <label>पत्र संख्या (प.सं.):</label>
+                <select id="inPatraSankhya" onchange="updateDoc()">
+                    <option value="२०८१/०८२">२०८१/०८२</option>
+                    <option value="२०८२/०८३">२०८२/०८३</option>
+                    <option value="२०८३/०८४" selected>२०८३/०८४</option>
+                    <option value="२०८४/०८५">२०८४/०८५</option>
+                    <option value="२०८५/०८६">२०८५/०८६</option>
+                </select>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="२०८३/०२/१८"
+                        oninput="updateNepalSambatFromMiti(); updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ने.स. :</label>
+                <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ 2. RECIPIENT ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">📝 पत्र सम्बोधन</div>
+
+            <!-- Receiver Address (श्री...) -->
+            <div class="form-group">
+                <label>पत्र सम्बोधन (श्री...):</label>
+                <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:3px;">
+                    <div class="radio-option">
+                        <input type="radio" id="rec1" name="recRadio" value="जो जस सँग सम्बन्धित छ"
+                            onchange="toggleCustomReceiver(); updateDoc();" checked>
+                        <label for="rec1" class="radio-label" style="font-size:0.82rem;">जो जस सँग सम्बन्धित छ</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="rec2" name="recRadio" value="CUSTOM"
+                            onchange="toggleCustomReceiver(); updateDoc();">
+                        <label for="rec2" class="radio-label" style="font-size:0.82rem;">आफैँ हाल्ने</label>
+                    </div>
+                </div>
+                <input type="text" id="inCustomReceiver" placeholder="कार्यालय वा व्यक्तिको नाम..."
+                    style="display:none; margin-top:8px;" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ 3. APPLICANT DETAILS ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">👤 निवेदकको विवरण</div>
+
+            <div class="form-group">
+                <label>निवेदक को हो?</label>
+                <div class="radio-container">
+                    <div class="radio-option">
+                        <input type="radio" id="appTypeWife" name="appTypeRadio" value="wife"
+                            onchange="handleApplicantTypeChange(); updateDoc();" checked>
+                        <label for="appTypeWife" class="radio-label">श्रीमती</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="appTypeHusband" name="appTypeRadio" value="husband"
+                            onchange="handleApplicantTypeChange(); updateDoc();">
+                        <label for="appTypeHusband" class="radio-label">श्रीमान्</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="appTypeCustom" name="appTypeRadio" value="custom"
+                            onchange="handleApplicantTypeChange(); updateDoc();">
+                        <label for="appTypeCustom" class="radio-label">अन्य निवेदक</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>निवेदकको नाम:</label>
+                <input type="text" id="inApplicantName" placeholder="उदा: भगिरथा अधिकारी" value="भगिरथा अधिकारी"
+                    oninput="updateDoc()">
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>जिल्ला:</label>
+                    <input type="text" id="inApplicantDistrict" placeholder="उदा: झापा" value="झापा"
+                        oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>गा.पा./न.पा.:</label>
+                    <input type="text" id="inApplicantMuni" placeholder="उदा: गौरादह नगरपालिका"
+                        value="गौरादह नगरपालिका" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>वडा नं.:</label>
+                    <input type="text" id="inApplicantWada" placeholder="उदा: १" value="१" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>नागरिकता नं. (ना.प्र.नं.):</label>
+                    <input type="text" id="inApplicantCitNo" placeholder="उदा: २३११२५३१७" value="२३११२५३१७"
+                        oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 4. HUSBAND DETAILS SECTION ══ -->
+        <div class="section-card husband-section">
+            <div class="section-label">🤵 श्रीमान् पक्षको विवरण</div>
+
+            <div class="form-group">
+                <label>श्रीमानको पूरा नाम:</label>
+                <input type="text" id="inHusbandName" placeholder="उदा: शान्ति राम अधिकारी" value="शान्ति राम अधिकारी"
+                    oninput="handleHusbandNameInput(); updateDoc();">
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>जिल्ला:</label>
+                    <input type="text" id="inHusbandDistrict" placeholder="उदा: झापा" value="झापा"
+                        oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>गा.पा./न.पा.:</label>
+                    <input type="text" id="inHusbandMuni" placeholder="उदा: गौरादह नगरपालिका"
+                        value="गौरादह नगरपालिका" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>वडा नं.:</label>
+                <input type="text" id="inHusbandWada" placeholder="उदा: १" value="१" oninput="updateDoc()">
+            </div>
+
+            <!-- Husband Grandfather Toggle -->
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkHusbandGrandpa" onchange="toggleHusbandGrandpa(); updateDoc();">
+                बाजेको नाम समावेश गर्ने
+            </label>
+            <div id="husbandGrandpaSection" style="display: none;">
+                <div class="form-group">
+                    <label>बाजेको नाम:</label>
+                    <input type="text" id="inHusbandGrandpaName" placeholder="उदा: गंगाधर अधिकारी"
+                        oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- Husband Parents Toggle -->
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkHusbandParents" onchange="toggleHusbandParents(); updateDoc();" checked>
+                बुवा तथा आमाको नाम समावेश गर्ने
+            </label>
+            <div id="husbandParentsSection">
+                <div class="row-grid">
+                    <div class="form-group">
+                        <label>बुवाको नाम:</label>
+                        <input type="text" id="inHusbandFatherName" placeholder="उदा: खगनाथ अधिकारी"
+                            value="खगनाथ अधिकारी" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group">
+                        <label>आमाको नाम:</label>
+                        <input type="text" id="inHusbandMotherName" placeholder="उदा: सरस्वता अधिकारी"
+                            value="सरस्वता अधिकारी" oninput="updateDoc()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Husband Citizenship Toggle -->
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkHusbandCit" onchange="toggleHusbandCit(); updateDoc();" checked>
+                नागरिकता विवरण समावेश गर्ने
+            </label>
+            <div id="husbandCitSection">
+                <div class="form-group">
+                    <label>नागरिकता नं. (ना.प्र.नं.):</label>
+                    <input type="text" id="inHusbandCitNo" placeholder="उदा: ६३५" value="६३५" oninput="updateDoc()">
+                </div>
+                <div class="row-grid">
+                    <div class="form-group">
+                        <label>जारी मिति (वि.सं.):</label>
+                        <input type="text" id="inHusbandCitDate" placeholder="उदा: २०२६/१०/१५" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group">
+                        <label>जारी जिल्ला:</label>
+                        <input type="text" id="inHusbandCitDistrict" placeholder="उदा: झापा" value="झापा"
+                            oninput="updateDoc()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 5. WIFE DETAILS SECTION ══ -->
+        <div class="section-card wife-section">
+            <div class="section-label">👰 श्रीमती पक्षको विवरण</div>
+
+            <div class="form-group">
+                <label>श्रीमतीको पूरा नाम:</label>
+                <input type="text" id="inWifeName" placeholder="उदा: भगिरथा निरौला" value="भगिरथा निरौला"
+                    oninput="handleWifeNameInput(); updateDoc();">
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>माईती / साविक जिल्ला:</label>
+                    <input type="text" id="inWifeDistrict" placeholder="उदा: झापा" value="झापा" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>गा.पा./न.पा.:</label>
+                    <input type="text" id="inWifeMuni" placeholder="उदा: कमल गाउँपालिका" value="कमल गाउँपालिका"
+                        oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>वडा नं.:</label>
+                <input type="text" id="inWifeWada" placeholder="उदा: ६" value="६" oninput="updateDoc()">
+            </div>
+
+            <!-- Wife Grandfather Toggle -->
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkWifeGrandpa" onchange="toggleWifeGrandpa(); updateDoc();">
+                बाजेको नाम समावेश गर्ने
+            </label>
+            <div id="wifeGrandpaSection" style="display: none;">
+                <div class="form-group">
+                    <label>बाजेको नाम:</label>
+                    <input type="text" id="inWifeGrandpaName" placeholder="उदा: रामचन्द्र निरौला"
+                        oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- Wife Parents Toggle -->
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkWifeParents" onchange="toggleWifeParents(); updateDoc();" checked>
+                बुवा तथा आमाको नाम समावेश गर्ने
+            </label>
+            <div id="wifeParentsSection">
+                <div class="row-grid">
+                    <div class="form-group">
+                        <label>बुवाको नाम:</label>
+                        <input type="text" id="inWifeFatherName" placeholder="उदा: लोमनाथ निरौला"
+                            value="लोमनाथ निरौला" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group">
+                        <label>आमाको नाम:</label>
+                        <input type="text" id="inWifeMotherName" placeholder="उदा: खुमादेवी निरौला"
+                            value="खुमादेवी निरौला" oninput="updateDoc()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wife Citizenship Toggle -->
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkWifeCit" onchange="toggleWifeCit(); updateDoc();" checked>
+                नागरिकता विवरण समावेश गर्ने
+            </label>
+            <div id="wifeCitSection">
+                <div class="form-group">
+                    <label>नागरिकता नं. (ना.प्र.नं.):</label>
+                    <input type="text" id="inWifeCitNo" placeholder="उदा: २३११२५३१७" value="२३११२५३१७"
+                        oninput="updateDoc()">
+                </div>
+                <div class="row-grid">
+                    <div class="form-group">
+                        <label>जारी मिति (वि.सं.):</label>
+                        <input type="text" id="inWifeCitDate" placeholder="उदा: २०३५/०१/१२" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group">
+                        <label>जारी जिल्ला:</label>
+                        <input type="text" id="inWifeCitDistrict" placeholder="उदा: झापा" value="झापा"
+                            oninput="updateDoc()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 6. MARRIAGE & LEGAL DETAILS ══ -->
+        <div class="section-card marriage-section">
+            <div class="section-label">📜 विवाह विवरण</div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>विवाह भएको मिति (वि.सं.):</label>
+                    <input type="text" id="inMarriageMiti" placeholder="उदा: २०२७/११/१४" value="२०२७/११/१४"
+                        oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>विवाहको परम्परा / प्रकार:</label>
+                    <input type="text" id="inMarriageType" placeholder="उदा: सामाजिक परम्परा अनुसार"
+                        value="सामाजिक परम्परा अनुसार" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <label class="optional-toggle">
+                <input type="checkbox" id="chkPhotoClause" onchange="updateDoc();" checked>
+                "निज दुवैको फोटो टाँस गरी," व्यहोरा समावेश गर्ने
+            </label>
+        </div>
+
+        <!-- ══ 7. SIGNING AUTHORITY ══ -->
+        <div class="form-group"
+            style="margin-top: 5px; background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
+            <label style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
+                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40"
+                    oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र सुरक्षित गर्नुस्</button>
+    </div>
+
+    <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content" style="max-width: 850px;">
+            <button class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ विवाह प्रमाणित सिफारिस अभिलेख</h3>
+            <div class="search-container">
+                <label>🔍 नाम वा नागरिकता नं. बाट खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="श्रीमान्, श्रीमती वा निवेदकको नाम टाइप गर्नुस्..."
+                    oninput="renderDatabaseTable()">
+            </div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width:6%;">क्रम</th>
+                        <th style="width:25%;">श्रीमान्को नाम</th>
+                        <th style="width:25%;">श्रीमतीको नाम</th>
+                        <th style="width:18%;">विवाह मिति</th>
+                        <th style="width:14%;">दर्ता मिति</th>
+                        <th style="width:12%;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ══════════════ PREVIEW PANEL (A4 Letter) ══════════════ -->
+    <div class="preview-panel">
+        <div class="a4-page">
+
+            <!-- ── Letterhead ── -->
+            <div class="letterhead-container">
+                <div class="lh-left">
+                    <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg"
+                        alt="Nepal Emblem">
+                    <div class="lh-meta">
+                        <div>प.सं. <span id="lblAY"></span></div>
+                        <div>च.नं. <span id="lblChalani"></span></div>
+                    </div>
+                </div>
+                <div class="lh-center">
+                    <div class="muni-n">गौरादह नगरपालिका</div>
+                    <div class="wada-title">१ नं. वडा कार्यालय</div>
+                    <div class="loc-t">गौरादह, झापा</div>
+                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
+                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                </div>
+                <div class="lh-right">
+                    <div class="miti-block">मिति : <span id="lblMiti"></span></div>
+                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat"></span></div>
+                </div>
+            </div>
+
+            <div class="header-red-line"></div>
+
+            <!-- ── Receiver ── -->
+            <div style="margin-top:10px; margin-bottom:16px; text-align: left; width: 100%;">
+                <div style="font-weight:700; font-size:13.5pt; line-height:1.7;">
+                    श्री <span id="lblReceiver">जो जस सँग सम्बन्धित छ ।</span>
+                </div>
+            </div>
+
+            <!-- ── Subject ── -->
+            <div style="margin: 10px 0 18px 0; font-size:14pt; font-weight:700; text-align: center; width: 100%;">
+                विषय:- <span id="lblSubject">विवाह प्रमाणित सम्बन्धमा ।</span>
+            </div>
+
+            <!-- ── Body Paragraph ── -->
+            <div class="letter-body-para" id="bodyText" style="text-indent: 50px;">
+                प्रस्तुत विषयमा <span id="lblApplicantDistrict">झापा</span> जिल्ला <span id="lblApplicantMuni">गौरादह नगरपालिका</span> वडा नं.<span id="lblApplicantWada">१</span> मा बसोबास गर्ने <span id="lblApplicantName" style="font-weight:bold;">भगिरथा अधिकारी</span><span id="lblApplicantCit"> (ना.प्र.नं.२३११२५३१७)</span> ले यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम <span id="lblHusbandAddress">झापा जिल्ला गौरादह नगरपालिका वडा नं.१</span> बसोबास गर्ने <span id="lblHusbandLineage">खगनाथ अधिकारी तथा सरस्वता अधिकारीको छोरा </span><span id="lblHusbandName" style="font-weight:bold;">शान्ति राम अधिकारी</span><span id="lblHusbandCit"> (ना.प्र.नं.६३५)</span> सँग <span id="lblWifeAddress">झापा जिल्ला कमल गाउँपालिका वडा नं.६</span> बसोबास गर्ने <span id="lblWifeLineage">लोमनाथ निरौला तथा खुमादेवी निरौलाको छोरी </span><span id="lblWifeName" style="font-weight:bold;">भगिरथा निरौला</span><span id="lblWifeCit"> (ना.प्र.नं.२३११२५३१७)</span> बीच मिति: <span id="lblMarriageMiti">२०२७/११/१४</span> गते <span id="lblMarriageType">सामाजिक परम्परा अनुसार</span> विवाह भएको हुँदा <span id="lblPhotoClause">निज दुवैको फोटो टाँस गरी, </span>स्थानीय सरकार ऐन, २०७४ को दफा १२(२) ङ (९) बमोजिम विवाह प्रमाणित गरिन्छ ।
+            </div>
+
+            <!-- ── Couple Identification & Photo Cards ── -->
+            <div class="marriage-couple-table" id="marriageCoupleSection">
+                <div class="couple-card">
+                    <div style="font-weight: bold; font-size: 13.5pt; margin-bottom: 6px; border-bottom: 1.5px solid #2b6cb0; padding-bottom: 2px; width: 110px;">श्रीमान्</div>
+                    <div id="lblHusbandPhotoBox" class="photo-box-print">
+                        <span style="font-size: 10pt; color: #718096; text-align: center; padding: 4px;">फोटो</span>
+                    </div>
+                    <div id="lblHusbandCardName" style="font-weight: bold; font-size: 13pt; color: #1a202c;">शान्ति राम अधिकारी</div>
+                </div>
+                <div class="couple-card">
+                    <div style="font-weight: bold; font-size: 13.5pt; margin-bottom: 6px; border-bottom: 1.5px solid #b83280; padding-bottom: 2px; width: 110px;">श्रीमती</div>
+                    <div id="lblWifePhotoBox" class="photo-box-print">
+                        <span style="font-size: 10pt; color: #718096; text-align: center; padding: 4px;">फोटो</span>
+                    </div>
+                    <div id="lblWifeCardName" style="font-weight: bold; font-size: 13pt; color: #1a202c;">भगिरथा निरौला</div>
+                </div>
+            </div>
+
+            <!-- ── Signature ── -->
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 40px;">
+                <div class="signature-block">
+                    <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
+                    <div class="sig-title" id="lblSigTitle" style="font-weight: normal; font-size: 12pt;">वडा अध्यक्ष</div>
+                </div>
+            </div>
+
+        </div><!-- /a4-page -->
+    </div><!-- /preview-panel -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="font-settings.js"></script>
+    <script src="script-bibaha-pramanit.js"></script>
+</body>
+
+</html>
