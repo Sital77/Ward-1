@@ -165,6 +165,11 @@ window.toggleLandUseSection = function () {
     if (chk && container) {
         container.style.display = chk.checked ? 'block' : 'none';
     }
+    // Also show/hide the land use statement container
+    const stmtBox = document.getElementById('lblLandUseStatement');
+    if (stmtBox) {
+        stmtBox.style.display = chk.checked ? 'block' : 'none';
+    }
     if (typeof updateDoc === 'function') {
         updateDoc();
     } else if (typeof window.updateDoc === 'function') {
