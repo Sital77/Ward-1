@@ -184,8 +184,30 @@ function updateDoc() {
         } else {
             stmtBox.style.display = 'block';
             safeSetText('lblSelectedZone', selectedZone);
-            const kittaCount = activeRowIds.length;
-            const landText = kittaCount > 1 ? 'जग्गाहरू' : 'जग्गा';
+            
+            // Calculate total kittas count (from rows or comma/space/र separated kitta numbers)
+            let kittaCount = 0;
+            activeRowIds.forEach(id => {
+                const block = document.getElementById(id);
+                if (block) {
+                    const kittaInput = block.querySelector('.input-kitta');
+                    const kVal = kittaInput ? kittaInput.value.trim() : '';
+                    if (kVal) {
+                        const splitted = kVal.split(/[,،\s+र/]+/).filter(x => x.trim().length > 0);
+                        kittaCount += Math.max(1, splitted.length);
+                    } else {
+                        kittaCount += 1;
+                    }
+                }
+            });
+            if (kittaCount === 0) kittaCount = activeRowIds.length;
+
+            const isPlural = kittaCount >= 2;
+            const kittaPhrase = isPlural ? 'माथि उल्लेखित कित्ताहरूको' : 'माथि उल्लेखित कित्ता नम्बरको';
+            const landText = isPlural ? 'जग्गाहरू' : 'जग्गा';
+
+            const kp = document.getElementById('lblKittaPhrase');
+            if (kp) kp.innerText = kittaPhrase;
             safeSetText('lblLandPlural1', landText);
             safeSetText('lblLandPlural2', landText);
         }
