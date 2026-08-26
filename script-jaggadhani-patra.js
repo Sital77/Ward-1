@@ -19,14 +19,14 @@ let globalDatabase = [];
 let rowCounter = 0;
 let activeRowIds = [];
 
-// Auth ready listener
+// Auth ready भएपछि snapshot listener start गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
     db.collection("jaggadhaniPoojaRecords").onSnapshot((snapshot) => {
         globalDatabase = [];
         snapshot.forEach((doc) => {
             globalDatabase.push({ id: doc.id, ...doc.data() });
         });
-        globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         renderDatabaseTable();
     });
 }).catch(() => {});
@@ -36,12 +36,6 @@ window.toNepaliDigit = function (num) {
     if (num === null || num === undefined) return '';
     const nd = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
     return num.toString().split('').map(d => nd[d] || d).join('');
-};
-
-window.getSelectedAY = function () {
-    const radios = document.querySelectorAll('input[name="ayRadio"]');
-    for (const r of radios) { if (r.checked) return r.value; }
-    return '२०८२/०८३';
 };
 
 window.toggleModal = function (show) {
@@ -79,12 +73,12 @@ window.addKittaRow = function (data = null) {
 
     const container = document.getElementById('kittaRowsContainer');
     const rowHtml = `
-        <div class="house-row-block" id="${rowId}">
-            <div style="display:flex; justify-between; align-items:center; margin-bottom:8px;">
-                <span style="font-weight:bold; font-size:0.9rem;">क्रम संख्या: <span class="row-index-display"></span></span>
-                <button type="button" class="btn-delete-row" id="del_${rowId}" onclick="removeKittaRow('${rowId}')" style="background:#e53e3e; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem;">हटाउनुस्</button>
+        <div class="house-row-block" id="${rowId}" style="background:#ffffff; border:1px solid #cbd5e0; padding:12px; border-radius:8px; margin-bottom:10px; position:relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-weight:bold; font-size:0.88rem; color:#2d3748;">क्रम संख्या: <span class="row-index-display"></span></span>
+                <button type="button" class="btn-delete-row" id="del_${rowId}" onclick="removeKittaRow('${rowId}')" style="background:#e53e3e; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem;">हटाउनुस्</button>
             </div>
-            <div class="row-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="row-grid" style="grid-template-columns: 1fr 1fr 1fr; gap:10px;">
                 <div class="form-group" style="margin-bottom:0;">
                     <label style="font-size:0.85rem;">सिट नं. (वैकल्पिक):</label>
                     <input type="text" class="inp-sheet" placeholder="उदा: १७९०२१७" value="${data ? (data.sheet || '') : ''}" oninput="updateDoc()">
@@ -151,226 +145,304 @@ window.updateNepalSambatFromMiti = function () {
     }
 };
 
-// Live document preview updater
-window.updateDoc = function () {
-    const ay = window.getSelectedAY();
-    const chalani = document.getElementById('inChalani').value || '.......';
-    const miti = document.getElementById('inMiti').value || '२०८३/.......';
-    const ns = document.getElementById('inNepalSamvat').value || '११४६';
-
-    const applicantName = document.getElementById('inApplicantName').value.trim() || '...................';
-    
-    // Address logic: default Ward 1 Gauradaha
-    const chkAddress = document.getElementById('chkChangeAddress');
-    let addressStr = "झापा जिल्ला गौरादह नगरपालिका वडा नं. १";
-    if (chkAddress && chkAddress.checked) {
-        const dist = document.getElementById('inCustDistrict').value.trim() || 'झापा';
-        const palika = document.getElementById('inCustPalika').value.trim() || 'गौरादह नगरपालिका';
-        const wada = document.getElementById('inCustWada').value.trim() || '१';
-        addressStr = `${dist} जिल्ला ${palika} वडा नं. ${wada}`;
+function generateKittaSentence(lands) {
+    if (!lands || lands.length === 0) {
+        return `(सिट नं. <span class="fill-space" style="min-width:50px;">.......</span>) कित्ता नं. <span class="fill-space" style="min-width:40px;">.......</span>, क्षेत्रफल: <span class="fill-space" style="min-width:60px;">.......</span> व.मिको`;
     }
 
-    // Citizenship details (optional)
+    let parts = [];
+    lands.forEach(l => {
+        const sheet = l.sheet ? l.sheet.trim() : '';
+        const kitta = l.kitta ? l.kitta.trim() : '.......';
+        const area = l.area ? l.area.trim() : '.......';
+        const sheetText = sheet ? `(सिट नं. <span class="fill-space">${sheet}</span>) ` : '';
+        parts.push(`${sheetText}कित्ता नं. <span class="fill-space">${kitta}</span>, क्षेत्रफल: <span class="fill-space">${area}</span> व.मिको`);
+    });
+
+    if (parts.length === 1) {
+        return parts[0];
+    } else {
+        const last = parts.pop();
+        return parts.join(', ') + ' तथा ' + last;
+    }
+}
+
+// Live preview updater
+window.updateDoc = function () {
+    const patra = document.getElementById('inPatraSankhya').value || '२०८२/०८३';
+    const chalani = document.getElementById('inChalani').value.trim() || '';
+    const miti = document.getElementById('inMiti').value.trim() || '२०८३/';
+    const ns = document.getElementById('inNepalSamvat').value.trim() || '११४६';
+
+    document.getElementById('lblPatraSankhya').innerText = patra;
+    document.getElementById('lblChalani').innerText = chalani;
+    document.getElementById('lblMiti').innerText = miti;
+    document.getElementById('lblNepalSamvat').innerText = ns;
+
+    const applicantName = document.getElementById('inApplicantName').value.trim() || '.......';
+    const selectedWada = document.getElementById('inWadaNo').value || '१';
+    const isChangeAddress = document.getElementById('chkChangeAddress').checked;
+
+    // Citizenship string
     const citNo = document.getElementById('inCitNo').value.trim();
     const citDate = document.getElementById('inCitDate').value.trim();
-    const citDist = document.getElementById('inCitDistrict').value.trim();
-
-    let citSentence = '';
-    let citTapasil = '';
-    if (citNo) {
-        citSentence = `(ना.प्र.नं. <span class="fill-space">${citNo}</span>`;
-        if (citDate) citSentence += `, जारी मिति: <span class="fill-space">${citDate}</span>`;
-        if (citDist) citSentence += `, जारी जिल्ला: <span class="fill-space">${citDist}</span>`;
-        citSentence += `)`;
-
-        citTapasil = `ना.प्र.नं. ${citNo}`;
-        if (citDate) citTapasil += `, जारी मिति: ${citDate}`;
-        if (citDist) citTapasil += `, जारी जिल्ला: ${citDist}`;
+    let citText = "";
+    if (citNo !== "") citText += "ना.प्र.नं. " + citNo;
+    if (citDate !== "") {
+        if (citText !== "") citText += ", ";
+        citText += "जारी मिति: " + citDate;
     }
 
     // Waris details
     const warisDate = document.getElementById('inWarisDate').value.trim() || '.........';
     const regNo = document.getElementById('inRegNo').value.trim() || '........';
 
-    // Kittas
+    // Land details
     const lands = collectKittaRows();
-    let kittaSentenceParts = [];
-    lands.forEach(land => {
-        const sheetStr = land.sheet ? `(सिट नं. <span class="fill-space">${land.sheet}</span>) ` : '';
-        const kittaStr = land.kitta || '......';
-        const areaStr = land.area || '......';
-        kittaSentenceParts.push(`${sheetStr}कित्ता नं. <span class="fill-space">${kittaStr}</span>, क्षेत्रफल: <span class="fill-space">${areaStr}</span> व.मि.`);
-    });
-    
-    let kittaSentence = kittaSentenceParts.join(', ');
-    if (!kittaSentence) {
-        kittaSentence = `(सिट नं. <span class="fill-space">......</span>) कित्ता नं. <span class="fill-space">......</span>, क्षेत्रफल: <span class="fill-space">......</span> व.मि.`;
+    const kittaSentence = generateKittaSentence(lands);
+
+    // Toggle letter bodies based on Change Address checkbox
+    const defaultBody = document.getElementById('defaultLetterBody');
+    const customBody = document.getElementById('customLetterBody');
+
+    if (isChangeAddress) {
+        defaultBody.style.display = 'none';
+        customBody.style.display = 'block';
+
+        const custDist = document.getElementById('inCustDistrict').value.trim() || '.......';
+        const custPalika = document.getElementById('inCustPalika').value.trim() || '.......';
+        const custWada = document.getElementById('inCustWada').value.trim() || '.......';
+
+        document.getElementById('lblCustDistrict').innerText = custDist;
+        document.getElementById('lblCustPalika').innerText = custPalika;
+        document.getElementById('lblCustWada').innerText = custWada;
+        document.getElementById('lblApplicantNameCust').innerText = applicantName;
+
+        const citBlockCust = document.getElementById('lblCitBlockCust');
+        if (citText !== "") {
+            citBlockCust.innerText = " (" + citText + ")";
+            citBlockCust.style.display = 'inline';
+        } else {
+            citBlockCust.style.display = 'none';
+        }
+
+        document.getElementById('lblWarisDateCust').innerText = warisDate;
+        document.getElementById('lblRegNoCust').innerText = regNo;
+        document.getElementById('lblKittaSentenceCust').innerHTML = kittaSentence;
+
+        // Tapasil Address
+        document.getElementById('lblTapasilAddress').innerText = `${custDist} जिल्ला ${custPalika} वडा नं. ${custWada}`;
+    } else {
+        defaultBody.style.display = 'block';
+        customBody.style.display = 'none';
+
+        document.getElementById('lblWadaBody').innerText = selectedWada;
+        document.getElementById('lblApplicantName').innerText = applicantName;
+
+        const citBlock = document.getElementById('lblCitBlock');
+        if (citText !== "") {
+            citBlock.innerText = " (" + citText + ")";
+            citBlock.style.display = 'inline';
+        } else {
+            citBlock.style.display = 'none';
+        }
+
+        document.getElementById('lblWarisDate').innerText = warisDate;
+        document.getElementById('lblRegNo').innerText = regNo;
+        document.getElementById('lblKittaSentence').innerHTML = kittaSentence;
+
+        // Tapasil Address
+        document.getElementById('lblTapasilAddress').innerText = `झापा जिल्ला गौरादह नगरपालिका वडा नं. ${selectedWada}`;
     }
 
-    // Three generation optional
-    const fatherName = document.getElementById('inFatherName').value.trim();
-    const husbandName = document.getElementById('inHusbandName').value.trim();
-    const grandFatherName = document.getElementById('inGrandfatherName').value.trim();
-
-    // DOM Update
-    document.getElementById('lblAY').innerText = ay;
-    document.getElementById('lblChalani').innerText = chalani;
-    document.getElementById('lblMiti').innerText = miti;
-    document.getElementById('lblNepalSamvat').innerText = ns;
-
-    document.getElementById('lblApplicantName').innerText = applicantName;
-    document.getElementById('lblCitDetails').innerHTML = citSentence;
-    document.getElementById('lblWarisDate').innerText = warisDate;
-    document.getElementById('lblRegNo').innerText = regNo;
-    document.getElementById('lblKittaSentence').innerHTML = kittaSentence;
-
-    // Tapasil
+    // Tapasil Fields
     document.getElementById('lblTapasilName').innerText = applicantName;
-    document.getElementById('lblTapasilAddress').innerText = addressStr;
 
     const rowCit = document.getElementById('rowTapasilCit');
     const lblCit = document.getElementById('lblTapasilCit');
-    if (citTapasil) {
-        rowCit.style.display = 'table-row';
-        lblCit.innerText = citTapasil;
+    if (citText !== "") {
+        rowCit.style.display = 'block';
+        lblCit.innerText = citText;
     } else {
         rowCit.style.display = 'none';
     }
 
-    const rowFat = document.getElementById('rowFather');
-    if (fatherName) { rowFat.style.display = 'table-row'; document.getElementById('lblFather').innerText = fatherName; }
-    else { rowFat.style.display = 'none'; }
+    const fatherName = document.getElementById('inFatherName').value.trim();
+    const rowFather = document.getElementById('rowFather');
+    if (fatherName !== "") {
+        rowFather.style.display = 'block';
+        document.getElementById('lblFather').innerText = fatherName;
+    } else {
+        rowFather.style.display = 'none';
+    }
 
-    const rowHus = document.getElementById('rowHusband');
-    if (husbandName) { rowHus.style.display = 'table-row'; document.getElementById('lblHusband').innerText = husbandName; }
-    else { rowHus.style.display = 'none'; }
+    const husbandName = document.getElementById('inHusbandName').value.trim();
+    const rowHusband = document.getElementById('rowHusband');
+    if (husbandName !== "") {
+        rowHusband.style.display = 'block';
+        document.getElementById('lblHusband').innerText = husbandName;
+    } else {
+        rowHusband.style.display = 'none';
+    }
 
-    const rowGfat = document.getElementById('rowGrandfather');
-    if (grandFatherName) { rowGfat.style.display = 'table-row'; document.getElementById('lblGrandfather').innerText = grandFatherName; }
-    else { rowGfat.style.display = 'none'; }
+    const grandfatherName = document.getElementById('inGrandfatherName').value.trim();
+    const rowGrandfather = document.getElementById('rowGrandfather');
+    if (grandfatherName !== "") {
+        rowGrandfather.style.display = 'block';
+        document.getElementById('lblGrandfather').innerText = grandfatherName;
+    } else {
+        rowGrandfather.style.display = 'none';
+    }
 
     // Signature
-    const sigAuth = document.getElementById('inSignAuthority').value;
-    const lblSignName = document.getElementById('lblSignName');
-    const lblSignPost = document.getElementById('lblSignPost');
-
-    if (sigAuth === 'CUSTOM') {
-        lblSignName.innerText = document.getElementById('inCustomSignName').value.trim() || '...................';
-        lblSignPost.innerText = document.getElementById('inCustomSignPost').value.trim() || 'अधिकारी';
+    const signSelect = document.getElementById('inSignAuthority').value;
+    let sigName = "", sigTitle = "";
+    const lblSigName = document.getElementById('lblSigName');
+    if (signSelect === 'BLANK') {
+        sigName = "";
+        sigTitle = "";
+        lblSigName.style.borderTop = "none";
     } else {
-        lblSignName.innerText = '...................';
-        lblSignPost.innerText = sigAuth;
+        lblSigName.style.borderTop = "1.5px dashed #000";
+        if (signSelect === 'CUSTOM') {
+            sigName = document.getElementById('inCustomSignName').value.trim() || '....................';
+            sigTitle = document.getElementById('inCustomSignTitle').value.trim() || '....................';
+        } else {
+            const signData = signSelect.split('|');
+            sigName = signData[0];
+            sigTitle = signData[1];
+        }
     }
+    lblSigName.innerText = sigName;
+    document.getElementById('lblSigTitle').innerText = sigTitle;
 };
 
-// Database CRUD
-window.saveRecordToDatabase = function () {
+// Print and Save to Database
+window.printAndSaveSystem = async function () {
     const applicantName = document.getElementById('inApplicantName').value.trim();
     if (!applicantName) {
-        alert('⚠️ कृपया निवेदक / जग्गाधनीको नाम लेख्नुहोस्।');
+        alert("कृपया निवेदकको नाम अनिवार्य लेख्नुहोस् ।");
         return;
     }
 
-    const chkAddress = document.getElementById('chkChangeAddress');
-    const isCustomAddress = chkAddress ? chkAddress.checked : false;
+    const btn = document.querySelector('.btn-print');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⏳ सुरक्षित हुँदैछ...";
+    }
+
+    const recordId = document.getElementById('editRecordIndex').value;
+    const lands = collectKittaRows();
+    const isChangeAddress = document.getElementById('chkChangeAddress').checked;
 
     const recordData = {
-        ay: window.getSelectedAY(),
-        chalani: document.getElementById('inChalani').value.trim(),
+        patra: document.getElementById('inPatraSankhya').value,
+        chalani: document.getElementById('inChalani').value.trim() || '-',
         miti: document.getElementById('inMiti').value.trim(),
-        nepalSamvat: document.getElementById('inNepalSamvat').value.trim(),
-        applicantName: applicantName,
-        isCustomAddress: isCustomAddress,
+        ns: document.getElementById('inNepalSamvat').value.trim(),
+        name: applicantName,
+        wada: document.getElementById('inWadaNo').value,
+        sabikWada: document.getElementById('inSabikWada').value.trim(),
+        citNo: document.getElementById('inCitNo').value.trim(),
+        citDate: document.getElementById('inCitDate').value.trim(),
+        changeAddress: isChangeAddress,
         custDistrict: document.getElementById('inCustDistrict').value.trim(),
         custPalika: document.getElementById('inCustPalika').value.trim(),
         custWada: document.getElementById('inCustWada').value.trim(),
-        citNo: document.getElementById('inCitNo').value.trim(),
-        citDate: document.getElementById('inCitDate').value.trim(),
-        citDistrict: document.getElementById('inCitDistrict').value.trim(),
         warisDate: document.getElementById('inWarisDate').value.trim(),
         regNo: document.getElementById('inRegNo').value.trim(),
-        lands: collectKittaRows(),
+        lands: lands,
         fatherName: document.getElementById('inFatherName').value.trim(),
         husbandName: document.getElementById('inHusbandName').value.trim(),
         grandfatherName: document.getElementById('inGrandfatherName').value.trim(),
         signAuthority: document.getElementById('inSignAuthority').value,
         customSignName: document.getElementById('inCustomSignName').value.trim(),
-        customSignPost: document.getElementById('inCustomSignPost').value.trim(),
+        customSignTitle: document.getElementById('inCustomSignTitle').value.trim(),
+        sigMargin: document.getElementById('inSigMargin').value,
+        subject: "जग्गाधनीपूर्जा रजिष्ट्रेसन सिफारिस",
         timestamp: Date.now()
     };
 
-    const editIndex = document.getElementById('editRecordIndex').value;
-    if (editIndex !== '') {
-        db.collection("jaggadhaniPoojaRecords").doc(editIndex).update(recordData).then(() => {
-            alert('✅ अभिलेख सफलतापूर्वक अद्यावधिक गरियो।');
-            document.getElementById('editRecordIndex').value = '';
-        }).catch((err) => {
-            alert('❌ त्रुटि: ' + err.message);
-        });
-    } else {
-        db.collection("jaggadhaniPoojaRecords").add(recordData).then(() => {
-            alert('✅ अभिलेख सफलतापूर्वक सेभ गरियो।');
-        }).catch((err) => {
-            alert('❌ त्रुटि: ' + err.message);
-        });
+    try {
+        if (recordId !== "") {
+            await db.collection("jaggadhaniPoojaRecords").doc(recordId).update(recordData);
+        } else {
+            const docRef = await db.collection("jaggadhaniPoojaRecords").add(recordData);
+            document.getElementById('editRecordIndex').value = docRef.id;
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
+        }
+        window.print();
+    } catch (e) {
+        alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
 };
 
 function renderDatabaseTable() {
-    const tbody = document.getElementById('abhilekhTableBody');
+    const tbody = document.getElementById('dbTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    globalDatabase.forEach((rec, idx) => {
-        const kittaList = (rec.lands || []).map(l => l.kitta).filter(Boolean).join(', ');
+    const search = (document.getElementById('searchField') ? document.getElementById('searchField').value.trim().toLowerCase() : '');
+
+    const filtered = globalDatabase.filter(r => {
+        if (!search) return true;
+        const name = (r.name || '').toLowerCase();
+        const chalani = (r.chalani || '').toLowerCase();
+        return name.includes(search) || chalani.includes(search);
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:#718096;">कुनै अभिलेख फेला परेन ।</td></tr>`;
+        return;
+    }
+
+    filtered.forEach((rec, idx) => {
         const tr = document.createElement('tr');
-        tr.style.borderBottom = '1px solid #e2e8f0';
         tr.innerHTML = `
-            <td style="padding: 8px; text-align: center;">${window.toNepaliDigit(idx + 1)}</td>
-            <td style="padding: 8px;">${rec.chalani || '-'}</td>
-            <td style="padding: 8px;">${rec.miti || '-'}</td>
-            <td style="padding: 8px; font-weight: bold;">${rec.applicantName || '-'}</td>
-            <td style="padding: 8px;">${kittaList || '-'}</td>
-            <td style="padding: 8px; text-align: center;">
-                <button onclick="editRecord('${rec.id}')" style="background: #3182ce; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">सम्पादन</button>
-                <button onclick="deleteRecord('${rec.id}')" style="background: #e53e3e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">हटाउनुस्</button>
+            <td style="text-align:center;">${window.toNepaliDigit(idx + 1)}</td>
+            <td style="font-weight:bold;">${rec.name || '-'}</td>
+            <td>${rec.subject || 'जग्गाधनीपूर्जा रजिष्ट्रेसन'}</td>
+            <td>${rec.miti || '-'}</td>
+            <td style="text-align:center;">
+                <button class="btn-action-edit" onclick="editRecord('${rec.id}')" style="background:#3182ce; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-right:4px;">सम्पादन</button>
+                <button class="btn-action-del" onclick="deleteRecord('${rec.id}')" style="background:#e53e3e; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem;">हटाउनुस्</button>
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-window.filterAbhilekhTable = function () {
-    const query = document.getElementById('searchAbhilekhInput').value.toLowerCase();
-    const rows = document.querySelectorAll('#abhilekhTableBody tr');
-    rows.forEach(tr => {
-        const text = tr.innerText.toLowerCase();
-        tr.style.display = text.includes(query) ? '' : 'none';
-    });
-};
-
 window.editRecord = function (id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
     document.getElementById('editRecordIndex').value = id;
-    document.getElementById('inChalani').value = rec.chalani || '';
-    document.getElementById('inMiti').value = rec.miti || '';
-    document.getElementById('inNepalSamvat').value = rec.nepalSamvat || '';
-    document.getElementById('inApplicantName').value = rec.applicantName || '';
+    document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
 
-    const chkAddress = document.getElementById('chkChangeAddress');
-    if (chkAddress) {
-        chkAddress.checked = !!rec.isCustomAddress;
-        window.toggleAddressFields();
-    }
+    document.getElementById('inPatraSankhya').value = rec.patra || '२०८२/०८३';
+    document.getElementById('inChalani').value = (rec.chalani === '-' ? '' : rec.chalani) || '';
+    document.getElementById('inMiti').value = rec.miti || '२०८३/';
+    document.getElementById('inNepalSamvat').value = rec.ns || '११४६';
+
+    document.getElementById('inApplicantName').value = rec.name || '';
+    document.getElementById('inWadaNo').value = rec.wada || '१';
+    document.getElementById('inSabikWada').value = rec.sabikWada || '';
+    document.getElementById('inCitNo').value = rec.citNo || '';
+    document.getElementById('inCitDate').value = rec.citDate || '';
+
+    const chk = document.getElementById('chkChangeAddress');
+    chk.checked = !!rec.changeAddress;
+    window.toggleAddressFields();
+
     document.getElementById('inCustDistrict').value = rec.custDistrict || '';
     document.getElementById('inCustPalika').value = rec.custPalika || '';
     document.getElementById('inCustWada').value = rec.custWada || '';
-
-    document.getElementById('inCitNo').value = rec.citNo || '';
-    document.getElementById('inCitDate').value = rec.citDate || '';
-    document.getElementById('inCitDistrict').value = rec.citDistrict || '';
 
     document.getElementById('inWarisDate').value = rec.warisDate || '';
     document.getElementById('inRegNo').value = rec.regNo || '';
@@ -379,7 +451,7 @@ window.editRecord = function (id) {
     document.getElementById('inHusbandName').value = rec.husbandName || '';
     document.getElementById('inGrandfatherName').value = rec.grandfatherName || '';
 
-    // Clear kitta rows and load
+    // Lands
     document.getElementById('kittaRowsContainer').innerHTML = '';
     activeRowIds = [];
     rowCounter = 0;
@@ -395,23 +467,28 @@ window.editRecord = function (id) {
         window.toggleCustomSign();
     }
     document.getElementById('inCustomSignName').value = rec.customSignName || '';
-    document.getElementById('inCustomSignPost').value = rec.customSignPost || '';
+    document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
+    if (rec.sigMargin) {
+        document.getElementById('inSigMargin').value = rec.sigMargin;
+        window.adjustSignaturePosition(rec.sigMargin);
+    }
 
     window.toggleModal(false);
     window.updateDoc();
 };
 
 window.deleteRecord = function (id) {
-    if (confirm('के तपाईं यो अभिलेख मेटाउन निश्चित हुनुहुन्छ?')) {
+    if (confirm("के तपाईं यो अभिलेख मेटाउन निश्चित हुनुहुन्छ?")) {
         db.collection("jaggadhaniPoojaRecords").doc(id).delete().then(() => {
-            alert('✅ अभिलेख मेटाइयो।');
+            alert("अभिलेख मेटाइयो ।");
         }).catch((err) => {
-            alert('❌ त्रुटि: ' + err.message);
+            alert("त्रुटि: " + err.message);
         });
     }
 };
 
-// Initialize
+// Initial Setup on load
 document.addEventListener('DOMContentLoaded', () => {
     window.addKittaRow();
+    window.updateDoc();
 });
