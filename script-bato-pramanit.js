@@ -245,6 +245,10 @@ window.updateDoc = function () {
 
     const landDetailsText = generateLandDetailsText(lands);
 
+    const loggedWard = localStorage.getItem('sifarish_ward') || '1';
+    const issuingWard = (typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit(loggedWard) : '१') || '१';
+    const sabikWada = document.getElementById('inSabikWada').value.trim() || issuingWard;
+
     if (changeAddress) {
         document.getElementById('lblCustDistrict').innerText = document.getElementById('inCustDistrict').value || '..........';
         document.getElementById('lblCustPalika').innerText = document.getElementById('inCustPalika').value || '..........';
@@ -259,19 +263,23 @@ window.updateDoc = function () {
             citBlockCust.style.display = 'none';
         }
         
-        document.getElementById('lblWadaBody2Cust').innerText = selectedWada;
+        document.getElementById('lblWadaBody2Cust').innerText = issuingWard;
+        const lblSabikContainerCust = document.getElementById('lblSabikContainerCust');
+        if (lblSabikContainerCust) {
+            lblSabikContainerCust.style.display = 'inline';
+            const lblSabikAddressCust = document.getElementById('lblSabikAddressCust');
+            if (lblSabikAddressCust) lblSabikAddressCust.innerText = 'गौरादह गा.वि.स. वडा नं. ' + sabikWada;
+        }
         document.getElementById('lblLandDetailsCust').innerHTML = landDetailsText;
     } else {
         document.getElementById('lblWadaBody1').innerText = selectedWada;
-        document.getElementById('lblWadaBody2').innerText = selectedWada;
+        document.getElementById('lblWadaBody2').innerText = issuingWard;
 
-        const sabikWada = document.getElementById('inSabikWada').value.trim();
         const lblSabikContainer = document.getElementById('lblSabikContainer');
-        if (sabikWada === '') {
-            if (lblSabikContainer) lblSabikContainer.style.display = 'none';
-        } else {
-            if (lblSabikContainer) lblSabikContainer.style.display = 'inline';
-            document.getElementById('lblSabikAddress').innerText = 'गौरादह गा.वि.स. वडा नं. ' + sabikWada;
+        if (lblSabikContainer) {
+            lblSabikContainer.style.display = 'inline';
+            const lblSabikAddress = document.getElementById('lblSabikAddress');
+            if (lblSabikAddress) lblSabikAddress.innerText = 'गौरादह गा.वि.स. वडा नं. ' + sabikWada;
         }
 
         document.getElementById('lblOwnerName').innerText = nameVal;
