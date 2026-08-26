@@ -58,6 +58,7 @@
         'aamdani-pramanit': { collection: 'aamdaniPramanitRecords', title: 'आम्दानी प्रमाणित सिफारिस' },
         'bargikaran-sifarish': { collection: 'bargikaranSifarishRecords', title: 'जग्गा वर्गीकरण सिफारिस' },
         'jaggadhani-pratilipi': { collection: 'jaggadhaniPratilipiRecords', title: 'धनीपूर्जा प्रतिलिपि सिफारिस' },
+        'jaggadhani-patra': { collection: 'jaggadhaniPoojaRecords', title: 'जग्गाधनीपूर्जा रजिष्ट्रेसन' },
         'nabalak-parichayapatra': { collection: 'nabalakRecords', title: 'नाबालक परिचय पत्र सिफारिस' }
     };
 

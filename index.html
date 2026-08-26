@@ -1544,6 +1544,7 @@
             'bato-pramanit': 'बाटो प्रमाणित',
             'bargikaran-sifarish': 'जग्गा वर्गीकरण सिफारिस',
             'jaggadhani-pratilipi': 'धनीपूर्जा प्रतिलिपि सिफारिस',
+            'jaggadhani-patra': 'जग्गाधनीपूर्जा रजिष्ट्रेसन',
             'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस',
             'pariwarik-bibaran': 'पारिवारिक विवरण प्रमाणित',
             'suchana-tans': 'सूचना टाँस सिफारिस',
@@ -1580,6 +1581,7 @@
                 'aamdani-pramanit': 'व्यक्तिगत प्रमाणित',
                 'bargikaran-sifarish': 'जग्गा सम्बन्धि',
                 'jaggadhani-pratilipi': 'जग्गा सम्बन्धि',
+                'jaggadhani-patra': 'जग्गा सम्बन्धि',
                 'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
                 'yojana-samjhauta': 'कार्यालय/प्रशासन',
                 'nabalak-parichayapatra': 'व्यक्तिगत प्रमाणित'
@@ -1629,7 +1631,7 @@
 
         const defaultTemplateIds = [
             'gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish',
-            'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran',
+            'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran',
             'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit',
             'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit',
             'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish',
@@ -1689,6 +1691,7 @@
             'bank-sifarish': '🏦',
             'nabalak-parichayapatra': '👶',
             'jaggadhani-pratilipi': '📜',
+            'jaggadhani-patra': '📝',
             'bargikaran-sifarish': '🗺️',
             'aamdani-pramanit': '💰',
             'yojana-bank-sifarish': '🏦',
@@ -1706,6 +1709,7 @@
             'bank-sifarish': '#cbd5e0',
             'nabalak-parichayapatra': '#feb2b2',
             'jaggadhani-pratilipi': '#fbd38d',
+            'jaggadhani-patra': '#cbd5e0',
             'bargikaran-sifarish': '#3182ce',
             'aamdani-pramanit': '#f6e05e',
             'yojana-bank-sifarish': '#9ae6b4',
@@ -1735,6 +1739,7 @@
             { id: 'bank-sifarish', title: 'सामाजिक सुरक्षा बैंक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'nabalak-parichayapatra', title: 'नाबालक परिचय पत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'jaggadhani-pratilipi', title: 'धनीपूर्जा प्रतिलिपि सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' },
+            { id: 'jaggadhani-patra', title: 'जग्गाधनीपूर्जा रजिष्ट्रेसन', category: 'जग्गा सम्बन्धि', status: 'Active' },
             { id: 'aamdani-pramanit', title: 'आम्दानी प्रमाणित सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'yojana-bank-sifarish', title: 'योजनाको बैंक खाता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
             { id: 'yojana-samjhauta', title: 'योजना सम्झौता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' }
@@ -1758,7 +1763,7 @@
             let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'nabalak-parichayapatra'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'nabalak-parichayapatra'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -1775,7 +1780,7 @@
                     const displayName = nepaliTitleMap[t.id] || (t.title && !/^[a-zA-Z0-9_\-\s]+$/.test(t.title) ? t.title : (nepaliTitleMap[t.id] || t.title));
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'nabalak-parichayapatra'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'arko-bibaha-nagareko', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'nabalak-parichayapatra'];
                     let targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
                     if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta') {
                         targetUrl += "?v=" + new Date().getTime();
