@@ -165,10 +165,15 @@ window.toggleLandUseSection = function () {
     if (chk && container) {
         container.style.display = chk.checked ? 'block' : 'none';
     }
-    if (typeof window.updateDoc === 'function') {
+    if (typeof updateDoc === 'function') {
+        updateDoc();
+    } else if (typeof window.updateDoc === 'function') {
         window.updateDoc();
     }
 };
+function toggleLandUseSection() {
+    window.toggleLandUseSection();
+}
 
 function getSelectedLandUseZone() {
     const chk = document.getElementById('chkLandUseZone');
