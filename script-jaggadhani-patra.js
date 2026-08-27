@@ -141,9 +141,120 @@ window.updateNepalSambatFromMiti = function () {
         const bsYear = parseInt(parts[0], 10);
         if (!isNaN(bsYear)) {
             document.getElementById('inNepalSamvat').value = window.toNepaliDigit(bsYear - 937);
+            let bsMonth = 5;
+            if (parts.length >= 2) {
+                const parsedMonth = parseInt(parts[1], 10);
+                if (!isNaN(parsedMonth)) bsMonth = parsedMonth;
+            }
+            initializeFiscalYear(bsYear, bsMonth);
         }
     }
 };
+
+function formatFiscalYear(startYear) {
+    const suffix = String(startYear + 1).slice(-2);
+    return window.toNepaliDigit(`${startYear}/0${suffix}`);
+}
+
+function initializeFiscalYear(bsYear, bsMonth) {
+    try {
+        let currentStartYear = bsYear;
+        if (bsMonth < 4) {
+            currentStartYear = bsYear - 1;
+        }
+        
+        const fySelect = document.getElementById('inPatraSankhya');
+        if (fySelect) {
+            const currentVal = fySelect.value;
+            const prevFY = formatFiscalYear(currentStartYear - 1);
+            const currFY = formatFiscalYear(currentStartYear);
+            const nextFY = formatFiscalYear(currentStartYear + 1);
+            
+            fySelect.innerHTML = '';
+            fySelect.insertAdjacentHTML('beforeend', `<option value="${prevFY}">${prevFY}</option>`);
+            fySelect.insertAdjacentHTML('beforeend', `<option value="${currFY}" selected>${currFY}</option>`);
+            fySelect.insertAdjacentHTML('beforeend', `<option value="${nextFY}">${nextFY}</option>`);
+            
+            if (currentVal && (currentVal === prevFY || currentVal === currFY || currentVal === nextFY)) {
+                fySelect.value = currentVal;
+            } else {
+                fySelect.value = currFY;
+            }
+        }
+    } catch (error) {}
+}
+
+function initializeAutomaticDate() {
+    try {
+        let nepaliBSDateStr = "";
+        let bsYearVal = 2083;
+        let bsMonthVal = 5;
+
+        const converter = window["@sbmdkl/nepali-date-converter"];
+        if (!converter && (window._dateInitRetries || 0) < 5) {
+            window._dateInitRetries = (window._dateInitRetries || 0) + 1;
+            setTimeout(initializeAutomaticDate, 400);
+        }
+        if (converter && typeof converter.adToBs === 'function') {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+
+            let bsDayVal = 1;
+            if (typeof bsDate === 'string') {
+                const parts = bsDate.split(/[-/]/);
+                bsYearVal = parseInt(parts[0], 10);
+                bsMonthVal = parseInt(parts[1], 10);
+                bsDayVal = parseInt(parts[2], 10);
+            } else if (bsDate && typeof bsDate === 'object') {
+                bsYearVal = bsDate.bsYear || bsDate.year || 2083;
+                bsMonthVal = bsDate.bsMonth || bsDate.month || 5;
+                bsDayVal = bsDate.bsDay || bsDate.day || 1;
+            }
+            const bsM = String(bsMonthVal).padStart(2, '0');
+            const bsD = String(bsDayVal).padStart(2, '0');
+            nepaliBSDateStr = window.toNepaliDigit(`${bsYearVal}/${bsM}/${bsD}`);
+        } else {
+            const today = new Date();
+            const adYear  = today.getFullYear();
+            const adMonth = today.getMonth() + 1;
+            const adDay   = today.getDate();
+            let bsY = adYear + 57;
+            let bsM = 1;
+            if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
+            else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
+            else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
+            else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
+            else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
+            else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
+            else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
+            else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
+            else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
+            else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
+            else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
+            else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
+            bsYearVal  = bsY;
+            bsMonthVal = bsM;
+            let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
+            if (bsD > 32) bsD = 30;
+            const bsMStr = String(bsMonthVal).padStart(2, '0');
+            const bsDStr = String(bsD).padStart(2, '0');
+            nepaliBSDateStr = window.toNepaliDigit(`${bsYearVal}/${bsMStr}/${bsDStr}`);
+        }
+
+        initializeFiscalYear(bsYearVal, bsMonthVal);
+
+        const inMiti = document.getElementById('inMiti');
+        if (inMiti && !inMiti.value) inMiti.value = nepaliBSDateStr;
+
+        const inNS = document.getElementById('inNepalSamvat');
+        if (inNS && !inNS.value) inNS.value = window.toNepaliDigit(bsYearVal - 937);
+
+        window.updateDoc();
+    } catch (e) {}
+}
 
 function generateKittaSentence(lands) {
     if (!lands || lands.length === 0) {
@@ -169,7 +280,7 @@ function generateKittaSentence(lands) {
 
 // Live preview updater
 window.updateDoc = function () {
-    const patra = document.getElementById('inPatraSankhya').value || '२०८२/०८३';
+    const patra = document.getElementById('inPatraSankhya').value || '२०८३/०८४';
     const chalani = document.getElementById('inChalani').value.trim() || '';
     const miti = document.getElementById('inMiti').value.trim() || '२०८३/';
     const ns = document.getElementById('inNepalSamvat').value.trim() || '११४६';
@@ -191,7 +302,7 @@ window.updateDoc = function () {
     let citBodyParts = [];
     if (citNo !== "") citBodyParts.push("ना.प्र.नं. " + citNo);
     if (citDate !== "") citBodyParts.push("जारी मिति: " + citDate);
-    if (citDistrict !== "") citBodyParts.push("जारी जिल्ला: " + citDistrict);
+    if (citDistrict !== "") citBodyParts.push(citDistrict);
     const citText = citBodyParts.length > 0 ? " (" + citBodyParts.join(", ") + ")" : "";
 
     // Waris details
@@ -271,7 +382,7 @@ window.updateDoc = function () {
             }
             let tapasilParts = [citNo];
             if (citDate !== "") tapasilParts.push("जारी मिति: " + citDate);
-            if (citDistrict !== "") tapasilParts.push("जारी जिल्ला: " + citDistrict);
+            if (citDistrict !== "") tapasilParts.push(citDistrict);
             lblCit.innerText = tapasilParts.join(", ");
         } else {
             if (lblCitLabel) {
@@ -279,7 +390,7 @@ window.updateDoc = function () {
             }
             let tapasilParts = [];
             if (citDate !== "") tapasilParts.push("जारी मिति: " + citDate);
-            if (citDistrict !== "") tapasilParts.push("जारी जिल्ला: " + citDistrict);
+            if (citDistrict !== "") tapasilParts.push(citDistrict);
             lblCit.innerText = tapasilParts.join(", ");
         }
     } else {
@@ -445,7 +556,7 @@ window.editRecord = function (id) {
     document.getElementById('editRecordIndex').value = id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
 
-    document.getElementById('inPatraSankhya').value = rec.patra || '२०८२/०८३';
+    document.getElementById('inPatraSankhya').value = rec.patra || '२०८३/०८४';
     document.getElementById('inChalani').value = (rec.chalani === '-' ? '' : rec.chalani) || '';
     document.getElementById('inMiti').value = rec.miti || '२०८३/';
     document.getElementById('inNepalSamvat').value = rec.ns || '११४६';
@@ -512,6 +623,7 @@ window.deleteRecord = function (id) {
 
 // Initial Setup on load
 document.addEventListener('DOMContentLoaded', () => {
+    initializeAutomaticDate();
     window.addKittaRow();
     window.updateDoc();
 });
