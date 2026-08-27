@@ -94,7 +94,7 @@
 
         <!-- नागरिकता विवरण (वैकल्पिक) -->
         <div class="row-grid"
-            style="background: #f7fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e0; margin-bottom: 15px;">
+            style="grid-template-columns: 1fr 1fr 1fr; gap: 10px; background: #f7fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e0; margin-bottom: 15px;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label style="font-size: 0.85rem;">नागरिकता नं. (वैकल्पिक):</label>
                 <input type="text" id="inCitNo" placeholder="उदा: ०४-०१-७९" oninput="updateDoc()">
@@ -102,6 +102,10 @@
             <div class="form-group" style="margin-bottom: 0;">
                 <label style="font-size: 0.85rem;">जारी मिति (वैकल्पिक):</label>
                 <input type="text" id="inCitDate" placeholder="उदा: २०७०/०५/१२" oninput="updateDoc()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.85rem;">जारी जिल्ला (वैकल्पिक):</label>
+                <input type="text" id="inCitDistrict" placeholder="उदा: झापा" oninput="updateDoc()">
             </div>
         </div>
 
@@ -323,13 +327,13 @@
                 प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं. <span id="lblWadaBody" class="fill-space"
                     style="min-width:30px;">१</span> मा बसोबास गर्ने <span id="lblApplicantName" class="fill-space"
                     style="font-weight: bold; min-width:200px; padding-right:0;">.......</span><span id="lblCitBlock"
-                    style="display:none; font-weight:normal; padding-right:0;"></span><span style="padding:0;">ले</span> यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निजको नाममा श्री भुमी प्रशासन कार्यालय दमकबाट मिति: <span id="lblWarisDate" class="fill-space" style="min-width:70px;">.........</span> गते वारिसनामाबाट र.नं. <span id="lblRegNo" class="fill-space" style="min-width:50px;">........</span> मा पास भइ आएको झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा <span id="lblKittaSentence"></span> जग्गाको जग्गाधनी पूर्जा दर्ता प्रमाण पूर्जा लिन बाँकी रहेको हुँदा निम्न अनुसारको तीन पुस्ते विवरण खुलाई फोटो टाँस सहितको जग्गाधनी दर्ता प्रमाण पुर्जा उपलब्ध गराइदिनुहुन सिफारिस साथ अनुरोध छ l
+                    style="display:none; font-weight:normal; padding-right:0;"></span><span style="padding:0;">ले</span> यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निजको नाममा श्री भुमी प्रशासन कार्यालय दमकबाट मिति: <span id="lblWarisDate" class="fill-space" style="font-weight: bold; min-width:70px;">.........</span> गते वारिसनामाबाट र.नं. <span id="lblRegNo" class="fill-space" style="font-weight: bold; min-width:50px;">........</span> मा पास भइ आएको झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा <span id="lblKittaSentence"></span> जग्गाको जग्गाधनी पूर्जा दर्ता प्रमाण पूर्जा लिन बाँकी रहेको हुँदा निम्न अनुसारको तीन पुस्ते विवरण खुलाई फोटो टाँस सहितको जग्गाधनी दर्ता प्रमाण पुर्जा उपलब्ध गराइदिनुहुन सिफारिस साथ अनुरोध छ l
             </div>
 
             <!-- ── Custom Address Letter Body ── -->
             <div id="customLetterBody" class="letter-body"
                 style="text-align: justify; text-justify: inter-word; font-size: 13.5pt; line-height: 1.85; margin-bottom: 18px; display: none;">
-                प्रस्तुत विषयमा <span id="lblCustDistrict" class="fill-space" style="min-width:60px;">.......</span> जिल्ला <span id="lblCustPalika" class="fill-space" style="min-width:120px;">.......</span> वडा नं. <span id="lblCustWada" class="fill-space" style="min-width:30px;">.......</span> मा बसोबास गर्ने <span id="lblApplicantNameCust" class="fill-space" style="font-weight: bold; min-width:200px; padding-right:0;">.......</span><span id="lblCitBlockCust" style="display:none; font-weight:normal; padding-right:0;"></span><span style="padding:0;">ले</span> यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निजको नाममा श्री भुमी प्रशासन कार्यालय दमकबाट मिति: <span id="lblWarisDateCust" class="fill-space" style="min-width:70px;">.........</span> गते वारिसनामाबाट र.नं. <span id="lblRegNoCust" class="fill-space" style="min-width:50px;">........</span> मा पास भइ आएको झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा <span id="lblKittaSentenceCust"></span> जग्गाको जग्गाधनी पूर्जा दर्ता प्रमाण पूर्जा लिन बाँकी रहेको हुँदा निम्न अनुसारको तीन पुस्ते विवरण खुलाई फोटो टाँस सहितको जग्गाधनी दर्ता प्रमाण पुर्जा उपलब्ध गराइदिनुहुन सिफारिस साथ अनुरोध छ l
+                प्रस्तुत विषयमा <span id="lblCustDistrict" class="fill-space" style="min-width:60px;">.......</span> जिल्ला <span id="lblCustPalika" class="fill-space" style="min-width:120px;">.......</span> वडा नं. <span id="lblCustWada" class="fill-space" style="min-width:30px;">.......</span> मा बसोबास गर्ने <span id="lblApplicantNameCust" class="fill-space" style="font-weight: bold; min-width:200px; padding-right:0;">.......</span><span id="lblCitBlockCust" style="display:none; font-weight:normal; padding-right:0;"></span><span style="padding:0;">ले</span> यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निजको नाममा श्री भुमी प्रशासन कार्यालय दमकबाट मिति: <span id="lblWarisDateCust" class="fill-space" style="font-weight: bold; min-width:70px;">.........</span> गते वारिसनामाबाट र.नं. <span id="lblRegNoCust" class="fill-space" style="font-weight: bold; min-width:50px;">........</span> मा पास भइ आएको झापा जिल्ला गौरादह नगरपालिका वडा नं.१ मा <span id="lblKittaSentenceCust"></span> जग्गाको जग्गाधनी पूर्जा दर्ता प्रमाण पूर्जा लिन बाँकी रहेको हुँदा निम्न अनुसारको तीन पुस्ते विवरण खुलाई फोटो टाँस सहितको जग्गाधनी दर्ता प्रमाण पुर्जा उपलब्ध गराइदिनुहुन सिफारिस साथ अनुरोध छ l
             </div>
 
             <!-- ── Tapasil Section ── -->
@@ -339,7 +343,7 @@
                     <div style="flex: 1;">
                         <div>• जग्गाधनीको नाम: <span id="lblTapasilName" style="font-weight: bold;" class="fill-space">.......</span></div>
                         <div>• ठेगाना: <span id="lblTapasilAddress" class="fill-space">झापा जिल्ला गौरादह नगरपालिका वडा नं. १</span></div>
-                        <div id="rowTapasilCit" style="display: none;">• नागरिकता विवरण: <span id="lblTapasilCit" class="fill-space"></span></div>
+                        <div id="rowTapasilCit" style="display: none;">• <span id="lblTapasilCitLabel">ना.प्र.नं.:</span> <span id="lblTapasilCit" class="fill-space"></span></div>
                         <div id="rowFather" style="display: none;">• बुवाको नाम: <span id="lblFather" class="fill-space"></span></div>
                         <div id="rowHusband" style="display: none;">• पतिको नाम: <span id="lblHusband" class="fill-space"></span></div>
                         <div id="rowGrandfather" style="display: none;">• बाजेको नाम: <span id="lblGrandfather" class="fill-space"></span></div>

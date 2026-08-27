@@ -186,12 +186,13 @@ window.updateDoc = function () {
     // Citizenship string
     const citNo = document.getElementById('inCitNo').value.trim();
     const citDate = document.getElementById('inCitDate').value.trim();
-    let citText = "";
-    if (citNo !== "") citText += "ना.प्र.नं. " + citNo;
-    if (citDate !== "") {
-        if (citText !== "") citText += ", ";
-        citText += "जारी मिति: " + citDate;
-    }
+    const citDistrict = document.getElementById('inCitDistrict') ? document.getElementById('inCitDistrict').value.trim() : '';
+
+    let citBodyParts = [];
+    if (citNo !== "") citBodyParts.push("ना.प्र.नं. " + citNo);
+    if (citDate !== "") citBodyParts.push("जारी मिति: " + citDate);
+    if (citDistrict !== "") citBodyParts.push("जारी जिल्ला: " + citDistrict);
+    const citText = citBodyParts.length > 0 ? " (" + citBodyParts.join(", ") + ")" : "";
 
     // Waris details
     const warisDate = document.getElementById('inWarisDate').value.trim() || '.........';
@@ -220,7 +221,7 @@ window.updateDoc = function () {
 
         const citBlockCust = document.getElementById('lblCitBlockCust');
         if (citText !== "") {
-            citBlockCust.innerText = " (" + citText + ")";
+            citBlockCust.innerText = citText;
             citBlockCust.style.display = 'inline';
         } else {
             citBlockCust.style.display = 'none';
@@ -241,7 +242,7 @@ window.updateDoc = function () {
 
         const citBlock = document.getElementById('lblCitBlock');
         if (citText !== "") {
-            citBlock.innerText = " (" + citText + ")";
+            citBlock.innerText = citText;
             citBlock.style.display = 'inline';
         } else {
             citBlock.style.display = 'none';
@@ -259,10 +260,28 @@ window.updateDoc = function () {
     document.getElementById('lblTapasilName').innerText = applicantName;
 
     const rowCit = document.getElementById('rowTapasilCit');
+    const lblCitLabel = document.getElementById('lblTapasilCitLabel');
     const lblCit = document.getElementById('lblTapasilCit');
-    if (citText !== "") {
+    if (citNo !== "" || citDate !== "" || citDistrict !== "") {
         rowCit.style.display = 'block';
-        lblCit.innerText = citText;
+        if (citNo !== "") {
+            if (lblCitLabel) {
+                lblCitLabel.style.display = 'inline';
+                lblCitLabel.innerText = "ना.प्र.नं.:";
+            }
+            let tapasilParts = [citNo];
+            if (citDate !== "") tapasilParts.push("जारी मिति: " + citDate);
+            if (citDistrict !== "") tapasilParts.push("जारी जिल्ला: " + citDistrict);
+            lblCit.innerText = tapasilParts.join(", ");
+        } else {
+            if (lblCitLabel) {
+                lblCitLabel.style.display = 'none';
+            }
+            let tapasilParts = [];
+            if (citDate !== "") tapasilParts.push("जारी मिति: " + citDate);
+            if (citDistrict !== "") tapasilParts.push("जारी जिल्ला: " + citDistrict);
+            lblCit.innerText = tapasilParts.join(", ");
+        }
     } else {
         rowCit.style.display = 'none';
     }
@@ -346,6 +365,7 @@ window.printAndSaveSystem = async function () {
         sabikWada: document.getElementById('inSabikWada').value.trim(),
         citNo: document.getElementById('inCitNo').value.trim(),
         citDate: document.getElementById('inCitDate').value.trim(),
+        citDistrict: document.getElementById('inCitDistrict') ? document.getElementById('inCitDistrict').value.trim() : '',
         changeAddress: isChangeAddress,
         custDistrict: document.getElementById('inCustDistrict').value.trim(),
         custPalika: document.getElementById('inCustPalika').value.trim(),
@@ -435,6 +455,9 @@ window.editRecord = function (id) {
     document.getElementById('inSabikWada').value = rec.sabikWada || '';
     document.getElementById('inCitNo').value = rec.citNo || '';
     document.getElementById('inCitDate').value = rec.citDate || '';
+    if (document.getElementById('inCitDistrict')) {
+        document.getElementById('inCitDistrict').value = rec.citDistrict || '';
+    }
 
     const chk = document.getElementById('chkChangeAddress');
     chk.checked = !!rec.changeAddress;
