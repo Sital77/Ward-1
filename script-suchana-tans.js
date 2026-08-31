@@ -49,6 +49,39 @@ function adjustSignaturePosition(value) {
     document.getElementById('docFooterSection').style.marginTop = value + "px";
 }
 
+// ── Letterhead Type Toggle & Size Adjustment ───────
+function toggleLetterheadType() {
+    const selected = document.querySelector('input[name="lhTypeRadio"]:checked')?.value || 'IMAGE';
+    const imgContainer = document.getElementById('imageLetterheadContainer');
+    const imgMetaRow = document.getElementById('imageLhMetaRow');
+    const textContainer = document.getElementById('textLetterheadContainer');
+    const imgControls = document.getElementById('lhImgControls');
+
+    if (selected === 'IMAGE') {
+        if (imgContainer) imgContainer.style.display = 'block';
+        if (imgMetaRow) imgMetaRow.style.display = 'flex';
+        if (textContainer) textContainer.style.display = 'none';
+        if (imgControls) imgControls.style.display = 'block';
+    } else {
+        if (imgContainer) imgContainer.style.display = 'none';
+        if (imgMetaRow) imgMetaRow.style.display = 'none';
+        if (textContainer) textContainer.style.display = 'flex';
+        if (imgControls) imgControls.style.display = 'none';
+    }
+    updateDoc();
+}
+
+function adjustLhHeight(value) {
+    const img = document.getElementById('letterheadBannerImg');
+    if (img) {
+        img.style.maxHeight = value + 'px';
+    }
+    const lbl = document.getElementById('lhHeightVal');
+    if (lbl) {
+        lbl.innerText = toNepaliDigit(value) + " px";
+    }
+}
+
 // ── Custom sign toggle ──────────────────────────────
 function toggleCustomSign() {
     const val = document.getElementById('inSignAuthority').value;
@@ -73,11 +106,25 @@ function updateDoc() {
     const wada = document.getElementById('inWadaNo').value;
     const praaptaMiti = document.getElementById('inPraaptaMiti').value || '........';
 
-    // Header
-    document.getElementById('lblAY').innerText = ay;
-    document.getElementById('lblChalani').innerText = chalani;
-    document.getElementById('lblMiti').innerText = miti;
-    document.getElementById('lblNepalSamvat').innerText = ns;
+    // Header (Image meta row)
+    const lblAY = document.getElementById('lblAY');
+    if (lblAY) lblAY.innerText = ay;
+    const lblChalani = document.getElementById('lblChalani');
+    if (lblChalani) lblChalani.innerText = chalani;
+    const lblMiti = document.getElementById('lblMiti');
+    if (lblMiti) lblMiti.innerText = miti;
+    const lblNepalSamvat = document.getElementById('lblNepalSamvat');
+    if (lblNepalSamvat) lblNepalSamvat.innerText = ns;
+
+    // Header (Text fallback)
+    const lblAY_text = document.getElementById('lblAY_text');
+    if (lblAY_text) lblAY_text.innerText = ay;
+    const lblChalani_text = document.getElementById('lblChalani_text');
+    if (lblChalani_text) lblChalani_text.innerText = chalani;
+    const lblMiti_text = document.getElementById('lblMiti_text');
+    if (lblMiti_text) lblMiti_text.innerText = miti;
+    const lblNepalSamvat_text = document.getElementById('lblNepalSamvat_text');
+    if (lblNepalSamvat_text) lblNepalSamvat_text.innerText = ns;
 
     // Body
     document.getElementById('lblBodyAY').innerText = bodyAY;
