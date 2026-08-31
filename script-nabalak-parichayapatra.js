@@ -862,11 +862,31 @@ function parseBirthCertificateDOM(doc) {
         return str.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
     }
 
+    function isCorruptedOrInvalid(str) {
+        if (!str) return true;
+        let cleanStr = str.replace(/[\uFFFD?\s,.\-–:()\/]+/g, '').trim();
+        return cleanStr.length === 0;
+    }
+    function isOnlyQuestionMarks(str) {
+        return isCorruptedOrInvalid(str);
+    }
+
+    function hasValidNepali(str) {
+        if (!str) return false;
+        let nepaliLetters = str.match(/[\u0900-\u097F]/g);
+        let corruptedLetters = str.match(/[\uFFFD?]/g);
+        if (!nepaliLetters) return false;
+        if (corruptedLetters && corruptedLetters.length > nepaliLetters.length) return false;
+        return true;
+    }
+
     const stopKeywords = [
-        "Full Name", "पूरा नाम", "नाम (नेपालीमा)", "नाम (अंग्रेजीमा)", "जन्म मिति", "Date of Birth",
+        "Full Name", "पूरा नाम", "नाम (नेपालीमा)", "नाम (नेपाली)", "नाम (अंग्रेजीमा)", "जन्म मिति", "Date of Birth",
         "लिङ्ग", "Sex", "जन्म स्थान", "Birth Place", "स्थायी ठेगाना", "ठेगाना", "Permanent Address",
-        "बाजेको पूरा नाम", "बाजेको नाम", "हजुरबुवाको पूरा नाम", "हजुरबुवाको नाम", "बाबुको विवरण", "बाबुको पूरा नाम", "बाबुको नाम", "बाबुको नागरिकता",
-        "आमाको विवरण", "आमाको पूरा नाम", "आमाको नाम", "आमाको नागरिकता", "सूचकको नाम", "सूचकको", "सूचना दिने",
+        "बाजेको पूरा नाम", "बाजेको नाम", "हजुरबुवाको पूरा नाम", "हजुरबुवाको नाम", "Full Name of Grandfather",
+        "बाबुको विवरण", "बाबुको पूरा नाम", "बाबुको नाम", "बाबुको नागरिकता", "Father's Details", "Father's Name",
+        "आमाको विवरण", "आमाको पूरा नाम", "आमाको नाम", "आमाको नागरिकता", "Mother's Details", "Mother's Name",
+        "सूचकको विवरण", "सूचकको नाम", "सूचकको", "सूचना दिने", "Informant's Details", "Applicant's Details",
         "नागरिकता प्रमाणपत्र नं", "नागरिकता नं", "राष्ट्रिय परिचय नं", "राष्ट्रिय परिचयपत्र नं", "दर्ता नम्बर", "Registration No",
         "हजुरबुवा", "बाजेको", "बाबुको", "आमाको", "शिशुको"
     ];
@@ -892,7 +912,6 @@ function parseBirthCertificateDOM(doc) {
         // 1. First inspect strong, b, span, label, th, td elements
         const labelNodes = doc.querySelectorAll('strong, b, span, label, th, td, dt, dd, p');
         for (let el of labelNodes) {
-            // Avoid large container elements
             if (el.children.length > 3) continue;
 
             let t = clean(el.innerText || el.textContent || '');
@@ -903,7 +922,7 @@ function parseBirthCertificateDOM(doc) {
                         let sibTxt = clean(el.nextSibling.textContent);
                         if (sibTxt && sibTxt.length > 0 && !labelList.some(l => sibTxt.startsWith(l))) {
                             let res = cleanTrailingLabels(sibTxt, labelList);
-                            if (res) return res;
+                            if (res && !isOnlyQuestionMarks(res)) return res;
                         }
                     }
 
@@ -912,7 +931,7 @@ function parseBirthCertificateDOM(doc) {
                     let after = t.substring(idx + lbl.length).replace(/^[:\s\-–]+/, '').trim();
                     if (after && after.length > 0 && after !== lbl) {
                         let res = cleanTrailingLabels(after, labelList);
-                        if (res) return res;
+                        if (res && !isOnlyQuestionMarks(res)) return res;
                     }
 
                     // If inside td/th, check next td/th
@@ -921,7 +940,7 @@ function parseBirthCertificateDOM(doc) {
                         let nextVal = clean(td.nextElementSibling.innerText || td.nextElementSibling.textContent || '');
                         if (nextVal && !labelList.some(l => nextVal.startsWith(l))) {
                             let res = cleanTrailingLabels(nextVal, labelList);
-                            if (res) return res;
+                            if (res && !isOnlyQuestionMarks(res)) return res;
                         }
                     }
 
@@ -934,7 +953,7 @@ function parseBirthCertificateDOM(doc) {
                             let pAfter = pText.substring(pIdx + lbl.length).replace(/^[:\s\-–]+/, '').trim();
                             if (pAfter && pAfter.length > 0) {
                                 let res = cleanTrailingLabels(pAfter, labelList);
-                                if (res) return res;
+                                if (res && !isOnlyQuestionMarks(res)) return res;
                             }
                         }
                     }
@@ -952,7 +971,7 @@ function parseBirthCertificateDOM(doc) {
                     let after = cl.substring(idx + lbl.length).replace(/^[:\s\-–]+/, '').trim();
                     if (after) {
                         let res = cleanTrailingLabels(after, labelList);
-                        if (res) return res;
+                        if (res && !isOnlyQuestionMarks(res)) return res;
                     }
                 }
             }
@@ -961,51 +980,38 @@ function parseBirthCertificateDOM(doc) {
         return "";
     }
 
-    // 1. Grandfather's Name (हजुरबुवा / बाजेको नाम)
-    const gfName = findValueByLabels([
-        "बाजेको पूरा नाम (नेपाली):", "बाजेको पूरा नाम:", "बाजेको पूरा नाम", "बाजेको नाम, थर:", "बाजेको नाम, थर",
-        "बाजेको नाम:", "हजुरबुवाको पूरा नाम:", "हजुरबुवाको पूरा नाम", "हजुरबुवाको नाम:",
-        "हजुरबुवाको नाम", "हजुरबाबुको पूरा नाम:", "हजुरबाबुको नाम:", "Grandfather's Full Name:",
-        "Grandfather's Full Name", "Grandfather's Name:"
-    ]);
-    if (gfName && document.getElementById('inGrandfatherName')) {
-        document.getElementById('inGrandfatherName').value = gfName.split(/\(|\n/)[0].trim();
-    }
+    let childData = { nameNP: "", nameEN: "", dobBS: "", dobAD: "", gender: "", regNo: "", nin: "", birthPlaceNP: "", birthPlaceEN: "", permAddrNP: "", permAddrEN: "" };
+    let gfData = { nameNP: "", nameEN: "", cit: "", nid: "" };
+    let fatherData = { nameNP: "", nameEN: "", cit: "", citType: "वंशज", citDist: "", nid: "", addr: "" };
+    let motherData = { nameNP: "", nameEN: "", cit: "", citType: "वंशज", citDist: "", nid: "", addr: "" };
+    let informantData = { nameNP: "", nameEN: "", rel: "", cit: "", addr: "" };
 
-    const gfNid = findValueByLabels([
-        "बाजेको राष्ट्रिय परिचयपत्र नं.:", "बाजेको राष्ट्रिय परिचयपत्र नं", "बाजेको राष्ट्रिय परिचय नं.:",
-        "बाजेको राष्ट्रिय परिचय नं", "बाजेको नागरिकता प्रमाणपत्र नं.:", "बाजेको नागरिकता प्रमाणपत्र नं",
-        "बाजेको नागरिकता नं.:", "बाजेको नागरिकता नं"
-    ]);
-    if (gfNid && document.getElementById('inGrandfatherNidNo')) {
-        document.getElementById('inGrandfatherNidNo').value = gfNid.split(/\s|\(/)[0].trim();
-    }
-
-    // 2. Separate Father and Mother Details
-    let fatherData = { name: "", cit: "", citType: "वंशज", citDist: "", nid: "", addr: "" };
-    let motherData = { name: "", cit: "", citType: "वंशज", citDist: "", nid: "", addr: "" };
-
-    // Check for Two-Column Table with Father in one col and Mother in another
-    let multiColFound = false;
+    // ── Table Traversal Strategy ─────────────────────────────
     const tables = doc.querySelectorAll('table');
     for (let tbl of tables) {
         const rows = tbl.querySelectorAll('tr');
+        if (rows.length === 0) continue;
+
+        // Check if table has side-by-side Father and Mother columns in the SAME row
+        let multiColFound = false;
         let fatherCol = -1;
         let motherCol = -1;
         let headerRowIdx = -1;
 
         for (let rIdx = 0; rIdx < rows.length; rIdx++) {
             const cells = rows[rIdx].querySelectorAll('th, td');
+            let rowFatherCol = -1;
+            let rowMotherCol = -1;
             for (let cIdx = 0; cIdx < cells.length; cIdx++) {
                 let cellTxt = clean(cells[cIdx].innerText || cells[cIdx].textContent || '');
-                if (cellTxt.includes("बाबुको") || cellTxt.toLowerCase().includes("father")) {
-                    fatherCol = cIdx;
-                }
-                if (cellTxt.includes("आमाको") || cellTxt.toLowerCase().includes("mother")) {
-                    motherCol = cIdx;
-                }
+                let hasFather = (cellTxt.includes("बाबुको") || cellTxt.toLowerCase().includes("father")) && !cellTxt.includes("हजुरबाबु");
+                let hasMother = cellTxt.includes("आमाको") || cellTxt.toLowerCase().includes("mother");
+                if (hasFather && !hasMother) rowFatherCol = cIdx;
+                if (hasMother && !hasFather) rowMotherCol = cIdx;
             }
-            if (fatherCol !== -1 && motherCol !== -1) {
+            if (rowFatherCol !== -1 && rowMotherCol !== -1 && rowFatherCol !== rowMotherCol) {
+                fatherCol = rowFatherCol;
+                motherCol = rowMotherCol;
                 headerRowIdx = rIdx;
                 multiColFound = true;
                 break;
@@ -1013,6 +1019,7 @@ function parseBirthCertificateDOM(doc) {
         }
 
         if (multiColFound && headerRowIdx !== -1) {
+            // Process side-by-side columns
             for (let rIdx = headerRowIdx + 1; rIdx < rows.length; rIdx++) {
                 const cells = rows[rIdx].querySelectorAll('th, td');
                 if (cells.length === 0) continue;
@@ -1021,142 +1028,412 @@ function parseBirthCertificateDOM(doc) {
                 let fCellTxt = (fatherCol < cells.length) ? clean(cells[fatherCol].innerText || cells[fatherCol].textContent || '') : '';
                 let mCellTxt = (motherCol < cells.length) ? clean(cells[motherCol].innerText || cells[motherCol].textContent || '') : '';
 
-                function extractCellVal(txt) {
+                function extractMultiCellVal(txt) {
                     return txt.replace(/^(?:पूरा नाम|नाम|Full Name|ठेगाना|स्थायी ठेगाना|नागरिकता प्रमाणपत्र नं\.?|नागरिकता नं\.?|जारी मिति|जारी जिल्ला|राष्ट्रिय परिचय नं\.?|Passport No\.?|Citizenship No\.?)[:\s\-–]+/i, '').trim();
                 }
 
-                if (rowLabel.includes("पूरा नाम") || rowLabel.includes("नाम (नेपाली") || rowLabel.includes("Full Name")) {
-                    if (!fatherData.name && fCellTxt) fatherData.name = cleanTrailingLabels(extractCellVal(fCellTxt), ["पूरा नाम"]);
-                    if (!motherData.name && mCellTxt) motherData.name = cleanTrailingLabels(extractCellVal(mCellTxt), ["पूरा नाम"]);
-                } else if (rowLabel.includes("नागरिकता") || rowLabel.includes("Citizenship") || rowLabel.includes("Passport")) {
+                if (rowLabel.includes("पूरा नाम") || rowLabel.includes("नाम (नेपाली") || rowLabel.includes("नाम:")) {
+                    let fVal = extractMultiCellVal(fCellTxt);
+                    let mVal = extractMultiCellVal(mCellTxt);
+                    if (!fatherData.nameNP && hasValidNepali(fVal)) fatherData.nameNP = fVal;
+                    else if (!fatherData.nameNP && !isOnlyQuestionMarks(fVal)) fatherData.nameNP = fVal;
+                    if (!motherData.nameNP && hasValidNepali(mVal)) motherData.nameNP = mVal;
+                    else if (!motherData.nameNP && !isOnlyQuestionMarks(mVal)) motherData.nameNP = mVal;
+                } else if (rowLabel.includes("Full Name")) {
+                    let fVal = extractMultiCellVal(fCellTxt);
+                    let mVal = extractMultiCellVal(mCellTxt);
+                    if (!fatherData.nameEN && !isOnlyQuestionMarks(fVal)) fatherData.nameEN = fVal;
+                    if (!motherData.nameEN && !isOnlyQuestionMarks(mVal)) motherData.nameEN = mVal;
+                } else if (rowLabel.includes("नागरिकता") || rowLabel.includes("Citizenship") || rowLabel.includes("Passport") || rowLabel.includes("NIN")) {
                     if (!fatherData.cit && fCellTxt) {
-                        let c = extractCellVal(fCellTxt).split(/\s|\(/)[0];
+                        let c = extractMultiCellVal(fCellTxt).split(/\s|\(/)[0];
                         if (c) fatherData.cit = c;
                     }
                     if (!motherData.cit && mCellTxt) {
-                        let c = extractCellVal(mCellTxt).split(/\s|\(/)[0];
+                        let c = extractMultiCellVal(mCellTxt).split(/\s|\(/)[0];
                         if (c) motherData.cit = c;
                     }
                 } else if (rowLabel.includes("ठेगाना") || rowLabel.includes("Address")) {
-                    if (!fatherData.addr && fCellTxt) fatherData.addr = extractCellVal(fCellTxt);
-                    if (!motherData.addr && mCellTxt) motherData.addr = extractCellVal(mCellTxt);
+                    if (!fatherData.addr && fCellTxt) fatherData.addr = extractMultiCellVal(fCellTxt);
+                    if (!motherData.addr && mCellTxt) motherData.addr = extractMultiCellVal(mCellTxt);
                 } else if (rowLabel.includes("जारी जिल्ला") || rowLabel.includes("District")) {
-                    if (!fatherData.citDist && fCellTxt) fatherData.citDist = extractCellVal(fCellTxt);
-                    if (!motherData.citDist && mCellTxt) motherData.citDist = extractCellVal(mCellTxt);
-                } else if (rowLabel.includes("राष्ट्रिय परिचय") || rowLabel.includes("National ID")) {
-                    if (!fatherData.nid && fCellTxt) fatherData.nid = extractCellVal(fCellTxt);
-                    if (!motherData.nid && mCellTxt) motherData.nid = extractCellVal(mCellTxt);
+                    if (!fatherData.citDist && fCellTxt) fatherData.citDist = extractMultiCellVal(fCellTxt);
+                    if (!motherData.citDist && mCellTxt) motherData.citDist = extractMultiCellVal(mCellTxt);
+                } else if (rowLabel.includes("राष्ट्रिय परिचय") || rowLabel.includes("National ID") || rowLabel.includes("NIN")) {
+                    if (!fatherData.nid && fCellTxt) fatherData.nid = extractMultiCellVal(fCellTxt);
+                    if (!motherData.nid && mCellTxt) motherData.nid = extractMultiCellVal(mCellTxt);
                 }
             }
-            break;
+        } else {
+            // Process Sequential Section Rows (like VERSP-MIS with rowspan)
+            let activeSection = 'child';
+            for (let rIdx = 0; rIdx < rows.length; rIdx++) {
+                const row = rows[rIdx];
+                const rowTxt = clean(row.innerText || row.textContent || '');
+                if (!rowTxt) continue;
+
+                // Detect Section Change
+                const cells = row.querySelectorAll('th, td');
+                for (let cell of cells) {
+                    let cTxt = clean(cell.innerText || cell.textContent || '');
+                    let isSectionHeaderCell = cell.hasAttribute('rowspan') || cell.tagName === 'TH' || cell.querySelector('strong, b') || cTxt.length < 50;
+                    if (isSectionHeaderCell) {
+                        if ((cTxt.includes("बाबुको विवरण") || cTxt.includes("Father's Details") || cTxt.includes("(Father's Details)")) && !cTxt.includes("हजुरबाबु")) {
+                            activeSection = 'father';
+                        } else if (cTxt.includes("आमाको विवरण") || cTxt.includes("Mother's Details") || cTxt.includes("(Mother's Details)")) {
+                            activeSection = 'mother';
+                        } else if (cTxt.includes("सूचकको विवरण") || cTxt.includes("Informant's Details") || cTxt.includes("(Informant's Details)") || cTxt.includes("Applicant's Details")) {
+                            activeSection = 'informant';
+                        } else if (cTxt.includes("बाजेको पूरा नाम") || cTxt.includes("हजुरबुवा") || cTxt.includes("Full Name of Grandfather")) {
+                            activeSection = 'grandfather';
+                        }
+                    }
+                }
+
+                // Extract fields based on activeSection
+                if (activeSection === 'father') {
+                    if (rowTxt.includes("पूरा नाम:") || rowTxt.includes("पूरा नाम :") || rowTxt.includes("नाम (नेपालीमा):") || rowTxt.includes("नाम (नेपाली):")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !fatherData.nameNP) {
+                            fatherData.nameNP = cleanTrailingLabels(val, ["पूरा नाम", "नाम"]);
+                        }
+                    } else if (rowTxt.includes("Full Name :") || rowTxt.includes("Full Name:") || rowTxt.includes("Full Name")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !fatherData.nameEN) {
+                            fatherData.nameEN = cleanTrailingLabels(val, ["Full Name"]);
+                        }
+                    } else if (rowTxt.includes("नागरिकता") || rowTxt.includes("Citizenship") || rowTxt.includes("NIN") || rowTxt.includes("Passport")) {
+                        let numMatch = rowTxt.match(/\(([0-9]+)\)/) || rowTxt.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                        if (numMatch && numMatch[1] && !fatherData.cit) {
+                            fatherData.cit = numMatch[1].trim();
+                        } else if (!fatherData.cit) {
+                            let val = rowTxt.split(/[:\-–]+/).pop().trim().split(/\s|\(/)[0];
+                            if (val && /[०-९0-9]/.test(val)) fatherData.cit = val;
+                        }
+                    } else if (rowTxt.includes("जारी जिल्ला") || rowTxt.includes("District")) {
+                        let val = rowTxt.split(/[:\-–]+/).pop().trim();
+                        if (val && !fatherData.citDist) fatherData.citDist = val;
+                    } else if (rowTxt.includes("ठेगाना") || rowTxt.includes("Address")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !fatherData.addr) fatherData.addr = val;
+                    }
+                } else if (activeSection === 'mother') {
+                    if (rowTxt.includes("पूरा नाम:") || rowTxt.includes("पूरा नाम :") || rowTxt.includes("नाम (नेपालीमा):") || rowTxt.includes("नाम (नेपाली):")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !motherData.nameNP) {
+                            motherData.nameNP = cleanTrailingLabels(val, ["पूरा नाम", "नाम"]);
+                        }
+                    } else if (rowTxt.includes("Full Name :") || rowTxt.includes("Full Name:") || rowTxt.includes("Full Name")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !motherData.nameEN) {
+                            motherData.nameEN = cleanTrailingLabels(val, ["Full Name"]);
+                        }
+                    } else if (rowTxt.includes("नागरिकता") || rowTxt.includes("Citizenship") || rowTxt.includes("NIN") || rowTxt.includes("Passport")) {
+                        let numMatch = rowTxt.match(/\(([0-9]+)\)/) || rowTxt.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                        if (numMatch && numMatch[1] && !motherData.cit) {
+                            motherData.cit = numMatch[1].trim();
+                        } else if (!motherData.cit) {
+                            let val = rowTxt.split(/[:\-–]+/).pop().trim().split(/\s|\(/)[0];
+                            if (val && /[०-९0-9]/.test(val)) motherData.cit = val;
+                        }
+                    } else if (rowTxt.includes("जारी जिल्ला") || rowTxt.includes("District")) {
+                        let val = rowTxt.split(/[:\-–]+/).pop().trim();
+                        if (val && !motherData.citDist) motherData.citDist = val;
+                    } else if (rowTxt.includes("ठेगाना") || rowTxt.includes("Address")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !motherData.addr) motherData.addr = val;
+                    }
+                } else if (activeSection === 'informant') {
+                    if (rowTxt.includes("पूरा नाम:") || rowTxt.includes("पूरा नाम :") || rowTxt.includes("नाम:")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !informantData.nameNP) {
+                            informantData.nameNP = cleanTrailingLabels(val, ["पूरा नाम", "नाम"]);
+                        }
+                    } else if (rowTxt.includes("Full Name :") || rowTxt.includes("Full Name:") || rowTxt.includes("Full Name")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !informantData.nameEN) {
+                            informantData.nameEN = cleanTrailingLabels(val, ["Full Name"]);
+                        }
+                    } else if (rowTxt.includes("नाता:") || rowTxt.includes("नाता :") || rowTxt.includes("Relation")) {
+                        let val = rowTxt.split(/[:\-–]+/).pop().trim();
+                        if (val && !informantData.rel) informantData.rel = val;
+                    } else if (rowTxt.includes("नागरिकता") || rowTxt.includes("Citizenship") || rowTxt.includes("ID") || rowTxt.includes("NIN")) {
+                        let numMatch = rowTxt.match(/\(([0-9]+)\)/) || rowTxt.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                        if (numMatch && numMatch[1] && !informantData.cit) {
+                            informantData.cit = numMatch[1].trim();
+                        } else if (!informantData.cit) {
+                            let val = rowTxt.split(/[:\-–]+/).pop().trim().split(/\s|\(/)[0];
+                            if (val && /[०-९0-9]/.test(val)) informantData.cit = val;
+                        }
+                    }
+                } else if (activeSection === 'grandfather') {
+                    if (rowTxt.includes("बाजेको पूरा नाम:") || rowTxt.includes("हजुरबुवाको नाम:") || rowTxt.includes("पूरा नाम:")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !gfData.nameNP) {
+                            gfData.nameNP = cleanTrailingLabels(val, ["बाजेको पूरा नाम", "पूरा नाम"]);
+                        }
+                    } else if (rowTxt.includes("Full Name of Grandfather:") || (rowTxt.includes("Full Name:") && activeSection === 'grandfather')) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !gfData.nameEN) {
+                            gfData.nameEN = cleanTrailingLabels(val, ["Full Name of Grandfather", "Full Name"]);
+                        }
+                    }
+                } else if (activeSection === 'child') {
+                    if ((rowTxt.includes("पूरा नाम :") || rowTxt.includes("पूरा नाम:") || rowTxt.includes("नाम (नेपालीमा):")) && !rowTxt.includes("बाजेको") && !rowTxt.includes("बाबुको") && !rowTxt.includes("आमाको")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !childData.nameNP) {
+                            childData.nameNP = cleanTrailingLabels(val, ["पूरा नाम"]);
+                        }
+                    } else if ((rowTxt.includes("Full Name :") || rowTxt.includes("Full Name:") || rowTxt.includes("Full Name")) && !rowTxt.includes("Grandfather") && !rowTxt.includes("Father") && !rowTxt.includes("Mother")) {
+                        let val = rowTxt.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (val && !isOnlyQuestionMarks(val) && !childData.nameEN) {
+                            childData.nameEN = cleanTrailingLabels(val, ["Full Name"]);
+                        }
+                    }
+                }
+            }
         }
     }
 
-    function parseSectionContainer(headerKeyword) {
-        const allElements = doc.querySelectorAll('div, table, fieldset, section, tr');
-        for (let el of allElements) {
-            let headerEl = el.querySelector('h1, h2, h3, h4, h5, h6, th, strong, b, legend');
-            let headerText = headerEl ? clean(headerEl.innerText || headerEl.textContent || '') : clean(el.innerText || '');
-            if (headerText.includes(headerKeyword) && (!headerEl || headerEl === el || headerEl.parentElement === el)) {
-                let name = "";
-                let cit = "";
-                let citDist = "";
-                let nid = "";
-                let addr = "";
-
-                let text = clean(el.innerText || el.textContent || '');
-                let lines = text.split(/\n/);
+    // ── Dedicated Container Parser (for divs/fieldsets/sections) ──
+    function parseContainerForPerson(keywordRegex) {
+        const containers = doc.querySelectorAll('div, fieldset, section, .card, .box');
+        for (let c of containers) {
+            let h = c.querySelector('h1, h2, h3, h4, h5, h6, legend, strong, b');
+            let hTxt = h ? clean(h.innerText || h.textContent || '') : '';
+            if (keywordRegex.test(hTxt) && c.children.length <= 15) {
+                let nameNP = "", nameEN = "", cit = "", citDist = "", nid = "", addr = "";
+                let lines = (c.innerText || c.textContent || '').split(/[\r\n]+/);
                 for (let l of lines) {
                     l = clean(l);
-                    if (l.includes("पूरा नाम") || l.includes("नाम (नेपाली") || l.includes("नाम:")) {
-                        if (!name) name = l.split(/[:\-–]+/).pop().trim();
-                    } else if (l.includes("नागरिकता प्रमाणपत्र नं") || l.includes("नागरिकता नं") || l.includes("Passport No")) {
-                        if (!cit) cit = l.split(/[:\-–]+/).pop().trim().split(/\s|\(/)[0];
+                    if ((l.includes("पूरा नाम") || l.includes("नाम (नेपाली")) && !nameNP) {
+                        let v = l.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (v && !isOnlyQuestionMarks(v)) nameNP = cleanTrailingLabels(v, ["पूरा नाम"]);
+                    } else if (l.includes("Full Name") && !nameEN) {
+                        let v = l.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (v && !isOnlyQuestionMarks(v)) nameEN = cleanTrailingLabels(v, ["Full Name"]);
+                    } else if (l.includes("नागरिकता") || l.includes("Citizenship") || l.includes("Passport") || l.includes("NIN")) {
+                        let m = l.match(/\(([0-9]+)\)/) || l.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                        if (m && m[1] && !cit) cit = m[1].trim();
                     } else if (l.includes("जारी जिल्ला")) {
-                        if (!citDist) citDist = l.split(/[:\-–]+/).pop().trim();
-                    } else if (l.includes("राष्ट्रिय परिचय नं")) {
-                        if (!nid) nid = l.split(/[:\-–]+/).pop().trim();
+                        let v = l.split(/[:\-–]+/).pop().trim();
+                        if (v && !citDist) citDist = v;
                     } else if (l.includes("ठेगाना")) {
-                        if (!addr) addr = l.split(/[:\-–]+/).pop().trim();
+                        let v = l.split(/[:\-–]+/).slice(1).join(':').trim();
+                        if (v && !addr) addr = v;
                     }
                 }
-                return { name, cit, citDist, nid, addr };
+                return { nameNP, nameEN, cit, citDist, nid, addr };
             }
         }
         return null;
     }
 
-    if (!fatherData.name) {
-        let fSec = parseSectionContainer("बाबुको विवरण") || parseSectionContainer("बाबुको");
-        if (fSec && fSec.name) fatherData = { ...fatherData, ...fSec };
-    }
-    if (!motherData.name) {
-        let mSec = parseSectionContainer("आमाको विवरण") || parseSectionContainer("आमाको");
-        if (mSec && mSec.name) motherData = { ...motherData, ...mSec };
+    if (!fatherData.nameNP && !fatherData.nameEN) {
+        let fBox = parseContainerForPerson(/(?:बाबुको|Father)/i);
+        if (fBox) {
+            if (fBox.nameNP) fatherData.nameNP = fBox.nameNP;
+            if (fBox.nameEN) fatherData.nameEN = fBox.nameEN;
+            if (fBox.cit) fatherData.cit = fBox.cit;
+            if (fBox.citDist) fatherData.citDist = fBox.citDist;
+            if (fBox.addr) fatherData.addr = fBox.addr;
+        }
     }
 
-    if (!fatherData.name) {
-        fatherData.name = findValueByLabels(["बाबुको पूरा नाम:", "बाबुको पूरा नाम", "बाबुको नाम, थर:", "बाबुको नाम:", "Father's Full Name:", "Father's Name:"]);
+    if (!motherData.nameNP && !motherData.nameEN) {
+        let mBox = parseContainerForPerson(/(?:आमाको|Mother)/i);
+        if (mBox) {
+            if (mBox.nameNP) motherData.nameNP = mBox.nameNP;
+            if (mBox.nameEN) motherData.nameEN = mBox.nameEN;
+            if (mBox.cit) motherData.cit = mBox.cit;
+            if (mBox.citDist) motherData.citDist = mBox.citDist;
+            if (mBox.addr) motherData.addr = mBox.addr;
+        }
+    }
+
+    // ── Explicit Label Fallback ──────────────────────────────
+    if (!fatherData.nameNP) {
+        let val = findValueByLabels(["बाबुको पूरा नाम:", "बाबुको पूरा नाम", "बाबुको नाम, थर:", "बाबुको नाम:"]);
+        if (val && !isOnlyQuestionMarks(val)) fatherData.nameNP = val;
+    }
+    if (!fatherData.nameEN) {
+        let val = findValueByLabels(["Father's Full Name:", "Father's Full Name", "Father's Name:"]);
+        if (val && !isOnlyQuestionMarks(val)) fatherData.nameEN = val;
     }
     if (!fatherData.cit) {
-        fatherData.cit = findValueByLabels(["बाबुको नागरिकता प्रमाणपत्र नं.:", "बाबुको नागरिकता प्रमाणपत्र नं", "बाबुको नागरिकता नं.:", "बाबुको नागरिकता नं"]);
-        if (fatherData.cit) fatherData.cit = fatherData.cit.split(/\s|\(/)[0];
+        let val = findValueByLabels(["बाबुको नागरिकता प्रमाणपत्र नं.:", "बाबुको नागरिकता प्रमाणपत्र नं", "बाबुको नागरिकता नं.:", "बाबुको नागरिकता नं", "बाबुको राष्ट्रिय परिचय नं"]);
+        if (val) fatherData.cit = val.split(/\s|\(/)[0];
     }
-    if (!motherData.name) {
-        motherData.name = findValueByLabels(["आमाको पूरा नाम:", "आमाको पूरा नाम", "आमाको नाम, थर:", "आमाको नाम:", "Mother's Full Name:", "Mother's Name:"]);
+
+    if (!motherData.nameNP) {
+        let val = findValueByLabels(["आमाको पूरा नाम:", "आमाको पूरा नाम", "आमाको नाम, थर:", "आमाको नाम:"]);
+        if (val && !isOnlyQuestionMarks(val)) motherData.nameNP = val;
+    }
+    if (!motherData.nameEN) {
+        let val = findValueByLabels(["Mother's Full Name:", "Mother's Full Name", "Mother's Name:"]);
+        if (val && !isOnlyQuestionMarks(val)) motherData.nameEN = val;
     }
     if (!motherData.cit) {
-        motherData.cit = findValueByLabels(["आमाको नागरिकता प्रमाणपत्र नं.:", "आमाको नागरिकता प्रमाणपत्र नं", "आमाको नागरिकता नं.:", "आमाको नागरिकता नं"]);
-        if (motherData.cit) motherData.cit = motherData.cit.split(/\s|\(/)[0];
+        let val = findValueByLabels(["आमाको नागरिकता प्रमाणपत्र नं.:", "आमाको नागरिकता प्रमाणपत्र नं", "आमाको नागरिकता नं.:", "आमाको नागरिकता नं", "आमाको राष्ट्रिय परिचय नं"]);
+        if (val) motherData.cit = val.split(/\s|\(/)[0];
     }
 
-    // Set Father values
-    if (fatherData.name && document.getElementById('inFatherNameNP')) document.getElementById('inFatherNameNP').value = fatherData.name;
-    if (fatherData.cit && document.getElementById('inFatherCitNo')) document.getElementById('inFatherCitNo').value = fatherData.cit;
-    if (fatherData.citDist && document.getElementById('inFatherCitDist')) document.getElementById('inFatherCitDist').value = fatherData.citDist;
-    if (fatherData.nid && document.getElementById('inFatherNidNo')) document.getElementById('inFatherNidNo').value = fatherData.nid;
-    if (fatherData.addr && document.getElementById('inFatherAddress')) document.getElementById('inFatherAddress').value = fatherData.addr;
+    if (!gfData.nameNP) {
+        let val = findValueByLabels(["बाजेको पूरा नाम (नेपाली):", "बाजेको पूरा नाम:", "बाजेको पूरा नाम", "बाजेको नाम, थर:", "बाजेको नाम:", "हजुरबुवाको पूरा नाम:", "हजुरबुवाको पूरा नाम", "हजुरबुवाको नाम:", "हजुरबाबुको पूरा नाम:"]);
+        if (val && !isOnlyQuestionMarks(val)) gfData.nameNP = val;
+    }
+    if (!gfData.nameEN) {
+        let val = findValueByLabels(["Full Name of Grandfather:", "Grandfather's Full Name:", "Grandfather's Name:"]);
+        if (val && !isOnlyQuestionMarks(val)) gfData.nameEN = val;
+    }
+    if (!gfData.nid) {
+        let val = findValueByLabels(["बाजेको राष्ट्रिय परिचयपत्र नं.:", "बाजेको राष्ट्रिय परिचय नं.:", "बाजेको नागरिकता प्रमाणपत्र नं.:", "बाजेको नागरिकता नं.:"]);
+        if (val) gfData.nid = val.split(/\s|\(/)[0];
+    }
 
-    // Set Mother values
-    if (motherData.name && document.getElementById('inMotherNameNP')) document.getElementById('inMotherNameNP').value = motherData.name;
-    if (motherData.cit && document.getElementById('inMotherCitNo')) document.getElementById('inMotherCitNo').value = motherData.cit;
-    if (motherData.citDist && document.getElementById('inMotherCitDist')) document.getElementById('inMotherCitDist').value = motherData.citDist;
-    if (motherData.nid && document.getElementById('inMotherNidNo')) document.getElementById('inMotherNidNo').value = motherData.nid;
-    if (motherData.addr && document.getElementById('inMotherAddress')) document.getElementById('inMotherAddress').value = motherData.addr;
+    // ── Resolve & Assign Grandfather, Father, Mother Values ────
+    let finalFatherName = "";
+    if (fatherData.nameNP && hasValidNepali(fatherData.nameNP)) {
+        finalFatherName = fatherData.nameNP;
+    } else if (fatherData.nameEN && !isCorruptedOrInvalid(fatherData.nameEN)) {
+        finalFatherName = fatherData.nameEN;
+    } else if (fatherData.nameNP && !isCorruptedOrInvalid(fatherData.nameNP)) {
+        finalFatherName = fatherData.nameNP;
+    }
 
-    // 3. Informant / Applicant (सूचकको विवरण)
-    const infName = findValueByLabels(["सूचकको पूरा नाम:", "सूचकको नाम:", "सूचकको नाम", "सूचना दिने व्यक्तिको नाम:", "सूचना दिनेको नाम:"]);
-    const infRel = findValueByLabels(["शिशुसँगको नाता:", "बच्चासँगको नाता:", "सूचकको नाता:", "नाता:"]);
-    const infCit = findValueByLabels(["सूचकको नागरिकता प्रमाणपत्र नं.:", "सूचकको नागरिकता नं.:", "सूचकको नागरिकता:"]);
-    const infAddr = findValueByLabels(["सूचकको ठेगाना:"]);
+    let finalMotherName = "";
+    if (motherData.nameNP && hasValidNepali(motherData.nameNP)) {
+        finalMotherName = motherData.nameNP;
+    } else if (motherData.nameEN && !isCorruptedOrInvalid(motherData.nameEN)) {
+        finalMotherName = motherData.nameEN;
+    } else if (motherData.nameNP && !isCorruptedOrInvalid(motherData.nameNP)) {
+        finalMotherName = motherData.nameNP;
+    }
+
+    let finalGfName = "";
+    if (gfData.nameNP && hasValidNepali(gfData.nameNP)) {
+        finalGfName = gfData.nameNP;
+    } else if (gfData.nameEN && !isCorruptedOrInvalid(gfData.nameEN)) {
+        finalGfName = gfData.nameEN;
+    } else if (gfData.nameNP && !isCorruptedOrInvalid(gfData.nameNP)) {
+        finalGfName = gfData.nameNP;
+    }
+
+    if (finalGfName && document.getElementById('inGrandfatherName')) {
+        document.getElementById('inGrandfatherName').value = finalGfName.split(/\(|\n/)[0].trim();
+    }
+    if (gfData.nid && document.getElementById('inGrandfatherNidNo')) {
+        document.getElementById('inGrandfatherNidNo').value = gfData.nid.split(/\s|\(/)[0].trim();
+    }
+
+    // Set Father values in Form
+    if (finalFatherName && document.getElementById('inFatherNameNP')) {
+        document.getElementById('inFatherNameNP').value = finalFatherName;
+    }
+    if (fatherData.cit && document.getElementById('inFatherCitNo')) {
+        document.getElementById('inFatherCitNo').value = fatherData.cit;
+    }
+    if (fatherData.citDist && document.getElementById('inFatherCitDist')) {
+        document.getElementById('inFatherCitDist').value = fatherData.citDist;
+    }
+    if (fatherData.nid && document.getElementById('inFatherNidNo')) {
+        document.getElementById('inFatherNidNo').value = fatherData.nid;
+    }
+    if (fatherData.addr && document.getElementById('inFatherAddress')) {
+        document.getElementById('inFatherAddress').value = fatherData.addr;
+    }
+
+    // Set Mother values in Form
+    if (finalMotherName && document.getElementById('inMotherNameNP')) {
+        document.getElementById('inMotherNameNP').value = finalMotherName;
+    }
+    if (motherData.cit && document.getElementById('inMotherCitNo')) {
+        document.getElementById('inMotherCitNo').value = motherData.cit;
+    }
+    if (motherData.citDist && document.getElementById('inMotherCitDist')) {
+        document.getElementById('inMotherCitDist').value = motherData.citDist;
+    }
+    if (motherData.nid && document.getElementById('inMotherNidNo')) {
+        document.getElementById('inMotherNidNo').value = motherData.nid;
+    }
+    if (motherData.addr && document.getElementById('inMotherAddress')) {
+        document.getElementById('inMotherAddress').value = motherData.addr;
+    }
+
+    // ── Informant & Guardian Resolution ───────────────────────
+    let infRel = informantData.rel || findValueByLabels(["शिशुसँगको नाता:", "बच्चासँगको नाता:", "सूचकको नाता:", "नाता:"]);
+    let infName = informantData.nameNP || informantData.nameEN || findValueByLabels(["सूचकको पूरा नाम:", "सूचकको नाम:", "सूचकको नाम", "सूचना दिने व्यक्तिको नाम:", "सूचना दिनेको नाम:"]);
+    let infCit = informantData.cit || findValueByLabels(["सूचकको नागरिकता प्रमाणपत्र नं.:", "सूचकको नागरिकता नं.:", "सूचकको नागरिकता:"]);
+    let infAddr = informantData.addr || findValueByLabels(["सूचकको ठेगाना:"]);
+
+    let isFather = false;
+    let isMother = false;
 
     if (infRel) {
-        if (infRel.includes("बाबु") || infRel.includes("बुवा") || infRel.toLowerCase().includes("father")) {
-            autoFillGuardian('father');
-        } else if (infRel.includes("आमा") || infRel.toLowerCase().includes("mother")) {
-            autoFillGuardian('mother');
-        } else {
-            autoFillGuardian('guardian');
-            if (document.getElementById('inGuardianRelation')) document.getElementById('inGuardianRelation').value = infRel;
-            if (infName && document.getElementById('inGuardianName')) document.getElementById('inGuardianName').value = infName;
-            if (infCit && document.getElementById('inGuardianCitNo')) document.getElementById('inGuardianCitNo').value = infCit.split(/\s|\(/)[0];
-            if (infAddr && document.getElementById('inGuardianAddress')) document.getElementById('inGuardianAddress').value = infAddr;
+        let rLow = infRel.toLowerCase();
+        if (rLow.includes("बाबु") || rLow.includes("बुवा") || rLow.includes("बुबा") || rLow.includes("father")) {
+            isFather = true;
+        } else if (rLow.includes("आमा") || rLow.includes("mother")) {
+            isMother = true;
         }
+    }
+
+    if (!isFather && !isMother && infName) {
+        let infClean = infName.toLowerCase().replace(/[^a-z\u0900-\u097F]/g, '');
+        let fCleanNP = (fatherData.nameNP || '').toLowerCase().replace(/[^a-z\u0900-\u097F]/g, '');
+        let fCleanEN = (fatherData.nameEN || '').toLowerCase().replace(/[^a-z\u0900-\u097F]/g, '');
+        let mCleanNP = (motherData.nameNP || '').toLowerCase().replace(/[^a-z\u0900-\u097F]/g, '');
+        let mCleanEN = (motherData.nameEN || '').toLowerCase().replace(/[^a-z\u0900-\u097F]/g, '');
+
+        if (fCleanNP && infClean.includes(fCleanNP)) isFather = true;
+        else if (fCleanEN && infClean.includes(fCleanEN)) isFather = true;
+        else if (mCleanNP && infClean.includes(mCleanNP)) isMother = true;
+        else if (mCleanEN && infClean.includes(mCleanEN)) isMother = true;
+    }
+
+    if (isMother) {
+        autoFillGuardian('mother');
+    } else if (isFather) {
+        autoFillGuardian('father');
+    } else if (infName && infRel && !infRel.includes("बाबु") && !infRel.includes("आमा")) {
+        autoFillGuardian('guardian');
+        if (document.getElementById('inGuardianRelation')) document.getElementById('inGuardianRelation').value = infRel;
+        if (infName && document.getElementById('inGuardianName')) document.getElementById('inGuardianName').value = infName;
+        if (infCit && document.getElementById('inGuardianCitNo')) document.getElementById('inGuardianCitNo').value = infCit.split(/\s|\(/)[0];
+        if (infAddr && document.getElementById('inGuardianAddress')) document.getElementById('inGuardianAddress').value = infAddr;
     } else {
         autoFillGuardian('father');
     }
 
-    // 4. Registration No
-    const regNoRaw = findValueByLabels(["दर्ता नम्बर (Registration No.):", "दर्ता नम्बर:", "दर्ता नम्बर", "दर्ता नं.:", "दर्ता नं", "Registration No.:", "Registration No"]);
+    // ── Registration No ───────────────────────────────────────
+    let regNoRaw = childData.regNo;
+    if (!regNoRaw || isCorruptedOrInvalid(regNoRaw)) {
+        regNoRaw = findValueByLabels(["दर्ता नम्बर (Registration No.):", "दर्ता नम्बर:", "दर्ता नम्बर", "दर्ता नं.:", "दर्ता नं", "Registration No.:", "Registration No"]);
+    }
+    if (!regNoRaw || isCorruptedOrInvalid(regNoRaw)) {
+        let bodyTxt = doc.body ? (doc.body.innerText || doc.body.textContent || '') : '';
+        let m = bodyTxt.match(/(?:दर्ता नम्बर|Registration No)[^\d०-९]*([0-9०-९]{10,})/i);
+        if (m) regNoRaw = m[1];
+    }
     if (regNoRaw && document.getElementById('inBirthRegNo')) {
-        document.getElementById('inBirthRegNo').value = regNoRaw.split(/\s|\(/)[0] || regNoRaw;
+        let cleanReg = regNoRaw.match(/\(([0-9]{10,})\)/) || regNoRaw.match(/[0-9]{10,}/) || regNoRaw.match(/[०-९]{10,}/);
+        if (cleanReg) {
+            document.getElementById('inBirthRegNo').value = cleanReg[1] || cleanReg[0];
+        } else if (!isCorruptedOrInvalid(regNoRaw)) {
+            document.getElementById('inBirthRegNo').value = regNoRaw.split(/\s|\(/)[0] || regNoRaw;
+        }
     }
 
-    // 5. Child Full Name Nepali
-    let childNameNP = "";
-    const nameNpCandidate = findValueByLabels(["शिशुको पूरा नाम:", "शिशुको पूरा नाम", "नाम (नेपालीमा):", "पूरा नाम :", "पूरा नाम:"]);
-    if (nameNpCandidate && nameNpCandidate !== fatherData.name && nameNpCandidate !== motherData.name && nameNpCandidate !== gfName) {
-        childNameNP = nameNpCandidate;
+    // ── Child Full Name Nepali ────────────────────────────────
+    let childNameNP = childData.nameNP;
+    if (!childNameNP || !hasValidNepali(childNameNP)) {
+        let nameNpCandidate = findValueByLabels(["शिशुको पूरा नाम:", "शिशुको पूरा नाम", "नाम (नेपालीमा):", "पूरा नाम :", "पूरा नाम:"]);
+        if (nameNpCandidate && nameNpCandidate !== finalFatherName && nameNpCandidate !== finalMotherName && nameNpCandidate !== finalGfName && hasValidNepali(nameNpCandidate)) {
+            childNameNP = nameNpCandidate;
+        }
+    }
+    if ((!childNameNP || !hasValidNepali(childNameNP)) && childData.nameEN) {
+        childNameNP = childData.nameEN;
     }
     if (childNameNP && document.getElementById('inNameFirstNP')) {
         let names = childNameNP.split(/\s+/);
@@ -1175,26 +1452,32 @@ function parseBirthCertificateDOM(doc) {
         }
     }
 
-    // 6. Child Full Name English
-    const nameEnRaw = findValueByLabels(["Full Name :", "Full Name:", "Full Name (in Block):", "Full Name (in English):", "नाम (अंग्रेजीमा):"]);
-    if (nameEnRaw && document.getElementById('inNameFirstEN')) {
-        let names = nameEnRaw.split(/\s+/);
+    // ── Child Full Name English ───────────────────────────────
+    let childNameEN = childData.nameEN;
+    if (!childNameEN || isCorruptedOrInvalid(childNameEN)) {
+        let nameEnRaw = findValueByLabels(["Full Name :", "Full Name:", "Full Name (in Block):", "Full Name (in English):", "नाम (अंग्रेजीमा):"]);
+        if (nameEnRaw && !isCorruptedOrInvalid(nameEnRaw)) {
+            childNameEN = nameEnRaw;
+        }
+    }
+    if (childNameEN && document.getElementById('inNameFirstEN')) {
+        let names = childNameEN.split(/\s+/);
         if (names.length === 1) {
-            document.getElementById('inNameFirstEN').value = names[0];
+            document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
             document.getElementById('inNameMidEN').value = '';
             document.getElementById('inNameLastEN').value = '';
         } else if (names.length === 2) {
-            document.getElementById('inNameFirstEN').value = names[0];
+            document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
             document.getElementById('inNameMidEN').value = '';
-            document.getElementById('inNameLastEN').value = names[1];
+            document.getElementById('inNameLastEN').value = names[1].toUpperCase();
         } else if (names.length >= 3) {
-            document.getElementById('inNameFirstEN').value = names[0];
-            document.getElementById('inNameLastEN').value = names[names.length - 1];
-            document.getElementById('inNameMidEN').value = names.slice(1, names.length - 1).join(' ');
+            document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
+            document.getElementById('inNameLastEN').value = names[names.length - 1].toUpperCase();
+            document.getElementById('inNameMidEN').value = names.slice(1, names.length - 1).join(' ').toUpperCase();
         }
     }
 
-    // 7. Gender
+    // ── Gender ────────────────────────────────────────────────
     const genderRaw = findValueByLabels(["लिङ्ग/Sex:", "लिङ्ग / Sex:", "लिङ्ग:", "Sex:"]);
     if (genderRaw && document.getElementById('inGender')) {
         if (genderRaw.includes("पुरूष") || genderRaw.includes("पुरुष") || genderRaw.toUpperCase().includes("MALE")) {
@@ -1206,51 +1489,63 @@ function parseBirthCertificateDOM(doc) {
         }
     }
 
-    // 8. DOB
+    // ── DOB (BS and AD) ───────────────────────────────────────
     const dobRaw = findValueByLabels(["जन्म मिति /Date of Birth:", "जन्म मिति / Date of Birth:", "जन्म मिति (वि.सं.):", "जन्म मिति:", "Date of Birth:"]);
-    if (dobRaw && document.getElementById('inDOB_BS')) {
+    if (dobRaw) {
         let bsMatch = dobRaw.match(/([०-९]{4}[/-][०-९]{1,2}[/-][०-९]{1,2})/);
-        if (bsMatch) {
+        if (bsMatch && document.getElementById('inDOB_BS')) {
             document.getElementById('inDOB_BS').value = bsMatch[1].replace(/-/g, '/');
         } else {
             let bsMatchEn = dobRaw.match(/(\d{4}[/-]\d{1,2}[/-]\d{1,2})/);
-            if (bsMatchEn) {
+            if (bsMatchEn && document.getElementById('inDOB_BS')) {
                 document.getElementById('inDOB_BS').value = bsMatchEn[1].replace(/-/g, '/');
+            }
+        }
+        let adMatch = dobRaw.match(/\((\d{1,2}[/-]\d{1,2}[/-]\d{4})\s*A\.?D\.?\)/i) || dobRaw.match(/\((\d{4}[/-]\d{1,2}[/-]\d{1,2})\s*A\.?D\.?\)/i);
+        if (adMatch && document.getElementById('inDOB_AD')) {
+            let p = adMatch[1].split(/[-/]/);
+            if (p[0].length === 4) {
+                document.getElementById('inDOB_AD').value = `${p[0]}-${p[1].padStart(2, '0')}-${p[2].padStart(2, '0')}`;
+            } else if (p[2].length === 4) {
+                document.getElementById('inDOB_AD').value = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
             }
         }
         if (typeof autoConvertBsToAd === 'function') autoConvertBsToAd();
     }
 
-    // 9. Birth Place
-    const birthPlaceRaw = findValueByLabels(["जन्म स्थान/Birth Place:", "जन्म स्थान / Birth Place:", "जन्म स्थान:", "Birth Place:"]);
+    // ── Birth Place ───────────────────────────────────────────
+    const birthPlaceRaw = findValueByLabels(["Birth Place:", "जन्म स्थान/Birth Place:", "जन्म स्थान / Birth Place:", "जन्म स्थान:"]);
     if (birthPlaceRaw) {
-        let npPart = birthPlaceRaw.split('(')[0].trim();
-        let wardMatch = npPart.match(/वडा\s*नं\.?\s*([०-९0-9]+)/);
+        let wardMatch = birthPlaceRaw.match(/(?:Ward No\.?|वडा\s*नं\.?)\s*([०-९0-9]+)/i);
         if (wardMatch && document.getElementById('inBirthWard')) document.getElementById('inBirthWard').value = wardMatch[1];
-        let rmMatch = npPart.match(/([^,]+(?:नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/);
+        let rmMatch = birthPlaceRaw.match(/([^,\-]+(?:Municipality|Rural Municipality|नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/i);
         if (rmMatch && document.getElementById('inBirthRM')) {
             document.getElementById('inBirthRM').value = rmMatch[1].replace(/-.*$/, '').trim();
         }
-        let distMatch = npPart.match(/([^,\s]+)\s*जिल्ला/);
+        let distMatch = birthPlaceRaw.match(/([^,\s]+)\s*(?:District|जिल्ला)/i);
         if (distMatch && document.getElementById('inBirthDistrict')) {
             document.getElementById('inBirthDistrict').value = distMatch[1];
         }
+        let enMatch = birthPlaceRaw.match(/\(([^)]+)\)/);
+        if (enMatch && document.getElementById('inBirthPlaceEN')) {
+            document.getElementById('inBirthPlaceEN').value = enMatch[1].trim().toUpperCase();
+        }
     }
 
-    // 10. Permanent Address
-    const permPlaceRaw = findValueByLabels(["स्थायी ठेगाना/Permanent Address:", "स्थायी ठेगाना:", "Permanent Address:"]);
+    // ── Permanent Address ─────────────────────────────────────
+    const permPlaceRaw = findValueByLabels(["Permanent Address:", "स्थायी ठेगाना/Permanent Address:", "स्थायी ठेगाना:"]);
     if (permPlaceRaw) {
-        let wardMatch = permPlaceRaw.match(/वडा\s*नं\.?\s*([०-९0-9]+)/);
+        let wardMatch = permPlaceRaw.match(/(?:Ward No\.?|वडा\s*नं\.?)\s*([०-९0-9]+)/i);
         if (wardMatch && document.getElementById('inPermWard')) document.getElementById('inPermWard').value = wardMatch[1];
-        let rmMatch = permPlaceRaw.match(/([^,]+(?:नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/);
+        let rmMatch = permPlaceRaw.match(/([^,\-]+(?:Municipality|Rural Municipality|नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/i);
         if (rmMatch && document.getElementById('inPermRM')) {
             document.getElementById('inPermRM').value = rmMatch[1].replace(/-.*$/, '').trim();
         }
-        let distMatch = permPlaceRaw.match(/([^,\s]+)\s*जिल्ला/);
+        let distMatch = permPlaceRaw.match(/([^,\s]+)\s*(?:District|जिल्ला)/i);
         if (distMatch && document.getElementById('inPermDistrict')) {
             document.getElementById('inPermDistrict').value = distMatch[1];
         }
-        let provMatch = permPlaceRaw.match(/([^,\s]+)\s*प्रदेश/);
+        let provMatch = permPlaceRaw.match(/([^,\s]+)\s*(?:Province|प्रदेश)/i);
         if (provMatch && document.getElementById('inPermProvince')) {
             document.getElementById('inPermProvince').value = provMatch[1];
         }
@@ -1332,9 +1627,24 @@ function executeSmartPaste() {
         parseBirthCertificateDOM(doc);
     } else {
         const lines = content.split(/\r?\n/);
+        let activeSection = 'child';
         for (let line of lines) {
             line = line.trim();
             if (!line) continue;
+
+            if ((line.includes("बाबुको विवरण") || line.includes("Father's Details")) && !line.includes("हजुरबाबु")) {
+                activeSection = 'father';
+                continue;
+            } else if (line.includes("आमाको विवरण") || line.includes("Mother's Details")) {
+                activeSection = 'mother';
+                continue;
+            } else if (line.includes("सूचकको विवरण") || line.includes("Informant's Details")) {
+                activeSection = 'informant';
+                continue;
+            } else if (line.includes("बाजेको विवरण") || line.includes("हजुरबुवा") || line.includes("Full Name of Grandfather")) {
+                activeSection = 'grandfather';
+                continue;
+            }
 
             if ((line.includes("दर्ता नम्बर") || line.includes("Registration No")) && document.getElementById('inBirthRegNo')) {
                 let parts = line.split(/[:\s(]+/);
@@ -1344,18 +1654,29 @@ function executeSmartPaste() {
                         break;
                     }
                 }
-            } else if (line.includes("पूरा नाम") && !line.includes("बाजेको") && !line.includes("बाबुको") && !line.includes("आमाको") && !line.includes("सूचक") && document.getElementById('inNameFirstNP')) {
-                let val = line.split(/[:\-–]+/).pop().trim();
+            } else if (activeSection === 'child' && (line.includes("पूरा नाम") || line.includes("Full Name")) && !line.includes("बाजेको") && !line.includes("बाबुको") && !line.includes("आमाको") && !line.includes("सूचक")) {
+                let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
                 let names = val.split(/\s+/);
-                if (names.length === 1) {
-                    document.getElementById('inNameFirstNP').value = names[0];
-                } else if (names.length === 2) {
-                    document.getElementById('inNameFirstNP').value = names[0];
-                    document.getElementById('inNameLastNP').value = names[1];
-                } else if (names.length >= 3) {
-                    document.getElementById('inNameFirstNP').value = names[0];
-                    document.getElementById('inNameLastNP').value = names[names.length - 1];
-                    document.getElementById('inNameMidNP').value = names.slice(1, names.length - 1).join(' ');
+                if (line.includes("Full Name")) {
+                    if (names.length === 1 && document.getElementById('inNameFirstEN')) document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
+                    else if (names.length === 2 && document.getElementById('inNameFirstEN')) {
+                        document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
+                        document.getElementById('inNameLastEN').value = names[1].toUpperCase();
+                    } else if (names.length >= 3 && document.getElementById('inNameFirstEN')) {
+                        document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
+                        document.getElementById('inNameLastEN').value = names[names.length - 1].toUpperCase();
+                        document.getElementById('inNameMidEN').value = names.slice(1, names.length - 1).join(' ').toUpperCase();
+                    }
+                } else {
+                    if (names.length === 1 && document.getElementById('inNameFirstNP')) document.getElementById('inNameFirstNP').value = names[0];
+                    else if (names.length === 2 && document.getElementById('inNameFirstNP')) {
+                        document.getElementById('inNameFirstNP').value = names[0];
+                        document.getElementById('inNameLastNP').value = names[1];
+                    } else if (names.length >= 3 && document.getElementById('inNameFirstNP')) {
+                        document.getElementById('inNameFirstNP').value = names[0];
+                        document.getElementById('inNameLastNP').value = names[names.length - 1];
+                        document.getElementById('inNameMidNP').value = names.slice(1, names.length - 1).join(' ');
+                    }
                 }
             } else if ((line.includes("जन्म मिति") || line.includes("Date of Birth")) && document.getElementById('inDOB_BS')) {
                 let bsMatch = line.match(/([०-९0-9]{4}[/-][०-९0-9]{1,2}[/-][०-९0-9]{1,2})/);
@@ -1369,12 +1690,21 @@ function executeSmartPaste() {
                 } else if (line.includes("महिला") || line.toUpperCase().includes("FEMALE")) {
                     document.getElementById('inGender').value = "महिला|Female";
                 }
-            } else if ((line.includes("बाजेको पूरा नाम") || line.includes("बाजेको नाम") || line.includes("हजुरबुवा")) && document.getElementById('inGrandfatherName')) {
-                document.getElementById('inGrandfatherName').value = line.split(/[:\-–]+/).pop().trim();
-            } else if ((line.includes("बाबुको पूरा नाम") || line.includes("बाबुको नाम")) && document.getElementById('inFatherNameNP')) {
-                document.getElementById('inFatherNameNP').value = line.split(/[:\-–]+/).pop().trim();
-            } else if ((line.includes("आमाको पूरा नाम") || line.includes("आमाको नाम")) && document.getElementById('inMotherNameNP')) {
-                document.getElementById('inMotherNameNP').value = line.split(/[:\-–]+/).pop().trim();
+            } else if ((activeSection === 'grandfather' || line.includes("बाजेको पूरा नाम") || line.includes("बाजेको नाम") || line.includes("Full Name of Grandfather")) && document.getElementById('inGrandfatherName')) {
+                let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
+                if (val) document.getElementById('inGrandfatherName').value = val;
+            } else if ((activeSection === 'father' || line.includes("बाबुको पूरा नाम") || line.includes("बाबुको नाम")) && (line.includes("पूरा नाम") || line.includes("Full Name") || line.includes("बाबुको"))) {
+                let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
+                if (val && document.getElementById('inFatherNameNP')) document.getElementById('inFatherNameNP').value = val;
+            } else if ((activeSection === 'mother' || line.includes("आमाको पूरा नाम") || line.includes("आमाको नाम")) && (line.includes("पूरा नाम") || line.includes("Full Name") || line.includes("आमाको"))) {
+                let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
+                if (val && document.getElementById('inMotherNameNP')) document.getElementById('inMotherNameNP').value = val;
+            } else if (activeSection === 'father' && (line.includes("नागरिकता") || line.includes("Citizenship") || line.includes("NIN") || line.includes("Passport"))) {
+                let numMatch = line.match(/\(([0-9]+)\)/) || line.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                if (numMatch && document.getElementById('inFatherCitNo')) document.getElementById('inFatherCitNo').value = numMatch[1].trim();
+            } else if (activeSection === 'mother' && (line.includes("नागरिकता") || line.includes("Citizenship") || line.includes("NIN") || line.includes("Passport"))) {
+                let numMatch = line.match(/\(([0-9]+)\)/) || line.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                if (numMatch && document.getElementById('inMotherCitNo')) document.getElementById('inMotherCitNo').value = numMatch[1].trim();
             } else if (line.includes("बाबुको नागरिकता") && document.getElementById('inFatherCitNo')) {
                 document.getElementById('inFatherCitNo').value = line.split(/[:\-–]+/).pop().trim().split(/\s|\(/)[0];
             } else if (line.includes("आमाको नागरिकता") && document.getElementById('inMotherCitNo')) {
