@@ -123,7 +123,7 @@ function reindexFormRows() {
     });
 }
 
-function generateLandDetailsText(lands) {
+function generateLandDetailsText(lands, isPlural = false) {
     if (!lands || lands.length === 0) {
         let baseNoLand = `दर्ता कायम रहेको कित्ता नं. <span class="fill-space">.......</span> को क्षेत्रफल: <span class="fill-space">.......</span> व.मि जग्गाको <span class="fill-space">.......</span> तर्फ <span class="fill-space">....</span> फुटे <span class="fill-space">.......</span> बाटो भएको`;
         return baseNoLand + ` व्यहोरा प्रमाणित गरिन्छ ।`;
@@ -142,7 +142,9 @@ function generateLandDetailsText(lands) {
         parts.push(`${sitText}कित्ता नं. <span class="fill-space">${kitta}</span> को क्षेत्रफल: <span class="fill-space">${area}</span> व.मि जग्गाको <span class="fill-space">${direction}</span> तर्फ <span class="fill-space">${roadWidth}</span> फुटे <span class="fill-space">${roadType}</span> बाटो भएको`);
     });
     
-    let text = "दर्ता कायम रहेको ";
+    const hasMultiple = isPlural || parts.length > 1;
+    let prefix = hasMultiple ? "दर्ता कायम रहेका कित्ताहरू " : "दर्ता कायम रहेको ";
+    let text = prefix;
     if (parts.length === 1) {
         text += parts[0];
     } else {
@@ -250,10 +252,28 @@ window.updateDoc = function () {
         }
     });
 
-    // Land Use Act Statement Controller
+    // Land Use Act Statement Controller & Pluralization Calculation
     const selectedZone = getSelectedLandUseZone();
 
-    const landDetailsText = generateLandDetailsText(lands);
+    // Calculate total kittas count (from rows or comma/space/र separated kitta numbers)
+    let kittaCount = 0;
+    activeRowIds.forEach(id => {
+        const block = document.getElementById(id);
+        if (block) {
+            const kittaInput = block.querySelector('.input-kitta');
+            const kVal = kittaInput ? kittaInput.value.trim() : '';
+            if (kVal) {
+                const splitted = kVal.split(/[,،\s+र/]+/).filter(x => x.trim().length > 0);
+                kittaCount += Math.max(1, splitted.length);
+            } else {
+                kittaCount += 1;
+            }
+        }
+    });
+    if (kittaCount === 0) kittaCount = activeRowIds.length;
+
+    const isPlural = kittaCount >= 2;
+    const landDetailsText = generateLandDetailsText(lands, isPlural);
 
     const loggedWard = localStorage.getItem('sifarish_ward') || '1';
     const issuingWard = (typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit(loggedWard) : '१') || '१';
@@ -319,25 +339,7 @@ window.updateDoc = function () {
                 const formattedZone = selectedZone.includes('क्षेत्र') ? selectedZone : selectedZone + ' क्षेत्र';
                 lblSelectedZone.innerText = formattedZone;
             }
-            
-            // Calculate total kittas count (from rows or comma/space/र separated kitta numbers)
-            let kittaCount = 0;
-            activeRowIds.forEach(id => {
-                const block = document.getElementById(id);
-                if (block) {
-                    const kittaInput = block.querySelector('.input-kitta');
-                    const kVal = kittaInput ? kittaInput.value.trim() : '';
-                    if (kVal) {
-                        const splitted = kVal.split(/[,،\s+र/]+/).filter(x => x.trim().length > 0);
-                        kittaCount += Math.max(1, splitted.length);
-                    } else {
-                        kittaCount += 1;
-                    }
-                }
-            });
-            if (kittaCount === 0) kittaCount = activeRowIds.length;
 
-            const isPlural = kittaCount >= 2;
             const kittaPhrase = isPlural ? 'माथि उल्लेखित कित्ताहरूको' : 'माथि उल्लेखित कित्ता नम्बरको';
             const landText = isPlural ? 'जग्गाहरू' : 'जग्गा';
 
