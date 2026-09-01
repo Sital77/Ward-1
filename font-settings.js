@@ -307,7 +307,19 @@
                         if (localOverride.template_content.includes('पूजी') || localOverride.template_content.includes('किताामा')) {
                             localOverride = null;
                         }
-                        if (localOverride && templateId === 'charkilla' && localOverride.template_content.includes('नाममा तहाँ') && !localOverride.template_content.includes('श्री भुमी प्रशासन')) {
+                        if (localOverride && templateId === 'bato-pramanit' && (!localOverride.template_content.includes('lblLandUseStatement') || !localOverride.template_content.includes('भू-उपयोग ऐन'))) {
+                            localOverride = null;
+                        }
+                        if (localOverride && templateId === 'gharbato' && (!localOverride.template_content.includes('lblLandUseStatement') || !localOverride.template_content.includes('भू-उपयोग ऐन'))) {
+                            localOverride = null;
+                        }
+                        if (localOverride && templateId === 'charkilla' && (!localOverride.template_content.includes('lblLandUseStatement') || !localOverride.template_content.includes('भू-उपयोग ऐन') || (localOverride.template_content.includes('नाममा तहाँ') && !localOverride.template_content.includes('श्री भुमी प्रशासन')))) {
+                            localOverride = null;
+                        }
+                        if (localOverride && templateId === 'nabalak-parichayapatra' && !localOverride.template_content.includes('lblDynamicRelation')) {
+                            localOverride = null;
+                        }
+                        if (localOverride && templateId === 'suchana-tans' && (localOverride.template_content.includes('A4-242.jpg') || localOverride.template_content.includes('letterheadType'))) {
                             localOverride = null;
                         }
                         if (localOverride && templateId === 'aamdani-pramanit' && (!localOverride.template_content.includes('globalLandAddr') || localOverride.template_content.includes('width: 250px;'))) {
@@ -327,15 +339,21 @@
                         let isOutdated = false;
                         if (!data.template_content) {
                             isOutdated = true;
+                        } else if (templateId === 'bato-pramanit' && (!data.template_content.includes('lblLandUseStatement') || !data.template_content.includes('भू-उपयोग ऐन') || !data.template_content.includes('lblSelectedZone'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'gharbato' && (!data.template_content.includes('lblLandUseStatement') || !data.template_content.includes('भू-उपयोग ऐन') || !data.template_content.includes('lblSelectedZone'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'charkilla' && (!data.template_content.includes('lblLandUseStatement') || !data.template_content.includes('भू-उपयोग ऐन') || !data.template_content.includes('lblSelectedZone') || (data.template_content.includes('नाममा तहाँ') && !data.template_content.includes('श्री भुमी प्रशासन')))) {
+                            isOutdated = true;
+                        } else if (templateId === 'nabalak-parichayapatra' && (!data.template_content.includes('lblDynamicRelation') || !data.template_content.includes('lblDynamicChildName'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'suchana-tans' && (data.template_content.includes('किताामा') || data.template_content.includes('पूजी') || data.template_content.includes('A4-242.jpg') || data.template_content.includes('letterheadType'))) {
+                            isOutdated = true;
                         } else if (templateId === 'bank-sifarish' && (!data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
                             isOutdated = true;
                         } else if (templateId === 'ghar-kayam' && (!data.template_content.includes('पूर्जा/सेस्तामा') || data.template_content.includes('पूजी') || data.template_content.includes('किताामा'))) {
                             isOutdated = true;
-                        } else if (templateId === 'suchana-tans' && (data.template_content.includes('किताामा') || data.template_content.includes('पूजी'))) {
-                            isOutdated = true;
                         } else if (templateId === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'charkilla' && data.template_content.includes('नाममा तहाँ') && !data.template_content.includes('श्री भुमी प्रशासन')) {
                             isOutdated = true;
                         } else if (templateId === 'aamdani-pramanit' && (!data.template_content.includes('globalLandAddr') || data.template_content.includes('width: 250px;') || !data.template_content.includes('lblLandDetails'))) {
                             isOutdated = true;
@@ -360,7 +378,6 @@
                         resolveTemplatePromise();
                     }
                 }).catch((err) => {
-
                     resolveTemplatePromise();
                 });
             } catch (e) {
