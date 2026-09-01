@@ -65,6 +65,12 @@
             box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
         }
 
+        .mode-btn.active-child-banda {
+            background: linear-gradient(135deg, #dd6b20, #c05621);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(221, 107, 32, 0.35);
+        }
+
         .section-card {
             border-radius: 10px;
             padding: 14px 14px 6px 14px;
@@ -278,7 +284,10 @@
                 📂 बैंक खाता खोल्ने सिफारिस
             </button>
             <button id="btnBanda" class="mode-btn" onclick="setMode('CLOSE_ACCOUNT_DECEASED')">
-                🔒 मृतकको बैंक खाता बन्द सिफारिस
+                🔒 मृतकको खाता बन्द सिफारिस
+            </button>
+            <button id="btnChildBanda" class="mode-btn" onclick="setMode('CLOSE_ACCOUNT_CHILD')">
+                👶 बालबालिका खाता बन्द
             </button>
         </div>
 
@@ -552,6 +561,57 @@
                 <div class="form-group">
                     <label>सामाजिक सुरक्षा बैंक खाता नम्बर:</label>
                     <input type="text" id="inDeceasedAccountNo" placeholder="उदा: ०४१२३०१००२९३००१" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- ── MODE 3: CHILD ACCOUNT CLOSURE FIELDS ── -->
+            <div id="secChildCloseAccount" style="display:none;">
+                <div class="row-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label>👨‍👩‍👧 निवेदकको बालबालिकासँग नाता:</label>
+                        <select id="inChildRelationSelect" class="bank-select-dropdown" onchange="toggleCustomChildRelation(); updateDoc()">
+                            <option value="छोरी" selected>छोरी</option>
+                            <option value="छोरा">छोरा</option>
+                            <option value="नातिनी">नातिनी</option>
+                            <option value="नाति">नाति</option>
+                            <option value="भतिजी">भतिजी</option>
+                            <option value="भतिजा">भतिजा</option>
+                            <option value="CUSTOM">✍️ आफैँ नाता लेख्नुहोस् (Custom)</option>
+                        </select>
+                        <input type="text" id="inChildRelation" placeholder="नाता लेख्नुहोस्..." style="display:none; margin-top:8px;" oninput="updateDoc()">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label>🛡️ निवेदकको नाता (हकदारको हैसियत):</label>
+                        <select id="inChildGuardianRelationSelect" class="bank-select-dropdown" onchange="toggleCustomChildGuardianRelation(); updateDoc()">
+                            <option value="बुवा" selected>बुवा</option>
+                            <option value="आमा">आमा</option>
+                            <option value="हजुरबुबा">हजुरबुबा</option>
+                            <option value="हजुरआमा">हजुरआमा</option>
+                            <option value="काका">काका</option>
+                            <option value="काकी">काकी</option>
+                            <option value="दाजु">दाजु</option>
+                            <option value="दिदी">दिदी</option>
+                            <option value="संरक्षक">संरक्षक</option>
+                            <option value="CUSTOM">✍️ आफैँ नाता लेख्नुहोस् (Custom)</option>
+                        </select>
+                        <input type="text" id="inChildGuardianRelation" placeholder="नाता लेख्नुहोस्..." style="display:none; margin-top:8px;" oninput="updateDoc()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>👶 बालबालिका (लाभग्राही) को पुरा नाम:</label>
+                    <input type="text" id="inChildBeneficiaryName" placeholder="उदा: संस्कृति विश्वकर्मा" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>लक्षित समूह / भत्ताको किसिम:</label>
+                    <input type="text" id="inChildTargetGroup" placeholder="उदा: दलित बालबालिका" value="दलित बालबालिका" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>🏦 बालबालिकाको सामाजिक सुरक्षा खाता नं.:</label>
+                    <input type="text" id="inChildAccountNo" placeholder="उदा: ०६२४२०५०७७९६१०१७" oninput="updateDoc()">
                 </div>
             </div>
 
@@ -851,35 +911,64 @@
             updateDoc();
         }
 
+        function toggleCustomChildRelation() {
+            const selEl = document.getElementById('inChildRelationSelect');
+            const customInput = document.getElementById('inChildRelation');
+            if (selEl && customInput) {
+                if (selEl.value === 'CUSTOM') {
+                    customInput.style.display = 'block';
+                    customInput.focus();
+                } else {
+                    customInput.style.display = 'none';
+                    customInput.value = selEl.value;
+                }
+            }
+            updateDoc();
+        }
+
+        function toggleCustomChildGuardianRelation() {
+            const selEl = document.getElementById('inChildGuardianRelationSelect');
+            const customInput = document.getElementById('inChildGuardianRelation');
+            if (selEl && customInput) {
+                if (selEl.value === 'CUSTOM') {
+                    customInput.style.display = 'block';
+                    customInput.focus();
+                } else {
+                    customInput.style.display = 'none';
+                    customInput.value = selEl.value;
+                }
+            }
+            updateDoc();
+        }
+
         // ── Mode Toggle Button Tabs (PAN Style) ────────────────
         function setMode(mode) {
-            const btnKholne = document.getElementById('btnKholne');
-            const btnBanda  = document.getElementById('btnBanda');
-            const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
+            const btnKholne     = document.getElementById('btnKholne');
+            const btnBanda      = document.getElementById('btnBanda');
+            const btnChildBanda = document.getElementById('btnChildBanda');
+            const isDeceased    = (mode === 'CLOSE_ACCOUNT_DECEASED');
+            const isChildClose  = (mode === 'CLOSE_ACCOUNT_CHILD');
 
-            if (isDeceased) {
-                btnKholne.className = 'mode-btn';
-                btnBanda.className = 'mode-btn active-banda';
-            } else {
-                btnKholne.className = 'mode-btn active-kholne';
-                btnBanda.className = 'mode-btn';
-            }
+            btnKholne.className     = (mode === 'OPEN_ACCOUNT') ? 'mode-btn active-kholne' : 'mode-btn';
+            btnBanda.className      = isDeceased ? 'mode-btn active-banda' : 'mode-btn';
+            btnChildBanda.className = isChildClose ? 'mode-btn active-child-banda' : 'mode-btn';
 
             document.getElementById('currentMode').value = mode;
 
-            document.getElementById('secOpenAccount').style.display = isDeceased ? 'none' : 'block';
-            document.getElementById('secDeceasedAccount').style.display = isDeceased ? 'block' : 'none';
-            document.getElementById('childChkBoxWrapper').style.display = isDeceased ? 'none' : 'block';
+            document.getElementById('secOpenAccount').style.display       = (mode === 'OPEN_ACCOUNT') ? 'block' : 'none';
+            document.getElementById('secDeceasedAccount').style.display   = isDeceased ? 'block' : 'none';
+            document.getElementById('secChildCloseAccount').style.display = isChildClose ? 'block' : 'none';
+            document.getElementById('childChkBoxWrapper').style.display   = (mode === 'OPEN_ACCOUNT') ? 'block' : 'none';
             
             const chkIsChild = document.getElementById('chkIsChild');
             const secGuardian = document.getElementById('secGuardianDetails');
             if (secGuardian) {
-                secGuardian.style.display = (!isDeceased && chkIsChild && chkIsChild.checked) ? 'block' : 'none';
+                secGuardian.style.display = (mode === 'OPEN_ACCOUNT' && chkIsChild && chkIsChild.checked) ? 'block' : 'none';
             }
 
             document.getElementById('secPasteBox').style.display = 'block';
 
-            // Ensure bank dropdown is visible for both modes
+            // Ensure bank dropdown is visible for all modes
             const bankSelectGroup = document.getElementById('inBankSelect').closest('.form-group');
             if (bankSelectGroup) {
                 bankSelectGroup.style.display = 'block';
@@ -888,13 +977,16 @@
             // Set bank receiver based on selected bank
             selectBank(document.getElementById('inBankSelect').value);
 
-            document.getElementById('formMainTitle').innerText = isDeceased 
-                ? "🔒 मृतकको बैंक खाता बन्द सिफारिस" 
-                : "📂 बैंक खाता खोल्ने सिफारिस";
-
-            document.getElementById('lblInputNameTitle').innerText = isDeceased 
-                ? "निवेदक / हकदारको पुरा नाम:" 
-                : "लाभव्यक्ति / निवेदकको पुरा नाम:";
+            if (isDeceased) {
+                document.getElementById('formMainTitle').innerText = "🔒 मृतकको बैंक खाता बन्द सिफारिस";
+                document.getElementById('lblInputNameTitle').innerText = "निवेदक / हकदारको पुरा नाम:";
+            } else if (isChildClose) {
+                document.getElementById('formMainTitle').innerText = "👶 बालबालिका बैंक खाता बन्द सिफारिस";
+                document.getElementById('lblInputNameTitle').innerText = "निवेदक / हकदारको पुरा नाम:";
+            } else {
+                document.getElementById('formMainTitle').innerText = "📂 बैंक खाता खोल्ने सिफारिस";
+                document.getElementById('lblInputNameTitle').innerText = "लाभव्यक्ति / निवेदकको पुरा नाम:";
+            }
 
             updateDoc();
         }
@@ -940,6 +1032,7 @@
 
             const mode = (document.getElementById('currentMode') || {}).value || 'OPEN_ACCOUNT';
             const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
+            const isChildClose = (mode === 'CLOSE_ACCOUNT_CHILD');
 
             let parsedData = {
                 name: '',
@@ -1153,6 +1246,56 @@
                     showBadge(false, `❌ मिल्ने विवरण फेला परेन । ढाँचा जाँच गर्नुहोस् ।`);
                 }
 
+            } else if (isChildClose) {
+                // Populate CLOSE_ACCOUNT_CHILD mode inputs
+                if (parsedData.guardianName) {
+                    document.getElementById('inName').value = parsedData.guardianName;
+                    extractCount++;
+                }
+
+                if (parsedData.guardianCitNo) {
+                    document.getElementById('inCitNo').value = parsedData.guardianCitNo;
+                    extractCount++;
+                } else if (parsedData.citNo) {
+                    document.getElementById('inCitNo').value = parsedData.citNo;
+                    extractCount++;
+                }
+
+                if (parsedData.guardianCitDistrict) {
+                    document.getElementById('inCitDistrict').value = parsedData.guardianCitDistrict;
+                } else if (parsedData.citDistrict) {
+                    document.getElementById('inCitDistrict').value = parsedData.citDistrict;
+                }
+
+                if (parsedData.name) {
+                    document.getElementById('inChildBeneficiaryName').value = parsedData.name;
+                    extractCount++;
+                }
+
+                if (parsedData.accountNo) {
+                    let rawAcc = parsedData.accountNo;
+                    if (/^[0-9०-९\s\-]+$/.test(rawAcc) && /[0-9०-९]/.test(rawAcc)) {
+                        document.getElementById('inChildAccountNo').value = rawAcc;
+                        extractCount++;
+                    }
+                }
+
+                if (parsedData.targetGroup) {
+                    document.getElementById('inChildTargetGroup').value = parsedData.targetGroup;
+                    extractCount++;
+                }
+
+                if (parsedData.bankKey) {
+                    selectBank(parsedData.bankKey);
+                    extractCount++;
+                }
+
+                if (extractCount > 0) {
+                    showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा बालबालिका खाता बन्दका विवरणहरू सफलतापूर्वक छानिए (Parsed) ।`);
+                } else {
+                    showBadge(false, `❌ मिल्ने विवरण फेला परेन । ढाँचा जाँच गर्नुहोस् ।`);
+                }
+
             } else {
                 // Populate OPEN_ACCOUNT mode inputs
                 const isChildTarget = (parsedData.targetGroup && /बालबालिका|बाल\s*पोषण|नाबालक/i.test(parsedData.targetGroup)) || Boolean(parsedData.guardianName || parsedData.guardianCitNo);
@@ -1250,6 +1393,7 @@
         function updateDoc() {
             const mode    = (document.getElementById('currentMode') || {}).value || 'OPEN_ACCOUNT';
             const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
+            const isChildClose = (mode === 'CLOSE_ACCOUNT_CHILD');
 
             const ay      = (document.getElementById('inPatraSankhya') || {}).value || '';
             const chalani = document.getElementById('inChalani').value     || '';
@@ -1361,6 +1505,64 @@
                         <td class="label-col">खाता नं.</td>
                         <td class="sep-col">:</td>
                         <td class="val-col"><b>${deceasedAccNo}</b></td>
+                    </tr>
+                `;
+
+            } else if (isChildClose) {
+                // ── CHILD ACCOUNT CLOSURE MODE ──
+                const applicantName = document.getElementById('inName').value.trim() || '.........................';
+                const citNo = document.getElementById('inCitNo').value.trim();
+                const citDist = document.getElementById('inCitDistrict').value.trim();
+
+                let citInfoStr = "";
+                if (citNo || citDist) {
+                    const citParts = [];
+                    if (citNo) citParts.push(`ना.प्र.नं.${citNo}`);
+                    if (citDist) citParts.push(`जारी जिल्ला: ${citDist}`);
+                    citInfoStr = ` (${citParts.join(', ')})`;
+                }
+
+                // Child relation (उदा: छोरी)
+                let childRelation = "";
+                const chRelSel = document.getElementById('inChildRelationSelect');
+                if (chRelSel) {
+                    childRelation = (chRelSel.value === 'CUSTOM')
+                        ? (document.getElementById('inChildRelation').value.trim() || 'छोरी')
+                        : chRelSel.value;
+                } else {
+                    childRelation = (document.getElementById('inChildRelation') || {}).value || 'छोरी';
+                }
+
+                // Guardian relation (उदा: बुवा)
+                let guardianRel = "";
+                const gRelSel = document.getElementById('inChildGuardianRelationSelect');
+                if (gRelSel) {
+                    guardianRel = (gRelSel.value === 'CUSTOM')
+                        ? (document.getElementById('inChildGuardianRelation').value.trim() || 'बुवा')
+                        : gRelSel.value;
+                } else {
+                    guardianRel = (document.getElementById('inChildGuardianRelation') || {}).value || 'बुवा';
+                }
+
+                const childName = document.getElementById('inChildBeneficiaryName').value.trim() || '.........................';
+                const targetGroup = document.getElementById('inChildTargetGroup').value.trim() || 'दलित बालबालिका';
+                const childAccNo = document.getElementById('inChildAccountNo').value.trim() || '..................................';
+
+                bodyTextEl.innerHTML = `
+                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${childRelation}</span> <span style="font-weight:bold;">${childName}</span>ले <span style="font-weight:bold;">${targetGroup}</span> अन्तर्गत सामाजिक सुरक्षा भत्ता प्राप्त गरिरहनुभएको र हाल निजको सामाजिक सुरक्षा अन्तर्गत ${targetGroup}ले प्राप्त गर्ने भत्ताको उमेर सिमा पुरा भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं.<span style="font-weight:bold;">${childAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${guardianRel}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकाश गरी उक्त बैंक खाता बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ l
+                `;
+
+                document.getElementById('tapasilHeaderBlock').innerText = "लाभग्राहीको विवरण:";
+                document.getElementById('tapasilTable').innerHTML = `
+                    <tr>
+                        <td class="label-col">नामथर</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><b>${childName}</b></td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">खाता नं.</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><b>${childAccNo}</b></td>
                     </tr>
                 `;
 
@@ -1523,6 +1725,22 @@
                 heirRelation = (document.getElementById('inHeirRelation') || {}).value || '';
             }
 
+            let childRelationVal = "";
+            const chRelSel = document.getElementById('inChildRelationSelect');
+            if (chRelSel) {
+                childRelationVal = (chRelSel.value === 'CUSTOM') ? document.getElementById('inChildRelation').value.trim() : chRelSel.value;
+            } else {
+                childRelationVal = (document.getElementById('inChildRelation') || {}).value || '';
+            }
+
+            let childGuardianRelationVal = "";
+            const chGRelSel = document.getElementById('inChildGuardianRelationSelect');
+            if (chGRelSel) {
+                childGuardianRelationVal = (chGRelSel.value === 'CUSTOM') ? document.getElementById('inChildGuardianRelation').value.trim() : chGRelSel.value;
+            } else {
+                childGuardianRelationVal = (document.getElementById('inChildGuardianRelation') || {}).value || '';
+            }
+
             const chkAddr = document.getElementById('chkCustomAddress');
             const isCustomAddress = !!(chkAddr && chkAddr.checked);
             const applicantDistrict = isCustomAddress ? (document.getElementById('inApplicantDistrict').value.trim() || 'झापा') : 'झापा';
@@ -1584,7 +1802,14 @@
                 deceasedNid:         document.getElementById('inDeceasedNid').value.trim() || '',
                 deceasedAccountNo:   document.getElementById('inDeceasedAccountNo').value.trim() || '',
 
-                subject:             mode === 'CLOSE_ACCOUNT_DECEASED' ? "मृतकको बैंक खाता बन्द सिफारिस" : "सामाजिक सुरक्षा बैंक सिफारिस",
+                // Child Account Closure specific
+                childBeneficiaryName: document.getElementById('inChildBeneficiaryName') ? document.getElementById('inChildBeneficiaryName').value.trim() : '',
+                childRelation:        childRelationVal,
+                childGuardianRelation: childGuardianRelationVal,
+                childTargetGroup:     document.getElementById('inChildTargetGroup') ? document.getElementById('inChildTargetGroup').value.trim() : '',
+                childAccountNo:       document.getElementById('inChildAccountNo') ? document.getElementById('inChildAccountNo').value.trim() : '',
+
+                subject:             mode === 'CLOSE_ACCOUNT_DECEASED' ? "मृतकको बैंक खाता बन्द सिफारिस" : (mode === 'CLOSE_ACCOUNT_CHILD' ? "बालबालिका बैंक खाता बन्द सिफारिस" : "सामाजिक सुरक्षा बैंक सिफारिस"),
                 signAuth:            document.getElementById('inSignAuthority').value,
                 customSignName:      document.getElementById('inCustomSignName').value.trim(),
                 customSignTitle:     document.getElementById('inCustomSignTitle').value.trim(),
@@ -1626,12 +1851,15 @@
             tbody.innerHTML = '';
             let counter = 0;
             globalDatabase.forEach((rec) => {
-                if (search && !(rec.name || '').toLowerCase().includes(search) && !(rec.deceasedName || '').toLowerCase().includes(search)) return;
+                if (search && !(rec.name || '').toLowerCase().includes(search) && !(rec.deceasedName || '').toLowerCase().includes(search) && !(rec.childBeneficiaryName || '').toLowerCase().includes(search)) return;
                 counter++;
-                const isDeceased = rec.sifarishMode === 'CLOSE_ACCOUNT_DECEASED';
+                const isDeceased   = rec.sifarishMode === 'CLOSE_ACCOUNT_DECEASED';
+                const isChildClose = rec.sifarishMode === 'CLOSE_ACCOUNT_CHILD';
                 let desc = '';
                 if (isDeceased) {
                     desc = `<span style="color:#e53e3e; font-weight:bold;">⚰️ खाता बन्द (${rec.deceasedName || 'मृतक'})</span>`;
+                } else if (isChildClose) {
+                    desc = `<span style="color:#dd6b20; font-weight:bold;">👶 बालबालिका खाता बन्द (${rec.childBeneficiaryName || 'लाभग्राही'})</span>`;
                 } else if (rec.isChild) {
                     desc = `<span style="color:#319795; font-weight:bold;">👶 बालबालिका (${rec.guardianName ? 'संरक्षक: ' + rec.guardianName : (rec.targetGroup || 'सा.सु.')})</span>`;
                 } else {
@@ -1705,7 +1933,7 @@
             document.getElementById('inTargetGroup').value        = rec.targetGroup || '';
             document.getElementById('inNid').value                = rec.nid || '';
 
-            // Restore Child & Guardian details
+            // Restore Child & Guardian details (Account Opening)
             const isChildRec = !!rec.isChild;
             const chkIsChild = document.getElementById('chkIsChild');
             if (chkIsChild) {
@@ -1800,6 +2028,51 @@
             document.getElementById('inDeceasedCitNo').value      = rec.deceasedCitNo || '';
             document.getElementById('inDeceasedNid').value        = rec.deceasedNid || '';
             document.getElementById('inDeceasedAccountNo').value  = rec.deceasedAccountNo || '';
+
+            // Restore Child Account Closure fields
+            if (document.getElementById('inChildBeneficiaryName')) {
+                document.getElementById('inChildBeneficiaryName').value = rec.childBeneficiaryName || '';
+            }
+            if (document.getElementById('inChildTargetGroup')) {
+                document.getElementById('inChildTargetGroup').value = rec.childTargetGroup || 'दलित बालबालिका';
+            }
+            if (document.getElementById('inChildAccountNo')) {
+                document.getElementById('inChildAccountNo').value = rec.childAccountNo || '';
+            }
+
+            const chRelVal = rec.childRelation || 'छोरी';
+            const chRelSelect = document.getElementById('inChildRelationSelect');
+            const customChRelInput = document.getElementById('inChildRelation');
+            if (chRelSelect) {
+                const options = Array.from(chRelSelect.options).map(o => o.value);
+                if (options.includes(chRelVal) && chRelVal !== 'CUSTOM') {
+                    chRelSelect.value = chRelVal;
+                    if (customChRelInput) customChRelInput.style.display = 'none';
+                } else if (chRelVal) {
+                    chRelSelect.value = 'CUSTOM';
+                    if (customChRelInput) {
+                        customChRelInput.style.display = 'block';
+                        customChRelInput.value = chRelVal;
+                    }
+                }
+            }
+
+            const chGRelVal = rec.childGuardianRelation || 'बुवा';
+            const chGRelSelect = document.getElementById('inChildGuardianRelationSelect');
+            const customChGRelInput = document.getElementById('inChildGuardianRelation');
+            if (chGRelSelect) {
+                const options = Array.from(chGRelSelect.options).map(o => o.value);
+                if (options.includes(chGRelVal) && chGRelVal !== 'CUSTOM') {
+                    chGRelSelect.value = chGRelVal;
+                    if (customChGRelInput) customChGRelInput.style.display = 'none';
+                } else if (chGRelVal) {
+                    chGRelSelect.value = 'CUSTOM';
+                    if (customChGRelInput) {
+                        customChGRelInput.style.display = 'block';
+                        customChGRelInput.value = chGRelVal;
+                    }
+                }
+            }
 
             // Restore fiscal year
             document.getElementById('inFiscalYear').value = rec.fiscalYear || rec.ay || '';
