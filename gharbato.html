@@ -118,11 +118,11 @@
         <div class="form-group"
             style="margin-top: 15px; background: #f0fff4; padding: 12px; border: 1.5px solid #c6f6d5; border-radius: 8px;">
             <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; color: #22543d; margin-bottom: 0;">
-                <input type="checkbox" id="chkLandUseZone" onchange="toggleLandUseSection(); updateDoc();" style="width: 18px; height: 18px; cursor: pointer;">
+                <input type="checkbox" id="chkLandUseZone" onchange="toggleLandUseSection(); updateDoc();" style="width: 18px; height: 18px; cursor: pointer;" checked>
                 <span>🗺️ ऐन तथा निर्णय व्यहोरा खुलाउने</span>
             </label>
 
-            <div id="landUseZoneContainer" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #bbf7d0;">
+            <div id="landUseZoneContainer" style="display: block; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #bbf7d0;">
                 <label style="font-size: 0.88rem; color: #166534; font-weight: 700; margin-bottom: 8px; display: block;">वर्गीकरण क्षेत्रको ३ प्रकार (कुनै एक रोज्नुहोस्):</label>
                 <div class="radio-container" style="background: #dcfce7; border: 1px solid #bbf7d0;">
                     <div class="radio-option">
@@ -262,10 +262,10 @@
                 <tbody id="outputTableBody"></tbody>
             </table>
 
-            <div class="landuse-container" id="lblLandUseStatement" style="margin-top: 15px; text-align: justify; text-justify: inter-word; font-size: 12.5pt; line-height: 1.5; display: none;">
+            <div class="landuse-container" id="lblLandUseStatement" style="margin-top: 15px; text-align: justify; text-justify: inter-word; font-size: 12.5pt; line-height: 1.5; display: block;">
                 उक्त <span id="lblKittaPhrase">माथि उल्लेखित कित्ता नम्बरको</span> <span id="lblLandPlural1">जग्गा</span> भू-उपयोग ऐन २०७६ को दफा २० र गौरादह नगरपालिकाको मिति: २०७९/१०/२६ को
                 निर्णय अनुसार उक्त <span id="lblLandPlural2">जग्गा</span> <span id="lblSelectedZone"
-                    style="text-decoration: underline; font-weight: bold;">............</span> भित्र पर्ने
+                    style="text-decoration: underline; font-weight: bold;">व्यवसायिक शहरी क्षेत्र</span> भित्र पर्ने
                 व्यहोरा अनुरोध छ ।
             </div>
 
