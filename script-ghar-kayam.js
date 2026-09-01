@@ -105,7 +105,7 @@ function addHouseRow(data = null) {
                     <input type="text" class="inp-area" placeholder="३३८.६३ व.मि" value="${data ? data.area : ''}" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
-                    <label>जम्मा क्षेत्रफल (व.फि):</label>
+                    <label>घरको क्षेत्रफल (व.फि):</label>
                     <input type="text" class="inp-total-area" placeholder="१३१२.४९ व.फि" value="${data ? data.totalArea : ''}" oninput="updateDoc()">
                 </div>
             </div>

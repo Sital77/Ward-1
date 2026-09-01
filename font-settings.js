@@ -322,6 +322,9 @@
                         if (localOverride && templateId === 'suchana-tans' && (localOverride.template_content.includes('A4-242.jpg') || localOverride.template_content.includes('letterheadType'))) {
                             localOverride = null;
                         }
+                        if (localOverride && templateId === 'ghar-kayam' && (localOverride.template_content.includes('जम्मा<br>क्षेत्रफल') || localOverride.template_content.includes('जम्मा क्षेत्रफल'))) {
+                            localOverride = null;
+                        }
                         if (localOverride && templateId === 'aamdani-pramanit' && (!localOverride.template_content.includes('globalLandAddr') || localOverride.template_content.includes('width: 250px;'))) {
                             localOverride = null;
                         }
@@ -354,7 +357,7 @@
                             isOutdated = true;
                         } else if (templateId === 'bank-sifarish' && (!data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
                             isOutdated = true;
-                        } else if (templateId === 'ghar-kayam' && (!data.template_content.includes('पूर्जा/सेस्तामा') || data.template_content.includes('पूजी') || data.template_content.includes('किताामा'))) {
+                        } else if (templateId === 'ghar-kayam' && (!data.template_content.includes('पूर्जा/सेस्तामा') || data.template_content.includes('पूजी') || data.template_content.includes('किताामा') || data.template_content.includes('जम्मा<br>क्षेत्रफल') || data.template_content.includes('जम्मा क्षेत्रफल'))) {
                             isOutdated = true;
                         } else if (templateId === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
                             isOutdated = true;
