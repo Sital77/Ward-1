@@ -325,6 +325,9 @@
                         if (localOverride && templateId === 'aamdani-pramanit' && (!localOverride.template_content.includes('globalLandAddr') || localOverride.template_content.includes('width: 250px;'))) {
                             localOverride = null;
                         }
+                        if (localOverride && templateId === 'pariwarik-bibaran' && (!localOverride.template_content.includes('जारी मिति') || !localOverride.template_content.includes('ठेगाना'))) {
+                            localOverride = null;
+                        }
                     }
                 } catch(e) {}
 
@@ -356,6 +359,8 @@
                         } else if (templateId === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
                             isOutdated = true;
                         } else if (templateId === 'aamdani-pramanit' && (!data.template_content.includes('globalLandAddr') || data.template_content.includes('width: 250px;') || !data.template_content.includes('lblLandDetails'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'pariwarik-bibaran' && (!data.template_content.includes('जारी मिति') || !data.template_content.includes('ठेगाना'))) {
                             isOutdated = true;
                         }
 

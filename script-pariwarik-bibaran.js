@@ -77,34 +77,56 @@ window.addFamilyRow = function (data = null) {
     const container = document.getElementById('familyRowsContainer');
     
     // Determine values to populate
-    let nameVal = data ? data.name : '';
-    let docVal = data ? data.document : '';
-    let relVal = data ? data.relationship : '';
+    let nameVal = data ? (data.name || '') : '';
+    let docVal = data ? (data.document || '') : '';
+    let issueDateVal = data ? (data.issueDate || '') : '';
+    let addressVal = data ? (data.address || '') : '';
+    let relVal = data ? (data.relationship || '') : '';
+
+    const selectedWada = document.getElementById('inWadaNo') ? document.getElementById('inWadaNo').value : '१';
+    const defaultAddr = `गौरादह न.पा.-${selectedWada}`;
 
     if (activeRowIds.length === 1 && !data && isFirstRowSynced) {
         nameVal = document.getElementById('inName').value;
         docVal = document.getElementById('inCitNo').value;
-        relVal = 'आफैँ';
+        issueDateVal = document.getElementById('inCitDate') ? document.getElementById('inCitDate').value : '';
+        addressVal = defaultAddr;
+        relVal = 'निवेदक';
+    } else if (!data && !addressVal) {
+        addressVal = defaultAddr;
     }
 
     const rowHtml = `
         <div class="member-row-block" id="${rowId}">
-            <div class="row-num-badge">क्रम संख्या: <span class="row-index-display"></span></div>
-            <button type="button" class="btn-delete-row" id="del_btn_${rowId}" onclick="removeFamilyRow('${rowId}')">हटाउनुस्</button>
-            
-            <div class="form-group" style="margin-bottom: 8px;">
-                <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">नाम थर:</label>
-                <input type="text" class="input-member-name" placeholder="उदा: रोजना श्रेष्ठ" value="${nameVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div class="row-num-badge">क्रम संख्या: <span class="row-index-display"></span></div>
+                <button type="button" class="btn-delete-row" id="del_btn_${rowId}" onclick="removeFamilyRow('${rowId}')" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:3px 8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">❌ हटाउनुस्</button>
             </div>
             
-            <div class="row-grid" style="margin-bottom: 0;">
+            <div class="form-group" style="margin-bottom: 8px;">
+                <label style="font-size:0.8rem; color:#2d3748; font-weight:700;">नाम थर (अनिवार्य):</label>
+                <input type="text" class="input-member-name" placeholder="उदा: रेखा देवी गन्गाई" value="${nameVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">ना.प्र.नं./ज.द.नं.:</label>
-                    <input type="text" class="input-member-document" placeholder="उदा: ३४१५/२४०" value="${docVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
+                    <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">ना.प्र.नं./ज.द.नं. (अनिवार्य):</label>
+                    <input type="text" class="input-member-document" placeholder="उदा: ०४०३०४८/३११ वा ज.द.नं. ५१" value="${docVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">नाता:</label>
-                    <input type="text" class="input-member-relationship" list="relList" placeholder="उदा: श्रीमती" value="${relVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
+                    <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">नाता (अनिवार्य):</label>
+                    <input type="text" class="input-member-relationship" list="relList" placeholder="उदा: निवेदक / पति / छोरी" value="${relVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">जारी मिति (ऐच्छिक):</label>
+                    <input type="text" class="input-member-issuedate" placeholder="उदा: २०६३/१०/०८" value="${issueDateVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size:0.75rem; color:#4a5568; font-weight:700;">ठेगाना (ऐच्छिक):</label>
+                    <input type="text" class="input-member-address" placeholder="उदा: गौरादह न.पा.-१" value="${addressVal}" oninput="handleFirstRowManualEdit('${rowId}'); updateDoc()">
                 </div>
             </div>
         </div>
@@ -112,16 +134,18 @@ window.addFamilyRow = function (data = null) {
     container.insertAdjacentHTML('beforeend', rowHtml);
     reindexFormRows();
     updateDoc();
-}
+};
 
 window.removeFamilyRow = function (rowId) {
     if (activeRowIds.length > 0 && activeRowIds[0] === rowId) {
         // If first row is cleared, empty its inputs and stop auto-sync
         const block = document.getElementById(rowId);
         if (block) {
-            block.querySelector('.input-member-name').value = '';
-            block.querySelector('.input-member-document').value = '';
-            block.querySelector('.input-member-relationship').value = '';
+            if (block.querySelector('.input-member-name')) block.querySelector('.input-member-name').value = '';
+            if (block.querySelector('.input-member-document')) block.querySelector('.input-member-document').value = '';
+            if (block.querySelector('.input-member-issuedate')) block.querySelector('.input-member-issuedate').value = '';
+            if (block.querySelector('.input-member-address')) block.querySelector('.input-member-address').value = '';
+            if (block.querySelector('.input-member-relationship')) block.querySelector('.input-member-relationship').value = '';
         }
         isFirstRowSynced = false;
         updateDoc();
@@ -134,7 +158,7 @@ window.removeFamilyRow = function (rowId) {
     activeRowIds = activeRowIds.filter(id => id !== rowId);
     reindexFormRows();
     updateDoc();
-}
+};
 
 function reindexFormRows() {
     activeRowIds.forEach((id, index) => {
@@ -163,19 +187,30 @@ window.updateDoc = function () {
         if (firstRowBlock) {
             const applicantName = document.getElementById('inName').value;
             const citNo = document.getElementById('inCitNo').value;
+            const citDate = document.getElementById('inCitDate') ? document.getElementById('inCitDate').value : '';
+            const selectedWada = document.getElementById('inWadaNo') ? document.getElementById('inWadaNo').value : '१';
+            const defaultAddr = `गौरादह न.पा.-${selectedWada}`;
             
             const nameInput = firstRowBlock.querySelector('.input-member-name');
             const docInput = firstRowBlock.querySelector('.input-member-document');
+            const issueDateInput = firstRowBlock.querySelector('.input-member-issuedate');
+            const addrInput = firstRowBlock.querySelector('.input-member-address');
             const relInput = firstRowBlock.querySelector('.input-member-relationship');
             
-            if (document.activeElement !== nameInput) {
+            if (nameInput && document.activeElement !== nameInput) {
                 nameInput.value = applicantName;
             }
-            if (document.activeElement !== docInput) {
+            if (docInput && document.activeElement !== docInput) {
                 docInput.value = citNo;
             }
-            if (document.activeElement !== relInput) {
-                relInput.value = 'आफैँ';
+            if (issueDateInput && document.activeElement !== issueDateInput && citDate) {
+                issueDateInput.value = citDate;
+            }
+            if (addrInput && document.activeElement !== addrInput && !addrInput.value) {
+                addrInput.value = defaultAddr;
+            }
+            if (relInput && document.activeElement !== relInput && !relInput.value) {
+                relInput.value = 'निवेदक';
             }
         }
     }
@@ -242,21 +277,25 @@ window.updateDoc = function () {
     activeRowIds.forEach((id, index) => {
         const block = document.getElementById(id);
         if (block) {
-            const mName = block.querySelector('.input-member-name').value || '';
-            const mDoc = block.querySelector('.input-member-document').value || '-';
-            const mRel = block.querySelector('.input-member-relationship').value || '-';
+            const mName = block.querySelector('.input-member-name') ? block.querySelector('.input-member-name').value.trim() : '';
+            const mDoc = block.querySelector('.input-member-document') ? block.querySelector('.input-member-document').value.trim() : '';
+            const mIssueDate = block.querySelector('.input-member-issuedate') ? block.querySelector('.input-member-issuedate').value.trim() : '';
+            const mAddress = block.querySelector('.input-member-address') ? block.querySelector('.input-member-address').value.trim() : '';
+            const mRel = block.querySelector('.input-member-relationship') ? block.querySelector('.input-member-relationship').value.trim() : '';
             
             tbody.insertAdjacentHTML('beforeend', `
                 <tr>
-                    <td>${window.toNepaliDigit(index + 1)}</td>
-                    <td style="text-align: left; padding-left: 8px; font-weight: bold;">${mName || '................'}</td>
-                    <td>${mDoc}</td>
-                    <td>${mRel}</td>
+                    <td>${window.toNepaliDigit(index + 1)}.</td>
+                    <td style="text-align: left; padding-left: 8px; font-weight: 600;">${mName || '................'}</td>
+                    <td>${mDoc || '-'}</td>
+                    <td>${mIssueDate || '-'}</td>
+                    <td>${mAddress || '-'}</td>
+                    <td>${mRel || '-'}</td>
                 </tr>
             `);
         }
     });
-}
+};
 
 // ६. क्लाउडमा डाटा सेभ गर्ने फङ्सन
 window.printAndSaveSystem = async function () {
@@ -270,9 +309,11 @@ window.printAndSaveSystem = async function () {
         const block = document.getElementById(id);
         if (block) {
             familyRecords.push({
-                name: block.querySelector('.input-member-name').value.trim(),
-                document: block.querySelector('.input-member-document').value.trim(),
-                relationship: block.querySelector('.input-member-relationship').value.trim()
+                name: block.querySelector('.input-member-name') ? block.querySelector('.input-member-name').value.trim() : '',
+                document: block.querySelector('.input-member-document') ? block.querySelector('.input-member-document').value.trim() : '',
+                issueDate: block.querySelector('.input-member-issuedate') ? block.querySelector('.input-member-issuedate').value.trim() : '',
+                address: block.querySelector('.input-member-address') ? block.querySelector('.input-member-address').value.trim() : '',
+                relationship: block.querySelector('.input-member-relationship') ? block.querySelector('.input-member-relationship').value.trim() : ''
             });
         }
     });

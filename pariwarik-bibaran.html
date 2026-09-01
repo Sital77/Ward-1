@@ -349,10 +349,12 @@
             <table class="details-table">
                 <thead>
                     <tr>
-                        <th style="width: 8%;">क्र.स.</th>
-                        <th style="width: 42%;">नाम थर</th>
-                        <th style="width: 30%;">ना.प्र.नं./ज.द.नं.</th>
-                        <th style="width: 20%;">नाता</th>
+                        <th style="width: 7%;">क्र.स.</th>
+                        <th style="width: 27%;">नाम थर</th>
+                        <th style="width: 22%;">ना.प्र.नं./ज.द.नं.</th>
+                        <th style="width: 17%;">जारी मिति</th>
+                        <th style="width: 16%;">ठेगाना</th>
+                        <th style="width: 11%;">नाता</th>
                     </tr>
                 </thead>
                 <tbody id="outputTableBody"></tbody>
@@ -372,16 +374,25 @@
 
     <!-- datalist for relationships -->
     <datalist id="relList">
+        <option value="निवेदक"></option>
         <option value="आफैँ"></option>
+        <option value="पति"></option>
+        <option value="पत्नी"></option>
         <option value="श्रीमती"></option>
         <option value="श्रीमान्"></option>
         <option value="छोरा"></option>
         <option value="छोरी"></option>
-        <option value="बुहारी"></option>
         <option value="बुबा"></option>
         <option value="आमा"></option>
+        <option value="बुहारी"></option>
         <option value="नाति"></option>
         <option value="नातिनी"></option>
+        <option value="भाइ"></option>
+        <option value="बहिनी"></option>
+        <option value="दाजु"></option>
+        <option value="दिदी"></option>
+        <option value="ससुरा"></option>
+        <option value="सासू"></option>
     </datalist>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -389,8 +400,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="font-settings.js"></script>
-    <script src="script-pariwarik-bibaran.js"></script>
+    <script src="font-settings.js?v=2.6"></script>
+    <script src="script-pariwarik-bibaran.js?v=2.6"></script>
 </body>
 
 </html>
