@@ -80,11 +80,33 @@
             text-decoration: none;
         }
 
+        #btnPrintLogo {
+            background: linear-gradient(135deg, #e51a23 0%, #c53030 100%);
+            border: 1px solid #c53030;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(229, 26, 35, 0.25);
+        }
+
         #themeToggle:hover,
         #adminBtn:hover,
         #logoutBtn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #btnPrintLogo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(229, 26, 35, 0.4);
+            background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
         }
 
         body.dark-mode #themeToggle,
@@ -93,6 +115,12 @@
             background: #4a5568;
             color: #f7fafc;
             border-color: #718096;
+        }
+
+        body.dark-mode #btnPrintLogo {
+            background: linear-gradient(135deg, #e51a23 0%, #9b2c2c 100%);
+            color: #ffffff;
+            border-color: #e51a23;
         }
 
         .muni-header {
@@ -803,7 +831,8 @@
             }
             #themeToggle,
             #adminBtn,
-            #logoutBtn {
+            #logoutBtn,
+            #btnPrintLogo {
                 padding: 6px 12px;
                 font-size: 0.85rem;
             }
@@ -891,6 +920,7 @@
 
     <div class="mega-dashboard">
         <div class="top-bar-buttons">
+            <button id="btnPrintLogo" onclick="printLogoFile()" title="लोगो फाइल छाप्नुहोस् / Print Logo File">🖨️ लोगो छाप्नुस</button>
             <button id="themeToggle">🌙 Dark</button>
             <button id="logoutBtn" style="display: none;" onclick="sifarishLogout()">🚪 लग-आउट</button>
         </div>
@@ -1891,6 +1921,42 @@
             updateDashboardWardDisplay();
             fetchLandData().catch(e => { /* logged */ });
         });
+
+        // Logo PDF print function
+        function printLogoFile() {
+            const pdfUrl = 'logo-file-sital.pdf';
+            let iframe = document.getElementById('logoPrintIframe');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'logoPrintIframe';
+                iframe.style.position = 'fixed';
+                iframe.style.right = '0';
+                iframe.style.bottom = '0';
+                iframe.style.width = '0';
+                iframe.style.height = '0';
+                iframe.style.border = 'none';
+                iframe.style.visibility = 'hidden';
+                iframe.src = pdfUrl;
+                document.body.appendChild(iframe);
+                iframe.onload = function () {
+                    setTimeout(function () {
+                        try {
+                            iframe.contentWindow.focus();
+                            iframe.contentWindow.print();
+                        } catch (e) {
+                            window.open(pdfUrl, '_blank');
+                        }
+                    }, 600);
+                };
+            } else {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch (e) {
+                    window.open(pdfUrl, '_blank');
+                }
+            }
+        }
 
         // Anti-debugging source code protection
         function protectSourceCode() {
