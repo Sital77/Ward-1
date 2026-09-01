@@ -33,9 +33,10 @@
 
         /* Inline fill-space spans */
         .fill-space {
-            display: inline-block;
-            min-width: 80px;
-            text-align: center;
+            display: inline;
+            font-weight: 700;
+            color: #000;
+            padding: 0 2px;
         }
 
         /* ── Section Cards ── */
@@ -68,53 +69,11 @@
         .body-section .section-label { color: #2b6cb0; }
         .body-section label { color: #2c5282; }
 
-        /* ── Image Letterhead Banner Styles ── */
-        .image-letterhead-container {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 2px;
-        }
-        .letterhead-banner-img {
-            width: 100%;
-            height: auto;
-            max-height: 135px;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
-        }
-        .image-lh-meta-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            width: 100%;
-            font-size: 11.5pt;
-            font-weight: 600;
-            color: #000;
-            margin-top: 4px;
-            margin-bottom: 6px;
-            font-family: 'Mukta', sans-serif !important;
-        }
-        .image-lh-meta-row * {
-            font-family: 'Mukta', sans-serif !important;
-        }
-        .lh-meta-left {
-            text-align: left;
-            line-height: 1.45;
-        }
-        .lh-meta-right {
-            text-align: right;
-            line-height: 1.45;
-        }
-
         /* Print: hide input panel */
         @media print {
             .input-panel  { display: none !important; }
             .preview-panel { width: 100% !important; }
             .modal-overlay { display: none !important; }
-            .letterhead-banner-img {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
         }
     </style>
 </head>
@@ -134,31 +93,6 @@
         <!-- ══ LETTERHEAD SECTION ══ -->
         <div class="section-card lh-section">
             <div class="section-label">📄 लेटर हेड विवरण</div>
-
-            <!-- लेटर हेड प्रकार छनोट -->
-            <div class="form-group" style="background: #edf2f7; padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0;">
-                <label style="font-weight: 700; color: #2d3748; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                    <span>🖼️ लेटर हेड प्रकार:</span>
-                    <span style="font-size: 0.75rem; background: #e2e8f0; color: #4a5568; padding: 2px 6px; border-radius: 4px;">A4 242 JPG</span>
-                </label>
-                <div style="display: flex; gap: 12px; margin-top: 4px;">
-                    <label style="font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600; color: #2b6cb0;">
-                        <input type="radio" name="lhTypeRadio" value="IMAGE" checked onchange="toggleLetterheadType()">
-                        इमेज लेटर हेड
-                    </label>
-                    <label style="font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600; color: #4a5568;">
-                        <input type="radio" name="lhTypeRadio" value="TEXT" onchange="toggleLetterheadType()">
-                        साविक टेक्स्ट हेड
-                    </label>
-                </div>
-                <div id="lhImgControls" style="margin-top: 10px; border-top: 1px dashed #cbd5e0; padding-top: 8px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #4a5568; margin-bottom: 4px;">
-                        <span>📐 लेटरहेड साइज (Height):</span>
-                        <b id="lhHeightVal" style="color: #2b6cb0;">१३५ px</b>
-                    </div>
-                    <input type="range" id="inLhHeight" min="80" max="220" value="135" oninput="adjustLhHeight(this.value)" style="width: 100%;">
-                </div>
-            </div>
 
             <!-- प.सं. (letterhead) -->
             <div class="form-group">
@@ -270,7 +204,7 @@
                 <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
                 <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
                 <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
-                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
+                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
                 <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
                 <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
             </select>
@@ -319,18 +253,13 @@
     <div class="preview-panel">
         <div class="a4-page">
 
-            <!-- ── Image Letterhead ── -->
-            <div id="imageLetterheadContainer" class="image-letterhead-container">
-                <img id="letterheadBannerImg" src="A4-242.jpg" alt="लेटर हेड" class="letterhead-banner-img">
-            </div>
-
-            <!-- ── Text Letterhead (साविक) ── -->
-            <div id="textLetterheadContainer" class="letterhead-container" style="display: none;">
+            <!-- ── Letterhead (साविक) ── -->
+            <div class="letterhead-container">
                 <div class="lh-left">
                     <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
                     <div class="lh-meta">
-                        <div>प.सं. <span id="lblAY_text" class="fill-space" style="min-width:80px;"></span></div>
-                        <div>च.नं. <span id="lblChalani_text" class="fill-space" style="min-width:60px;"></span></div>
+                        <div>प.सं. <span id="lblAY" class="fill-space"></span></div>
+                        <div>च.नं. <span id="lblChalani" class="fill-space"></span></div>
                     </div>
                 </div>
                 <div class="lh-center">
@@ -341,20 +270,8 @@
                     <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
                 </div>
                 <div class="lh-right">
-                    <div class="miti-block">मिति : <span id="lblMiti_text" class="fill-space" style="min-width:90px;"></span></div>
-                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat_text" class="fill-space" style="min-width:50px;"></span></div>
-                </div>
-            </div>
-
-            <!-- ── Meta Row for Image Letterhead ── -->
-            <div id="imageLhMetaRow" class="image-lh-meta-row">
-                <div class="lh-meta-left">
-                    <div>प.सं. <span id="lblAY" class="fill-space" style="min-width:80px;"></span></div>
-                    <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width:60px;"></span></div>
-                </div>
-                <div class="lh-meta-right">
-                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width:90px;"></span></div>
-                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space" style="min-width:50px;"></span></div>
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space"></span></div>
+                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space"></span></div>
                 </div>
             </div>
 
@@ -378,13 +295,7 @@
 
             <!-- ── Body ── -->
             <div class="letter-body-para">
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिकाको आ.व.
-                <span id="lblBodyAY" class="fill-space" style="min-width:90px;"></span>
-                को च.नं.<span id="lblBodyChalani" class="fill-space" style="min-width:60px;"></span>
-                को मिति:
-                <span id="lblPraaptaMiti" class="fill-space" style="min-width:90px;"></span>
-                को प्राप्त पत्र अनुसार गौरादह नगरपालिका वडा नं.<span id="lblBodyWada" class="fill-space" style="min-width:30px;"></span>
-                को सार्वजनिक सूचना पाटीमा सँधियारको नाम जारी भएको १५ दिने सूचना टाँस गरिएको व्यहोरा जानकारी गराइन्छ ।
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिकाको आ.व. <span id="lblBodyAY" class="fill-space"></span> को च.नं. <span id="lblBodyChalani" class="fill-space"></span> को मिति <span id="lblPraaptaMiti" class="fill-space"></span> को प्राप्त पत्र अनुसार गौरादह नगरपालिका वडा नं. <span id="lblBodyWada" class="fill-space"></span> को सार्वजनिक सूचना पाटीमा सँधियारको नाम जारी भएको १५ दिने सूचना टाँस गरिएको व्यहोरा जानकारी गराइन्छ ।
             </div>
 
             <!-- ── Signature ── -->
