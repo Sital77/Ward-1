@@ -156,7 +156,17 @@ function safeSetText(id, text) {
     return el;
 }
 
-// Dynamic Land Rows with Optional Address Fields
+// Toggle Custom Land Address Section
+window.toggleLandAddressFields = function() {
+    const chk = document.getElementById('chkChangeLandAddress');
+    const container = document.getElementById('landAddressContainer');
+    if (chk && container) {
+        container.style.display = chk.checked ? 'block' : 'none';
+    }
+    updateDoc();
+};
+
+// Dynamic Land Rows with Clean 3-Column Layout
 window.addLandRow = function(data = null) {
     landRowCounter++;
     const rowId = 'land_row_' + landRowCounter;
@@ -166,18 +176,11 @@ window.addLandRow = function(data = null) {
     if (!container) return;
 
     const rowHtml = `
-        <div class="builder-row-land" id="${rowId}" style="background:#fff; padding:10px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05); border:1px solid #edf2f7; margin-bottom:10px;">
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:6px;">
-                <input type="text" class="input-sit" placeholder="सिट नं." value="${data && data.sit ? data.sit : ''}" oninput="updateDoc()">
-                <input type="text" class="input-kitta" placeholder="कि.नं." value="${data && data.kitta ? data.kitta : ''}" oninput="updateDoc()">
-                <input type="text" class="input-area" placeholder="क्षेत्रफल" value="${data && data.area ? data.area : ''}" oninput="updateDoc()">
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center;">
-                <input type="text" class="input-land-dist" placeholder="जिल्ला (फरक भएमा)" value="${data && data.dist ? data.dist : ''}" oninput="updateDoc()">
-                <input type="text" class="input-land-palika" placeholder="पालिका (फरक भएमा)" value="${data && data.palika ? data.palika : ''}" oninput="updateDoc()">
-                <input type="text" class="input-land-wada" placeholder="वडा (फरक भएमा)" value="${data && data.wada ? data.wada : ''}" oninput="updateDoc()">
-                <button type="button" class="btn-remove" onclick="removeLandRow('${rowId}')">❌</button>
-            </div>
+        <div class="builder-row-land" id="${rowId}" style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center; background:#fff; padding:8px 10px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05); border:1px solid #edf2f7; margin-bottom:8px;">
+            <input type="text" class="input-sit" placeholder="सिट नं." value="${data && data.sit ? data.sit : ''}" oninput="updateDoc()">
+            <input type="text" class="input-kitta" placeholder="कि.नं." value="${data && data.kitta ? data.kitta : ''}" oninput="updateDoc()">
+            <input type="text" class="input-area" placeholder="क्षेत्रफल" value="${data && data.area ? data.area : ''}" oninput="updateDoc()">
+            <button type="button" class="btn-remove" onclick="removeLandRow('${rowId}')">❌</button>
         </div>
     `;
     container.insertAdjacentHTML('beforeend', rowHtml);
@@ -243,13 +246,7 @@ function generateLandDetailsText() {
         return { text: "सिट नं. ..... कि.नं. ..... को ज.वि. .....", hasCustomAddr: false };
     }
 
-    const globalDist = document.getElementById('inLandDist') ? document.getElementById('inLandDist').value.trim() : '';
-    const globalPalika = document.getElementById('inLandPalika') ? document.getElementById('inLandPalika').value.trim() : '';
-    const globalWada = document.getElementById('inLandWada') ? document.getElementById('inLandWada').value.trim() : '';
-
-    // First pass: check if ANY land row has a per-row custom address specified
-    let anyCustomAddr = false;
-    const landData = [];
+    const parts = [];
     activeLandRowIds.forEach((id) => {
         const block = document.getElementById(id);
         if (!block) return;
@@ -257,45 +254,16 @@ function generateLandDetailsText() {
         const sitInput = block.querySelector('.input-sit');
         const kittaInput = block.querySelector('.input-kitta');
         const areaInput = block.querySelector('.input-area');
-        const distInput = block.querySelector('.input-land-dist');
-        const palikaInput = block.querySelector('.input-land-palika');
-        const wadaInput = block.querySelector('.input-land-wada');
 
         const s = sitInput && sitInput.value.trim() ? sitInput.value.trim() : '';
         const k = kittaInput && kittaInput.value.trim() ? kittaInput.value.trim() : '.....';
         const a = areaInput && areaInput.value.trim() ? areaInput.value.trim() : '.....';
-        const rDist = distInput && distInput.value.trim() ? distInput.value.trim() : '';
-        const rPalika = palikaInput && palikaInput.value.trim() ? palikaInput.value.trim() : '';
-        const rWada = wadaInput && wadaInput.value.trim() ? wadaInput.value.trim() : '';
 
-        if (rDist || rPalika || rWada) {
-            anyCustomAddr = true;
-        }
-
-        landData.push({ s, k, a, rDist, rPalika, rWada });
+        const sitText = s ? `सिट नं. ${s} ` : '';
+        parts.push(`${sitText}कि.नं. ${k} को ज.वि. ${a}`);
     });
 
-    const parts = [];
-    if (anyCustomAddr) {
-        // When different addresses exist, prefix each land item with its full address
-        landData.forEach((row) => {
-            const targetDist = row.rDist || globalDist || '.......';
-            const targetPalika = row.rPalika || globalPalika || '.......';
-            const targetWada = row.rWada || globalWada || '...';
-
-            const addrPrefix = `${targetDist} जिल्ला ${targetPalika} वडा नं. ${targetWada} मा दर्ता कायम रहेको `;
-            const sitText = row.s ? `सिट नं. ${row.s} ` : '';
-            parts.push(`${addrPrefix}${sitText}कि.नं. ${row.k} को ज.वि. ${row.a}`);
-        });
-    } else {
-        // When all lands share the default address, the globalLandAddr element handles the prefix
-        landData.forEach((row) => {
-            const sitText = row.s ? `सिट नं. ${row.s} ` : '';
-            parts.push(`${sitText}कि.नं. ${row.k} को ज.वि. ${row.a}`);
-        });
-    }
-
-    return { text: parts.join(" तथा "), hasCustomAddr: anyCustomAddr };
+    return { text: parts.join(" तथा "), hasCustomAddr: false };
 }
 
 // Main sync engine
@@ -319,22 +287,37 @@ window.updateDoc = function() {
     safeSetText('lblOwnerName', name && name.value ? name.value : '...........................');
 
     const dist = document.getElementById('inDist');
-    safeSetText('lblDist', dist && dist.value ? dist.value : '........');
+    const distVal = dist && dist.value ? dist.value : 'झापा';
+    safeSetText('lblDist', distVal);
 
     const palika = document.getElementById('inPalika');
-    safeSetText('lblPalika', palika && palika.value ? palika.value : '........');
+    const palikaVal = palika && palika.value ? palika.value : 'गौरादह नगरपालिका';
+    safeSetText('lblPalika', palikaVal);
 
     const wadaNo = document.getElementById('inWadaNo');
-    safeSetText('lblWadaBody', wadaNo && wadaNo.value ? wadaNo.value : '...');
+    const wadaVal = wadaNo && wadaNo.value ? wadaNo.value : '१';
+    safeSetText('lblWadaBody', wadaVal);
 
-    const landDist = document.getElementById('inLandDist');
-    safeSetText('lblLandDist', landDist && landDist.value ? landDist.value : '........');
+    // Land Address: Check if custom land address is enabled
+    const chkLandAddr = document.getElementById('chkChangeLandAddress');
+    const isCustomLandAddr = chkLandAddr && chkLandAddr.checked;
 
-    const landPalika = document.getElementById('inLandPalika');
-    safeSetText('lblLandPalika', landPalika && landPalika.value ? landPalika.value : '........');
+    let landDistVal = distVal;
+    let landPalikaVal = palikaVal;
+    let landWadaVal = wadaVal;
 
-    const landWada = document.getElementById('inLandWada');
-    safeSetText('lblLandWada', landWada && landWada.value ? landWada.value : '...');
+    if (isCustomLandAddr) {
+        const inLDist = document.getElementById('inLandDist');
+        const inLPalika = document.getElementById('inLandPalika');
+        const inLWada = document.getElementById('inLandWada');
+        if (inLDist && inLDist.value.trim()) landDistVal = inLDist.value.trim();
+        if (inLPalika && inLPalika.value.trim()) landPalikaVal = inLPalika.value.trim();
+        if (inLWada && inLWada.value.trim()) landWadaVal = inLWada.value.trim();
+    }
+
+    safeSetText('lblLandDist', landDistVal || '........');
+    safeSetText('lblLandPalika', landPalikaVal || '........');
+    safeSetText('lblLandWada', landWadaVal || '...');
 
     const incomeType = document.getElementById('inIncomeType');
     safeSetText('lblIncomeType', incomeType && incomeType.value ? incomeType.value : '......................');
@@ -359,12 +342,6 @@ window.updateDoc = function() {
     // Build Land Details sentence
     const landResult = generateLandDetailsText();
     safeSetText('lblLandDetails', landResult.text);
-
-    // Toggle global land address visibility based on whether custom addresses are used
-    const globalLandAddrEl = document.getElementById('globalLandAddr');
-    if (globalLandAddrEl) {
-        globalLandAddrEl.style.display = landResult.hasCustomAddr ? 'none' : 'inline';
-    }
 
     // Build Income Table and Calculate Total
     const tbody = document.getElementById('outputTableBody');
@@ -409,16 +386,9 @@ window.updateDoc = function() {
         safeSetText('lblTotalAmt', totalIncome > 0 ? window.formatNepaliCurrency(totalIncome) : '...........');
         safeSetText('lblTotalTableAmount', totalIncome > 0 ? window.formatNepaliCurrency(totalIncome) + '/-' : '/-');
 
-        // Auto-convert total income number to Nepali Words
-        const totalWordsInput = document.getElementById('inTotalWords');
-        if (totalWordsInput && (!window._userEditedWords || !totalWordsInput.value.trim())) {
-            if (totalIncome > 0) {
-                totalWordsInput.value = window.convertNumberToNepaliWords(totalIncome) + " रुपैयाँ";
-            } else {
-                totalWordsInput.value = '';
-            }
-        }
-        safeSetText('lblTotalWords', totalWordsInput && totalWordsInput.value ? totalWordsInput.value : '..........................');
+        // Auto-convert total income number to Nepali Words directly in document preview
+        const totalWords = totalIncome > 0 ? (window.convertNumberToNepaliWords(totalIncome) + " रुपैयाँ") : '..........................';
+        safeSetText('lblTotalWords', totalWords);
     }
 
     // Signature logic
@@ -682,13 +652,16 @@ window.editFromDB = function(recordId) {
     if (document.getElementById('inPalika')) document.getElementById('inPalika').value = record.palika || 'गौरादह नगरपालिका';
     if (document.getElementById('inWadaNo')) document.getElementById('inWadaNo').value = record.wadaNo || '१';
     
-    if (document.getElementById('inLandDist')) document.getElementById('inLandDist').value = record.landDist || 'झापा';
-    if (document.getElementById('inLandPalika')) document.getElementById('inLandPalika').value = record.landPalika || 'गौरादह नगरपालिका';
-    if (document.getElementById('inLandWada')) document.getElementById('inLandWada').value = record.landWada || '१';
+    const changeLand = record.changeLandAddress || false;
+    const chkLand = document.getElementById('chkChangeLandAddress');
+    if (chkLand) chkLand.checked = changeLand;
+    window.toggleLandAddressFields();
+
+    if (document.getElementById('inLandDist')) document.getElementById('inLandDist').value = record.landDist || record.dist || 'झापा';
+    if (document.getElementById('inLandPalika')) document.getElementById('inLandPalika').value = record.landPalika || record.palika || 'गौरादह नगरपालिका';
+    if (document.getElementById('inLandWada')) document.getElementById('inLandWada').value = record.landWada || record.wadaNo || '१';
     
     if (document.getElementById('inIncomeType')) document.getElementById('inIncomeType').value = record.incomeType || 'कृषि तथा पशुपालन';
-    if (document.getElementById('inTotalWords')) document.getElementById('inTotalWords').value = record.totalWords || '';
-    window._userEditedWords = true;
 
     if (document.getElementById('inSignAuthority')) document.getElementById('inSignAuthority').value = record.signAuth || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
     if (record.signAuth === 'CUSTOM') {
@@ -762,10 +735,7 @@ window.printAndSaveSystem = async function() {
         return {
             sit: block && block.querySelector('.input-sit') ? block.querySelector('.input-sit').value : '',
             kitta: block && block.querySelector('.input-kitta') ? block.querySelector('.input-kitta').value : '',
-            area: block && block.querySelector('.input-area') ? block.querySelector('.input-area').value : '',
-            dist: block && block.querySelector('.input-land-dist') ? block.querySelector('.input-land-dist').value : '',
-            palika: block && block.querySelector('.input-land-palika') ? block.querySelector('.input-land-palika').value : '',
-            wada: block && block.querySelector('.input-land-wada') ? block.querySelector('.input-land-wada').value : ''
+            area: block && block.querySelector('.input-area') ? block.querySelector('.input-area').value : ''
         };
     });
     
@@ -776,6 +746,8 @@ window.printAndSaveSystem = async function() {
             amount: block && block.querySelector('.input-amount') ? block.querySelector('.input-amount').value : ''
         };
     });
+
+    const isCustomLand = document.getElementById('chkChangeLandAddress') ? document.getElementById('chkChangeLandAddress').checked : false;
 
     const docData = {
         templateType: 'aamdani-pramanit',
@@ -790,11 +762,11 @@ window.printAndSaveSystem = async function() {
         dist: document.getElementById('inDist') ? document.getElementById('inDist').value : '',
         palika: document.getElementById('inPalika') ? document.getElementById('inPalika').value : '',
         wadaNo: document.getElementById('inWadaNo') ? document.getElementById('inWadaNo').value : '',
+        changeLandAddress: isCustomLand,
         landDist: document.getElementById('inLandDist') ? document.getElementById('inLandDist').value : '',
         landPalika: document.getElementById('inLandPalika') ? document.getElementById('inLandPalika').value : '',
         landWada: document.getElementById('inLandWada') ? document.getElementById('inLandWada').value : '',
         incomeType: document.getElementById('inIncomeType') ? document.getElementById('inIncomeType').value : '',
-        totalWords: document.getElementById('inTotalWords') ? document.getElementById('inTotalWords').value : '',
         signAuth: document.getElementById('inSignAuthority') ? document.getElementById('inSignAuthority').value : '',
         customSignName: document.getElementById('inCustomSignName') ? document.getElementById('inCustomSignName').value : '',
         customSignTitle: document.getElementById('inCustomSignTitle') ? document.getElementById('inCustomSignTitle').value : '',

@@ -211,18 +211,28 @@
             </div>
         </div>
 
-        <div class="row-grid">
-            <div class="form-group">
-                <label>जग्गाको ठेगाना जिल्ला:</label>
-                <input type="text" id="inLandDist" value="झापा" oninput="updateDoc()">
-            </div>
-            <div class="form-group">
-                <label>पालिका:</label>
-                <input type="text" id="inLandPalika" value="गौरादह नगरपालिका" oninput="updateDoc()">
-            </div>
-            <div class="form-group">
-                <label>वडा नं:</label>
-                <input type="text" id="inLandWada" value="१" oninput="updateDoc()">
+        <!-- ══ जग्गाको ठेगाना फेर्ने विकल्प (ऐच्छिक) ══ -->
+        <div class="form-group" style="margin-top: 10px; background: #f0fdf4; padding: 10px 12px; border: 1.5px solid #bbf7d0; border-radius: 6px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; color: #166534; margin-bottom: 0;">
+                <input type="checkbox" id="chkChangeLandAddress" onchange="toggleLandAddressFields(); updateDoc();" style="width: 18px; height: 18px; cursor: pointer;">
+                <span>📍 जग्गाको ठेगाना फेर्नुहोस् (फरक भएमा मात्र)</span>
+            </label>
+
+            <div id="landAddressContainer" style="display: none; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #86efac;">
+                <div class="row-grid">
+                    <div class="form-group">
+                        <label>जग्गाको जिल्ला:</label>
+                        <input type="text" id="inLandDist" value="झापा" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group">
+                        <label>पालिका:</label>
+                        <input type="text" id="inLandPalika" value="गौरादह नगरपालिका" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group">
+                        <label>वडा नं:</label>
+                        <input type="text" id="inLandWada" value="१" oninput="updateDoc()">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -241,12 +251,6 @@
             <h3>💰 आम्दानीको विवरण (तपसिल)</h3>
             <div id="incomeRowsContainer"></div>
             <button type="button" class="btn-add-row" onclick="addIncomeRow()">➕ व्यवसाय थप्नुहोस्</button>
-        </div>
-
-        <div class="form-group" style="margin-top: 15px;">
-            <label>जम्मा आम्दानी (अक्षरेपी - अटोमेटिक रूपान्तरण हुन्छ):</label>
-            <input type="text" id="inTotalWords" placeholder="उदा: पाँच लाख पचास हजार रुपैयाँ" oninput="if (!this.value.trim()) window._userEditedWords = false; else window._userEditedWords = true; updateDoc();">
-            <small style="color:#718096;">*अङ्क अनुसार अटोमेटिक अक्षरेपी आउँछ, आवश्यक परे आफैँ सच्याउन पनि सकिन्छ।</small>
         </div>
 
         <div class="form-group"
@@ -376,8 +380,8 @@
 
     <!-- Main Logic & Font Settings Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="font-settings.js?v=2.5"></script>
-    <script src="script-aamdani-pramanit.js?v=2.5"></script>
+    <script src="font-settings.js?v=2.6"></script>
+    <script src="script-aamdani-pramanit.js?v=2.6"></script>
 </body>
 
 </html>
