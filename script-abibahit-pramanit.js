@@ -147,11 +147,11 @@ function updateDoc() {
     let gpText = '';
     if (hasGrandparents && (gfName || gmName)) {
         if (gfName && gmName) {
-            gpText = `हजुरबुवा ${gfName} तथा हजुरआमा ${gmName}को ${grandChildVal}`;
+            gpText = `${gfName} तथा ${gmName}को ${grandChildVal}`;
         } else if (gfName) {
-            gpText = `हजुरबुवा ${gfName}को ${grandChildVal}`;
+            gpText = `${gfName}को ${grandChildVal}`;
         } else {
-            gpText = `हजुरआमा ${gmName}को ${grandChildVal}`;
+            gpText = `${gmName}को ${grandChildVal}`;
         }
     }
 
@@ -164,11 +164,11 @@ function updateDoc() {
     let pText = '';
     if (hasParents && (fName || mName)) {
         if (fName && mName) {
-            pText = `बुवा ${fName} तथा आमा ${mName}को ${childVal}`;
+            pText = `${fName} तथा ${mName}को ${childVal}`;
         } else if (fName) {
-            pText = `बुवा ${fName}को ${childVal}`;
+            pText = `${fName}को ${childVal}`;
         } else {
-            pText = `आमा ${mName}को ${childVal}`;
+            pText = `${mName}को ${childVal}`;
         }
     }
 
