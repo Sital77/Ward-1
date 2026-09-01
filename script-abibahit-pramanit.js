@@ -131,11 +131,11 @@ function updateDoc() {
     if (hasParents && (fName || mName)) {
         let text = '';
         if (fName && mName) {
-            text = `बुवा ${fName} तथा आमा ${mName} को `;
+            text = `बुवा ${fName} तथा आमा ${mName}को `;
         } else if (fName) {
-            text = `बुवा ${fName} को `;
+            text = `बुवा ${fName}को `;
         } else {
-            text = `आमा ${mName} को `;
+            text = `आमा ${mName}को `;
         }
         parentsBlock.innerText = text;
     } else {
