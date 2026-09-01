@@ -341,7 +341,7 @@
 
             <!-- Receiver Bank Details -->
             <div class="form-group">
-                <label>🏦 बैङ्कको नाम छान्नुहोस्:</label>
+                <label id="lblBankSelect">🏦 बैङ्कको नाम छान्नुहोस्:</label>
                 <select id="inBankSelect" class="bank-select-dropdown" onchange="selectBank(this.value)">
                     <option value="krishi" selected>श्री कृषि विकास बैङ्क लिमिटेड (गौरादह शाखा)</option>
                     <option value="nic">श्री एन.आई.सी. एसिया बैंक लिमिटेड (गौरादह शाखा)</option>
@@ -977,6 +977,17 @@
             // Set bank receiver based on selected bank
             selectBank(document.getElementById('inBankSelect').value);
 
+            const lblBank = document.getElementById('lblBankSelect');
+            if (lblBank) {
+                if (isDeceased) {
+                    lblBank.innerText = "🏦 मृतकको खाता रहेको बैंक छान्नुहोस्:";
+                } else if (isChildClose) {
+                    lblBank.innerText = "🏦 बालबालिकाको खाता रहेको बैंक छान्नुहोस्:";
+                } else {
+                    lblBank.innerText = "🏦 बैङ्कको नाम छान्नुहोस्:";
+                }
+            }
+
             if (isDeceased) {
                 document.getElementById('formMainTitle').innerText = "🔒 मृतकको बैंक खाता बन्द सिफारिस";
                 document.getElementById('lblInputNameTitle').innerText = "निवेदक / हकदारको पुरा नाम:";
@@ -1406,13 +1417,19 @@
             document.getElementById('lblMiti').innerText        = miti;
             document.getElementById('lblNepalSamvat').innerText = ns;
 
-            // Receiver Details - use selected bank for both modes
-            const recName = document.getElementById('inReceiverName').value || '';
-            const recOffice = document.getElementById('inReceiverOffice').value || '';
-            const recLoc = document.getElementById('inReceiverLocation').value || '';
-            document.getElementById('lblReceiverName').innerText = recName;
-            document.getElementById('lblReceiverOffice').innerText = recOffice;
-            document.getElementById('lblReceiverLocation').innerText = recLoc;
+            // Receiver Details
+            if (isDeceased) {
+                document.getElementById('lblReceiverName').innerText = "श्री गौरादह नगरपालिका";
+                document.getElementById('lblReceiverOffice').innerText = "नगर कार्यपालिकाको कार्यालय";
+                document.getElementById('lblReceiverLocation').innerText = "गौरादह, झापा";
+            } else {
+                const recName = document.getElementById('inReceiverName').value || '';
+                const recOffice = document.getElementById('inReceiverOffice').value || '';
+                const recLoc = document.getElementById('inReceiverLocation').value || '';
+                document.getElementById('lblReceiverName').innerText = recName;
+                document.getElementById('lblReceiverOffice').innerText = recOffice;
+                document.getElementById('lblReceiverLocation').innerText = recLoc;
+            }
 
             // Applicant Address Calculation
             const loggedWard = localStorage.getItem('sifarish_ward') || '1';
@@ -1760,15 +1777,20 @@
                 guardianRelation = ((document.getElementById('inGuardianRelation') || {}).value || '').trim();
             }
 
+            const isDeceased = (mode === 'CLOSE_ACCOUNT_DECEASED');
+            const receiverName = isDeceased ? 'श्री गौरादह नगरपालिका' : (document.getElementById('inReceiverName').value.trim() || '');
+            const receiverOffice = isDeceased ? 'नगर कार्यपालिकाको कार्यालय' : (document.getElementById('inReceiverOffice').value.trim() || '');
+            const receiverLocation = isDeceased ? 'गौरादह, झापा' : (document.getElementById('inReceiverLocation').value.trim() || '');
+
             const obj = {
                 sifarishMode:        mode,
                 ay:                  (document.getElementById('inPatraSankhya') || {}).value || '',
                 chalani:             document.getElementById('inChalani').value.trim()      || '-',
                 miti:                document.getElementById('inMiti').value.trim()          || '-',
                 ns:                  document.getElementById('inNepalSamvat').value.trim()   || '-',
-                receiverName:        document.getElementById('inReceiverName').value.trim()  || '',
-                receiverOffice:      document.getElementById('inReceiverOffice').value.trim()|| '',
-                receiverLocation:    document.getElementById('inReceiverLocation').value.trim()|| '',
+                receiverName:        receiverName,
+                receiverOffice:      receiverOffice,
+                receiverLocation:    receiverLocation,
                 bankKey:             (document.getElementById('inBankSelect') || {}).value || 'krishi',
                 name:                name,
                 citNo:               document.getElementById('inCitNo').value.trim()        || '',
