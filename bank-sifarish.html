@@ -1418,14 +1418,15 @@
             document.getElementById('lblNepalSamvat').innerText = ns;
 
             // Receiver Details
+            const recName = document.getElementById('inReceiverName').value || '';
+            const recOffice = document.getElementById('inReceiverOffice').value || '';
+            const recLoc = document.getElementById('inReceiverLocation').value || '';
+
             if (isDeceased) {
                 document.getElementById('lblReceiverName').innerText = "श्री गौरादह नगरपालिका";
                 document.getElementById('lblReceiverOffice').innerText = "नगर कार्यपालिकाको कार्यालय";
                 document.getElementById('lblReceiverLocation').innerText = "गौरादह, झापा";
             } else {
-                const recName = document.getElementById('inReceiverName').value || '';
-                const recOffice = document.getElementById('inReceiverOffice').value || '';
-                const recLoc = document.getElementById('inReceiverLocation').value || '';
                 document.getElementById('lblReceiverName').innerText = recName;
                 document.getElementById('lblReceiverOffice').innerText = recOffice;
                 document.getElementById('lblReceiverLocation').innerText = recLoc;
