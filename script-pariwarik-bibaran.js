@@ -86,7 +86,7 @@ window.addFamilyRow = function (data = null) {
     if (activeRowIds.length === 1 && !data && isFirstRowSynced) {
         nameVal = document.getElementById('inName').value;
         docVal = document.getElementById('inCitNo').value;
-        issueDateVal = document.getElementById('inCitDate') ? document.getElementById('inCitDate').value : '';
+        // issueDateVal is NOT auto-synced — user fills it manually per member
         relVal = 'निवेदक';
     }
 
@@ -174,18 +174,16 @@ function reindexFormRows() {
 
 
 window.updateDoc = function () {
-    // Sync first row details if enabled
+    // Sync first row details if enabled (name, citNo, relationship only — NOT issue date)
     if (isFirstRowSynced && activeRowIds.length > 0) {
         const firstRowId = activeRowIds[0];
         const firstRowBlock = document.getElementById(firstRowId);
         if (firstRowBlock) {
             const applicantName = document.getElementById('inName').value;
             const citNo = document.getElementById('inCitNo').value;
-            const citDate = document.getElementById('inCitDate') ? document.getElementById('inCitDate').value : '';
             
             const nameInput = firstRowBlock.querySelector('.input-member-name');
             const docInput = firstRowBlock.querySelector('.input-member-document');
-            const issueDateInput = firstRowBlock.querySelector('.input-member-issuedate');
             const relInput = firstRowBlock.querySelector('.input-member-relationship');
             
             if (nameInput && document.activeElement !== nameInput) {
@@ -194,9 +192,7 @@ window.updateDoc = function () {
             if (docInput && document.activeElement !== docInput) {
                 docInput.value = citNo;
             }
-            if (issueDateInput && document.activeElement !== issueDateInput && citDate) {
-                issueDateInput.value = citDate;
-            }
+            // Issue date is NOT auto-synced — it must be entered manually per member
             if (relInput && document.activeElement !== relInput && !relInput.value) {
                 relInput.value = 'निवेदक';
             }
@@ -345,7 +341,7 @@ window.updateDoc = function () {
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td>${sn}.</td>
-                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td style="font-weight: 600;">${nameDisplay}</td>
                         <td>${row.mDoc || '-'}</td>
                         <td>${row.mIssueDate || '-'}</td>
                         <td>${row.mAddress || '-'}</td>
@@ -356,7 +352,7 @@ window.updateDoc = function () {
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td>${sn}.</td>
-                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td style="font-weight: 600;">${nameDisplay}</td>
                         <td>${row.mDoc || '-'}</td>
                         <td>${row.mIssueDate || '-'}</td>
                         <td>${row.mRel || '-'}</td>
@@ -366,7 +362,7 @@ window.updateDoc = function () {
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td>${sn}.</td>
-                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td style="font-weight: 600;">${nameDisplay}</td>
                         <td>${row.mDoc || '-'}</td>
                         <td>${row.mAddress || '-'}</td>
                         <td>${row.mRel || '-'}</td>
@@ -376,7 +372,7 @@ window.updateDoc = function () {
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td>${sn}.</td>
-                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td style="font-weight: 600;">${nameDisplay}</td>
                         <td>${row.mDoc || '-'}</td>
                         <td>${row.mRel || '-'}</td>
                     </tr>

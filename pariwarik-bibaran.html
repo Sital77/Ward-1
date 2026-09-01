@@ -59,7 +59,7 @@
             font-size: 12.5pt !important;
             margin: 10px 0 !important;
             border-collapse: collapse !important;
-            table-layout: fixed !important;
+            table-layout: auto !important;
             box-sizing: border-box !important;
         }
 
@@ -70,10 +70,16 @@
             border: 1px solid #000 !important;
             text-align: center !important;
             vertical-align: middle !important;
-            word-break: break-word !important;
-            overflow-wrap: anywhere !important;
-            white-space: normal !important;
+            white-space: nowrap !important;
             box-sizing: border-box !important;
+        }
+
+        .details-table td:nth-child(2) {
+            /* नाम थर column — allow wrapping only if truly needed */
+            white-space: normal !important;
+            word-break: keep-all !important;
+            text-align: left !important;
+            padding-left: 8px !important;
         }
 
         /* ===== PRINT: Page layout fix ===== */
