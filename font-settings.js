@@ -331,6 +331,9 @@
                         if (localOverride && templateId === 'pariwarik-bibaran' && (!localOverride.template_content.includes('outputTableHead') || !localOverride.template_content.includes('familyDetailsTable'))) {
                             localOverride = null;
                         }
+                        if (localOverride && templateId === 'pan-sifarish' && (!localOverride.template_content.includes('lblCitBlockK') || !localOverride.template_content.includes('lblCitBlockBanda'))) {
+                            localOverride = null;
+                        }
                     }
                 } catch(e) {}
 
@@ -364,6 +367,8 @@
                         } else if (templateId === 'aamdani-pramanit' && (!data.template_content.includes('globalLandAddr') || data.template_content.includes('width: 250px;') || !data.template_content.includes('lblLandDetails'))) {
                             isOutdated = true;
                         } else if (templateId === 'pariwarik-bibaran' && (!data.template_content.includes('outputTableHead') || !data.template_content.includes('familyDetailsTable'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'pan-sifarish' && (!data.template_content.includes('lblCitBlockK') || !data.template_content.includes('lblCitBlockBanda'))) {
                             isOutdated = true;
                         }
 

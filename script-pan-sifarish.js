@@ -132,6 +132,11 @@ function toggleDarta() {
     document.getElementById('dartaSection').style.display = chk.checked ? 'block' : 'none';
 }
 
+function toggleCit() {
+    const chk = document.getElementById('chkCit');
+    document.getElementById('citSection').style.display = (chk && chk.checked) ? 'block' : 'none';
+}
+
 function toggleCustomSign() {
     const val = document.getElementById('inSignAuthority').value;
     document.getElementById('customSignBox').style.display = (val === 'CUSTOM') ? 'grid' : 'none';
@@ -209,6 +214,41 @@ function updateDoc() {
             lblReceiverAddress.innerHTML = 'श्री आन्तरिक राजश्व कार्यालय<br>दमक, झापा ।';
         } else {
             lblReceiverAddress.innerHTML = 'श्री करदाता सेवा कार्यालय<br>गौरादह नगरपालिका<br>गौरादह, झापा ।';
+        }
+    }
+
+    // Citizenship details
+    const hasCit = document.getElementById('chkCit') ? document.getElementById('chkCit').checked : false;
+    const citNo = document.getElementById('inCitNo') ? document.getElementById('inCitNo').value.trim() : '';
+    const citDate = document.getElementById('inCitDate') ? document.getElementById('inCitDate').value.trim() : '';
+    const citDist = document.getElementById('inCitDistrict') ? document.getElementById('inCitDistrict').value.trim() : '';
+
+    let citText = '';
+    if (hasCit && (citNo || citDate || citDist)) {
+        let parts = [];
+        if (citNo) parts.push(`ना.प्र.नं. ${citNo}`);
+        if (citDate) parts.push(`जारी मिति: ${citDate}`);
+        if (citDist) parts.push(`जारी जिल्ला: ${citDist}`);
+        citText = ` (${parts.join(', ')}) `;
+    }
+
+    const lblCitBlockK = document.getElementById('lblCitBlockK');
+    if (lblCitBlockK) {
+        if (citText) {
+            lblCitBlockK.innerText = citText;
+            lblCitBlockK.style.display = 'inline';
+        } else {
+            lblCitBlockK.style.display = 'none';
+        }
+    }
+
+    const lblCitBlockBanda = document.getElementById('lblCitBlockBanda');
+    if (lblCitBlockBanda) {
+        if (citText) {
+            lblCitBlockBanda.innerText = citText;
+            lblCitBlockBanda.style.display = 'inline';
+        } else {
+            lblCitBlockBanda.style.display = 'none';
         }
     }
 
@@ -338,6 +378,10 @@ async function printAndSaveSystem() {
         customPalika:    document.getElementById('inCustomPalika').value.trim()  || '',
         wada:            document.getElementById('inWadaNo').value.trim(),
         name,
+        hasCit:          document.getElementById('chkCit') ? document.getElementById('chkCit').checked : false,
+        citNo:           document.getElementById('inCitNo') ? document.getElementById('inCitNo').value.trim() : '',
+        citDate:         document.getElementById('inCitDate') ? document.getElementById('inCitDate').value.trim() : '',
+        citDistrict:     document.getElementById('inCitDistrict') ? document.getElementById('inCitDistrict').value.trim() : '',
         sifarisNamaRadio: sifarisNamaType,
         sifarisNama:     document.getElementById('inSifarisNama').value.trim()   || '',
         business:        document.getElementById('inBusiness').value.trim()      || '',
@@ -457,6 +501,16 @@ function editFromDB(id) {
     document.getElementById('inWadaNo').value       = rec.wada || '१';
     document.getElementById('inName').value         = rec.name || '';
     document.getElementById('inBusiness').value     = rec.business || '';
+
+    // Citizenship Checkbox and inputs
+    const chkCit = document.getElementById('chkCit');
+    if (chkCit) {
+        chkCit.checked = rec.hasCit || false;
+        toggleCit();
+        document.getElementById('inCitNo').value = rec.citNo || '';
+        document.getElementById('inCitDate').value = rec.citDate || '';
+        document.getElementById('inCitDistrict').value = rec.citDistrict || 'झापा';
+    }
 
     // Palika
     const palikaRadios = document.getElementsByName('palikaRadio');

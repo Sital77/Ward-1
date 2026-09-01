@@ -264,6 +264,28 @@
                 </div>
             </div>
 
+            <!-- Optional: नागरिकता विवरण थप गर्ने -->
+            <label class="optional-toggle" style="margin-top: 4px; margin-bottom: 8px;">
+                <input type="checkbox" id="chkCit" onchange="toggleCit(); updateDoc()">
+                🪪 नागरिकता विवरण थप गर्नुस् (ऐच्छिक)
+            </label>
+            <div id="citSection" style="display:none; margin-bottom: 12px; background: #f8fafc; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 6px;">
+                <div class="row-grid">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size:0.78rem;">नागरिकता नं. (ना.प्र.नं.):</label>
+                        <input type="text" id="inCitNo" placeholder="उदा: ०४-०१-७५-१२३४५" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size:0.78rem;">जारी मिति:</label>
+                        <input type="text" id="inCitDate" placeholder="उदा: २०७०/०५/१२" oninput="updateDoc()">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 8px; margin-bottom: 0;">
+                    <label style="font-size:0.78rem;">जारी जिल्ला:</label>
+                    <input type="text" id="inCitDistrict" placeholder="उदा: झापा" value="झापा" oninput="updateDoc()">
+                </div>
+            </div>
+
             <!-- सिफारिस नाममा -->
             <div id="sifarisNamaSection">
                 <div class="form-group">
@@ -420,7 +442,7 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा झापा जिल्ला
                 <span id="lblPalika"></span>
                 वडा नं. <span id="lblWadaBody"></span>
-                बसोबास गर्ने <span id="lblNameK" style="font-weight: bold;"></span>ले यस कार्यालयमा पेश गर्नु भएको माग
+                बसोबास गर्ने <span id="lblNameK" style="font-weight: bold;"></span> <span id="lblCitBlockK" style="display:none;"></span>ले यस कार्यालयमा पेश गर्नु भएको माग
                 निवेदन अनुसार
                 <span id="lblSifarisNamaK" style="font-weight: bold;"></span> नाममा झापा जिल्ला गौरादह नगरपालिका वडा
                 नं.१ मा सञ्चालन गर्नुभएको
@@ -436,7 +458,7 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;प्रस्तुत विषयमा झापा जिल्ला
                 <span id="lblPalikaBanda"></span>
                 वडा नं. <span id="lblWadaBodyBanda"></span>
-                बसोबास गर्ने <span id="lblNameBanda" style="font-weight: bold;"></span>ले यस कार्यालयमा पेश गर्नु भएको
+                बसोबास गर्ने <span id="lblNameBanda" style="font-weight: bold;"></span> <span id="lblCitBlockBanda" style="display:none;"></span>ले यस कार्यालयमा पेश गर्नु भएको
                 माग निवेदन अनुसार
                 <span id="lblSifarisNama" style="font-weight: bold;"></span> नाममा गौरादह नगरपालिका वडा नं.<span id="lblSifarisWada">१</span> मा सञ्चालन
                 गर्नुभएको
@@ -469,8 +491,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="font-settings.js"></script>
-    <script src="script-pan-sifarish.js?v=3.4"></script>
+    <script src="font-settings.js?v=2.8"></script>
+    <script src="script-pan-sifarish.js?v=3.5"></script>
 </body>
 
 </html>
