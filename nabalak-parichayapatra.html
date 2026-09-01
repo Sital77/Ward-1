@@ -968,18 +968,18 @@
             </div>
 
             <!-- Salutation & Opening Paragraph -->
-            <p style="margin: 0 0 1px 0; font-weight: 600; font-size: 8.5pt;">महोदय,</p>
+            <p style="margin: 0 0 1px 0; font-weight: 600; font-size: 9pt;">महोदय,</p>
             <p
-                style="margin: 0 0 2px 0; font-weight: 500; font-size: 8pt; line-height: 1.25; text-align: justify; text-indent: 20px;">
+                style="margin: 0 0 3px 0; font-weight: 500; font-size: 8.5pt; line-height: 1.35; text-align: justify; text-indent: 20px;">
                 मेरो निम्नानुसार विवरण भएको नाबालकको परिचयपत्र बनाउनु पर्ने भएको हुँदा सिफारिस साथ रू.१०/- को टिकट टाँसी
-                यो निवेदन पेश गरेको छु। मेरो छोरा/छोरी/ .............ले यस अघि नाबालक परिचय पत्र बनाएको छैन ।
+                यो निवेदन पेश गरेको छु। मेरो <span id="lblIntroChildRel" style="font-weight: 600;">छोरा</span> <span id="lblIntroChildTitle" style="font-weight: 600;">श्री</span> <span id="lblIntroChildName" style="border-bottom: 1px dashed #000; padding: 0 4px; font-weight: 600;">................</span>ले यस अघि नाबालक परिचय पत्र बनाएको छैन ।
             </p>
 
-            <!-- 2-Column Bordered Table (Exact match to sample image) -->
-            <table
-                style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-size: 7.5pt; table-layout: fixed;">
+            <!-- 2-Column Bordered Table (Exact match to sample image with balanced column heights) -->
+            <table class="nabalak-tbl"
+                style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-size: 8.5pt; table-layout: fixed;">
                 <tr>
-                    <!-- LEFT COLUMN (Items १ to ८) -->
+                    <!-- LEFT COLUMN (Items १ to ७) -->
                     <td style="width: 50%; border-right: 1px solid #000; padding: 2px 4px; vertical-align: top;">
                         <div style="margin-bottom: 2px;">
                             <div style="display: flex; align-items: baseline;">
@@ -1053,7 +1053,7 @@
                             </div>
                         </div>
 
-                        <div style="margin-bottom: 2px;">
+                        <div>
                             <div style="display: flex; align-items: baseline; flex-wrap: wrap; line-height: 1.35;">
                                 <span style="font-weight: 600; white-space: nowrap;">७. स्थायी बासस्थान : प्रदेश :
                                 </span>
@@ -1104,8 +1104,11 @@
                                     style="border-bottom: 1px dashed #000; padding: 0 4px; font-weight: 600; flex-grow: 1;">................</span>
                             </div>
                         </div>
+                    </td>
 
-                        <div>
+                    <!-- RIGHT COLUMN (Items ८ to १३) -->
+                    <td style="width: 50%; padding: 2px 4px; vertical-align: top;">
+                        <div style="margin-bottom: 3px;">
                             <div style="display: flex; align-items: baseline; flex-wrap: wrap; line-height: 1.35;">
                                 <span style="font-weight: 600; white-space: nowrap;">८. जन्म मिति : साल </span>
                                 <span id="lblDOB_BS_Year"
@@ -1131,10 +1134,7 @@
                                 <span style="font-weight: 600; white-space: nowrap; margin-left: 2px;">Day</span>
                             </div>
                         </div>
-                    </td>
 
-                    <!-- RIGHT COLUMN (Items ९ to १३) -->
-                    <td style="width: 50%; padding: 2px 4px; vertical-align: top;">
                         <div style="margin-bottom: 3px;">
                             <div style="display: flex; align-items: baseline;">
                                 <span style="font-weight: 600; white-space: nowrap;">९. बाबुको नाम थर : </span>

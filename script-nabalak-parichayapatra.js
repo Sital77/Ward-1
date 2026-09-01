@@ -579,6 +579,23 @@ function updateDoc() {
     if (document.getElementById('lblSubmitAddr_P1')) document.getElementById('lblSubmitAddr_P1').innerText = submitAddr;
     if (document.getElementById('lblSubmitRelation_P1')) document.getElementById('lblSubmitRelation_P1').innerText = submitRel;
 
+    // Intro paragraph dynamic child relation, title, and name
+    const introName = (fullNP && fullNP !== '................') ? fullNP : '................';
+    if (document.getElementById('lblIntroChildName')) document.getElementById('lblIntroChildName').innerText = introName;
+    if (document.getElementById('lblIntroChildTitle')) document.getElementById('lblIntroChildTitle').innerText = titleText;
+    
+    let introChildRel = relText; // default 'छोरा' or 'छोरी' or 'छोरा/छोरी'
+    if (submitRel === 'हजुरबुबा' || submitRel === 'हजुरबुवा' || submitRel === 'हजुरआमा') {
+        introChildRel = (genNP === 'महिला') ? 'नातिनी' : 'नाति';
+    } else if (submitRel === 'काका' || submitRel === 'काकी') {
+        introChildRel = (genNP === 'महिला') ? 'भतिजी' : 'भतिजा';
+    } else if (submitRel === 'दाजु' || submitRel === 'दिदी') {
+        introChildRel = (genNP === 'महिला') ? 'बहिनी' : 'भाइ';
+    } else if (submitRel === 'मामा' || submitRel === 'माइजु' || submitRel === 'अंकल') {
+        introChildRel = (genNP === 'महिला') ? 'भान्जी' : 'भान्जा';
+    }
+    if (document.getElementById('lblIntroChildRel')) document.getElementById('lblIntroChildRel').innerText = introChildRel;
+
     // Page 1 Sifarish Parents Bindings
     if (document.getElementById('lblSifFather')) document.getElementById('lblSifFather').innerText = fatherNP;
     if (document.getElementById('lblSifMother')) document.getElementById('lblSifMother').innerText = motherNP;

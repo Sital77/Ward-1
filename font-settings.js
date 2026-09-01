@@ -1089,6 +1089,23 @@
                 .signature-block * {
                     font-style: normal !important;
                 }
+
+                /* Nabalak Parichayapatra table & compact layout scaling */
+                .nabalak-tbl,
+                .nabalak-tbl * {
+                    font-size: calc(var(--doc-font-size) * 0.82) !important;
+                    line-height: 1.35 !important;
+                }
+                .sifarish-para,
+                .sifarish-para * {
+                    font-size: calc(var(--doc-font-size) * 0.85) !important;
+                    line-height: 1.35 !important;
+                }
+                #lblPhotoBox,
+                #lblPhotoBox * {
+                    font-size: 7.5pt !important;
+                    line-height: 1.2 !important;
+                }
             `;
         }
 
