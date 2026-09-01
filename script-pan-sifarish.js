@@ -509,7 +509,7 @@ function editFromDB(id) {
         toggleCit();
         document.getElementById('inCitNo').value = rec.citNo || '';
         document.getElementById('inCitDate').value = rec.citDate || '';
-        document.getElementById('inCitDistrict').value = rec.citDistrict || 'झापा';
+        document.getElementById('inCitDistrict').value = rec.citDistrict || '';
     }
 
     // Palika
