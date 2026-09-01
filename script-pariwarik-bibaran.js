@@ -83,17 +83,11 @@ window.addFamilyRow = function (data = null) {
     let addressVal = data ? (data.address || '') : '';
     let relVal = data ? (data.relationship || '') : '';
 
-    const selectedWada = document.getElementById('inWadaNo') ? document.getElementById('inWadaNo').value : '१';
-    const defaultAddr = `गौरादह न.पा.-${selectedWada}`;
-
     if (activeRowIds.length === 1 && !data && isFirstRowSynced) {
         nameVal = document.getElementById('inName').value;
         docVal = document.getElementById('inCitNo').value;
         issueDateVal = document.getElementById('inCitDate') ? document.getElementById('inCitDate').value : '';
-        addressVal = defaultAddr;
         relVal = 'निवेदक';
-    } else if (!data && !addressVal) {
-        addressVal = defaultAddr;
     }
 
     const rowHtml = `
@@ -188,13 +182,10 @@ window.updateDoc = function () {
             const applicantName = document.getElementById('inName').value;
             const citNo = document.getElementById('inCitNo').value;
             const citDate = document.getElementById('inCitDate') ? document.getElementById('inCitDate').value : '';
-            const selectedWada = document.getElementById('inWadaNo') ? document.getElementById('inWadaNo').value : '१';
-            const defaultAddr = `गौरादह न.पा.-${selectedWada}`;
             
             const nameInput = firstRowBlock.querySelector('.input-member-name');
             const docInput = firstRowBlock.querySelector('.input-member-document');
             const issueDateInput = firstRowBlock.querySelector('.input-member-issuedate');
-            const addrInput = firstRowBlock.querySelector('.input-member-address');
             const relInput = firstRowBlock.querySelector('.input-member-relationship');
             
             if (nameInput && document.activeElement !== nameInput) {
@@ -205,9 +196,6 @@ window.updateDoc = function () {
             }
             if (issueDateInput && document.activeElement !== issueDateInput && citDate) {
                 issueDateInput.value = citDate;
-            }
-            if (addrInput && document.activeElement !== addrInput && !addrInput.value) {
-                addrInput.value = defaultAddr;
             }
             if (relInput && document.activeElement !== relInput && !relInput.value) {
                 relInput.value = 'निवेदक';
@@ -271,10 +259,12 @@ window.updateDoc = function () {
     lblSigName.innerText = sigName;
     document.getElementById('lblSigTitle').innerText = sigTitle;
 
-    const tbody = document.getElementById('outputTableBody');
-    tbody.innerHTML = ''; 
+    // Dynamic Columns Evaluation: Check if any row has issueDate or address
+    let hasIssueDate = false;
+    let hasAddress = false;
+    const memberRows = [];
 
-    activeRowIds.forEach((id, index) => {
+    activeRowIds.forEach((id) => {
         const block = document.getElementById(id);
         if (block) {
             const mName = block.querySelector('.input-member-name') ? block.querySelector('.input-member-name').value.trim() : '';
@@ -282,19 +272,111 @@ window.updateDoc = function () {
             const mIssueDate = block.querySelector('.input-member-issuedate') ? block.querySelector('.input-member-issuedate').value.trim() : '';
             const mAddress = block.querySelector('.input-member-address') ? block.querySelector('.input-member-address').value.trim() : '';
             const mRel = block.querySelector('.input-member-relationship') ? block.querySelector('.input-member-relationship').value.trim() : '';
-            
-            tbody.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td>${window.toNepaliDigit(index + 1)}.</td>
-                    <td style="text-align: left; padding-left: 8px; font-weight: 600;">${mName || '................'}</td>
-                    <td>${mDoc || '-'}</td>
-                    <td>${mIssueDate || '-'}</td>
-                    <td>${mAddress || '-'}</td>
-                    <td>${mRel || '-'}</td>
-                </tr>
-            `);
+
+            if (mIssueDate !== '') hasIssueDate = true;
+            if (mAddress !== '') hasAddress = true;
+
+            memberRows.push({ mName, mDoc, mIssueDate, mAddress, mRel });
         }
     });
+
+    const thead = document.getElementById('outputTableHead') || (document.getElementById('familyDetailsTable') ? document.getElementById('familyDetailsTable').querySelector('thead') : null);
+    const tbody = document.getElementById('outputTableBody');
+
+    if (thead) {
+        if (hasIssueDate && hasAddress) {
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 7%;">क्र.स.</th>
+                    <th style="width: 27%;">नाम थर</th>
+                    <th style="width: 22%;">ना.प्र.नं./ज.द.नं.</th>
+                    <th style="width: 17%;">जारी मिति</th>
+                    <th style="width: 16%;">ठेगाना</th>
+                    <th style="width: 11%;">नाता</th>
+                </tr>
+            `;
+        } else if (hasIssueDate && !hasAddress) {
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 8%;">क्र.स.</th>
+                    <th style="width: 32%;">नाम थर</th>
+                    <th style="width: 24%;">ना.प्र.नं./ज.द.नं.</th>
+                    <th style="width: 20%;">जारी मिति</th>
+                    <th style="width: 16%;">नाता</th>
+                </tr>
+            `;
+        } else if (!hasIssueDate && hasAddress) {
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 8%;">क्र.स.</th>
+                    <th style="width: 32%;">नाम थर</th>
+                    <th style="width: 24%;">ना.प्र.नं./ज.द.नं.</th>
+                    <th style="width: 20%;">ठेगाना</th>
+                    <th style="width: 16%;">नाता</th>
+                </tr>
+            `;
+        } else {
+            // Default 4 columns (क्र.स., नाम थर, ना.प्र.नं./ज.द.नं., नाता)
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 8%;">क्र.स.</th>
+                    <th style="width: 42%;">नाम थर</th>
+                    <th style="width: 30%;">ना.प्र.नं./ज.द.नं.</th>
+                    <th style="width: 20%;">नाता</th>
+                </tr>
+            `;
+        }
+    }
+
+    if (tbody) {
+        tbody.innerHTML = '';
+        memberRows.forEach((row, index) => {
+            const sn = window.toNepaliDigit(index + 1);
+            const nameDisplay = row.mName || '................';
+            
+            if (hasIssueDate && hasAddress) {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${sn}.</td>
+                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td>${row.mDoc || '-'}</td>
+                        <td>${row.mIssueDate || '-'}</td>
+                        <td>${row.mAddress || '-'}</td>
+                        <td>${row.mRel || '-'}</td>
+                    </tr>
+                `);
+            } else if (hasIssueDate && !hasAddress) {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${sn}.</td>
+                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td>${row.mDoc || '-'}</td>
+                        <td>${row.mIssueDate || '-'}</td>
+                        <td>${row.mRel || '-'}</td>
+                    </tr>
+                `);
+            } else if (!hasIssueDate && hasAddress) {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${sn}.</td>
+                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td>${row.mDoc || '-'}</td>
+                        <td>${row.mAddress || '-'}</td>
+                        <td>${row.mRel || '-'}</td>
+                    </tr>
+                `);
+            } else {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${sn}.</td>
+                        <td style="text-align: left; padding-left: 8px; font-weight: 600;">${nameDisplay}</td>
+                        <td>${row.mDoc || '-'}</td>
+                        <td>${row.mRel || '-'}</td>
+                    </tr>
+                `);
+            }
+        });
+    }
 };
 
 // ६. क्लाउडमा डाटा सेभ गर्ने फङ्सन
