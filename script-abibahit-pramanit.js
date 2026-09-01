@@ -55,6 +55,12 @@ function toggleCustomReceiver() {
     document.getElementById('inCustomReceiver').style.display = isCustom ? 'block' : 'none';
 }
 
+function toggleGrandparentsSection() {
+    const chk = document.getElementById('chkGrandparents');
+    const sec = document.getElementById('grandparentsSection');
+    if (sec) sec.style.display = (chk && chk.checked) ? 'block' : 'none';
+}
+
 function toggleParentsSection() {
     const chk = document.getElementById('chkParents');
     document.getElementById('parentsSection').style.display = chk.checked ? 'block' : 'none';
@@ -123,32 +129,64 @@ function updateDoc() {
     }
     document.getElementById('lblReceiver').innerText = recVal;
 
-    // Parents Block
-    const hasParents = document.getElementById('chkParents').checked;
-    const fName = document.getElementById('inFatherName').value.trim();
-    const mName = document.getElementById('inMotherName').value.trim();
-    const parentsBlock = document.getElementById('lblParentsBlock');
-    if (hasParents && (fName || mName)) {
-        let text = '';
-        if (fName && mName) {
-            text = `बुवा ${fName} तथा आमा ${mName}को `;
-        } else if (fName) {
-            text = `बुवा ${fName}को `;
-        } else {
-            text = `आमा ${mName}को `;
-        }
-        parentsBlock.innerText = text;
-    } else {
-        parentsBlock.innerText = '';
-    }
-
-    // Gender
+    // Relationship (Three Generations / Grandparents & Parents)
     const genRadios = document.getElementsByName('genderRadio');
     let genderVal = 'छोरी';
     for (const r of genRadios) {
         if (r.checked) { genderVal = r.value; break; }
     }
-    document.getElementById('lblGender').innerText = genderVal;
+    const grandChildVal = (genderVal === 'छोरा') ? 'नाती' : 'नातिनी';
+    const childVal = genderVal; // 'छोरा' or 'छोरी'
+
+    // Grandparents block
+    const chkGp = document.getElementById('chkGrandparents');
+    const hasGrandparents = (chkGp && chkGp.checked);
+    const gfName = document.getElementById('inGrandfatherName') ? document.getElementById('inGrandfatherName').value.trim() : '';
+    const gmName = document.getElementById('inGrandmotherName') ? document.getElementById('inGrandmotherName').value.trim() : '';
+
+    let gpText = '';
+    if (hasGrandparents && (gfName || gmName)) {
+        if (gfName && gmName) {
+            gpText = `हजुरबुवा ${gfName} तथा हजुरआमा ${gmName}को ${grandChildVal}`;
+        } else if (gfName) {
+            gpText = `हजुरबुवा ${gfName}को ${grandChildVal}`;
+        } else {
+            gpText = `हजुरआमा ${gmName}को ${grandChildVal}`;
+        }
+    }
+
+    // Parents block
+    const chkP = document.getElementById('chkParents');
+    const hasParents = (chkP && chkP.checked);
+    const fName = document.getElementById('inFatherName') ? document.getElementById('inFatherName').value.trim() : '';
+    const mName = document.getElementById('inMotherName') ? document.getElementById('inMotherName').value.trim() : '';
+
+    let pText = '';
+    if (hasParents && (fName || mName)) {
+        if (fName && mName) {
+            pText = `बुवा ${fName} तथा आमा ${mName}को ${childVal}`;
+        } else if (fName) {
+            pText = `बुवा ${fName}को ${childVal}`;
+        } else {
+            pText = `आमा ${mName}को ${childVal}`;
+        }
+    }
+
+    let fullRelationText = '';
+    if (gpText && pText) {
+        fullRelationText = `${gpText}, ${pText} `;
+    } else if (gpText) {
+        fullRelationText = `${gpText} `;
+    } else if (pText) {
+        fullRelationText = `${pText} `;
+    } else {
+        fullRelationText = `${childVal} `;
+    }
+
+    const parentsBlock = document.getElementById('lblParentsBlock');
+    if (parentsBlock) {
+        parentsBlock.innerText = fullRelationText;
+    }
 
     // Name labels
     document.getElementById('lblName').innerText = name || '....................';
@@ -246,9 +284,12 @@ async function printAndSaveSystem() {
         ns:              document.getElementById('inNepalSamvat').value.trim()   || '-',
         recRadio:        recRadioVal,
         customReceiver:  document.getElementById('inCustomReceiver').value.trim()|| '',
-        hasParents:      document.getElementById('chkParents').checked,
-        fatherName:      document.getElementById('inFatherName').value.trim()    || '',
-        motherName:      document.getElementById('inMotherName').value.trim()    || '',
+        hasGrandparents: document.getElementById('chkGrandparents') ? document.getElementById('chkGrandparents').checked : false,
+        grandfatherName: document.getElementById('inGrandfatherName') ? document.getElementById('inGrandfatherName').value.trim() : '',
+        grandmotherName: document.getElementById('inGrandmotherName') ? document.getElementById('inGrandmotherName').value.trim() : '',
+        hasParents:      document.getElementById('chkParents') ? document.getElementById('chkParents').checked : false,
+        fatherName:      document.getElementById('inFatherName') ? document.getElementById('inFatherName').value.trim() : '',
+        motherName:      document.getElementById('inMotherName') ? document.getElementById('inMotherName').value.trim() : '',
         gender:          genderVal,
         name:            name,
         hasCit:          document.getElementById('chkCitizenship').checked,
@@ -361,6 +402,15 @@ function editFromDB(id) {
         document.getElementById('inCustomReceiver').value = rec.customReceiver || '';
     } else {
         document.getElementById('inCustomReceiver').style.display = 'none';
+    }
+
+    // Grandparents
+    const chkGrandparents = document.getElementById('chkGrandparents');
+    if (chkGrandparents) {
+        chkGrandparents.checked = rec.hasGrandparents || false;
+        toggleGrandparentsSection();
+        document.getElementById('inGrandfatherName').value = rec.grandfatherName || '';
+        document.getElementById('inGrandmotherName').value = rec.grandmotherName || '';
     }
 
     // Parents

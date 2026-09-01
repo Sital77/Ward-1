@@ -334,6 +334,9 @@
                         if (localOverride && templateId === 'pan-sifarish' && (!localOverride.template_content.includes('lblCitBlockK') || !localOverride.template_content.includes('lblCitBlockBanda'))) {
                             localOverride = null;
                         }
+                        if (localOverride && templateId === 'abibahit-pramanit' && localOverride.template_content.includes('lblGender')) {
+                            localOverride = null;
+                        }
                     }
                 } catch(e) {}
 
@@ -369,6 +372,8 @@
                         } else if (templateId === 'pariwarik-bibaran' && (!data.template_content.includes('outputTableHead') || !data.template_content.includes('familyDetailsTable'))) {
                             isOutdated = true;
                         } else if (templateId === 'pan-sifarish' && (!data.template_content.includes('lblCitBlockK') || !data.template_content.includes('lblCitBlockBanda'))) {
+                            isOutdated = true;
+                        } else if (templateId === 'abibahit-pramanit' && data.template_content.includes('lblGender')) {
                             isOutdated = true;
                         }
 
