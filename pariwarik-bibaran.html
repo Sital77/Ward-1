@@ -213,15 +213,21 @@
             <input type="text" id="inName" placeholder="उदा: डिल्ली राम श्रेष्ठ" oninput="syncOwnerName(); updateDoc()">
         </div>
 
-        <div class="row-grid"
-            style="background: #f7fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e0; margin-bottom: 15px;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-size: 0.85rem;">नागरिकता नं. :</label>
-                <input type="text" id="inCitNo" placeholder="उदा: ३४१५२८८५" oninput="updateDoc()">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-size: 0.85rem;">जारी मिति (वैकल्पिक):</label>
-                <input type="text" id="inCitDate" placeholder="उदा: २०७०/०५/१२" oninput="updateDoc()">
+        <div style="background: #f7fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e0; margin-bottom: 15px;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #2d3748; margin-bottom: 6px;">🪪 निवेदकको नागरिकता विवरण (ऐच्छिक):</div>
+            <div class="row-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem; color: #4a5568;">ना.प्र.नं. :</label>
+                    <input type="text" id="inCitNo" placeholder="उदा: ०४३०४५/५२" oninput="updateDoc()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem; color: #4a5568;">जारी मिति :</label>
+                    <input type="text" id="inCitDate" placeholder="उदा: २०८३/०५/०८" oninput="updateDoc()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem; color: #4a5568;">जारी जिल्ला :</label>
+                    <input type="text" id="inCitDistrict" placeholder="उदा: झापा" oninput="updateDoc()">
+                </div>
             </div>
         </div>
 
@@ -398,8 +404,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="font-settings.js?v=2.6"></script>
-    <script src="script-pariwarik-bibaran.js?v=2.6"></script>
+    <script src="font-settings.js?v=2.7"></script>
+    <script src="script-pariwarik-bibaran.js?v=2.7"></script>
 </body>
 
 </html>

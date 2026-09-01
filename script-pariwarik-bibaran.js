@@ -215,23 +215,30 @@ window.updateDoc = function () {
     const nameVal = document.getElementById('inName').value || '...........................';
     document.getElementById('lblApplicantName').innerText = nameVal;
 
-    const citNo = document.getElementById('inCitNo').value.trim();
-    const citDate = document.getElementById('inCitDate').value.trim();
+    const citNo = (document.getElementById('inCitNo') ? document.getElementById('inCitNo').value : '').trim();
+    const citDate = (document.getElementById('inCitDate') ? document.getElementById('inCitDate').value : '').trim();
+    const citDistrict = (document.getElementById('inCitDistrict') ? document.getElementById('inCitDistrict').value : '').trim();
     const citBlock = document.getElementById('lblCitBlock');
     
-    let citText = "";
+    const citParts = [];
     if (citNo !== "") {
-        citText += "ना.प्र.नं. " + citNo;
+        let cleanNo = citNo.replace(/^ना\.?\s*प्र\.?\s*नं\.?\s*[:ः]?\s*/i, '');
+        citParts.push("ना.प्र.नं." + cleanNo);
     }
     if (citDate !== "") {
-        if (citText !== "") citText += ", ";
-        citText += "जारी मिति: " + citDate;
+        let cleanDate = citDate.replace(/^जारी\s*मिति\s*[:ः]?\s*/i, '');
+        citParts.push("जारी मिति: " + cleanDate);
+    }
+    if (citDistrict !== "") {
+        let cleanDistrict = citDistrict.replace(/^जारी\s*जिल्ला\s*[:ः]?\s*/i, '').replace(/^जिल्ला\s*[:ः]?\s*/i, '');
+        citParts.push(cleanDistrict);
     }
 
-    if (citText !== "") {
-        citBlock.innerText = " (" + citText + ")";
+    if (citParts.length > 0) {
+        citBlock.innerText = " (" + citParts.join(', ') + ")";
         citBlock.style.display = 'inline';
     } else {
+        citBlock.innerText = "";
         citBlock.style.display = 'none';
     }
 
@@ -405,8 +412,9 @@ window.printAndSaveSystem = async function () {
         chalani: document.getElementById('inChalani').value.trim() || '-',
         wada: document.getElementById('inWadaNo').value,
         name: name,
-        citNo: document.getElementById('inCitNo').value,
-        citDate: document.getElementById('inCitDate').value,
+        citNo: document.getElementById('inCitNo') ? document.getElementById('inCitNo').value.trim() : '',
+        citDate: document.getElementById('inCitDate') ? document.getElementById('inCitDate').value.trim() : '',
+        citDistrict: document.getElementById('inCitDistrict') ? document.getElementById('inCitDistrict').value.trim() : '',
         miti: document.getElementById('inMiti').value,
         subject: "पारिवारिक विवरण प्रमाणित",
         ns: document.getElementById('inNepalSamvat').value,
@@ -507,6 +515,9 @@ window.editFromDB = function (id) {
     document.getElementById('inName').value = rec.name;
     document.getElementById('inCitNo').value = rec.citNo || '';
     document.getElementById('inCitDate').value = rec.citDate || '';
+    if (document.getElementById('inCitDistrict')) {
+        document.getElementById('inCitDistrict').value = rec.citDistrict || '';
+    }
     
     const ownerInput = document.getElementById('inOwnerName');
     ownerInput.value = rec.ownerName || rec.name;
