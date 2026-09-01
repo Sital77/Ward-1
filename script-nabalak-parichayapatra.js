@@ -286,14 +286,10 @@ function updateDoc() {
     if (document.getElementById('lblNameEN_tbl')) document.getElementById('lblNameEN_tbl').innerText = fullEN;
     if (document.getElementById('lblNameNP_Sif')) document.getElementById('lblNameNP_Sif').innerText = fullNP;
 
-    // Page 2 Name Bindings
-    if (document.getElementById('lblNameNP_P2')) document.getElementById('lblNameNP_P2').innerText = fullNP;
-    if (document.getElementById('lblNameNP_P2_box')) document.getElementById('lblNameNP_P2_box').innerText = fullNP;
-    if (document.getElementById('lblNameNP_P2_right')) document.getElementById('lblNameNP_P2_right').innerText = fullNP;
 
     // 2. Birth Reg No & DOB
     const birthRegNo = document.getElementById('inBirthRegNo').value.trim() || '................';
-    if (document.getElementById('lblBirthReg_tbl')) document.getElementById('lblBirthReg_tbl').innerText = birthRegNo;
+    if (document.getElementById('lblBirthReg_tbl')) document.getElementById('lblBirthReg_tbl').innerText = birthRegNo !== '................' ? toNepaliDigit(birthRegNo) : '................';
     if (document.getElementById('lblBirthRegEN_tbl')) document.getElementById('lblBirthRegEN_tbl').innerText = birthRegNo !== '................' ? toEnglishDigit(birthRegNo) : '................';
 
     if (typeof autoFormatDateInput === 'function') autoFormatDateInput(document.getElementById('inDOB_AD'), '-');
@@ -325,7 +321,6 @@ function updateDoc() {
     const relText = (genNP === 'महिला') ? 'छोरी' : ((genNP === 'अन्य') ? 'छोरा/छोरी' : 'छोरा');
     const titleText = (genNP === 'महिला') ? 'सुश्री' : ((genNP === 'अन्य') ? 'श्री/सुश्री' : 'श्री');
     if (document.getElementById('lblRelation_Sif')) document.getElementById('lblRelation_Sif').innerText = relText;
-    if (document.getElementById('lblRelation_P2_box')) document.getElementById('lblRelation_P2_box').innerText = relText;
     if (document.getElementById('lblTitle_Sif')) document.getElementById('lblTitle_Sif').innerText = titleText;
 
     const relVal = document.getElementById('inReligion').value || '';
@@ -335,7 +330,15 @@ function updateDoc() {
 
     const casteVal = document.getElementById('inCaste').value.trim() || '................';
     if (document.getElementById('lblCaste_tbl')) document.getElementById('lblCaste_tbl').innerText = casteVal;
-    if (document.getElementById('lblCasteEN_tbl')) document.getElementById('lblCasteEN_tbl').innerText = casteVal.toUpperCase();
+    const casteMap = {
+        'ब्राह्मण': 'BRAHMIN', 'बाहुन': 'BRAHMIN', 'क्षेत्री': 'CHHETRI', 'नेवार': 'NEWAR', 'मगर': 'MAGAR',
+        'तामाङ': 'TAMANG', 'राई': 'RAI', 'लिम्बू': 'LIMBU', 'लिम्बु': 'LIMBU', 'गुरुङ': 'GURUNG',
+        'यादव': 'YADAV', 'थारु': 'THARU', 'थारू': 'THARU', 'मुस्लिम': 'MUSLIM', 'दलित': 'DALIT',
+        'विश्वकर्मा': 'BISHWOKARMA', 'परियार': 'PARIYAR', 'मिजार': 'MIJAR', 'कालिकोटे': 'KALIKOTE',
+        'शर्मा': 'SHARMA', 'अधिकारी': 'ADHIKARI', 'पौडेल': 'POUDEL', 'दाहाल': 'DAHAL', 'कोइराला': 'KOIRALA'
+    };
+    const casteEN = casteMap[casteVal] || (/^[a-zA-Z\s]+$/.test(casteVal) ? casteVal.toUpperCase() : casteVal);
+    if (document.getElementById('lblCasteEN_tbl')) document.getElementById('lblCasteEN_tbl').innerText = casteEN;
 
     const contactNo = document.getElementById('inContactNo').value.trim() || '................................';
     if (document.getElementById('lblContact_tbl')) document.getElementById('lblContact_tbl').innerText = contactNo;
@@ -353,14 +356,12 @@ function updateDoc() {
     if (document.getElementById('lblRecRM_Sif')) document.getElementById('lblRecRM_Sif').innerText = birthRM;
     if (document.getElementById('lblRecWard_Sif')) document.getElementById('lblRecWard_Sif').innerText = birthWard;
 
-    const birthPlaceEN = document.getElementById('inBirthPlaceEN').value.trim() || (birthRM !== '................' ? `${birthRM.toUpperCase()}-${birthWard}, ${birthDist.toUpperCase()}` : '................');
-    if (document.getElementById('lblBirthPlaceEN_tbl')) document.getElementById('lblBirthPlaceEN_tbl').innerText = birthPlaceEN;
-
     const permProv = document.getElementById('inPermProvince').value.trim() || '................';
     const permDist = document.getElementById('inPermDistrict').value.trim() || '................';
     const permRM = document.getElementById('inPermRM').value.trim() || '................';
     const permWard = document.getElementById('inPermWard').value || '....';
     const permToleNP = document.getElementById('inPermToleNP').value.trim() || '................';
+    const permToleEN = (document.getElementById('inPermToleEN') ? document.getElementById('inPermToleEN').value.trim().toUpperCase() : '') || (permToleNP !== '................' ? permToleNP.toUpperCase() : '................');
 
     if (document.getElementById('lblPermProv_tbl')) document.getElementById('lblPermProv_tbl').innerText = permProv;
     if (document.getElementById('lblPermDist_tbl')) document.getElementById('lblPermDist_tbl').innerText = permDist;
@@ -370,46 +371,120 @@ function updateDoc() {
     if (document.getElementById('lblPermRM_Sif')) document.getElementById('lblPermRM_Sif').innerText = permRM;
     if (document.getElementById('lblPermWard_Sif')) document.getElementById('lblPermWard_Sif').innerText = permWard;
 
-    // Permanent Address EN
-    const provENMap = { 'कोशी': 'KOSHI', 'मधेश': 'MADHESH', 'बागमती': 'BAGMATI', 'गण्डकी': 'GANDAKI', 'लुम्बिनी': 'LUMBINI', 'कर्णाली': 'KARNALI', 'सुदूरपश्चिम': 'SUDURPASCHIM' };
-    if (document.getElementById('lblPermProvEN_tbl')) document.getElementById('lblPermProvEN_tbl').innerText = provENMap[permProv] || (permProv !== '................' ? permProv.toUpperCase() : '................');
-    if (document.getElementById('lblPermDistEN_tbl')) document.getElementById('lblPermDistEN_tbl').innerText = permDist !== '................' ? permDist.toUpperCase() : '................';
-    if (document.getElementById('lblPermRM_EN_tbl')) document.getElementById('lblPermRM_EN_tbl').innerText = permRM !== '................' ? permRM.toUpperCase() : '................';
-    if (document.getElementById('lblPermWard_EN_tbl')) document.getElementById('lblPermWard_EN_tbl').innerText = permWard !== '....' ? toEnglishDigit(permWard) : '....';
-    if (document.getElementById('lblPermToleEN_tbl')) document.getElementById('lblPermToleEN_tbl').innerText = permToleNP !== '................' ? permToleNP.toUpperCase() : '................';
+    // Permanent Address EN Maps
+    const provENMap = {
+        'कोशी': 'KOSHI', 'मधेश': 'MADHESH', 'बागमती': 'BAGMATI', 'गण्डकी': 'GANDAKI', 'लुम्बिनी': 'LUMBINI', 'कर्णाली': 'KARNALI', 'सुदूरपश्चिम': 'SUDURPASCHIM',
+        '१': 'KOSHI', '२': 'MADHESH', '३': 'BAGMATI', '४': 'GANDAKI', '५': 'LUMBINI', '६': 'KARNALI', '७': 'SUDURPASCHIM',
+        '1': 'KOSHI', '2': 'MADHESH', '3': 'BAGMATI', '4': 'GANDAKI', '5': 'LUMBINI', '6': 'KARNALI', '7': 'SUDURPASCHIM'
+    };
+
+    const distENMap = {
+        'झापा': 'JHAPA', 'इलाम': 'ILAM', 'पाँचथर': 'PANCHTHAR', 'ताप्लेजुङ': 'TAPLEJUNG', 'ताप्लेजुङ्ग': 'TAPLEJUNG',
+        'मोरङ': 'MORANG', 'सुनसरी': 'SUNSARI', 'धनकुटा': 'DHANKUTA', 'तेह्रथुम': 'TEHRATHUM', 'संखुवासभा': 'SANKHUWASABHA',
+        'भोजपुर': 'BHOJPUR', 'सोलुखुम्बु': 'SOLUKHUMBU', 'ओखलढुङ्गा': 'OKHALDHUNGA', 'ओखलढुंगा': 'OKHALDHUNGA',
+        'खोटाङ': 'KHOTANG', 'उदयपुर': 'UDAYAPUR', 'सप्तरी': 'SAPTARI', 'सिराहा': 'SIRAHA', 'सिरहा': 'SIRAHA',
+        'धनुषा': 'DHANUSHA', 'महोत्तरी': 'MAHOTTARI', 'सर्लाही': 'SARLAHI', 'रौतहट': 'RAUTAHAT', 'बारा': 'BARA',
+        'पर्सा': 'PARSA', 'दोलखा': 'DOLAKHA', 'सिन्धुपाल्चोक': 'SINDHUPALCHOK', 'रसुवा': 'RASUWA', 'धादिङ': 'DHADING',
+        'नुवाकोट': 'NUWAKOT', 'काठमाडौं': 'KATHMANDU', 'काठमाडौँ': 'KATHMANDU', 'भक्तपुर': 'BHAKTAPUR',
+        'ललितपुर': 'LALITPUR', 'काभ्रेपलाञ्चोक': 'KAVREPALANCHOK', 'काभ्रे': 'KAVREPALANCHOK', 'रामेछाप': 'RAMECHHAP',
+        'सिन्धुली': 'SINDHULI', 'मकवानपुर': 'MAKWANPUR', 'चितवन': 'CHITWAN', 'गोरखा': 'GORKHA', 'मनाङ': 'MANANG',
+        'मुस्ताङ': 'MUSTANG', 'म्याग्दी': 'MYAGDI', 'कास्की': 'KASKI', 'लमजुङ': 'LAMJUNG', 'तनहुँ': 'TANAHUN',
+        'तनहु': 'TANAHUN', 'स्याङ्जा': 'SYANGJA', 'स्याङ्गजा': 'SYANGJA', 'नवलपुर': 'NAWALPUR',
+        'नवलपरासी (ब.सु.पू.)': 'NAWALPUR', 'नवलपरासी पूर्व': 'NAWALPUR', 'पर्वत': 'PARBAT', 'बागलुङ': 'BAGLUNG',
+        'गुल्मी': 'GULMI', 'पाल्पा': 'PALPA', 'अर्घाखाँची': 'ARGHA KHANCHI', 'नवलपरासी': 'NAWALPARASI',
+        'नवलपरासी (ब.सु.प.)': 'PARASI', 'नवलपरासी पश्चिम': 'PARASI', 'रुपन्देही': 'RUPANDEHI', 'कपिलवस्तु': 'KAPILVASTU',
+        'रोल्पा': 'ROLPA', 'प्युठान': 'PYUTHAN', 'दाङ': 'DANG', 'बाँके': 'BANKE', 'बर्दिया': 'BARDIYA',
+        'रुकुम पूर्व': 'EASTERN RUKUM', 'रुकुम (पूर्व)': 'EASTERN RUKUM', 'रुकुम पश्चिम': 'WESTERN RUKUM',
+        'रुकुम (पश्चिम)': 'WESTERN RUKUM', 'सल्यान': 'SALYAN', 'डोल्पा': 'DOLPA', 'जुम्ला': 'JUMLA',
+        'कालिकोट': 'KALIKOT', 'मुगु': 'MUGU', 'हुम्ला': 'HUMLA', 'जाजरकोट': 'JAJARKOT', 'दैलेख': 'DAILEKH',
+        'सुर्खेत': 'SURKHET', 'बाजुरा': 'BAJURA', 'बझाङ': 'BAJHANG', 'डोटी': 'DOTI', 'अछाम': 'ACHHAM',
+        'दार्चुला': 'DARCHULA', 'बैतडी': 'BAITADI', 'डडेलधुरा': 'DADELDHURA', 'कञ्चनपुर': 'KANCHANPUR', 'कैलाली': 'KAILALI'
+    };
+
+    const rmENMap = {
+        'गौरादह': 'GAURADAHA', 'गौरादह नगरपालिका': 'GAURADAHA MUNICIPALITY',
+        'दमक': 'DAMAK', 'दमक नगरपालिका': 'DAMAK MUNICIPALITY',
+        'विर्तामोड': 'BIRTAMOD', 'बिर्तामोड': 'BIRTAMOD', 'विर्तामोड नगरपालिका': 'BIRTAMOD MUNICIPALITY',
+        'भद्रपुर': 'BHADRAPUR', 'भद्रपुर नगरपालिका': 'BHADRAPUR MUNICIPALITY',
+        'मेचीनगर': 'MECHINAGAR', 'मेचीनगर नगरपालिका': 'MECHINAGAR MUNICIPALITY',
+        'कन्काई': 'KANKAI', 'कनकाई': 'KANKAI', 'कन्काई नगरपालिका': 'KANKAI MUNICIPALITY',
+        'शिवसताक्षी': 'SHIVASATAKSHI', 'शिवसताक्षी नगरपालिका': 'SHIVASATAKSHI MUNICIPALITY',
+        'अर्जुनधारा': 'ARJUNDHARA', 'अर्जुनधारा नगरपालिका': 'ARJUNDHARA MUNICIPALITY',
+        'कमल': 'KAMAL', 'कमल गाउँपालिका': 'KAMAL RURAL MUNICIPALITY',
+        'गौरीगञ्ज': 'GAURIGANJ', 'गौरीगंज': 'GAURIGANJ', 'गौरीगञ्ज गाउँपालिका': 'GAURIGANJ RURAL MUNICIPALITY',
+        'झापा गाउँपालिका': 'JHAPA RURAL MUNICIPALITY',
+        'बाह्रदशी': 'BARHADASHI', 'बाह्रदशी गाउँपालिका': 'BARHADASHI RURAL MUNICIPALITY',
+        'हल्दिबारी': 'HALDIBARI', 'हल्दिबारी गाउँपालिका': 'HALDIBARI RURAL MUNICIPALITY',
+        'कचनकवल': 'KACHANKAWAL', 'कचनकवल गाउँपालिका': 'KACHANKAWAL RURAL MUNICIPALITY',
+        'बुद्धशान्ति': 'BUDDHASHANTI', 'बुद्धशान्ति गाउँपालिका': 'BUDDHASHANTI RURAL MUNICIPALITY',
+        'आठराई': 'AATHRAI', 'आठराई गाउँपालिका': 'AATHRAI RURAL MUNICIPALITY',
+        'विराटनगर': 'BIRATNAGAR', 'विराटनगर महानगरपालिका': 'BIRATNAGAR METROPOLITAN CITY',
+        'काठमाडौं': 'KATHMANDU', 'काठमाडौँ': 'KATHMANDU', 'काठमाडौं महानगरपालिका': 'KATHMANDU METROPOLITAN CITY'
+    };
+
+    function convertNepToEng(val, map) {
+        if (!val || val === '................') return '................';
+        if (/^[a-zA-Z0-9\s\-.,/()]+$/.test(val)) return val.toUpperCase();
+        if (map && map[val.trim()]) return map[val.trim()];
+        if (map) {
+            for (let k of Object.keys(map)) {
+                if (val.includes(k)) return map[k];
+            }
+        }
+        return val.toUpperCase();
+    }
+
+    const permProvEN = provENMap[permProv] || convertNepToEng(permProv, provENMap);
+    const permDistEN = distENMap[permDist] || convertNepToEng(permDist, distENMap);
+    const permRmEN = rmENMap[permRM] || convertNepToEng(permRM, rmENMap);
+    const permWardEN = permWard !== '....' ? toEnglishDigit(permWard) : '....';
+
+    if (document.getElementById('lblPermProvEN_tbl')) document.getElementById('lblPermProvEN_tbl').innerText = permProvEN;
+    if (document.getElementById('lblPermDistEN_tbl')) document.getElementById('lblPermDistEN_tbl').innerText = permDistEN;
+    if (document.getElementById('lblPermRM_EN_tbl')) document.getElementById('lblPermRM_EN_tbl').innerText = permRmEN;
+    if (document.getElementById('lblPermWard_EN_tbl')) document.getElementById('lblPermWard_EN_tbl').innerText = permWardEN;
+    if (document.getElementById('lblPermToleEN_tbl')) document.getElementById('lblPermToleEN_tbl').innerText = permToleEN;
+
+    // Birth Place EN
+    const birthDistEN = distENMap[birthDist] || convertNepToEng(birthDist, distENMap);
+    const birthRmMapped = rmENMap[birthRM] || convertNepToEng(birthRM, rmENMap);
+    const birthWardEN = birthWard !== '....' ? toEnglishDigit(birthWard) : '....';
+    const autoBirthPlaceEN = (birthDist !== '................' || birthRM !== '................') ? `${birthRmMapped}-${birthWardEN}, ${birthDistEN}` : '................';
+    const birthPlaceEN = (document.getElementById('inBirthPlaceEN') ? document.getElementById('inBirthPlaceEN').value.trim() : '') || autoBirthPlaceEN;
+    if (document.getElementById('lblBirthPlaceEN_tbl')) document.getElementById('lblBirthPlaceEN_tbl').innerText = birthPlaceEN.toUpperCase();
 
     // 5. Family Details
     const fatherNP = document.getElementById('inFatherNameNP').value.trim() || '................';
     const fatherAddr = document.getElementById('inFatherAddress').value.trim() || (permRM !== '................' ? `${permRM} - ${permWard}, ${permDist}` : '................');
     const fatherCit = document.getElementById('inFatherCitNo').value.trim() || '................';
+    const fatherCitOnly = fatherCit.includes(',') ? fatherCit.split(',')[0].trim() : fatherCit;
+    const fatherCitNP = fatherCitOnly !== '................' ? toNepaliDigit(fatherCitOnly) : '................';
     const fatherType = (document.getElementById('inFatherCitType') ? document.getElementById('inFatherCitType').value.trim() : '') || '................';
     const fatherDist = (document.getElementById('inFatherCitDist') ? document.getElementById('inFatherCitDist').value.trim() : '') || '................';
     const fatherNid = (document.getElementById('inFatherNidNo') ? document.getElementById('inFatherNidNo').value.trim() : '') || '................';
 
     if (document.getElementById('lblFatherName_tbl')) document.getElementById('lblFatherName_tbl').innerText = fatherNP;
     if (document.getElementById('lblFatherAddr_tbl')) document.getElementById('lblFatherAddr_tbl').innerText = fatherAddr;
-    if (document.getElementById('lblFatherCit_tbl')) {
-        document.getElementById('lblFatherCit_tbl').innerText = fatherCit.includes(',') ? fatherCit.split(',')[0].trim() : fatherCit;
-    }
+    if (document.getElementById('lblFatherCit_tbl')) document.getElementById('lblFatherCit_tbl').innerText = fatherCitNP;
     if (document.getElementById('lblFatherCitType_tbl')) document.getElementById('lblFatherCitType_tbl').innerText = fatherType;
     if (document.getElementById('lblFatherCitDist_tbl')) document.getElementById('lblFatherCitDist_tbl').innerText = fatherDist;
-    if (document.getElementById('lblFatherNid_tbl')) document.getElementById('lblFatherNid_tbl').innerText = fatherNid;
+    if (document.getElementById('lblFatherNid_tbl')) document.getElementById('lblFatherNid_tbl').innerText = fatherNid !== '................' ? toNepaliDigit(fatherNid) : '................';
 
     const motherNP = document.getElementById('inMotherNameNP').value.trim() || '................';
     const motherAddr = document.getElementById('inMotherAddress').value.trim() || (permRM !== '................' ? `${permRM} - ${permWard}, ${permDist}` : '................');
     const motherCit = document.getElementById('inMotherCitNo').value.trim() || '................';
+    const motherCitOnly = motherCit.includes(',') ? motherCit.split(',')[0].trim() : motherCit;
+    const motherCitNP = motherCitOnly !== '................' ? toNepaliDigit(motherCitOnly) : '................';
     const motherType = (document.getElementById('inMotherCitType') ? document.getElementById('inMotherCitType').value.trim() : '') || '................';
     const motherDist = (document.getElementById('inMotherCitDist') ? document.getElementById('inMotherCitDist').value.trim() : '') || '................';
     const motherNid = (document.getElementById('inMotherNidNo') ? document.getElementById('inMotherNidNo').value.trim() : '') || '................';
 
     if (document.getElementById('lblMotherName_tbl')) document.getElementById('lblMotherName_tbl').innerText = motherNP;
     if (document.getElementById('lblMotherAddr_tbl')) document.getElementById('lblMotherAddr_tbl').innerText = motherAddr;
-    if (document.getElementById('lblMotherCit_tbl')) {
-        document.getElementById('lblMotherCit_tbl').innerText = motherCit.includes(',') ? motherCit.split(',')[0].trim() : motherCit;
-    }
+    if (document.getElementById('lblMotherCit_tbl')) document.getElementById('lblMotherCit_tbl').innerText = motherCitNP;
     if (document.getElementById('lblMotherCitType_tbl')) document.getElementById('lblMotherCitType_tbl').innerText = motherType;
     if (document.getElementById('lblMotherCitDist_tbl')) document.getElementById('lblMotherCitDist_tbl').innerText = motherDist;
-    if (document.getElementById('lblMotherNid_tbl')) document.getElementById('lblMotherNid_tbl').innerText = motherNid;
+    if (document.getElementById('lblMotherNid_tbl')) document.getElementById('lblMotherNid_tbl').innerText = motherNid !== '................' ? toNepaliDigit(motherNid) : '................';
 
     // Guardian Selection Resolution (Father / Mother / Guardian)
     const guardRadio = document.querySelector('input[name="guardSelect"]:checked');
@@ -481,10 +556,13 @@ function updateDoc() {
         submitRel = gRel || 'संरक्षक';
     }
 
+    const guardianCitOnly = guardianCitDisplay.includes(',') ? guardianCitDisplay.split(',')[0].trim() : guardianCitDisplay;
+    const guardianCitNP = guardianCitOnly !== '................' ? toNepaliDigit(guardianCitOnly) : '................';
+
     if (document.getElementById('lblGuardian_tbl')) document.getElementById('lblGuardian_tbl').innerText = guardianDisplayNP;
-    if (document.getElementById('lblGuardianCit_tbl')) document.getElementById('lblGuardianCit_tbl').innerText = guardianCitDisplay;
+    if (document.getElementById('lblGuardianCit_tbl')) document.getElementById('lblGuardianCit_tbl').innerText = guardianCitNP;
     if (document.getElementById('lblGuardianCitType_tbl')) document.getElementById('lblGuardianCitType_tbl').innerText = guardianTypeDisplay;
-    if (document.getElementById('lblGuardianNid_tbl')) document.getElementById('lblGuardianNid_tbl').innerText = guardianNidDisplay;
+    if (document.getElementById('lblGuardianNid_tbl')) document.getElementById('lblGuardianNid_tbl').innerText = guardianNidDisplay !== '................' ? toNepaliDigit(guardianNidDisplay) : '................';
 
     const grandfatherNP = (document.getElementById('inGrandfatherName') ? document.getElementById('inGrandfatherName').value.trim() : '') || '................';
     const grandfatherNid = (document.getElementById('inGrandfatherNidNo') ? document.getElementById('inGrandfatherNidNo').value.trim() : '') || '................';
@@ -492,16 +570,16 @@ function updateDoc() {
     const grandmotherNid = (document.getElementById('inGrandmotherNidNo') ? document.getElementById('inGrandmotherNidNo').value.trim() : '') || '................';
 
     if (document.getElementById('lblGrandfatherName_tbl')) document.getElementById('lblGrandfatherName_tbl').innerText = grandfatherNP;
-    if (document.getElementById('lblGrandfatherNid_tbl')) document.getElementById('lblGrandfatherNid_tbl').innerText = grandfatherNid;
+    if (document.getElementById('lblGrandfatherNid_tbl')) document.getElementById('lblGrandfatherNid_tbl').innerText = grandfatherNid !== '................' ? toNepaliDigit(grandfatherNid) : '................';
     if (document.getElementById('lblGrandmotherName_tbl')) document.getElementById('lblGrandmotherName_tbl').innerText = grandmotherNP;
-    if (document.getElementById('lblGrandmotherNid_tbl')) document.getElementById('lblGrandmotherNid_tbl').innerText = grandmotherNid;
+    if (document.getElementById('lblGrandmotherNid_tbl')) document.getElementById('lblGrandmotherNid_tbl').innerText = grandmotherNid !== '................' ? toNepaliDigit(grandmotherNid) : '................';
 
     // Page 1 Submit Box Bindings (Nivedak ko Namthar, Thegana, Nata)
     if (document.getElementById('lblSubmitName_P1')) document.getElementById('lblSubmitName_P1').innerText = submitName;
     if (document.getElementById('lblSubmitAddr_P1')) document.getElementById('lblSubmitAddr_P1').innerText = submitAddr;
     if (document.getElementById('lblSubmitRelation_P1')) document.getElementById('lblSubmitRelation_P1').innerText = submitRel;
 
-    // Page 2 Recommendation & Sanakhat Bindings
+    // Page 1 Sifarish Parents Bindings
     if (document.getElementById('lblSifFather')) document.getElementById('lblSifFather').innerText = fatherNP;
     if (document.getElementById('lblSifMother')) document.getElementById('lblSifMother').innerText = motherNP;
 
