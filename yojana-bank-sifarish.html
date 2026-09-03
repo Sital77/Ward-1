@@ -906,15 +906,15 @@
                     personsText = persons[0];
                     personCountWord = "एक";
                 } else if (persons.length === 2) {
-                    personsText = persons.join(" र ");
+                    personsText = persons.join(" तथा ");
                     personCountWord = "दुई";
                 } else {
                     const last = persons.pop();
-                    personsText = persons.join(", ") + " र " + last;
+                    personsText = persons.join(", ") + " तथा " + last;
                     personCountWord = "तीन";
                 }
             } else {
-                personsText = "अध्यक्ष: ........, सचिव: ......... र कोषाध्यक्ष: ..........";
+                personsText = "अध्यक्ष: .........., सचिव: .................... तथा कोषाध्यक्ष: .......................";
                 personCountWord = "तीन";
             }
 
@@ -928,11 +928,12 @@
                 document.getElementById('lblSubject').innerText = "बैंक खाता बन्द गरिदिने सम्बन्धमा";
                 
                 const accNo = document.getElementById('inAccountNo').value.trim() || '...............';
-                const commWithKa = committeeName.trim().endsWith('का') ? committeeName.trim() : `${committeeName} का`;
+                const cName = committeeName.trim();
+                const commWithKa = cName.endsWith('का') ? cName : (cName + 'का');
                 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.${wardNep} स्थित ${commWithKa} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको खाता नं. ${accNo} को बैंक खाता हाल उक्त योजना सम्पन्न भईसकेको हुँदा तहाँ कार्यालयको नियमानुसार उक्त खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
+                        प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.${wardNep} स्थित ${commWithKa} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको खाता नं. ${accNo} को बैंक खाता हाल उक्त योजना सम्पन्न भईसकेको हुँदा तहाँ कार्यालयको नियमानुसार उक्त बैंक खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
                     </div>
                 `;
 
