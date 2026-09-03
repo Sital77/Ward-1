@@ -1020,6 +1020,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
         box-shadow: 0 3px 8px rgba(43, 108, 176, 0.35);
     }
 
+    .input-panel, .preview-panel {
+        pointer-events: auto !important;
+    }
+
     body.mobile-mode-preview .input-panel {
         display: none !important;
     }

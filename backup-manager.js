@@ -101,17 +101,19 @@
                 console.warn('Could not save to system_backups collection:', fsErr);
             }
 
-            // 2. Local JSON File Download
-            const jsonBlob = new Blob([JSON.stringify(backupBundle, null, 2)], { type: 'application/json' });
-            const fileName = `Ward1_Sifarish_Backup_${dateStr}.json`;
-            const downloadUrl = URL.createObjectURL(jsonBlob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(downloadUrl);
+            // 2. Local JSON File Download (Only when manually triggered to never block UI)
+            if (isManual) {
+                const jsonBlob = new Blob([JSON.stringify(backupBundle, null, 2)], { type: 'application/json' });
+                const fileName = `Ward1_Sifarish_Backup_${dateStr}.json`;
+                const downloadUrl = URL.createObjectURL(jsonBlob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+            }
 
             // 3. Send to Google Drive Webhook if configured
             const webhookUrl = localStorage.getItem(GDRIVE_WEBHOOK_KEY);
