@@ -104,7 +104,7 @@ function sanitizeHTML(html) {
 
     // Do not run guard on login.html
     const currentPath = window.location.pathname.toLowerCase();
-    if (currentPath.endsWith('login.html')) {
+    if (currentPath.includes('login.html')) {
         return;
     }
 

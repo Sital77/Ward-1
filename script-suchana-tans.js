@@ -22,7 +22,9 @@ let globalDatabase = [];
     db.collection("suchanaTansRecords").onSnapshot((snapshot) => {
         globalDatabase = [];
         snapshot.forEach((doc) => {
-            globalDatabase.push({ id: doc.id, ...doc.data() });
+            const d = doc.data();
+            if (d.isDeleted) return; // 🗑️ Skip soft-deleted items
+            globalDatabase.push({ id: doc.id, ...d });
         });
         globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
         renderDatabaseTable();
@@ -253,11 +255,25 @@ function editFromDB(id) {
 
 // ── Delete record ───────────────────────────────────
 async function deleteFromDB(id) {
-    if (confirm("के तपाईं यो रेकर्ड क्लाउड डेटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
+    const rec = globalDatabase.find(r => r.id === id);
+    const chalani = rec ? (rec.bodyChalani || rec.chalani || '') : '';
+    if (confirm("के तपाईं यो रेकर्ड हटाउन चाहनुहुन्छ?\n(यो रेकर्ड १०० दिनसम्म रद्दीको टोकरी / Recycle Bin मा सुरक्षित रहनेछ)")) {
         try {
-            await db.collection("suchanaTansRecords").doc(id).delete();
+            if (typeof window.softDeleteRecord === 'function') {
+                await window.softDeleteRecord("suchanaTansRecords", id, {
+                    title: 'सूचना टाँस पत्र' + (chalani ? ' (च.नं. ' + chalani + ')' : ''),
+                    category: 'सूचना टाँस पत्र',
+                    chalani: chalani,
+                    miti: rec ? (rec.praaptaMiti || rec.miti || '') : ''
+                });
+            } else {
+                await db.collection("suchanaTansRecords").doc(id).update({
+                    isDeleted: true,
+                    deletedAtMillis: Date.now()
+                });
+            }
         } catch (e) {
-            alert("डिलिट गर्न समस्या भयो ।");
+            alert("डिलिट गर्न समस्या भयो: " + e.message);
         }
     }
 }
