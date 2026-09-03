@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>एकीकृत नागरिक तथा सिफारिस खोजी — गौरादह नगरपालिका वडा नं. १</title>
+    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="auth.js?v=2.5"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Mukta', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            color: #102a43;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.09);
+            border: 1px solid #d9e2ec;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #102a43 0%, #243b53 100%);
+            color: #ffffff;
+            padding: 24px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title img {
+            width: 55px;
+            height: 55px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .header-title h1 {
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .header-title p {
+            font-size: 0.92rem;
+            color: #bcccdc;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .search-section {
+            background: #f0f4f8;
+            padding: 25px 30px;
+            border-bottom: 2px solid #d9e2ec;
+        }
+
+        .search-box-wrap {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        .search-main-input {
+            flex: 1;
+            padding: 14px 20px 14px 48px;
+            border-radius: 12px;
+            border: 2px solid #bcccdc;
+            font-size: 1.1rem;
+            font-family: inherit;
+            background: #ffffff;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .search-main-input:focus {
+            outline: none;
+            border-color: #334e68;
+            box-shadow: 0 0 0 4px rgba(51, 78, 104, 0.15);
+        }
+
+        .search-icon-inside {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.25rem;
+            color: #627d98;
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            color: #829ab1;
+            cursor: pointer;
+            display: none;
+        }
+
+        .search-hints {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #486581;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .hint-badge {
+            background: #e1e8f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .hint-badge:hover {
+            background: #cbd5e1;
+        }
+
+        .content {
+            padding: 25px 30px;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #627d98;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e1e8f0;
+            border-top: 4px solid #334e68;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-summary-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1.5px solid #e2e8f0;
+        }
+
+        .results-count {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #102a43;
+        }
+
+        .citizen-card {
+            background: #ffffff;
+            border: 1.5px solid #d9e2ec;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s;
+        }
+
+        .citizen-card:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-bottom: 1.5px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .citizen-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .citizen-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2b6cb0, #4299e1);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .citizen-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #102a43;
+        }
+
+        .citizen-meta {
+            font-size: 0.85rem;
+            color: #627d98;
+        }
+
+        .badge-count {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .timeline-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+
+        .timeline-table th {
+            background: #f0f4f8;
+            color: #486581;
+            font-weight: 700;
+            padding: 10px 16px;
+            border-bottom: 1px solid #d9e2ec;
+            text-align: left;
+        }
+
+        .timeline-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f4f8;
+            vertical-align: middle;
+        }
+
+        .timeline-table tr:hover {
+            background: #fafbfc;
+        }
+
+        .badge-category {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            background: #edf2f7;
+            color: #2d3748;
+        }
+
+        .btn-view-link {
+            background: #3182ce;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+
+        .btn-view-link:hover {
+            background: #2b6cb0;
+        }
+
+        .empty-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #829ab1;
+        }
+
+        .empty-results-icon {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .content, .search-section {
+                padding: 16px 14px;
+            }
+            .header {
+                padding: 16px;
+            }
+            .header-title h1 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <img src="assets/emblem_of_nepal.svg" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg'" alt="Nepal Emblem">
+                <div>
+                    <h1>🔍 एकीकृत नागरिक तथा सिफारिस खोजी</h1>
+                    <p>गौरादह नगरपालिका वडा नं. १ • सम्पूर्ण सिफारिसहरूको एकीकृत प्रोफाइल खोज इन्जिन</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn-nav">🏠 गृहपृष्ठ</a>
+                <a href="recycle-bin.html" class="btn-nav">🗑️ रद्दीको टोकरी</a>
+            </div>
+        </div>
+
+        <!-- Search Bar Section -->
+        <div class="search-section">
+            <div class="search-box-wrap">
+                <span class="search-icon-inside">🔎</span>
+                <input type="text" id="mainSearchInput" class="search-main-input" 
+                    placeholder="नागरिकको नाम, नागरिकता नम्बर, उपभोक्ता समिति, वा चलानी नम्बर टाइप गर्नुहोस्..." 
+                    oninput="handleSearchInput(this.value)" autofocus>
+                <button type="button" id="clearSearchBtn" class="search-clear-btn" onclick="clearSearch()">✕</button>
+            </div>
+            <div class="search-hints">
+                <span>उदाहरणीय खोजहरू:</span>
+                <span class="hint-badge" onclick="fillHint('मनोज श्रेष्ठ')">मनोज श्रेष्ठ</span>
+                <span class="hint-badge" onclick="fillHint('उपभोक्ता समिति')">उपभोक्ता समिति</span>
+                <span class="hint-badge" onclick="fillHint('लालपानी')">लालपानी</span>
+                <span class="hint-badge" onclick="fillHint('सिंहदेवीथान')">सिंहदेवीथान</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div id="resultsSummaryBar" class="results-summary-bar" style="display: none;">
+                <div class="results-count" id="resultsCountText">फेला परेका नतिजाहरू: ०</div>
+                <button type="button" class="btn-nav" style="background:#2b6cb0; color:#fff;" onclick="window.print()">🖨️ विवरण प्रिन्ट</button>
+            </div>
+
+            <div id="searchResultsContainer">
+                <div class="empty-results">
+                    <div class="empty-results-icon">📂</div>
+                    <h3>नागरिक वा संस्थाको नाम टाइप गर्नुहोस्</h3>
+                    <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै २० वटा सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // 20 Sifarish collections and their page mappings
+        const COLLECTION_SPECS = [
+            { name: 'yojanaBankRecords', label: '📂 योजना बैंक खाता', page: 'yojana-bank-sifarish.html' },
+            { name: 'yojanaSamjhautaRecords', label: '📝 योजना सम्झौता', page: 'yojana-samjhauta.html' },
+            { name: 'charKillaRecords', label: '📐 चारकिल्ला सिफारिस', page: 'charkilla.html' },
+            { name: 'gharBatoRecords', label: '🏠 घरबाटो प्रमाणित', page: 'gharbato.html' },
+            { name: 'suchanaTansRecords', label: '📢 सूचना टाँस पत्र', page: 'suchana-tans.html' },
+            { name: 'panRecords', label: '💼 स्थायी लेखा (PAN)', page: 'pan-sifarish.html' },
+            { name: 'batoPramanitRecords', label: '🛣️ बाटो प्रमाणित', page: 'bato-pramanit.html' },
+            { name: 'gharKayamRecords', label: '🏡 घर कायम', page: 'ghar-kayam.html' },
+            { name: 'pariwarikRecords', label: '👨‍👩‍👧‍👦 पारिवारिक विवरण', page: 'pariwarik-bibaran.html' },
+            { name: 'nabalakRecords', label: '👶 नाबालक परिचयपत्र', page: 'nabalak-parichayapatra.html' },
+            { name: 'jaggadhaniPratilipiRecords', label: '📜 जग्गाधनी प्रतिलिपि', page: 'jaggadhani-pratilipi.html' },
+            { name: 'jaggadhaniPoojaRecords', label: '📄 जग्गाधनी पुर्जा', page: 'jaggadhani-patra.html' },
+            { name: 'bargikaranSifarishRecords', label: '📊 वर्गीकरण सिफारिस', page: 'bargikaran-sifarish.html' },
+            { name: 'bibahaRecords', label: '💍 विवाह प्रमाणित', page: 'bibaha-pramanit.html' },
+            { name: 'aamdaniRecords', label: '💰 आम्दानी प्रमाणित', page: 'aamdani-pramanit.html' },
+            { name: 'abhilekhRecords', label: '📁 अभिलेख प्रमाणित', page: 'abhilekh-pramanit.html' },
+            { name: 'abibahitRecords', label: '👤 अविवाहित प्रमाणित', page: 'abibahit-pramanit.html' },
+            { name: 'apangataRecords', label: '♿ अपाङ्गता सिफारिस', page: 'apangata-sifarish.html' },
+            { name: 'arkoBibahaRecords', label: '👥 अर्को विवाह नगरेको', page: 'arko-bibaha-nagareko.html' },
+            { name: 'bankRecords', label: '🏦 बैंक खाता सिफारिस', page: 'bank-sifarish.html' }
+        ];
+
+        let searchDebounceTimer = null;
+        let cachedAllRecords = null;
+        let isPreloading = false;
+
+        function toNepaliNum(n) {
+            const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            return String(n).replace(/[0-9]/g, d => nepaliDigits[d]);
+        }
+
+        // Preload records across all collections once in memory for ultra-fast instant search
+        async function preloadAllRecords() {
+            if (cachedAllRecords || isPreloading) return;
+            isPreloading = true;
+            console.log('⚡ Preloading all collections for instant citizen search...');
+
+            const loaded = [];
+            const promises = COLLECTION_SPECS.map(async (spec) => {
+                try {
+                    const snap = await db.collection(spec.name).get();
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        if (data.isDeleted) return; // Ignore soft-deleted items
+
+                        loaded.push({
+                            id: doc.id,
+                            collectionName: spec.name,
+                            categoryLabel: spec.label,
+                            pageUrl: spec.page,
+                            data: data,
+                            // Extract primary searchable text
+                            searchableText: extractSearchableText(data)
+                        });
+                    });
+                } catch(e) {
+                    console.warn(`Could not preload ${spec.name}:`, e);
+                }
+            });
+
+            await Promise.all(promises);
+            cachedAllRecords = loaded;
+            isPreloading = false;
+            console.log(`✅ Loaded ${cachedAllRecords.length} records ready for cross-search.`);
+
+            // Trigger search if user already typed
+            const q = document.getElementById('mainSearchInput').value;
+            if (q.trim()) {
+                performSearch(q.trim());
+            }
+        }
+
+        function extractSearchableText(d) {
+            const parts = [
+                d.committeeName,
+                d.projectName,
+                d.chairman,
+                d.secretary,
+                d.treasurer,
+                d.name,
+                d.applicantName,
+                d.ownerName,
+                d.fatherName,
+                d.citizenshipNo,
+                d.chalani,
+                d.chalaniNo,
+                d.miti,
+                d.tole,
+                d.ward,
+                d.bankName
+            ];
+            return parts.filter(Boolean).join(' ').toLowerCase();
+        }
+
+        function handleSearchInput(val) {
+            const clearBtn = document.getElementById('clearSearchBtn');
+            clearBtn.style.display = val ? 'block' : 'none';
+
+            clearTimeout(searchDebounceTimer);
+            if (!val.trim()) {
+                document.getElementById('resultsSummaryBar').style.display = 'none';
+                document.getElementById('searchResultsContainer').innerHTML = `
+                    <div class="empty-results">
+                        <div class="empty-results-icon">📂</div>
+                        <h3>नागरिक वा संस्थाको नाम टाइप गर्नुहोस्</h3>
+                        <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै २० वटा सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
+                    </div>`;
+                return;
+            }
+
+            searchDebounceTimer = setTimeout(() => {
+                performSearch(val.trim());
+            }, 250);
+        }
+
+        function clearSearch() {
+            const inp = document.getElementById('mainSearchInput');
+            inp.value = '';
+            handleSearchInput('');
+            inp.focus();
+        }
+
+        function fillHint(hint) {
+            const inp = document.getElementById('mainSearchInput');
+            inp.value = hint;
+            handleSearchInput(hint);
+            inp.focus();
+        }
+
+        function performSearch(query) {
+            if (!cachedAllRecords) {
+                document.getElementById('searchResultsContainer').innerHTML = `
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <h3>डाटाबेसबाट सम्पूर्ण सिफारिसहरू लोड गरिँदैछ...</h3>
+                        <p>कृपया केही सेकेन्ड पर्खनुहोस्...</p>
+                    </div>`;
+                preloadAllRecords();
+                return;
+            }
+
+            const qLower = query.toLowerCase();
+            const matched = cachedAllRecords.filter(item => item.searchableText.includes(qLower));
+
+            renderSearchResults(matched, query);
+        }
+
+        function renderSearchResults(records, query) {
+            const container = document.getElementById('searchResultsContainer');
+            const summaryBar = document.getElementById('resultsSummaryBar');
+            const countText = document.getElementById('resultsCountText');
+
+            if (!records || records.length === 0) {
+                summaryBar.style.display = 'none';
+                container.innerHTML = `
+                    <div class="empty-results">
+                        <div class="empty-results-icon">🔍</div>
+                        <h3>"${escapeHtml(query)}" सँग मिल्दोजुल्दो कुनै सिफारिस फेला परेन</h3>
+                        <p>कृपया हिज्जे जाँच गर्नुहोस् वा नागरिकता नं / चलानी नं बाट खोजी गर्नुहोस्।</p>
+                    </div>`;
+                return;
+            }
+
+            summaryBar.style.display = 'flex';
+            countText.innerText = `फेला परेका नतिजाहरू: ${toNepaliNum(records.length)}`;
+
+            // Group by Citizen / Entity Name if possible
+            const grouped = {};
+            records.forEach(r => {
+                const d = r.data;
+                const primaryName = d.name || d.applicantName || d.committeeName || d.projectName || d.ownerName || 'अन्य';
+                if (!grouped[primaryName]) {
+                    grouped[primaryName] = [];
+                }
+                grouped[primaryName].push(r);
+            });
+
+            container.innerHTML = Object.keys(grouped).map(name => {
+                const list = grouped[name];
+                const first = list[0].data;
+                const metaParts = [];
+                if (first.fatherName) metaParts.push(`बुवा: ${first.fatherName}`);
+                if (first.citizenshipNo) metaParts.push(`ना.प्र.नं: ${first.citizenshipNo}`);
+                if (first.chairman) metaParts.push(`अध्यक्ष: ${first.chairman}`);
+
+                return `
+                    <div class="citizen-card">
+                        <div class="card-header">
+                            <div class="citizen-title-group">
+                                <div class="citizen-avatar">${name.charAt(0)}</div>
+                                <div>
+                                    <div class="citizen-name">${escapeHtml(name)}</div>
+                                    <div class="citizen-meta">${escapeHtml(metaParts.join(' • ') || 'गौरादह १')}</div>
+                                </div>
+                            </div>
+                            <span class="badge-count">जारी सिफारिसहरू: ${toNepaliNum(list.length)}</span>
+                        </div>
+                        <table class="timeline-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;">क्र.</th>
+                                    <th>सिफारिस प्रकार</th>
+                                    <th>चलानी नं.</th>
+                                    <th>मिति</th>
+                                    <th>मुख्य विवरण</th>
+                                    <th style="text-align: right;">कार्य</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${list.map((item, idx) => {
+                                    const d = item.data;
+                                    const chalani = d.chalani || d.chalaniNo || '-';
+                                    const miti = d.miti || '-';
+                                    const desc = d.projectName || d.purpose || d.kittaNo || d.bankName || '-';
+
+                                    return `
+                                        <tr>
+                                            <td>${toNepaliNum(idx + 1)}</td>
+                                            <td><span class="badge-category">${item.categoryLabel}</span></td>
+                                            <td><strong>${escapeHtml(chalani)}</strong></td>
+                                            <td>${toNepaliNum(miti)}</td>
+                                            <td>${escapeHtml(desc)}</td>
+                                            <td style="text-align: right;">
+                                                <a href="${item.pageUrl}" class="btn-view-link" target="_blank">
+                                                    📄 खोल्नुहोस् ↗
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        window.onload = function() {
+            preloadAllRecords();
+        };
+    </script>
+</body>
+</html>

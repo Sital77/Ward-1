@@ -1,0 +1,17 @@
+{
+  "name": "गौरादह नगरपालिका वडा नं. १ — डिजिटल सिफारिस प्रणाली",
+  "short_name": "वडा १ सिफारिस",
+  "description": "गौरादह नगरपालिका वडा नं. १ को डिजिटल सिफारिस तथा सेवा व्यवस्थापन प्रणाली",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7fafc",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "assets/emblem_of_nepal.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

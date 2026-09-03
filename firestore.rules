@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 🔒 Security: Only authenticated ward staff can access system records
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Ward users collection: Only authenticated users can read/write their own info
+    match /ward_users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.token.admin == true || request.auth.uid == userId);
+    }
+
+    // System Backups: Only authenticated staff can create/read backups; deletion requires admin
+    match /system_backups/{backupId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    // Deleted Records Log / Recycle Bin
+    match /deleted_records_log/{logId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // All Sifarish Recommendation Collections
+    match /{collectionName}/{docId} {
+      // Allow read & write only if authenticated
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      
+      // Prevent hard-delete by standard users if soft-delete is enforced
+      allow delete: if isAuthenticated();
+    }
+  }
+}

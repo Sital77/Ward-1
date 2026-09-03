@@ -1033,7 +1033,9 @@
             db.collection("yojanaBankRecords").onSnapshot((snapshot) => {
                 globalDatabase = [];
                 snapshot.forEach((doc) => {
-                    globalDatabase.push({ id: doc.id, ...doc.data() });
+                    const d = doc.data();
+                    if (d.isDeleted) return; // 🗑️ Skip soft-deleted items (in Recycle Bin)
+                    globalDatabase.push({ id: doc.id, ...d });
                 });
                 globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 renderDatabaseTable();
@@ -1278,11 +1280,26 @@
         }
 
         async function deleteFromDB(id) {
-            if (confirm("के तपाईं यो रेकर्ड क्लाउड डाटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
+            const rec = globalDatabase.find(r => r.id === id);
+            const committeeName = rec ? (rec.committeeName || rec.projectName || 'योजना') : 'योजना';
+            if (confirm(`के तपाईं "${committeeName}" को यो रेकर्ड हटाउन चाहनुहुन्छ?\n(यो रेकर्ड १०० दिनसम्म रद्दीको टोकरी / Recycle Bin मा सुरक्षित रहनेछ)`)) {
                 try {
-                    await db.collection("yojanaBankRecords").doc(id).delete();
+                    if (typeof window.softDeleteRecord === 'function') {
+                        await window.softDeleteRecord("yojanaBankRecords", id, {
+                            title: committeeName,
+                            category: 'योजना बैंक खाता',
+                            chalani: rec ? (rec.chalani || '') : '',
+                            miti: rec ? (rec.miti || '') : '',
+                            mode: rec ? (rec.mode || '') : ''
+                        });
+                    } else {
+                        await db.collection("yojanaBankRecords").doc(id).update({
+                            isDeleted: true,
+                            deletedAtMillis: Date.now()
+                        });
+                    }
                 } catch (e) {
-                    alert("डिलिट गर्न समस्या भयो ।");
+                    alert("डिलिट गर्न समस्या भयो: " + e.message);
                 }
             }
         }

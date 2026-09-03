@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>रद्दीको टोकरी (Recycle Bin) — गौरादह नगरपालिका वडा नं. १</title>
+    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="auth.js?v=2.5"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Mukta', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            color: #2d3748;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #742a2a 0%, #9b2c2c 100%);
+            color: #ffffff;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title img {
+            width: 55px;
+            height: 55px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .header-title h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .header-title p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .retention-alert {
+            background: #fffaf0;
+            border-left: 5px solid #dd6b20;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            color: #9c4221;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .content {
+            padding: 25px 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            background: #ffffff;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d3748;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .search-bar-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 2;
+            min-width: 260px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e0;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+        }
+
+        .filter-select {
+            flex: 1;
+            min-width: 180px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e0;
+            font-size: 0.95rem;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .bin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.92rem;
+        }
+
+        .bin-table th {
+            background: #edf2f7;
+            color: #4a5568;
+            font-weight: 800;
+            padding: 12px 14px;
+            border-bottom: 2px solid #cbd5e0;
+            white-space: nowrap;
+        }
+
+        .bin-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .bin-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .badge-type {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: #fed7d7;
+            color: #9b2c2c;
+            white-space: nowrap;
+        }
+
+        .days-left-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+        }
+
+        .days-normal {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .days-warning {
+            background: #feebc8;
+            color: #c05621;
+        }
+
+        .days-danger {
+            background: #fed7d7;
+            color: #9b2c2c;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .btn-restore {
+            background: #38a169;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-restore:hover {
+            background: #2f855a;
+            transform: scale(1.02);
+        }
+
+        .btn-delete-forever {
+            background: #e53e3e;
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-delete-forever:hover {
+            background: #c53030;
+        }
+
+        .empty-bin {
+            text-align: center;
+            padding: 50px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-bin .empty-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .content {
+                padding: 16px 12px;
+            }
+            .header {
+                padding: 16px;
+            }
+            .header-title h1 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <img src="assets/emblem_of_nepal.svg" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg'" alt="Nepal Emblem">
+                <div>
+                    <h1>🗑️ रद्दीको टोकरी (Recycle Bin)</h1>
+                    <p>गौरादह नगरपालिका वडा नं. १ • हटाइएका सिफारिसहरूको सुरक्षित १०० दिने भण्डार</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn-nav">🏠 गृहपृष्ठ</a>
+                <a href="admin.html" class="btn-nav">📊 Admin Panel</a>
+            </div>
+        </div>
+
+        <!-- Retention Alert -->
+        <div class="retention-alert">
+            <span style="font-size: 1.4rem;">ℹ️</span>
+            <div>
+                <strong>१०० दिने सुरक्षा म्याद:</strong> यहाँ डिलिट गरिएका सिफारिसहरू १०० दिनसम्म सुरक्षित रहन्छन्। यो अवधिभित्र तपाईंले जुनसुकै बेला <strong>'रिस्टोर (Restore)'</strong> गरी पूर्ववत गर्न सक्नुहुन्छ। १०० दिन नाघेपछि प्रणालीले स्वचालित रूपमा डाटा सफा (Permanent Purge) गर्दछ।
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🗑️</div>
+                    <div>
+                        <div class="stat-val" id="statTotalDeleted">०</div>
+                        <div class="stat-label">टोकरीमा रहेका रेकर्डहरू</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div>
+                        <div class="stat-val" id="statExpiringSoon">०</div>
+                        <div class="stat-label">म्याद सकिन लागेका (&lt; १० दिन)</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔄</div>
+                    <div>
+                        <div class="stat-val" id="statRestoredCount">०</div>
+                        <div class="stat-label">सफलतापुर्वक रिस्टोर गरिएका</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search & Filters -->
+            <div class="search-bar-row">
+                <input type="text" id="binSearchInput" class="search-input" placeholder="🔍 नाम, उपभोक्ता समिति, वा चलानी नं. खोज्नुहोस्..." oninput="filterBinTable()">
+                <select id="binCategoryFilter" class="filter-select" onchange="filterBinTable()">
+                    <option value="">-- सबै सिफारिस प्रकार --</option>
+                    <option value="yojanaBankRecords">योजना बैंक खाता</option>
+                    <option value="charKillaRecords">चारकिल्ला सिफारिस</option>
+                    <option value="gharBatoRecords">घरबाटो प्रमाणित</option>
+                    <option value="suchanaTansRecords">सूचना टाँस पत्र</option>
+                    <option value="panRecords">स्थायी लेखा (PAN)</option>
+                    <option value="batoPramanitRecords">बाटो प्रमाणित</option>
+                    <option value="gharKayamRecords">घर कायम</option>
+                    <option value="pariwarikRecords">पारिवारिक विवरण</option>
+                </select>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="bin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">सि.नं.</th>
+                            <th>सिफारिसको प्रकार</th>
+                            <th>नागरिक / समिति / मुख्य विवरण</th>
+                            <th>चलानी नं.</th>
+                            <th>डिलिट गरिएको मिति</th>
+                            <th>बाँकी म्याद</th>
+                            <th style="text-align: right;">कार्य</th>
+                        </tr>
+                    </thead>
+                    <tbody id="binTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #718096;">
+                                ⏳ रद्दीको टोकरीबाट रेकर्डहरू लोड हुँदैछन्...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+            authDomain: "gauradaha-ward1.firebaseapp.com",
+            projectId: "gauradaha-ward1",
+            storageBucket: "gauradaha-ward1.firebasestorage.app",
+            messagingSenderId: "905617778132",
+            appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        let binRecords = [];
+        let restoredCount = 0;
+
+        const categoryLabels = {
+            'yojanaBankRecords': '📂 योजना बैंक खाता',
+            'yojanaSamjhautaRecords': '📝 योजना सम्झौता',
+            'charKillaRecords': '📐 चारकिल्ला सिफारिस',
+            'gharBatoRecords': '🏠 घरबाटो प्रमाणित',
+            'suchanaTansRecords': '📢 सूचना टाँस पत्र',
+            'panRecords': '💼 स्थायी लेखा (PAN)',
+            'batoPramanitRecords': '🛣️ बाटो प्रमाणित',
+            'gharKayamRecords': '🏡 घर कायम',
+            'pariwarikRecords': '👨‍👩‍👧‍👦 पारिवारिक विवरण',
+            'nabalakRecords': '👶 नाबालक परिचयपत्र',
+            'jaggadhaniPratilipiRecords': '📜 जग्गाधनी प्रतिलिपि',
+            'jaggadhaniPoojaRecords': '📄 जग्गाधनी पुर्जा',
+            'bargikaranSifarishRecords': '📊 वर्गीकरण सिफारिस',
+            'bibahaRecords': '💍 विवाह प्रमाणित',
+            'aamdaniRecords': '💰 आम्दानी प्रमाणित',
+            'abhilekhRecords': '📁 अभिलेख प्रमाणित',
+            'abibahitRecords': '👤 अविवाहित प्रमाणित',
+            'apangataRecords': '♿ अपाङ्गता सिफारिस',
+            'arkoBibahaRecords': '👥 अर्को विवाह नगरेको',
+            'bankRecords': '🏦 बैंक खाता सिफारिस'
+        };
+
+        function toNepaliNum(n) {
+            const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            return String(n).replace(/[0-9]/g, d => nepaliDigits[d]);
+        }
+
+        // Load Deleted Records in Realtime
+        function initRecycleBin() {
+            // Auto purge records > 100 days
+            if (typeof window.purgeExpiredDeletedRecords === 'function') {
+                window.purgeExpiredDeletedRecords().then(purged => {
+                    if (purged > 0) {
+                        console.log(`🧹 Auto-purged ${purged} records older than 100 days.`);
+                    }
+                });
+            }
+
+            db.collection("deleted_records_log")
+                .orderBy("deletedAtMillis", "desc")
+                .onSnapshot(snapshot => {
+                    binRecords = [];
+                    let expiringSoonCount = 0;
+                    const now = Date.now();
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const deletedAt = data.deletedAtMillis || now;
+                        const elapsedDays = Math.floor((now - deletedAt) / (1000 * 60 * 60 * 24));
+                        const daysLeft = Math.max(0, 100 - elapsedDays);
+
+                        if (daysLeft <= 10) {
+                            expiringSoonCount++;
+                        }
+
+                        binRecords.push({
+                            id: doc.id,
+                            collectionName: data.collectionName,
+                            originalDocId: data.originalDocId,
+                            deletedAtMillis: deletedAt,
+                            deletedBy: data.deletedBy || 'वडा कर्मचारी',
+                            summary: data.summary || {},
+                            daysLeft: daysLeft
+                        });
+                    });
+
+                    document.getElementById('statTotalDeleted').innerText = toNepaliNum(binRecords.length);
+                    document.getElementById('statExpiringSoon').innerText = toNepaliNum(expiringSoonCount);
+                    renderBinTable(binRecords);
+                }, err => {
+                    console.warn("Bin listener error:", err);
+                    document.getElementById('binTableBody').innerHTML = `
+                        <tr><td colspan="7" style="text-align:center; color:#c53030; padding:30px;">
+                            डाटा लोड गर्न समस्या भयो। कृपया इन्टरनेट जाँच गर्नुहोस्।
+                        </td></tr>`;
+                });
+        }
+
+        function renderBinTable(records) {
+            const tbody = document.getElementById('binTableBody');
+            if (!records || records.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-bin">
+                                <div class="empty-icon">🎉</div>
+                                <h3>रद्दीको टोकरी पूर्ण रूपमा खाली छ!</h3>
+                                <p>हाल कुनै पनि डिलिट गरिएको सिफारिस छैन।</p>
+                            </div>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = records.map((rec, index) => {
+                const s = rec.summary || {};
+                const title = s.title || s.name || s.committeeName || s.projectName || 'अज्ञात रेकर्ड';
+                const chalani = s.chalani || '-';
+                const colLabel = categoryLabels[rec.collectionName] || rec.collectionName || 'सिफारिस';
+                
+                const dDate = new Date(rec.deletedAtMillis);
+                const dDateStr = `${dDate.getFullYear()}/${String(dDate.getMonth() + 1).padStart(2, '0')}/${String(dDate.getDate()).padStart(2, '0')}`;
+
+                let daysClass = 'days-normal';
+                if (rec.daysLeft <= 10) daysClass = 'days-danger';
+                else if (rec.daysLeft <= 30) daysClass = 'days-warning';
+
+                return `
+                    <tr>
+                        <td>${toNepaliNum(index + 1)}</td>
+                        <td><span class="badge-type">${colLabel}</span></td>
+                        <td>
+                            <strong>${escapeHtml(title)}</strong>
+                            <div style="font-size:0.8rem; color:#718096;">हटाउने: ${escapeHtml(rec.deletedBy)}</div>
+                        </td>
+                        <td>${escapeHtml(chalani)}</td>
+                        <td>${toNepaliNum(dDateStr)}</td>
+                        <td>
+                            <span class="days-left-badge ${daysClass}">
+                                ⏳ ${toNepaliNum(rec.daysLeft)} दिन बाँकी
+                            </span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <button class="btn-restore" onclick="restoreFromBin('${rec.collectionName}', '${rec.originalDocId}', '${escapeHtml(title)}')">
+                                🔄 रिस्टोर
+                            </button>
+                            <button class="btn-delete-forever" onclick="deleteForever('${rec.id}', '${rec.collectionName}', '${rec.originalDocId}', '${escapeHtml(title)}')">
+                                ⚠️ स्थायी हटाउनुस्
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterBinTable() {
+            const query = (document.getElementById('binSearchInput').value || '').toLowerCase().trim();
+            const cat = document.getElementById('binCategoryFilter').value;
+
+            const filtered = binRecords.filter(rec => {
+                const s = rec.summary || {};
+                const title = (s.title || s.name || s.committeeName || s.projectName || '').toLowerCase();
+                const chalani = (s.chalani || '').toLowerCase();
+                const col = (rec.collectionName || '').toLowerCase();
+
+                const matchQuery = !query || title.includes(query) || chalani.includes(query) || col.includes(query);
+                const matchCat = !cat || rec.collectionName === cat;
+
+                return matchQuery && matchCat;
+            });
+
+            renderBinTable(filtered);
+        }
+
+        async function restoreFromBin(colName, docId, title) {
+            if (confirm(`के तपाईं "${title}" को रेकर्ड सक्रिय सिफारिस अभिलेखमा फर्काउन (Restore गर्न) चाहनुहुन्छ?`)) {
+                try {
+                    await window.restoreRecord(colName, docId);
+                    restoredCount++;
+                    document.getElementById('statRestoredCount').innerText = toNepaliNum(restoredCount);
+                    alert(`✅ "${title}" सफलतापुर्वक रिस्टोर गरियो!`);
+                } catch (e) {
+                    alert("रिस्टोर गर्न समस्या भयो: " + e.message);
+                }
+            }
+        }
+
+        async function deleteForever(logId, colName, docId, title) {
+            if (confirm(`⚠️ चेतावनी: के तपाईं "${title}" लाई सधैंका लागि मेटाउन चाहनुहुन्छ?\nयो कार्य पूर्ववत गर्न सकिँदैन!`)) {
+                try {
+                    if (colName && docId) {
+                        await db.collection(colName).doc(docId).delete();
+                    }
+                    await db.collection("deleted_records_log").doc(logId).delete();
+                    alert(`🗑️ रेकर्ड स्थायी रूपमा हटाइयो।`);
+                } catch (e) {
+                    alert("हटाउन समस्या भयो: " + e.message);
+                }
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        window.onload = function() {
+            initRecycleBin();
+        };
+    </script>
+</body>
+</html>

@@ -504,20 +504,39 @@
             ADMIN_KEY: 'sifarish_admin',
             AUTH_KEY: 'sifarish_auth',
             REDIRECT_KEY: 'sifarish_redirect',
-            DEFAULT_EXPIRY_HOURS: 8760, // 365 days — permanent login
-            REMEMBER_EXPIRY_HOURS: 8760 // 365 days — permanent login
+            DEFAULT_EXPIRY_HOURS: 8760,
+            REMEMBER_EXPIRY_HOURS: 8760,
+            TOKEN_PREFIX: 'sif_',
+            SECRET_SALT: 'GW1_SEC_905617778132_K2'
         };
 
-        function generateSessionToken(rememberMe) {
+        function computeSessionSig(tokenId, expiresAt, isAdmin) {
+            let hash = 0;
+            const str = tokenId + '_' + expiresAt + '_' + (isAdmin ? '1' : '0') + '_' + AUTH_CONFIG.SECRET_SALT;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return 'sig_' + Math.abs(hash).toString(36);
+        }
+
+        function generateSessionToken(rememberMe, isAdmin) {
             const expiry = rememberMe ? AUTH_CONFIG.REMEMBER_EXPIRY_HOURS : AUTH_CONFIG.DEFAULT_EXPIRY_HOURS;
             const expiresAt = Date.now() + (expiry * 60 * 60 * 1000);
             const tokenId = 'sif_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
-            return { token: tokenId, createdAt: Date.now(), expiresAt: expiresAt, rememberMe: rememberMe };
+            const sig = computeSessionSig(tokenId, expiresAt, isAdmin);
+            return {
+                token: tokenId,
+                createdAt: Date.now(),
+                expiresAt: expiresAt,
+                rememberMe: rememberMe,
+                isAdmin: !!isAdmin,
+                sig: sig
+            };
         }
 
         function createSession(isAdmin, rememberMe) {
-            const session = generateSessionToken(rememberMe || false);
-            session.isAdmin = isAdmin;
+            const session = generateSessionToken(rememberMe || false, isAdmin);
             localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
             localStorage.setItem(AUTH_CONFIG.AUTH_KEY, 'true');
             localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, isAdmin ? 'true' : 'false');
@@ -528,14 +547,9 @@
                 const sessionStr = localStorage.getItem(AUTH_CONFIG.SESSION_KEY);
                 if (!sessionStr) return false;
                 const session = JSON.parse(sessionStr);
-                if (!session.token || !session.expiresAt) return false;
-                if (Date.now() > session.expiresAt) {
-                    localStorage.removeItem(AUTH_CONFIG.SESSION_KEY);
-                    localStorage.removeItem(AUTH_CONFIG.AUTH_KEY);
-                    localStorage.removeItem(AUTH_CONFIG.ADMIN_KEY);
-                    return false;
-                }
-                return true;
+                if (!session.token || !session.expiresAt || !session.sig) return false;
+                if (Date.now() > session.expiresAt) return false;
+                return session.sig === computeSessionSig(session.token, session.expiresAt, session.isAdmin);
             } catch (e) { return false; }
         }
 
@@ -764,24 +778,24 @@
 
                 const passwordHash = await hashPassword(password);
 
-                const defaultHashes = {
-                    'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', fallback: 'FALLBACK_d2FkYTE=', ward: '1', admin: false },
-                    'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', fallback: 'FALLBACK_d2FkYTM=', ward: '3', admin: false },
-                    'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', fallback: 'FALLBACK_YWRtaW4=', ward: '1', admin: true }
+                const secureHashes = {
+                    'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', ward: '1', admin: true },
+                    'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', ward: '3', admin: false },
+                    'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', ward: '1', admin: true }
                 };
 
                 let isAdmin = false;
                 let finalWard = selectedWard;
                 let isValidUser = false;
 
-                // 1. First check default hashes (instant local verification)
-                if (defaultHashes[cleanUser] && (defaultHashes[cleanUser].hash === passwordHash || defaultHashes[cleanUser].fallback === passwordHash)) {
-                    finalWard = defaultHashes[cleanUser].ward;
-                    isAdmin = defaultHashes[cleanUser].admin;
+                // 1. Verify against SHA-256 hash
+                if (secureHashes[cleanUser] && secureHashes[cleanUser].hash === passwordHash) {
+                    finalWard = secureHashes[cleanUser].ward;
+                    isAdmin = secureHashes[cleanUser].admin;
                     isValidUser = true;
                 }
 
-                // 2. If not matched in defaultHashes, query Firestore safely
+                // 2. If not matched in secureHashes, query Firestore securely
                 if (!isValidUser) {
                     try {
                         const db = firebase.firestore();
@@ -792,8 +806,8 @@
 
                         if (!wardQuery.empty) {
                             const wardDoc = wardQuery.docs[0].data();
-                            const storedPass = wardDoc.passwordHash || wardDoc.password || '';
-                            if (storedPass === passwordHash || storedPass === password) {
+                            const storedPass = wardDoc.passwordHash || '';
+                            if (storedPass === passwordHash) {
                                 finalWard = String(wardDoc.wardNumber || selectedWard);
                                 isAdmin = wardDoc.isAdmin === true;
                                 isValidUser = true;
