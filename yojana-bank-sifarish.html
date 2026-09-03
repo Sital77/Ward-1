@@ -158,7 +158,10 @@
             .mode-toggle-wrap,
             .top-bar-buttons,
             .btn-abhilekh,
-            #abhilekhModal {
+            #abhilekhModal,
+            .mobile-nav-bar,
+            .mobile-floating-btn,
+            .mobile-action-bar {
                 display: none !important;
             }
 
@@ -191,10 +194,24 @@
 <body>
     <script src="auth.js?v=2.3"></script>
 
+    <!-- 📱 Mobile View Navigation Bar (Only visible on mobile screens <= 768px) -->
+    <div class="mobile-nav-bar">
+        <button type="button" class="mobile-nav-btn active" id="btnMobForm" onclick="setMobileTab('form')">
+            📝 फारम भर्नुहोस्
+        </button>
+        <button type="button" class="mobile-nav-btn" id="btnMobPreview" onclick="setMobileTab('preview')">
+            📄 पत्र हेर्नुहोस्
+        </button>
+    </div>
+
     <div class="input-panel">
+        <div class="top-bar-buttons">
+            <a href="index.html" class="btn-home">🏠 गृहपृष्ठ</a>
+            <button type="button" class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
         <div class="header-action-container">
             <h2 class="panel-title" id="formMainTitle">📂 योजनाको बैंक खाता सञ्चालन सिफारिस</h2>
-            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
         </div>
 
         <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
@@ -248,7 +265,7 @@
                 </div>
             </div>
 
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group chalani-miti-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                     <label>चलानी नं (च.नं.):</label>
                     <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
@@ -320,7 +337,7 @@
             <input type="hidden" id="selectedBankKey" value="saptakoshi">
 
             <!-- Custom Bank Fields -->
-            <div id="customBankBox" style="display:none; margin-top:12px; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+            <div id="customBankBox" class="custom-bank-grid" style="display:none; margin-top:12px; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
                 <div class="form-group">
                     <label>बैंकको नाम:</label>
                     <input type="text" id="inCustomBankName" placeholder="उदा: श्री राष्ट्रिय वाणिज्य बैंक लिमिटेड" oninput="updateDoc()">
@@ -368,7 +385,7 @@
                 <input type="text" id="inProjectName" placeholder="उदा: गौरादह १ बजार ढल तथा सडक निर्माण योजना" oninput="updateDoc()">
             </div>
 
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px;">
+            <div class="form-group budget-amt-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px;">
                 <div>
                     <label>विनियोजन रकम रू. (अंकमा):</label>
                     <input type="text" id="inBudgetAmt" placeholder="उदा: ५,५५,५५५/- वा 555555" oninput="autoConvertAmtToWords(); updateDoc()">
@@ -397,7 +414,7 @@
                 <input type="text" id="inCommitteeName" placeholder="उदा: गौरादह खानेपानी उपभोक्ता समिति" oninput="updateDoc()">
             </div>
 
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div class="form-group committee-members-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                 <div>
                     <label>अध्यक्षको नाम:</label>
                     <input type="text" id="inChairman" placeholder="अध्यक्षको नाम" oninput="updateDoc()">
@@ -424,7 +441,7 @@
                 <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
                 <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
             </select>
-            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px; grid-template-columns: 1fr 1fr;">
+            <div id="customSignBox" class="custom-sign-grid" style="display:none; margin-top:10px; gap:10px; grid-template-columns: 1fr 1fr;">
                 <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
                 <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
             </div>
@@ -511,6 +528,20 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- 📱 Mobile Floating Quick Action Buttons (<= 768px) -->
+    <button type="button" class="mobile-floating-btn" id="floatBtnToPreview" onclick="setMobileTab('preview')">
+        👁️ पत्र हेर्नुहोस्
+    </button>
+
+    <div class="mobile-action-bar" id="mobActionBar" style="display:none;">
+        <button type="button" class="btn-mob-edit" onclick="setMobileTab('form')">
+            ✏️ फारम सम्पादन
+        </button>
+        <button type="button" class="btn-mob-print" onclick="printAndSaveSystem()">
+            🖨️ प्रिन्ट / सेभ
+        </button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -1348,10 +1379,45 @@
             }
         }
 
+        function setMobileTab(tab) {
+            const isForm = (tab === 'form');
+            document.body.classList.remove('mobile-mode-form', 'mobile-mode-preview');
+            document.body.classList.add(isForm ? 'mobile-mode-form' : 'mobile-mode-preview');
+
+            const btnF = document.getElementById('btnMobForm');
+            const btnP = document.getElementById('btnMobPreview');
+            if (btnF) btnF.classList.toggle('active', isForm);
+            if (btnP) btnP.classList.toggle('active', !isForm);
+
+            const floatToPreview = document.getElementById('floatBtnToPreview');
+            const mobActionBar = document.getElementById('mobActionBar');
+            if (floatToPreview) floatToPreview.style.display = isForm ? 'flex' : 'none';
+            if (mobActionBar) mobActionBar.style.display = isForm ? 'none' : 'flex';
+
+            if (!isForm) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
         window.onload = function() {
             setMode('OPEN_ACCOUNT');
             populateSamjhautaDropdown();
+            if (window.innerWidth <= 768) {
+                setMobileTab('form');
+            }
         };
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-mode-form', 'mobile-mode-preview');
+                const floatToPreview = document.getElementById('floatBtnToPreview');
+                const mobActionBar = document.getElementById('mobActionBar');
+                if (floatToPreview) floatToPreview.style.display = 'none';
+                if (mobActionBar) mobActionBar.style.display = 'none';
+            } else if (!document.body.classList.contains('mobile-mode-form') && !document.body.classList.contains('mobile-mode-preview')) {
+                setMobileTab('form');
+            }
+        });
     </script>
 </body>
 </html>

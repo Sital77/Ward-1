@@ -569,33 +569,90 @@ input[type="range"]::-webkit-slider-thumb:hover {
     }
 }
 
-/* 📱 MOBILE RESPONSIVE FIX (NEW) */
+/* 📱 MOBILE RESPONSIVE FIX */
 @media (max-width: 950px) {
     body {
-        display: block !important;
-        overflow-y: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 100vh !important;
+        overflow-x: hidden !important;
     }
 
     .input-panel {
         position: relative !important;
         width: 100% !important;
+        max-width: 100% !important;
         height: auto !important;
+        max-height: none !important;
+        left: auto !important;
+        top: auto !important;
         border-right: none !important;
-        border-bottom: 3px solid #cbd5e0 !important;
-        box-shadow: none !important;
-        padding: 15px !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+        padding: 20px 16px !important;
     }
 
     .preview-panel {
         margin-left: 0 !important;
         width: 100% !important;
-        padding: 10px !important;
+        max-width: 100% !important;
+        padding: 16px 10px !important;
         overflow-x: auto !important;
         background-color: #cbd5e0;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
     }
 
     .row-grid,
     .table-row-input-grid {
         grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .preview-panel {
+        padding: 12px 6px !important;
+    }
+
+    .a4-page {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        min-height: auto !important;
+        height: auto !important;
+        padding: 18px 12px 24px 12px !important;
+        margin: 0 auto !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+        border-radius: 8px !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+    }
+
+    .gov-logo {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .office-title {
+        font-size: 20pt !important;
+    }
+
+    .municipality-name {
+        font-size: 13pt !important;
+    }
+
+    .modal-content {
+        width: 96% !important;
+        max-width: 96% !important;
+        padding: 18px 12px !important;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important;
     }
 }
