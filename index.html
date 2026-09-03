@@ -81,21 +81,157 @@
             text-decoration: none;
         }
 
-        .btn-top-bar {
-            padding: 8px 16px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.95rem;
+        /* Quick Actions Sliding Dropdown Menu */
+        .quick-menu-container {
+            position: relative;
+            display: inline-block;
         }
 
-        .btn-top-bar:hover {
+        .btn-quick-menu {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            border: 1px solid #1d4ed8;
+            color: #ffffff;
+            padding: 8px 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            user-select: none;
+        }
+
+        .btn-quick-menu:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.38);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1d40af 100%);
+        }
+
+        .dropdown-arrow {
+            font-size: 0.72rem;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+        }
+
+        .btn-quick-menu.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .quick-menu-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.06);
+            width: 280px;
+            padding: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.96);
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+
+        .quick-menu-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .quick-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #2d3748;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .quick-menu-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .q-icon {
+            font-size: 1.35rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 8px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+
+        .q-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .q-text strong {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .q-text small {
+            font-size: 0.78rem;
+            color: #718096;
+        }
+
+        .quick-menu-item.q-logout:hover {
+            background: #fff5f5;
+        }
+
+        .quick-menu-item.q-logout .q-text strong {
+            color: #c53030;
+        }
+
+        /* Dark Mode Support for Dropdown */
+        body.dark-mode .quick-menu-dropdown {
+            background: #1a202c;
+            border-color: #4a5568;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode .quick-menu-item {
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .quick-menu-item:hover {
+            background: #2d3748;
+        }
+
+        body.dark-mode .q-icon {
+            background: #2d3748;
+        }
+
+        body.dark-mode .q-text strong {
+            color: #f7fafc;
+        }
+
+        body.dark-mode .q-text small {
+            color: #a0aec0;
+        }
+
+        body.dark-mode .quick-menu-item.q-logout:hover {
+            background: #742a2a;
         }
 
         #btnPrintLogo {
@@ -938,11 +1074,45 @@
 
     <div class="mega-dashboard">
         <div class="top-bar-buttons">
-            <a href="citizen-search.html" id="btnCitizenSearch" class="btn-top-bar" style="background: linear-gradient(135deg, #2b6cb0, #3182ce); color: #fff; border: 1px solid #2b6cb0; text-decoration: none;" title="नागरिक तथा सिफारिस खोजी">🔍 नागरिक खोजी</a>
-            <a href="recycle-bin.html" id="btnRecycleBin" class="btn-top-bar" style="background: linear-gradient(135deg, #c53030, #9b2c2c); color: #fff; border: 1px solid #9b2c2c; text-decoration: none;" title="१०० दिने रद्दीको टोकरी">🗑️ रद्दीको टोकरी</a>
-            <button id="btnPrintLogo" onclick="printLogoFile()" title="लोगो फाइल छाप्नुहोस् / Print Logo File">🖨️ लोगो छाप्नुस</button>
             <button id="themeToggle">🌙 Dark</button>
-            <button id="logoutBtn" style="display: none;" onclick="sifarishLogout()">🚪 लग-आउट</button>
+            
+            <div class="quick-menu-container">
+                <button id="quickMenuToggle" class="btn-quick-menu" onclick="toggleQuickMenu(event)" title="थप सेवा तथा विकल्पहरू">
+                    <span>⚡ द्रुत सेवाहरू</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                
+                <div id="quickMenuDropdown" class="quick-menu-dropdown">
+                    <a href="citizen-search.html" class="quick-menu-item">
+                        <span class="q-icon">🔍</span>
+                        <div class="q-text">
+                            <strong>नागरिक खोजी</strong>
+                            <small>एकीकृत सिफारिस इतिहास</small>
+                        </div>
+                    </a>
+                    <a href="recycle-bin.html" class="quick-menu-item">
+                        <span class="q-icon">🗑️</span>
+                        <div class="q-text">
+                            <strong>रद्दीको टोकरी</strong>
+                            <small>१०० दिने सुरक्षित भण्डार</small>
+                        </div>
+                    </a>
+                    <button onclick="printLogoFile()" class="quick-menu-item">
+                        <span class="q-icon">🖨️</span>
+                        <div class="q-text">
+                            <strong>लोगो छाप्नुस</strong>
+                            <small>लेटरहेड लोगो फाइल</small>
+                        </div>
+                    </button>
+                    <button id="logoutBtn" style="display: none;" onclick="sifarishLogout()" class="quick-menu-item q-logout">
+                        <span class="q-icon">🚪</span>
+                        <div class="q-text">
+                            <strong>लग-आउट</strong>
+                            <small>सेसन सुरक्षित बन्द गर्नुहोस्</small>
+                        </div>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="muni-header">
@@ -1177,6 +1347,40 @@
         function openModal(id) { const modal = document.getElementById(id); modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 10); }
         function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300); }
         window.onclick = function (e) { if (e.target.classList.contains('modal-overlay') && e.target.id !== 'modal-sif-login') { e.target.classList.remove('active'); setTimeout(() => e.target.style.display = 'none', 300); } }
+
+        // ===== ⚡ QUICK ACTIONS SLIDING DROPDOWN =====
+        function toggleQuickMenu(event) {
+            if (event) event.stopPropagation();
+            const btn = document.getElementById('quickMenuToggle');
+            const menu = document.getElementById('quickMenuDropdown');
+            if (!menu) return;
+
+            const isOpen = menu.classList.contains('show');
+            if (isOpen) {
+                menu.classList.remove('show');
+                if (btn) btn.classList.remove('active');
+                setTimeout(() => { if (!menu.classList.contains('show')) menu.style.display = 'none'; }, 220);
+            } else {
+                menu.style.display = 'block';
+                setTimeout(() => {
+                    menu.classList.add('show');
+                    if (btn) btn.classList.add('active');
+                }, 10);
+            }
+        }
+
+        document.addEventListener('click', function (e) {
+            const container = document.querySelector('.quick-menu-container');
+            const menu = document.getElementById('quickMenuDropdown');
+            const btn = document.getElementById('quickMenuToggle');
+            if (menu && menu.classList.contains('show')) {
+                if (!container || !container.contains(e.target)) {
+                    menu.classList.remove('show');
+                    if (btn) btn.classList.remove('active');
+                    setTimeout(() => { if (!menu.classList.contains('show')) menu.style.display = 'none'; }, 220);
+                }
+            }
+        });
 
         // ===== SIFARISH SEARCH & AUTH =====
         function filterSifarishCards(query) {
@@ -1570,7 +1774,7 @@
         function updateTopBarButtons() {
             const isAuth = localStorage.getItem('sifarish_auth') === 'true';
             const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
-            document.getElementById('logoutBtn').style.display = isAuth ? 'inline-block' : 'none';
+            document.getElementById('logoutBtn').style.display = isAuth ? 'flex' : 'none';
             const modalAdminBtn = document.getElementById('modalAdminBtn');
             if (modalAdminBtn) {
                 modalAdminBtn.style.display = (isAuth && isAdmin) ? 'inline-block' : 'none';
