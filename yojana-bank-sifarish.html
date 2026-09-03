@@ -198,6 +198,7 @@
         </div>
 
         <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
+        <input type="hidden" id="editRecordIndex" value="">
 
         <!-- Mode Toggle Tabs (Fast Switch) -->
         <div class="mode-toggle-wrap">
@@ -444,22 +445,20 @@
             <button class="modal-close" onclick="toggleModal(false)">×</button>
             <h3 class="modal-title">🗄️ योजनाको बैंक खाता सिफारिस अभिलेख</h3>
             <div class="search-container">
-                <label>🔍 उपभोक्ता समितिको नामबाट खोज्नुहोस्:</label>
-                <input type="text" id="searchField" placeholder="खोज्नुपर्ने समितिको नाम टाइप गर्नुस्..." oninput="renderDatabaseTable()">
+                <label>🔍 खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="समिति वा अध्यक्षको नाम वा चलानी नं. टाइप गर्नुस्..." oninput="renderDatabaseTable()">
             </div>
             <table class="db-table">
                 <thead>
                     <tr>
-                        <th style="width: 100px;">मिति</th>
-                        <th>उपभोक्ता समितिको नाम</th>
-                        <th>अध्यक्ष</th>
-                        <th>सिफारिस प्रकार</th>
-                        <th style="width: 90px; text-align: center;">कार्य</th>
+                        <th style="width: 8%;">क्रम</th>
+                        <th style="width: 38%;">उपभोक्ता समितिको नाम</th>
+                        <th style="width: 20%;">प्रकार</th>
+                        <th style="width: 20%;">मिति</th>
+                        <th style="width: 14%; text-align: center;">कार्य</th>
                     </tr>
                 </thead>
-                <tbody id="dbTableBody">
-                    <!-- Data injected via JS -->
-                </tbody>
+                <tbody id="dbTableBody"></tbody>
             </table>
         </div>
     </div>
@@ -473,7 +472,7 @@
                     <img class="lh-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
                     <div class="lh-meta">
                         <div>प.सं. <span id="lblAY"></span></div>
-                        <div>च.नं. <span id="lblChalani">..........</span></div>
+                        <div>च.नं. <span id="lblChalani"></span></div>
                     </div>
                 </div>
                 <div class="lh-center">
@@ -504,10 +503,12 @@
                 <!-- Dynamically Populated Text -->
             </div>
 
-            <div class="signature-section" style="margin-top: 40px; text-align: right; margin-right: 40px; position: relative; height: 120px;">
-                <div id="sigSpacing" style="height: 40px;"></div>
-                <div id="lblSignName" style="font-weight: bold; font-size: 13pt;">अनिता अधिकारी</div>
-                <div id="lblSignTitle" style="font-size: 13pt;">वडा सचिव</div>
+            <!-- ── Signature ── -->
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 40px;">
+                <div class="signature-block">
+                    <div class="sig-name" id="lblSigName">अनिता अधिकारी</div>
+                    <div class="sig-title" id="lblSigTitle" style="font-weight: normal; font-size: 12pt;">वडा सचिव</div>
+                </div>
             </div>
         </div>
     </div>
@@ -865,7 +866,7 @@
             const ay = getSelectedAY();
             const chalani = document.getElementById('inChalani').value.trim();
             document.getElementById('lblAY').innerText = ay;
-            document.getElementById('lblChalani').innerText = chalani || '..........';
+            document.getElementById('lblChalani').innerText = chalani || '';
             document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
             document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value.trim() || '';
             
@@ -957,36 +958,83 @@
 
                 bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.${wardNep} को चालू आर्थिक वर्ष ${ayText} को स्वीकृत ${budgetType} योजना तथा कार्यक्रम अन्तर्गत “${projName}” शीर्षकमा विनियोजन भएको रकम रू. ${amtNum} (अक्षरेपी ${amtWords} मात्र) बाट योजना कार्यन्वयन गर्नको लागि गठित ${committeeName} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियमानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
+                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.${wardNep} को चालू आर्थिक वर्ष ${ayText} को स्वीकृत ${budgetType} योजना तथा कार्यक्रम अन्तर्गत “${projName}” शीर्षकमा विनियोजन भएको रकम रू. ${amtNum} (अक्षरेपी ${amtWords}) बाट योजना कार्यन्वयन गर्नको लागि गठित ${committeeName} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियमानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                     </div>
                 `;
             }
 
             // Sign Authority
-            const signAuth = document.getElementById('inSignAuthority').value;
-            if (signAuth === 'BLANK') {
-                document.getElementById('lblSignName').innerText = '';
-                document.getElementById('lblSignTitle').innerText = '';
-            } else if (signAuth === 'CUSTOM') {
-                document.getElementById('lblSignName').innerText = document.getElementById('inCustomSignName').value.trim() || '..................';
-                document.getElementById('lblSignTitle').innerText = document.getElementById('inCustomSignTitle').value.trim() || '..................';
+            const signSelect = document.getElementById('inSignAuthority').value;
+            let sigName = "", sigTitle = "";
+            const lblSigName = document.getElementById('lblSigName');
+            const lblSigTitle = document.getElementById('lblSigTitle');
+            if (signSelect === 'BLANK') {
+                sigName = "";
+                sigTitle = "";
+                if (lblSigName) lblSigName.style.borderTop = "none";
             } else {
-                const parts = signAuth.split('|');
-                document.getElementById('lblSignName').innerText = parts[0];
-                document.getElementById('lblSignTitle').innerText = parts[1];
+                if (lblSigName) lblSigName.style.borderTop = "1.5px dashed #000";
+                if (signSelect === 'CUSTOM') {
+                    sigName = document.getElementById('inCustomSignName').value.trim() || '..................';
+                    sigTitle = document.getElementById('inCustomSignTitle').value.trim() || '..................';
+                } else {
+                    const parts = signSelect.split('|');
+                    sigName = parts[0] || '';
+                    sigTitle = parts[1] || '';
+                }
             }
+            if (lblSigName) lblSigName.innerText = sigName;
+            if (lblSigTitle) lblSigTitle.innerText = sigTitle;
+        }
+
+        function adjustSignaturePosition(value) {
+            document.getElementById('marginVal').innerText = toNepaliDigit(value) + " px";
+            const footer = document.getElementById('docFooterSection');
+            if (footer) footer.style.marginTop = value + "px";
         }
 
         // ================= DATABASE / ABHILEKH LOGIC =================
 
-        let abhilekhData = [];
+        let globalDatabase = [];
+
+        // Realtime Firestore listener
+        (window._firebaseAuthReady || Promise.resolve()).then(() => {
+            db.collection("yojanaBankRecords").onSnapshot((snapshot) => {
+                globalDatabase = [];
+                snapshot.forEach((doc) => {
+                    globalDatabase.push({ id: doc.id, ...doc.data() });
+                });
+                globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                renderDatabaseTable();
+            }, err => {
+                console.warn("Firestore snapshot error:", err);
+            });
+        }).catch(() => {});
+
+        function formatTimestamp(ts) {
+            if (!ts) return '';
+            const d = new Date(ts);
+            if (isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hr = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const formatted = `${y}/${m}/${day} ${hr}:${min}`;
+            const toNep = typeof toNepaliDigit === 'function' ? toNepaliDigit : (window.toNepaliDigit || (x => x));
+            return toNep(formatted);
+        }
 
         async function printAndSaveSystem() {
-            window.print();
-            
-            const mode = document.getElementById('currentMode').value;
             const committeeName = document.getElementById('inCommitteeName').value.trim();
-            if (!committeeName) return;
+            if (!committeeName) {
+                alert("कृपया उपभोक्ता समितिको नाम अनिवार्य लेख्नुहोस् !");
+                return;
+            }
+
+            const recordId = document.getElementById('editRecordIndex').value;
+            const mode = document.getElementById('currentMode').value;
+            const bankVal = document.getElementById('selectedBankKey').value;
 
             const record = {
                 mode: mode,
@@ -998,9 +1046,22 @@
                 chairman: document.getElementById('inChairman').value.trim(),
                 secretary: document.getElementById('inSecretary').value.trim(),
                 treasurer: document.getElementById('inTreasurer').value.trim(),
-                bankKey: document.getElementById('selectedBankKey').value,
+                bankKey: bankVal,
+                signAuth: document.getElementById('inSignAuthority').value,
+                sigMargin: document.getElementById('inSigMargin').value,
                 timestamp: Date.now()
             };
+
+            if (bankVal === 'CUSTOM') {
+                record.customBankName = document.getElementById('inCustomBankName').value.trim();
+                record.customBankOffice = document.getElementById('inCustomBankOffice').value.trim();
+                record.customBankLocation = document.getElementById('inCustomBankLocation').value.trim();
+            }
+
+            if (record.signAuth === 'CUSTOM') {
+                record.customSignName = document.getElementById('inCustomSignName').value.trim();
+                record.customSignTitle = document.getElementById('inCustomSignTitle').value.trim();
+            }
 
             if (mode === 'OPEN_ACCOUNT') {
                 const selectedBudgetTypeRadio = document.querySelector('input[name="budgetTypeRadio"]:checked');
@@ -1015,64 +1076,105 @@
                 record.accountNo = document.getElementById('inAccountNo').value.trim();
             }
 
-            try {
-                await db.collection("yojanaBankRecords").add(record);
-            } catch (e) {
+            const btn = document.querySelector('.btn-print');
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = "💾 सुरक्षित हुँदैछ...";
+            }
 
+            try {
+                if (recordId) {
+                    await db.collection("yojanaBankRecords").doc(recordId).update(record);
+                } else {
+                    const docRef = await db.collection("yojanaBankRecords").add(record);
+                    document.getElementById('editRecordIndex').value = docRef.id;
+                    document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
+                }
+                window.print();
+            } catch (e) {
+                alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
             }
         }
 
         function toggleModal(show) {
-            document.getElementById('abhilekhModal').style.display = show ? 'flex' : 'none';
-            if (show) fetchDatabase();
-        }
-
-        async function fetchDatabase() {
-            try {
-                const snapshot = await db.collection("yojanaBankRecords").orderBy("timestamp", "desc").limit(100).get();
-                abhilekhData = [];
-                snapshot.forEach(doc => {
-                    abhilekhData.push({ id: doc.id, ...doc.data() });
-                });
-                renderDatabaseTable();
-            } catch (e) {
-
-            }
+            const modal = document.getElementById('abhilekhModal');
+            if (modal) modal.style.display = show ? 'flex' : 'none';
+            if (show) renderDatabaseTable();
         }
 
         function renderDatabaseTable() {
             const tbody = document.getElementById('dbTableBody');
+            if (!tbody) return;
+            const search = document.getElementById('searchField').value.trim().toLowerCase();
             tbody.innerHTML = '';
-            const q = document.getElementById('searchField').value.trim().toLowerCase();
+            let counter = 0;
             
-            let filtered = abhilekhData;
-            if (q) {
-                filtered = abhilekhData.filter(r => (r.committeeName || '').toLowerCase().includes(q));
+            const filtered = globalDatabase.filter(rec => {
+                if (!search) return true;
+                const cName = (rec.committeeName || '').toLowerCase();
+                const chair = (rec.chairman || '').toLowerCase();
+                const chalani = (rec.chalani || '').toLowerCase();
+                const proj = (rec.projectName || '').toLowerCase();
+                return cName.includes(search) || chair.includes(search) || chalani.includes(search) || proj.includes(search);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#a0aec0;">कुनै अभिलेख फेला परेन ।</td></tr>`;
+                return;
             }
 
-            filtered.forEach(rec => {
-                const tr = document.createElement('tr');
-                const tName = rec.committeeName || '-';
-                const chair = rec.chairman || '-';
-                const miti = rec.miti || '-';
-                const type = rec.mode === 'OPEN_ACCOUNT' ? '📂 खोल्ने' : '🔒 बन्द';
-                
-                tr.innerHTML = `
-                    <td>${miti}</td>
-                    <td>${tName}</td>
-                    <td>${chair}</td>
-                    <td><span class="badge" style="background:#e2e8f0; color:#2d3748; padding:3px 6px; border-radius:4px; font-size:0.75rem;">${type}</span></td>
-                    <td style="text-align:center;">
-                        <button class="btn-abhilekh" onclick="loadRecord('${rec.id}')">Load</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+            filtered.forEach((rec) => {
+                counter++;
+                const isClose = (rec.mode === 'CLOSE_ACCOUNT');
+                const typeBadge = isClose
+                    ? `<span style="color:#9b2c2c; background:#fed7d7; padding:2px 8px; border-radius:12px; font-weight:bold; font-size:0.8rem;">🔒 खाता बन्द</span>`
+                    : `<span style="color:#276749; background:#c6f6d5; padding:2px 8px; border-radius:12px; font-weight:bold; font-size:0.8rem;">📂 खाता सञ्चालन</span>`;
+
+                const committeeDisplay = rec.committeeName || '-';
+                const chairDisplay = rec.chairman ? `<div style="font-size:0.8rem; color:#4a5568; margin-top:2px;">अध्यक्ष: ${rec.chairman}</div>` : '';
+                const chalaniDisplay = rec.chalani ? `<span style="font-size:0.75rem; background:#edf2f7; color:#4a5568; padding:1px 5px; border-radius:4px; margin-left:5px;">च.नं. ${rec.chalani}</span>` : '';
+                const timeStr = rec.timestamp ? `<div style="font-size:0.78rem; color:#718096; margin-top:2px;">⏱️ ${formatTimestamp(rec.timestamp)}</div>` : '';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${toNepaliDigit(counter)}</b></td>
+                        <td>
+                            <b>${committeeDisplay}</b>${chalaniDisplay}
+                            ${chairDisplay}
+                        </td>
+                        <td>${typeBadge}</td>
+                        <td>
+                            ${rec.miti || '-'}
+                            ${timeStr}
+                        </td>
+                        <td style="text-align: center;">
+                            <div style="display:flex; gap:4px; justify-content:center;">
+                                <button class="btn-action btn-edit-db" onclick="editFromDB('${rec.id}')" title="सम्पादन / लोड" style="padding: 4px 8px; font-size: 0.85rem; width: auto; margin-top:0;">📝</button>
+                                <button class="btn-action btn-del-db" onclick="deleteFromDB('${rec.id}')" title="मेटाउनुहोस्" style="padding: 4px 8px; font-size: 0.85rem; width: auto; margin-top:0; background: #e53e3e; color: #fff;">❌</button>
+                            </div>
+                        </td>
+                    </tr>
+                `);
             });
         }
 
-        function loadRecord(id) {
-            const rec = abhilekhData.find(r => r.id === id);
+        function editFromDB(id) {
+            const rec = globalDatabase.find(r => r.id === id);
             if (!rec) return;
+
+            document.getElementById('editRecordIndex').value = id;
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
+
+            // Set Mode
+            const mode = rec.mode || 'OPEN_ACCOUNT';
+            setMode(mode);
+
             // Restore AY radio
             if (rec.ay) {
                 const ayRadio = document.querySelector(`input[name="ayRadio"][value="${rec.ay}"]`);
@@ -1101,9 +1203,14 @@
                     'CUSTOM': '✍️ अन्य बैंक (Custom)'
                 };
                 selectBankOption(rec.bankKey, textMap[rec.bankKey] || textMap['saptakoshi']);
+                if (rec.bankKey === 'CUSTOM') {
+                    if (rec.customBankName) document.getElementById('inCustomBankName').value = rec.customBankName;
+                    if (rec.customBankOffice) document.getElementById('inCustomBankOffice').value = rec.customBankOffice;
+                    if (rec.customBankLocation) document.getElementById('inCustomBankLocation').value = rec.customBankLocation;
+                }
             }
 
-            if (document.getElementById('currentMode').value === 'OPEN_ACCOUNT') {
+            if (mode === 'OPEN_ACCOUNT') {
                 if (rec.projectName) document.getElementById('inProjectName').value = rec.projectName;
                 if (rec.budgetAmt) document.getElementById('inBudgetAmt').value = rec.budgetAmt;
                 if (rec.budgetWords) document.getElementById('inBudgetWords').value = rec.budgetWords;
@@ -1121,8 +1228,32 @@
                 if (rec.accountNo) document.getElementById('inAccountNo').value = rec.accountNo;
             }
 
+            if (rec.signAuth) {
+                document.getElementById('inSignAuthority').value = rec.signAuth;
+                toggleCustomSign();
+                if (rec.signAuth === 'CUSTOM') {
+                    if (rec.customSignName) document.getElementById('inCustomSignName').value = rec.customSignName;
+                    if (rec.customSignTitle) document.getElementById('inCustomSignTitle').value = rec.customSignTitle;
+                }
+            }
+
+            if (rec.sigMargin) {
+                document.getElementById('inSigMargin').value = rec.sigMargin;
+                adjustSignaturePosition(rec.sigMargin);
+            }
+
             updateDoc();
             toggleModal(false);
+        }
+
+        async function deleteFromDB(id) {
+            if (confirm("के तपाईं यो रेकर्ड क्लाउड डाटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
+                try {
+                    await db.collection("yojanaBankRecords").doc(id).delete();
+                } catch (e) {
+                    alert("डिलिट गर्न समस्या भयो ।");
+                }
+            }
         }
 
         let fetchedSamjhautaDocs = {};
