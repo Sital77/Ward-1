@@ -112,6 +112,12 @@ window.toggleLandUseSection = function () {
     const container = document.getElementById('landUseZoneContainer');
     if (chk && container) {
         container.style.display = chk.checked ? 'block' : 'none';
+    }
+    const stmtBox = document.getElementById('lblLandUseStatement');
+    if (stmtBox && chk) {
+        stmtBox.style.display = chk.checked ? 'block' : 'none';
+    }
+    if (typeof updateDoc === 'function') {
         updateDoc();
     }
 };
@@ -590,8 +596,14 @@ window.onload = function () {
     initializeAutomaticDate();
     addKittaRow();
     adjustSignaturePosition(40);
+    if (typeof window.toggleLandUseSection === 'function') {
+        window.toggleLandUseSection();
+    }
 };
 
 window.addEventListener('templateInjected', function() {
     initializeAutomaticDate();
+    if (typeof window.toggleLandUseSection === 'function') {
+        window.toggleLandUseSection();
+    }
 });

@@ -732,8 +732,14 @@ window.onload = function () {
     initializeAutomaticDate();
     window.addKittaRow();
     window.adjustSignaturePosition(40);
+    if (typeof window.toggleLandUseSection === 'function') {
+        window.toggleLandUseSection();
+    }
 };
 
 window.addEventListener('templateInjected', function() {
     initializeAutomaticDate();
+    if (typeof window.toggleLandUseSection === 'function') {
+        window.toggleLandUseSection();
+    }
 });
