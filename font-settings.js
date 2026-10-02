@@ -205,56 +205,6 @@
                         return await runWithAuthAndRetry(origAdd, this, arguments);
                     };
                 }
-
-                // Operator isolation: normal operators (wada1) only see records they created
-                const origOnSnapshot = firebase.firestore.CollectionReference.prototype.onSnapshot;
-                if (origOnSnapshot) {
-                    firebase.firestore.CollectionReference.prototype.onSnapshot = function (onNext, onError) {
-                        const colName = this.id || '';
-                        const isRecordCol = colName.endsWith('Records') || colName.includes('Record');
-                        if (isRecordCol) {
-                            const wrappedOnNext = (snapshot) => {
-                                const curUser = (localStorage.getItem('sifarish_user') || 'wada1').trim().toLowerCase();
-                                const curWard = localStorage.getItem('sifarish_ward') || '1';
-                                const isAdmin = typeof isAdminSession === 'function' ? isAdminSession() : (localStorage.getItem('sifarish_admin') === 'true');
-
-                                const filteredDocs = [];
-                                snapshot.forEach(doc => {
-                                    const data = doc.data();
-                                    if (data.isDeleted) return;
-                                    if (isAdmin) {
-                                        filteredDocs.push(doc);
-                                    } else {
-                                        const createdBy = (data.createdBy || '').toLowerCase();
-                                        const createdWard = String(data.createdWard || data.wada || '').trim();
-                                        if (createdBy) {
-                                            if (createdBy === curUser) filteredDocs.push(doc);
-                                        } else if (createdWard) {
-                                            if (createdWard === curWard) filteredDocs.push(doc);
-                                        } else if (curUser === 'wada1' || curWard === '1') {
-                                            filteredDocs.push(doc);
-                                        }
-                                    }
-                                });
-
-                                const proxySnapshot = {
-                                    ...snapshot,
-                                    docs: filteredDocs,
-                                    size: filteredDocs.length,
-                                    empty: filteredDocs.length === 0,
-                                    forEach: function (cb) {
-                                        filteredDocs.forEach(cb);
-                                    }
-                                };
-                                if (typeof onNext === 'function') {
-                                    onNext(proxySnapshot);
-                                }
-                            };
-                            return origOnSnapshot.call(this, wrappedOnNext, onError);
-                        }
-                        return origOnSnapshot.apply(this, arguments);
-                    };
-                }
             }
 
             if (firebase.firestore.DocumentReference && firebase.firestore.DocumentReference.prototype) {
@@ -1439,9 +1389,11 @@
                     badge.style.color = '#744210';
                     badge.innerHTML = '👑 सम्पूर्ण अभिलेख (Admin)';
                 } else {
+                    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+                    const ward = localStorage.getItem('sifarish_ward') || '1';
                     badge.style.background = '#e6fffa';
                     badge.style.color = '#234e52';
-                    badge.innerHTML = `👤 प्रविष्टि: ${curUser} (अभिलेख)`;
+                    badge.innerHTML = `📁 वडा नं. ${toNep(ward)} अभिलेख (${curUser})`;
                 }
                 const title = header.querySelector('.modal-title');
                 if (title) title.appendChild(badge);

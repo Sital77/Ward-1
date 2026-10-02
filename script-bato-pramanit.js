@@ -481,6 +481,7 @@ window.renderDatabaseTable = function () {
     let counter = 0;
 
     globalDatabase.forEach((rec) => {
+        if (rec.isDeleted) return;
         if (search) {
             const targetText = `${rec.name || ''} ${rec.chalani || ''} ${rec.citNo || ''} ${rec.subject || ''}`.toLowerCase();
             const targetNep = toNep(targetText);
