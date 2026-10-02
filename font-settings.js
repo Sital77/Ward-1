@@ -181,11 +181,78 @@
                 }
             };
 
+            // Auto-stamp user/ward and convert all citizenship numbers to Nepali digits on Firestore operations
+            const sanitizeRecordData = (docData) => {
+                if (docData && typeof docData === 'object') {
+                    const curUser = (localStorage.getItem('sifarish_user') || 'wada1').trim();
+                    const curWard = localStorage.getItem('sifarish_ward') || '1';
+                    if (!docData.createdBy) docData.createdBy = curUser;
+                    if (!docData.createdWard) docData.createdWard = curWard;
+                    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+                    for (const k in docData) {
+                        if (/cit|nagarik|नागरिकता/i.test(k) && typeof docData[k] === 'string') {
+                            docData[k] = toNep(docData[k]);
+                        }
+                    }
+                }
+            };
+
             if (firebase.firestore.CollectionReference && firebase.firestore.CollectionReference.prototype) {
                 const origAdd = firebase.firestore.CollectionReference.prototype.add;
                 if (origAdd) {
-                    firebase.firestore.CollectionReference.prototype.add = async function () {
+                    firebase.firestore.CollectionReference.prototype.add = async function (docData) {
+                        sanitizeRecordData(docData);
                         return await runWithAuthAndRetry(origAdd, this, arguments);
+                    };
+                }
+
+                // Operator isolation: normal operators (wada1) only see records they created
+                const origOnSnapshot = firebase.firestore.CollectionReference.prototype.onSnapshot;
+                if (origOnSnapshot) {
+                    firebase.firestore.CollectionReference.prototype.onSnapshot = function (onNext, onError) {
+                        const colName = this.id || '';
+                        const isRecordCol = colName.endsWith('Records') || colName.includes('Record');
+                        if (isRecordCol) {
+                            const wrappedOnNext = (snapshot) => {
+                                const curUser = (localStorage.getItem('sifarish_user') || 'wada1').trim().toLowerCase();
+                                const curWard = localStorage.getItem('sifarish_ward') || '1';
+                                const isAdmin = typeof isAdminSession === 'function' ? isAdminSession() : (localStorage.getItem('sifarish_admin') === 'true');
+
+                                const filteredDocs = [];
+                                snapshot.forEach(doc => {
+                                    const data = doc.data();
+                                    if (data.isDeleted) return;
+                                    if (isAdmin) {
+                                        filteredDocs.push(doc);
+                                    } else {
+                                        const createdBy = (data.createdBy || '').toLowerCase();
+                                        const createdWard = String(data.createdWard || data.wada || '').trim();
+                                        if (createdBy) {
+                                            if (createdBy === curUser) filteredDocs.push(doc);
+                                        } else if (createdWard) {
+                                            if (createdWard === curWard) filteredDocs.push(doc);
+                                        } else if (curUser === 'wada1' || curWard === '1') {
+                                            filteredDocs.push(doc);
+                                        }
+                                    }
+                                });
+
+                                const proxySnapshot = {
+                                    ...snapshot,
+                                    docs: filteredDocs,
+                                    size: filteredDocs.length,
+                                    empty: filteredDocs.length === 0,
+                                    forEach: function (cb) {
+                                        filteredDocs.forEach(cb);
+                                    }
+                                };
+                                if (typeof onNext === 'function') {
+                                    onNext(proxySnapshot);
+                                }
+                            };
+                            return origOnSnapshot.call(this, wrappedOnNext, onError);
+                        }
+                        return origOnSnapshot.apply(this, arguments);
                     };
                 }
             }
@@ -193,14 +260,26 @@
             if (firebase.firestore.DocumentReference && firebase.firestore.DocumentReference.prototype) {
                 const origUpdate = firebase.firestore.DocumentReference.prototype.update;
                 if (origUpdate) {
-                    firebase.firestore.DocumentReference.prototype.update = async function () {
+                    firebase.firestore.DocumentReference.prototype.update = async function (docData) {
+                        if (docData && typeof docData === 'object') {
+                            const curUser = (localStorage.getItem('sifarish_user') || 'wada1').trim();
+                            docData.updatedBy = curUser;
+                            docData.updatedAt = Date.now();
+                            const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+                            for (const k in docData) {
+                                if (/cit|nagarik|नागरिकता/i.test(k) && typeof docData[k] === 'string') {
+                                    docData[k] = toNep(docData[k]);
+                                }
+                            }
+                        }
                         return await runWithAuthAndRetry(origUpdate, this, arguments);
                     };
                 }
 
                 const origSet = firebase.firestore.DocumentReference.prototype.set;
                 if (origSet) {
-                    firebase.firestore.DocumentReference.prototype.set = async function () {
+                    firebase.firestore.DocumentReference.prototype.set = async function (docData) {
+                        sanitizeRecordData(docData);
                         return await runWithAuthAndRetry(origSet, this, arguments);
                     };
                 }
@@ -216,7 +295,8 @@
             const originalCollection = firebase.firestore.Firestore.prototype.collection;
             firebase.firestore.Firestore.prototype.collection = function (name) {
                 const ward = localStorage.getItem('sifarish_ward') || '1';
-                if (ward !== '1') {
+                const sharedCols = ['sifarish_templates', 'sifarish_categories', 'signing_authorities', 'ward_users', 'deleted_records_log', 'system_logs'];
+                if (ward !== '1' && !sharedCols.includes(name)) {
                     return originalCollection.call(this, name + "_w" + ward);
                 }
                 return originalCollection.call(this, name);
@@ -1305,6 +1385,9 @@
             try {
                 localizePageForWard();
                 setupDynamicSignatures();
+                sanitizeOperatorUI();
+                enhanceAbhilekhModal();
+                convertCitElementsToNepali();
                 if (typeof updateDoc === 'function') {
                     try { updateDoc(); } catch(e) {}
                 }
@@ -1312,11 +1395,84 @@
         } catch(e) {}
     }
 
+    // Convert any English digits in citizenship display elements to Nepali Unicode digits
+    function convertCitElementsToNepali() {
+        const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+        const citSelectors = [
+            '#lblCitNo', '#lblCitDetailsSpan', '#lblDetailCitNo', '#lblFatherCit_tbl',
+            '#lblMotherCit_tbl', '#lblGuardianCit_tbl', '#lblTapasilCit', '#lblCitBlock',
+            '#lblCitBlockCust', '#lblCitDate', '#lblDetailCitDate', '#lblFatherCitDate_tbl',
+            '#lblMotherCitDate_tbl', '#lblCitDistrict', '#lblTapasilGuardianCit', '#lblCitInfoSpan',
+            '#lblHusbandCit', '#lblWifeCit', '#lblDeceasedCitNo', '#lblGuardianCit', '#lblGrandfatherCit'
+        ];
+        citSelectors.forEach(sel => {
+            const el = document.querySelector(sel);
+            if (el && el.innerText && /[0-9]/.test(el.innerText)) {
+                el.innerText = toNep(el.innerText);
+            }
+        });
+        // Broad search for any display spans/divs with cit or nagarik in their id
+        const matched = document.querySelectorAll('[id*="Cit"], [id*="cit"], [id*="nagarik"], [id*="Nagrik"]');
+        matched.forEach(el => {
+            if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.innerText && /[0-9]/.test(el.innerText)) {
+                el.innerText = toNep(el.innerText);
+            }
+        });
+    }
+    window.convertCitElementsToNepali = convertCitElementsToNepali;
+
+    // Enhance Abhilekh modal with operator badge and user-filtered records
+    function enhanceAbhilekhModal() {
+        const modal = document.getElementById('abhilekhModal');
+        if (!modal) return;
+        const curUser = localStorage.getItem('sifarish_user') || 'wada1';
+        const isAdmin = typeof isAdminSession === 'function' ? isAdminSession() : (localStorage.getItem('sifarish_admin') === 'true');
+        let badge = document.getElementById('abhilekhUserBadge');
+        if (!badge) {
+            const header = modal.querySelector('.modal-header');
+            if (header) {
+                badge = document.createElement('div');
+                badge.id = 'abhilekhUserBadge';
+                badge.style.cssText = 'font-size:0.84rem; font-weight:700; padding:4px 12px; border-radius:12px; margin-left:12px; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 3px rgba(0,0,0,0.08); font-family:inherit;';
+                if (isAdmin) {
+                    badge.style.background = '#feebc8';
+                    badge.style.color = '#744210';
+                    badge.innerHTML = '👑 सम्पूर्ण अभिलेख (Admin)';
+                } else {
+                    badge.style.background = '#e6fffa';
+                    badge.style.color = '#234e52';
+                    badge.innerHTML = `👤 प्रविष्टि: ${curUser} (अभिलेख)`;
+                }
+                const title = header.querySelector('.modal-title');
+                if (title) title.appendChild(badge);
+            }
+        }
+    }
+
+    // Sanitize UI for operator wada1 (hide Admin links/buttons)
+    function sanitizeOperatorUI() {
+        const curUser = (localStorage.getItem('sifarish_user') || 'wada1').trim().toLowerCase();
+        const isAdmin = typeof isAdminSession === 'function' ? isAdminSession() : (localStorage.getItem('sifarish_admin') === 'true');
+        if (!isAdmin || curUser === 'wada1' || curUser === 'wada3') {
+            const adminEls = document.querySelectorAll('#btnAdminManage, #modalAdminBtn, a[href="admin.html"], a[href*="admin.html"]');
+            adminEls.forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+    }
+
+    document.addEventListener('input', () => {
+        setTimeout(convertCitElementsToNepali, 40);
+    });
+
     // Run ward localization and signature setup on all lifecycle stages
     window.addEventListener('templateInjected', () => {
         try {
             localizePageForWard();
             setupDynamicSignatures();
+            sanitizeOperatorUI();
+            enhanceAbhilekhModal();
+            convertCitElementsToNepali();
             if (typeof updateDoc === 'function') {
                 try { updateDoc(); } catch(e) {}
             }
@@ -1327,6 +1483,9 @@
         try {
             localizePageForWard();
             setupDynamicSignatures();
+            sanitizeOperatorUI();
+            enhanceAbhilekhModal();
+            convertCitElementsToNepali();
         } catch(e) {}
     });
 

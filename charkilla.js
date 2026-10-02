@@ -286,6 +286,8 @@ async function printAndSaveSystem() {
         sigMargin: document.getElementById('inSigMargin').value,
         landUseZone: getSelectedLandUseZone(), 
         kittas: kittaRecords,
+        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard: localStorage.getItem('sifarish_ward') || '1',
         timestamp: Date.now()
     };
 
@@ -333,10 +335,19 @@ function formatTimestamp(ts) {
 function renderDatabaseTable() {
     const tbody = document.getElementById('dbTableBody');
     const search = document.getElementById('searchField').value.trim().toLowerCase();
+    const toNep = typeof toNepaliDigit === 'function' ? toNepaliDigit : (window.toNepaliDigit || (x => x));
+    const toEng = typeof toEnglishDigit === 'function' ? toEnglishDigit : (window.toEnglishDigit || (x => x));
+    const searchNep = toNep(search);
+    const searchEng = toEng(search);
     tbody.innerHTML = '';
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        if (search && !rec.name.toLowerCase().includes(search)) return;
+        if (search) {
+            const targetText = `${rec.name || ''} ${rec.chalani || ''} ${rec.subject || ''}`.toLowerCase();
+            const targetNep = toNep(targetText);
+            const targetEng = toEng(targetText);
+            if (!targetText.includes(search) && !targetNep.includes(searchNep) && !targetEng.includes(searchEng)) return;
+        }
         counter++;
         tbody.insertAdjacentHTML('beforeend', `
             <tr>

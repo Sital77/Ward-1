@@ -496,6 +496,8 @@ async function printAndSaveSystem() {
         customSignTitle:     document.getElementById('inCustomSignTitle').value.trim(),
         sigMargin:           document.getElementById('inSigMargin').value,
         name:                `${hName} र ${wName}`,
+        createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard:         localStorage.getItem('sifarish_ward') || '1',
         timestamp:           Date.now()
     };
 
@@ -543,12 +545,20 @@ function renderDatabaseTable() {
     const tbody = document.getElementById('dbTableBody');
     if (!tbody) return;
     const search = (document.getElementById('searchField')?.value || '').trim().toLowerCase();
+    const toNep = typeof toNepaliDigit === 'function' ? toNepaliDigit : (window.toNepaliDigit || (x => x));
+    const toEng = typeof toEnglishDigit === 'function' ? toEnglishDigit : (window.toEnglishDigit || (x => x));
+    const searchNep = toNep(search);
+    const searchEng = toEng(search);
     tbody.innerHTML = '';
     let counter = 0;
 
     globalDatabase.forEach((rec) => {
-        const searchTarget = `${rec.husbandName || ''} ${rec.wifeName || ''} ${rec.applicantName || ''} ${rec.husbandCitNo || ''} ${rec.wifeCitNo || ''}`.toLowerCase();
-        if (search && !searchTarget.includes(search)) return;
+        if (search) {
+            const searchTarget = `${rec.husbandName || ''} ${rec.wifeName || ''} ${rec.applicantName || ''} ${rec.husbandCitNo || ''} ${rec.wifeCitNo || ''}`.toLowerCase();
+            const targetNep = toNep(searchTarget);
+            const targetEng = toEng(searchTarget);
+            if (!searchTarget.includes(search) && !targetNep.includes(searchNep) && !targetEng.includes(searchEng)) return;
+        }
         counter++;
 
         tbody.insertAdjacentHTML('beforeend', `

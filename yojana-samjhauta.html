@@ -834,6 +834,8 @@
                 treasurer: document.getElementById('inTreasurer').value.trim(),
                 budgetType: getSelectedBudgetType(),
                 amount: document.getElementById('inBudgetAmt').value.trim(),
+                createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+                createdWard: localStorage.getItem('sifarish_ward') || '1',
                 timestamp: Date.now()
             };
 
@@ -849,6 +851,8 @@
         async function renderDatabaseTable() {
             const tbody = document.getElementById('dbTableBody');
             const search = (document.getElementById('searchField').value || '').trim().toLowerCase();
+            const searchEn = (window.toEnglishDigit || (x => x))(search);
+            const searchNe = (window.toNepaliDigit || (x => x))(search);
 
             try {
                 const snap = await db.collection("yojanaSamjhautaRecords").orderBy("timestamp", "desc").limit(50).get();
@@ -856,7 +860,16 @@
 
                 snap.forEach(doc => {
                     const data = doc.data();
-                    if (!search || (data.committeeName && data.committeeName.toLowerCase().includes(search)) || (data.projectName && data.projectName.toLowerCase().includes(search))) {
+                    const cName = (data.committeeName || '').toLowerCase();
+                    const pName = (data.projectName || '').toLowerCase();
+                    const chalani = (data.chalani || '').toLowerCase();
+                    const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+                    const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+
+                    const match = !search || cName.includes(search) || pName.includes(search) ||
+                                  chalani.includes(search) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe);
+
+                    if (match) {
                         html += `
                             <tr>
                                 <td>${data.miti || '-'}</td>

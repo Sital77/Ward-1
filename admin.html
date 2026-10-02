@@ -25,7 +25,12 @@
 
     <!-- Auth Guard -->
     <script>
-        if (localStorage.getItem('sifarish_auth') !== 'true') {
+        const curAdminUser = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+        if (curAdminUser === 'wada1' || curAdminUser === 'wada3') {
+            localStorage.setItem('sifarish_admin', 'false');
+            alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin अनुमति आवश्यक छ। (तपाईं अपरेटर खाता ' + curAdminUser + ' मा हुनुहुन्छ)');
+            window.location.replace('index.html');
+        } else if (localStorage.getItem('sifarish_auth') !== 'true') {
             localStorage.setItem('sifarish_redirect', 'admin.html');
             window.location.replace('login.html');
         } else if (localStorage.getItem('sifarish_admin') !== 'true') {

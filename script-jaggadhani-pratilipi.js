@@ -177,11 +177,12 @@ function updateDoc() {
 
     const lblCitDetailsSpan = document.getElementById('lblCitDetailsSpan');
     const divDetailCit      = document.getElementById('divDetailCit');
+    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
     if (citNo || citDate || citDist) {
-        lblCitDetailsSpan.innerHTML = `(ना.प्र.नं. <span style="font-weight:bold;">${citNo || '...'}</span>, जारी मिति: <span style="font-weight:bold;">${citDate || '...'}</span>, <span style="font-weight:bold;">${citDist || '...'}</span>)`;
+        lblCitDetailsSpan.innerHTML = `(ना.प्र.नं. <span style="font-weight:bold;">${toNep(citNo) || '...'}</span>, जारी मिति: <span style="font-weight:bold;">${toNep(citDate) || '...'}</span>, <span style="font-weight:bold;">${citDist || '...'}</span>)`;
         divDetailCit.style.display = 'block';
-        document.getElementById('lblDetailCitNo').innerText       = citNo || '...';
-        document.getElementById('lblDetailCitDate').innerText     = citDate || '...';
+        document.getElementById('lblDetailCitNo').innerText       = toNep(citNo) || '...';
+        document.getElementById('lblDetailCitDate').innerText     = toNep(citDate) || '...';
         document.getElementById('lblDetailCitDistrict').innerText = citDist || '...';
     } else {
         lblCitDetailsSpan.innerHTML = '';
@@ -321,6 +322,8 @@ async function printAndSaveSystem() {
         customSignName:  document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin:       document.getElementById('inSigMargin').value,
+        createdBy:       localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard:     localStorage.getItem('sifarish_ward') || '1',
         timestamp:       Date.now()
     };
 
@@ -369,10 +372,19 @@ function formatTimestamp(ts) {
 function renderDatabaseTable() {
     const tbody  = document.getElementById('dbTableBody');
     const search = document.getElementById('searchField').value.trim().toLowerCase();
+    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+    const toEng = typeof window.toEnglishDigit === 'function' ? window.toEnglishDigit : (x => x);
+    const searchNep = toNep(search);
+    const searchEng = toEng(search);
     tbody.innerHTML = '';
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        if (search && !(rec.name || '').toLowerCase().includes(search)) return;
+        if (search) {
+            const targetText = `${rec.name || ''} ${rec.chalani || ''} ${rec.citNo || ''} ${rec.subject || ''}`.toLowerCase();
+            const targetNep = toNep(targetText);
+            const targetEng = toEng(targetText);
+            if (!targetText.includes(search) && !targetNep.includes(searchNep) && !targetEng.includes(searchEng)) return;
+        }
         counter++;
         tbody.insertAdjacentHTML('beforeend', `
             <tr>

@@ -179,12 +179,13 @@ function updateDoc() {
     document.getElementById('lblNepalSamvat').innerText = ns;
 
     // Body
+    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
     document.getElementById('lblWadaBody').innerText    = wada;
     document.getElementById('lblName').innerText        = name;
-    document.getElementById('lblCitNo').innerText       = citNo;
-    document.getElementById('lblCitDate').innerText     = citDate;
+    document.getElementById('lblCitNo').innerText       = toNep(citNo);
+    document.getElementById('lblCitDate').innerText     = toNep(citDate);
     document.getElementById('lblCitDistrict').innerText = citDist;
-    document.getElementById('lblGharMiti').innerText    = gharMiti;
+    document.getElementById('lblGharMiti').innerText    = toNep(gharMiti);
 
     // House table preview
     const rows = collectHouseRows();
@@ -263,6 +264,8 @@ async function printAndSaveSystem() {
         customSignName:  document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin:   document.getElementById('inSigMargin').value,
+        createdBy:   localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard: localStorage.getItem('sifarish_ward') || '1',
         timestamp:   Date.now()
     };
 
@@ -311,10 +314,19 @@ function formatTimestamp(ts) {
 function renderDatabaseTable() {
     const tbody  = document.getElementById('dbTableBody');
     const search = document.getElementById('searchField').value.trim().toLowerCase();
+    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+    const toEng = typeof window.toEnglishDigit === 'function' ? window.toEnglishDigit : (x => x);
+    const searchNep = toNep(search);
+    const searchEng = toEng(search);
     tbody.innerHTML = '';
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        if (search && !(rec.name || '').toLowerCase().includes(search)) return;
+        if (search) {
+            const targetText = `${rec.name || ''} ${rec.chalani || ''} ${rec.citNo || ''} ${rec.subject || ''}`.toLowerCase();
+            const targetNep = toNep(targetText);
+            const targetEng = toEng(targetText);
+            if (!targetText.includes(search) && !targetNep.includes(searchNep) && !targetEng.includes(searchEng)) return;
+        }
         counter++;
         tbody.insertAdjacentHTML('beforeend', `
             <tr>

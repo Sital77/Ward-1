@@ -450,8 +450,18 @@
         let isPreloading = false;
 
         function toNepaliNum(n) {
+            if (n === null || n === undefined) return '';
             const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
             return String(n).replace(/[0-9]/g, d => nepaliDigits[d]);
+        }
+
+        function toEnglishNum(n) {
+            if (n === null || n === undefined) return '';
+            const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            return String(n).replace(/[०-९]/g, d => {
+                const idx = nepaliDigits.indexOf(d);
+                return idx !== -1 ? String(idx) : d;
+            });
         }
 
         // Preload records across all collections once in memory for ultra-fast instant search
@@ -506,7 +516,15 @@
                 d.applicantName,
                 d.ownerName,
                 d.fatherName,
+                d.husbandName,
+                d.wifeName,
                 d.citizenshipNo,
+                d.citNo,
+                d.husbandCitNo,
+                d.wifeCitNo,
+                d.fatherCitNo,
+                d.motherCitNo,
+                d.guardianCitNo,
                 d.chalani,
                 d.chalaniNo,
                 d.miti,
@@ -514,7 +532,10 @@
                 d.ward,
                 d.bankName
             ];
-            return parts.filter(Boolean).join(' ').toLowerCase();
+            const baseText = parts.filter(Boolean).join(' ').toLowerCase();
+            const nepaliVersion = toNepaliNum(baseText);
+            const englishVersion = toEnglishNum(baseText);
+            return `${baseText} ${nepaliVersion} ${englishVersion}`;
         }
 
         function handleSearchInput(val) {
@@ -564,8 +585,15 @@
                 return;
             }
 
-            const qLower = query.toLowerCase();
-            const matched = cachedAllRecords.filter(item => item.searchableText.includes(qLower));
+            const qLower = query.toLowerCase().trim();
+            const qNep = toNepaliNum(qLower);
+            const qEng = toEnglishNum(qLower);
+
+            const matched = cachedAllRecords.filter(item => {
+                return item.searchableText.includes(qLower) ||
+                       item.searchableText.includes(qNep) ||
+                       item.searchableText.includes(qEng);
+            });
 
             renderSearchResults(matched, query);
         }

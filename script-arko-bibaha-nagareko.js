@@ -307,6 +307,8 @@ async function printAndSaveSystem() {
         customSignName:  document.getElementById('inCustomSignName').value.trim(),
         customSignTitle: document.getElementById('inCustomSignTitle').value.trim(),
         sigMargin:       document.getElementById('inSigMargin').value,
+        createdBy:       localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard:     localStorage.getItem('sifarish_ward') || '1',
         timestamp:       Date.now()
     };
 
@@ -356,10 +358,22 @@ function renderDatabaseTable() {
     tbody.innerHTML = '';
 
     const query = document.getElementById('searchField').value.trim().toLowerCase();
+    const queryEn = (window.toEnglishDigit || (x => x))(query);
+    const queryNe = (window.toNepaliDigit || (x => x))(query);
 
     const filtered = globalDatabase.filter(rec => {
+        if (!query) return true;
         const text = (rec.name || '').toLowerCase();
-        return text.includes(query);
+        const citNo = (rec.citNo || '').toLowerCase();
+        const citNoEn = (window.toEnglishDigit || (x => x))(citNo);
+        const citNoNe = (window.toNepaliDigit || (x => x))(citNo);
+        const chalani = (rec.chalani || '').toLowerCase();
+        const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+        const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+
+        return text.includes(query) ||
+               citNo.includes(query) || citNo.includes(queryNe) || citNoEn.includes(queryEn) || citNoNe.includes(queryNe) ||
+               chalani.includes(query) || chalaniEn.includes(queryEn) || chalaniNe.includes(queryNe);
     });
 
     if (filtered.length === 0) {

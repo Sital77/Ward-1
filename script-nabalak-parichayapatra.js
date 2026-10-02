@@ -704,11 +704,17 @@ function renderDatabaseTable() {
     tbody.innerHTML = '';
 
     const query = (document.getElementById('searchField') ? document.getElementById('searchField').value.trim().toLowerCase() : '');
+    const toNep = typeof toNepaliDigit === 'function' ? toNepaliDigit : (window.toNepaliDigit || (x => x));
+    const toEng = typeof toEnglishDigit === 'function' ? toEnglishDigit : (window.toEnglishDigit || (x => x));
+    const qNep = toNep(query);
+    const qEng = toEng(query);
+
     const filtered = globalDatabase.filter(r => {
         if (!query) return true;
-        return (r.nameFirstNP || '').toLowerCase().includes(query) ||
-            (r.birthRegNo || '').toLowerCase().includes(query) ||
-            (r.fatherNP || '').toLowerCase().includes(query);
+        const target = `${r.nameFirstNP || ''} ${r.nameMidNP || ''} ${r.nameLastNP || ''} ${r.nameNP || ''} ${r.birthRegNo || ''} ${r.fatherNP || ''} ${r.fatherCitNo || ''} ${r.motherCitNo || ''}`.toLowerCase();
+        const tNep = toNep(target);
+        const tEng = toEng(target);
+        return target.includes(query) || tNep.includes(qNep) || tEng.includes(qEng);
     });
 
     if (filtered.length === 0) {
@@ -918,6 +924,8 @@ async function printAndSaveSystem() {
         grandmotherNid: (document.getElementById('inGrandmotherNidNo') ? document.getElementById('inGrandmotherNidNo').value.trim() : ''),
         signAuth: document.getElementById('inSignAuthority').value,
         sigMargin: document.getElementById('inSigMargin').value,
+        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard: localStorage.getItem('sifarish_ward') || '1',
         timestamp: Date.now()
     };
 

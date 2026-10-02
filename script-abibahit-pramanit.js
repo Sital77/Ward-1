@@ -200,8 +200,9 @@ function updateDoc() {
     const citBlock = document.getElementById('lblCitBlock');
     if (hasCit && (citNo || citDate || citDistrict)) {
         let parts = [];
-        if (citNo) parts.push(`ना.प्र.नं. ${citNo}`);
-        if (citDate) parts.push(`जारी मिति: ${citDate}`);
+        const toNep = window.toNepaliDigit || toNepaliDigit || (x => x);
+        if (citNo) parts.push(`ना.प्र.नं. ${toNep(citNo)}`);
+        if (citDate) parts.push(`जारी मिति: ${toNep(citDate)}`);
         if (citDistrict) parts.push(`${citDistrict}`);
         citBlock.innerText = ` (${parts.join(', ')}) `;
     } else {
@@ -304,6 +305,8 @@ async function printAndSaveSystem() {
         customSignName:  document.getElementById('inCustomSignName').value.trim(),
         customSignTitle: document.getElementById('inCustomSignTitle').value.trim(),
         sigMargin:       document.getElementById('inSigMargin').value,
+        createdBy:       localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard:     localStorage.getItem('sifarish_ward') || '1',
         timestamp:       Date.now()
     };
 
@@ -352,10 +355,25 @@ function formatTimestamp(ts) {
 function renderDatabaseTable() {
     const tbody  = document.getElementById('dbTableBody');
     const search = document.getElementById('searchField').value.trim().toLowerCase();
+    const searchEn = (window.toEnglishDigit || (x => x))(search);
+    const searchNe = (window.toNepaliDigit || (x => x))(search);
     tbody.innerHTML = '';
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        if (search && !(rec.name || '').toLowerCase().includes(search)) return;
+        if (search) {
+            const name = (rec.name || '').toLowerCase();
+            const citNo = (rec.citNo || '').toLowerCase();
+            const citNoEn = (window.toEnglishDigit || (x => x))(citNo);
+            const citNoNe = (window.toNepaliDigit || (x => x))(citNo);
+            const chalani = (rec.chalani || '').toLowerCase();
+            const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+            const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+
+            const matchName = name.includes(search);
+            const matchCit = citNo.includes(search) || citNo.includes(searchNe) || citNoEn.includes(searchEn) || citNoNe.includes(searchNe);
+            const matchChalani = chalani.includes(search) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe);
+            if (!matchName && !matchCit && !matchChalani) return;
+        }
         counter++;
         tbody.insertAdjacentHTML('beforeend', `
             <tr>

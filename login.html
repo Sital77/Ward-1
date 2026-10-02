@@ -780,7 +780,7 @@
                 const passwordHash = await hashPassword(password);
 
                 const secureHashes = {
-                    'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', ward: '1', admin: true },
+                    'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', ward: '1', admin: false },
                     'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', ward: '3', admin: false },
                     'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', ward: '1', admin: true }
                 };
@@ -794,6 +794,9 @@
                     finalWard = secureHashes[cleanUser].ward;
                     isAdmin = secureHashes[cleanUser].admin;
                     isValidUser = true;
+                }
+                if (cleanUser === 'wada1' || cleanUser === 'wada3') {
+                    isAdmin = false;
                 }
 
                 // 2. If not matched in secureHashes, query Firestore securely
@@ -827,6 +830,10 @@
                 // Reset rate limiter on success
                 loginAttempts.count = 0;
                 loginAttempts.lockedUntil = 0;
+
+                if (cleanUser === 'wada1' || cleanUser === 'wada3') {
+                    isAdmin = false;
+                }
 
                 // Save ward, username, and session info locally
                 localStorage.setItem('sifarish_ward', finalWard);

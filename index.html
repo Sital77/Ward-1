@@ -1299,7 +1299,7 @@
                     <button onclick="sifarishLogout()"
                         style="background:linear-gradient(135deg,#c53030,#9b2c2c);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">🚪 लग-आउट</button>
                     <button id="modalAdminBtn" onclick="openAdminPanel()"
-                        style="display:inline-block; background:linear-gradient(135deg,#3182ce,#2b6cb0);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">⚙️ Admin व्यवस्थापन</button>
+                        style="display:none; background:linear-gradient(135deg,#3182ce,#2b6cb0);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">⚙️ Admin व्यवस्थापन</button>
                     <h2 style="color:#e51a23; font-size:1.5rem; font-weight:800; margin:0; display:flex; align-items:center; gap:6px;">🗂️ सिफारिस प्रणाली भित्र स्वागत छ</h2>
                 </div>
                 <!-- 🔍 Live Recommendation Search Box 🔍 -->
@@ -1770,11 +1770,13 @@
         }
         const db = firebase.firestore();
 
-        // Show/hide top bar buttons initially on load (Admin button only visible for admin users)
+        // Show/hide top bar buttons initially on load (Admin button only visible for admin users, NOT wada1)
         function updateTopBarButtons() {
             const isAuth = localStorage.getItem('sifarish_auth') === 'true';
-            const isAdmin = localStorage.getItem('sifarish_admin') === 'true';
-            document.getElementById('logoutBtn').style.display = isAuth ? 'flex' : 'none';
+            const user = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+            const isAdmin = user !== 'wada1' && user !== 'wada3' && localStorage.getItem('sifarish_admin') === 'true';
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.style.display = isAuth ? 'flex' : 'none';
             const modalAdminBtn = document.getElementById('modalAdminBtn');
             if (modalAdminBtn) {
                 modalAdminBtn.style.display = (isAuth && isAdmin) ? 'inline-block' : 'none';
@@ -1784,10 +1786,15 @@
 
         // Redirect helper for the admin panel button
         function openAdminPanel() {
-            if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
+            const user = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+            const isAdmin = user !== 'wada1' && user !== 'wada3' && localStorage.getItem('sifarish_admin') === 'true';
+            if (localStorage.getItem('sifarish_auth') === 'true' && isAdmin) {
                 window.location.href = 'admin.html';
             } else {
                 alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin अनुमति आवश्यक छ।');
+                if (localStorage.getItem('sifarish_auth') === 'true') {
+                    return;
+                }
                 window.location.href = 'login.html';
             }
         }
@@ -2050,8 +2057,10 @@
                 });
             }
 
-            // Show admin quick add button if admin logged in
-            if (localStorage.getItem('sifarish_auth') === 'true' && localStorage.getItem('sifarish_admin') === 'true') {
+            // Show admin quick add button ONLY if actual admin logged in (NOT for normal operator like wada1)
+            const curUser = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+            const isActualAdmin = curUser !== 'wada1' && curUser !== 'wada3' && localStorage.getItem('sifarish_admin') === 'true';
+            if (localStorage.getItem('sifarish_auth') === 'true' && isActualAdmin) {
                 const addCard = document.createElement('a');
                 addCard.className = 'sifarish-link-card';
                 addCard.style.cssText = 'border-color: #3182ce; background: linear-gradient(135deg, #ebf8ff, #bee3f8); border-style: dashed; border-width: 2px; font-weight: bold; color: #2b6cb0;';

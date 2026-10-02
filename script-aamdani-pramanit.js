@@ -602,11 +602,27 @@ window.renderDatabaseTable = function() {
 
     const searchField = document.getElementById('searchField');
     const searchVal = searchField ? searchField.value.trim().toLowerCase() : '';
+    const searchEn = window.toEnglishNumber ? window.toEnglishNumber(searchVal) : searchVal;
+    const searchNe = window.toNepaliDigit ? window.toNepaliDigit(searchVal) : searchVal;
     tbody.innerHTML = '';
 
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        if (searchVal && !(rec.name || '').toLowerCase().includes(searchVal)) return;
+        if (searchVal) {
+            const name = (rec.name || '').toLowerCase();
+            const citNo = (rec.citNo || '').toLowerCase();
+            const citNoEn = window.toEnglishNumber ? window.toEnglishNumber(citNo) : citNo;
+            const citNoNe = window.toNepaliDigit ? window.toNepaliDigit(citNo) : citNo;
+            const chalani = (rec.chalani || '').toLowerCase();
+            const chalaniEn = window.toEnglishNumber ? window.toEnglishNumber(chalani) : chalani;
+            const chalaniNe = window.toNepaliDigit ? window.toNepaliDigit(chalani) : chalani;
+
+            const matchName = name.includes(searchVal);
+            const matchCit = citNo.includes(searchVal) || citNo.includes(searchNe) || citNoEn.includes(searchEn) || citNoNe.includes(searchNe);
+            const matchChalani = chalani.includes(searchVal) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe);
+
+            if (!matchName && !matchCit && !matchChalani) return;
+        }
         counter++;
         tbody.insertAdjacentHTML('beforeend', `
             <tr>
@@ -773,6 +789,8 @@ window.printAndSaveSystem = async function() {
         sigMargin: document.getElementById('inSigMargin') ? document.getElementById('inSigMargin').value : '40',
         landRows: landRowsData,
         incomeRows: incomeRowsData,
+        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard: localStorage.getItem('sifarish_ward') || '1',
         timestamp: Date.now()
     };
 

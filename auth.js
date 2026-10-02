@@ -39,6 +39,10 @@ function generateSessionToken(rememberMe, isAdmin) {
 }
 
 function createSession(isAdmin, rememberMe) {
+    const user = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+    if (user === 'wada1' || user === 'wada3') {
+        isAdmin = false;
+    }
     const session = generateSessionToken(rememberMe || false, isAdmin);
     session.isAdmin = !!isAdmin;
     localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
@@ -64,6 +68,13 @@ function isSessionValid() {
 
 function isAdminSession() {
     try {
+        const user = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+        if (user === 'wada1' || user === 'wada3') {
+            if (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true') {
+                localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, 'false');
+            }
+            return false;
+        }
         if (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true') return true;
         const sessionStr = localStorage.getItem(AUTH_CONFIG.SESSION_KEY);
         if (!sessionStr) return false;
@@ -73,6 +84,69 @@ function isAdminSession() {
         return false;
     }
 }
+
+// Universal Nepali / English digit conversion
+window.toNepaliDigit = function (num) {
+    if (num === null || num === undefined) return '';
+    const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+    return String(num).replace(/[0-9]/g, d => nepaliDigits[d]);
+};
+
+window.toEnglishDigit = function (num) {
+    if (num === null || num === undefined) return '';
+    const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+    return String(num).replace(/[०-९]/g, d => {
+        const idx = nepaliDigits.indexOf(d);
+        return idx !== -1 ? String(idx) : d;
+    });
+};
+
+// Global Citizenship Number Auto-Conversion (English 0-9 -> Nepali ०-९)
+(function setupCitizenshipConverter() {
+    function isCitField(el) {
+        if (!el || el.tagName !== 'INPUT' || (el.type !== 'text' && el.type !== 'search' && el.type !== '')) return false;
+        const id = (el.id || '').toLowerCase();
+        const name = (el.name || '').toLowerCase();
+        const cls = (el.className || '').toLowerCase();
+        const placeholder = (el.placeholder || '').toLowerCase();
+        if (id.includes('cit') || id.includes('nagarik') || id.includes('nagrik') || id.includes('citizenship')) return true;
+        if (name.includes('cit') || name.includes('nagarik') || name.includes('nagrik') || name.includes('citizenship')) return true;
+        if (cls.includes('member-document') || cls.includes('cit-input') || cls.includes('cit-field')) return true;
+        if (placeholder.includes('नागरिकता') || placeholder.includes('ना.प्र.नं') || placeholder.includes('ना.नं') || placeholder.includes('नाप्रनं') || placeholder.includes('नागरिक')) return true;
+
+        const parent = el.closest('.input-group, .form-group, td, tr, div');
+        if (parent) {
+            const lbl = parent.querySelector('label');
+            if (lbl && /नागरिकता|ना\.?प्र\.?नं|ना\.?नं|नागरिक/i.test(lbl.innerText || '')) return true;
+            const prev = el.previousElementSibling;
+            if (prev && /नागरिकता|ना\.?प्र\.?नं|ना\.?नं|नागरिक/i.test(prev.innerText || '')) return true;
+        }
+        return false;
+    }
+
+    function handleCitInput(el) {
+        if (!isCitField(el)) return;
+        const val = el.value;
+        if (/[0-9]/.test(val)) {
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            el.value = window.toNepaliDigit(val);
+            if (start !== null && end !== null) {
+                el.setSelectionRange(start, end);
+            }
+            if (typeof updateDoc === 'function') {
+                try { updateDoc(); } catch (e) {}
+            }
+            if (typeof convertCitElementsToNepali === 'function') {
+                try { convertCitElementsToNepali(); } catch (e) {}
+            }
+        }
+    }
+
+    document.addEventListener('input', e => handleCitInput(e.target), true);
+    document.addEventListener('paste', e => setTimeout(() => handleCitInput(e.target), 10), true);
+    document.addEventListener('blur', e => handleCitInput(e.target), true);
+})();
 
 function clearSession() {
     localStorage.removeItem(AUTH_CONFIG.SESSION_KEY);

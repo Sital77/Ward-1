@@ -1082,6 +1082,8 @@
                 bankKey: bankVal,
                 signAuth: document.getElementById('inSignAuthority').value,
                 sigMargin: document.getElementById('inSigMargin').value,
+                createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+                createdWard: localStorage.getItem('sifarish_ward') || '1',
                 timestamp: Date.now()
             };
 
@@ -1145,6 +1147,8 @@
             const tbody = document.getElementById('dbTableBody');
             if (!tbody) return;
             const search = document.getElementById('searchField').value.trim().toLowerCase();
+            const searchEn = (window.toEnglishDigit || (x => x))(search);
+            const searchNe = (window.toNepaliDigit || (x => x))(search);
             tbody.innerHTML = '';
             let counter = 0;
             
@@ -1153,8 +1157,17 @@
                 const cName = (rec.committeeName || '').toLowerCase();
                 const chair = (rec.chairman || '').toLowerCase();
                 const chalani = (rec.chalani || '').toLowerCase();
+                const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+                const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
                 const proj = (rec.projectName || '').toLowerCase();
-                return cName.includes(search) || chair.includes(search) || chalani.includes(search) || proj.includes(search);
+                const acc = (rec.accountNo || '').toLowerCase();
+                const accEn = (window.toEnglishDigit || (x => x))(acc);
+                const accNe = (window.toNepaliDigit || (x => x))(acc);
+
+                return cName.includes(search) || chair.includes(search) ||
+                       chalani.includes(search) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe) ||
+                       acc.includes(search) || accEn.includes(searchEn) || accNe.includes(searchNe) ||
+                       proj.includes(search);
             });
 
             if (filtered.length === 0) {

@@ -1837,6 +1837,8 @@
                 customSignName:      document.getElementById('inCustomSignName').value.trim(),
                 customSignTitle:     document.getElementById('inCustomSignTitle').value.trim(),
                 sigMargin:           document.getElementById('inSigMargin').value,
+                createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
+                createdWard:         localStorage.getItem('sifarish_ward') || '1',
                 timestamp:           Date.now()
             };
 
@@ -1871,10 +1873,31 @@
         function renderDatabaseTable() {
             const tbody  = document.getElementById('dbTableBody');
             const search = document.getElementById('searchField').value.trim().toLowerCase();
+            const searchEn = (window.toEnglishDigit || (x => x))(search);
+            const searchNe = (window.toNepaliDigit || (x => x))(search);
             tbody.innerHTML = '';
             let counter = 0;
             globalDatabase.forEach((rec) => {
-                if (search && !(rec.name || '').toLowerCase().includes(search) && !(rec.deceasedName || '').toLowerCase().includes(search) && !(rec.childBeneficiaryName || '').toLowerCase().includes(search)) return;
+                if (search) {
+                    const name = (rec.name || '').toLowerCase();
+                    const deceased = (rec.deceasedName || '').toLowerCase();
+                    const child = (rec.childBeneficiaryName || '').toLowerCase();
+                    const citNo = (rec.citNo || '').toLowerCase();
+                    const citNoEn = (window.toEnglishDigit || (x => x))(citNo);
+                    const citNoNe = (window.toNepaliDigit || (x => x))(citNo);
+                    const decCit = (rec.deceasedCitNo || '').toLowerCase();
+                    const decCitEn = (window.toEnglishDigit || (x => x))(decCit);
+                    const decCitNe = (window.toNepaliDigit || (x => x))(decCit);
+                    const chalani = (rec.chalani || '').toLowerCase();
+                    const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+                    const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+
+                    const matchName = name.includes(search) || deceased.includes(search) || child.includes(search);
+                    const matchCit = citNo.includes(search) || citNo.includes(searchNe) || citNoEn.includes(searchEn) || citNoNe.includes(searchNe) ||
+                                     decCit.includes(search) || decCit.includes(searchNe) || decCitEn.includes(searchEn) || decCitNe.includes(searchNe);
+                    const matchChalani = chalani.includes(search) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe);
+                    if (!matchName && !matchCit && !matchChalani) return;
+                }
                 counter++;
                 const isDeceased   = rec.sifarishMode === 'CLOSE_ACCOUNT_DECEASED';
                 const isChildClose = rec.sifarishMode === 'CLOSE_ACCOUNT_CHILD';

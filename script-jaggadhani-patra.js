@@ -300,8 +300,9 @@ window.updateDoc = function () {
     const citDistrict = document.getElementById('inCitDistrict') ? document.getElementById('inCitDistrict').value.trim() : '';
 
     let citBodyParts = [];
-    if (citNo !== "") citBodyParts.push("ना.प्र.नं. " + citNo);
-    if (citDate !== "") citBodyParts.push("जारी मिति: " + citDate);
+    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+    if (citNo !== "") citBodyParts.push("ना.प्र.नं. " + toNep(citNo));
+    if (citDate !== "") citBodyParts.push("जारी मिति: " + toNep(citDate));
     if (citDistrict !== "") citBodyParts.push(citDistrict);
     const citText = citBodyParts.length > 0 ? " (" + citBodyParts.join(", ") + ")" : "";
 
@@ -380,8 +381,8 @@ window.updateDoc = function () {
                 lblCitLabel.style.display = 'inline';
                 lblCitLabel.innerText = "ना.प्र.नं.:";
             }
-            let tapasilParts = [citNo];
-            if (citDate !== "") tapasilParts.push("जारी मिति: " + citDate);
+            let tapasilParts = [toNep(citNo)];
+            if (citDate !== "") tapasilParts.push("जारी मिति: " + toNep(citDate));
             if (citDistrict !== "") tapasilParts.push(citDistrict);
             lblCit.innerText = tapasilParts.join(", ");
         } else {
@@ -492,6 +493,8 @@ window.printAndSaveSystem = async function () {
         customSignTitle: document.getElementById('inCustomSignTitle').value.trim(),
         sigMargin: document.getElementById('inSigMargin').value,
         subject: "जग्गाधनीपूर्जा रजिष्ट्रेसन सिफारिस",
+        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard: localStorage.getItem('sifarish_ward') || '1',
         timestamp: Date.now()
     };
 
@@ -520,12 +523,17 @@ function renderDatabaseTable() {
     tbody.innerHTML = '';
 
     const search = (document.getElementById('searchField') ? document.getElementById('searchField').value.trim().toLowerCase() : '');
+    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+    const toEng = typeof window.toEnglishDigit === 'function' ? window.toEnglishDigit : (x => x);
+    const searchNep = toNep(search);
+    const searchEng = toEng(search);
 
     const filtered = globalDatabase.filter(r => {
         if (!search) return true;
-        const name = (r.name || '').toLowerCase();
-        const chalani = (r.chalani || '').toLowerCase();
-        return name.includes(search) || chalani.includes(search);
+        const target = `${r.name || ''} ${r.chalani || ''} ${r.citNo || ''} ${r.subject || ''}`.toLowerCase();
+        const tNep = toNep(target);
+        const tEng = toEng(target);
+        return target.includes(search) || tNep.includes(searchNep) || tEng.includes(searchEng);
     });
 
     if (filtered.length === 0) {

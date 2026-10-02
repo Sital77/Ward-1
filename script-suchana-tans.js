@@ -139,6 +139,8 @@ async function printAndSaveSystem() {
         praaptaMiti,
         subject: "सूचना टाँस",
         signAuth, customSignName, customSignTitle, sigMargin,
+        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard: localStorage.getItem('sifarish_ward') || '1',
         timestamp: Date.now()
     };
 
@@ -186,11 +188,23 @@ function formatTimestamp(ts) {
 function renderDatabaseTable() {
     const tbody = document.getElementById('dbTableBody');
     const search = document.getElementById('searchField').value.trim().toLowerCase();
+    const searchEn = (window.toEnglishDigit || (x => x))(search);
+    const searchNe = (window.toNepaliDigit || (x => x))(search);
     tbody.innerHTML = '';
     let counter = 0;
     globalDatabase.forEach((rec) => {
-        const chalaniVal = (rec.chalani || rec.name || '').toLowerCase();
-        if (search && !chalaniVal.includes(search)) return;
+        const chalaniVal = (rec.chalani || '').toLowerCase();
+        const bodyChalaniVal = (rec.bodyChalani || '').toLowerCase();
+        const nameVal = (rec.name || '').toLowerCase();
+        const chalaniEn = (window.toEnglishDigit || (x => x))(chalaniVal);
+        const chalaniNe = (window.toNepaliDigit || (x => x))(chalaniVal);
+
+        if (search) {
+            const matchName = nameVal.includes(search);
+            const matchChalani = chalaniVal.includes(search) || chalaniVal.includes(searchNe) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe);
+            const matchBody = bodyChalaniVal.includes(search) || bodyChalaniVal.includes(searchNe);
+            if (!matchName && !matchChalani && !matchBody) return;
+        }
         counter++;
         const displayChalani = (rec.chalani && rec.chalani !== '-') ? rec.chalani : ((rec.bodyChalani && rec.bodyChalani !== '-') ? rec.bodyChalani : '-');
         tbody.insertAdjacentHTML('beforeend', `

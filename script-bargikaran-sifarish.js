@@ -510,6 +510,8 @@ window.printAndSaveSystem = function () {
         signAuthority: document.getElementById('inSignAuthority') ? document.getElementById('inSignAuthority').value : '',
         customSignName: document.getElementById('inCustomSignName') ? document.getElementById('inCustomSignName').value.trim() : '',
         customSignTitle: document.getElementById('inCustomSignTitle') ? document.getElementById('inCustomSignTitle').value.trim() : '',
+        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard: localStorage.getItem('sifarish_ward') || '1',
         timestamp: Date.now()
     };
 
@@ -561,6 +563,8 @@ window.toggleModal = function (show) {
 function renderDatabaseTable() {
     const searchField = document.getElementById('searchField');
     const searchVal = (searchField ? searchField.value : '').trim().toLowerCase();
+    const searchEn = (window.toEnglishDigit || (x => x))(searchVal);
+    const searchNe = (window.toNepaliDigit || (x => x))(searchVal);
     const tbody = document.getElementById('dbTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -578,9 +582,21 @@ function renderDatabaseTable() {
         if (!searchVal) return true;
         const name = (item.applicantName || '').toLowerCase();
         const chalani = (item.chalani || '').toLowerCase();
+        const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+        const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+        const citNo = (item.citNo || '').toLowerCase();
+        const citNoEn = (window.toEnglishDigit || (x => x))(citNo);
+        const citNoNe = (window.toNepaliDigit || (x => x))(citNo);
         const kittaStr = (item.kittaList || []).map(k => k.kitta).join(' ').toLowerCase();
+        const kittaEn = (window.toEnglishDigit || (x => x))(kittaStr);
+        const kittaNe = (window.toNepaliDigit || (x => x))(kittaStr);
         const zoneStr = (item.mainZone || '').toLowerCase();
-        return name.includes(searchVal) || chalani.includes(searchVal) || kittaStr.includes(searchVal) || zoneStr.includes(searchVal);
+
+        return name.includes(searchVal) ||
+               chalani.includes(searchVal) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe) ||
+               citNo.includes(searchVal) || citNoEn.includes(searchEn) || citNoNe.includes(searchNe) ||
+               kittaStr.includes(searchVal) || kittaEn.includes(searchEn) || kittaNe.includes(searchNe) ||
+               zoneStr.includes(searchVal);
     });
 
     if (filtered.length === 0) {

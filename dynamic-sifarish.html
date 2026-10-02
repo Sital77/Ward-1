@@ -554,11 +554,24 @@
         // Render records in table list
         function renderRecordsTable() {
             const searchVal = document.getElementById('searchField').value.toLowerCase().trim();
+            const searchEn = (window.toEnglishDigit || (x => x))(searchVal);
+            const searchNe = (window.toNepaliDigit || (x => x))(searchVal);
             const body = document.getElementById('dbTableBody');
             body.innerHTML = '';
 
             const filtered = globalRecords.filter(r => {
-                return r.applicantName.toLowerCase().includes(searchVal);
+                if (!searchVal) return true;
+                const name = (r.applicantName || '').toLowerCase();
+                const chalani = (r.chalani || '').toLowerCase();
+                const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+                const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+                const formValues = Object.values(r.formData || {}).join(' ').toLowerCase();
+                const formValuesEn = (window.toEnglishDigit || (x => x))(formValues);
+                const formValuesNe = (window.toNepaliDigit || (x => x))(formValues);
+
+                return name.includes(searchVal) ||
+                       chalani.includes(searchVal) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe) ||
+                       formValues.includes(searchVal) || formValuesEn.includes(searchEn) || formValuesNe.includes(searchNe);
             });
 
             if (filtered.length === 0) {
@@ -571,7 +584,7 @@
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = '1px solid #edf2f7';
                 tr.innerHTML = `
-                    <td style="padding:10px;">${idx + 1}</td>
+                    <td style="padding:10px;">${(window.toNepaliDigit || (x => x))(idx + 1)}</td>
                     <td style="padding:10px; font-weight:700;">${r.applicantName}</td>
                     <td style="padding:10px;">${dateStr}</td>
                     <td style="padding:10px; text-align:center;">
@@ -683,6 +696,8 @@
                 sigName: sigName,
                 sigTitle: sigTitle,
                 formData: formData,
+                createdBy: localStorage.getItem('sifarish_user') || 'wada1',
+                createdWard: localStorage.getItem('sifarish_ward') || '1',
                 timestamp: Date.now()
             };
 

@@ -336,7 +336,7 @@
             </div>
             <div class="header-actions">
                 <a href="index.html" class="btn-nav">🏠 गृहपृष्ठ</a>
-                <a href="admin.html" class="btn-nav">📊 Admin Panel</a>
+                <a href="admin.html" class="btn-nav" id="adminPanelNav" style="display:none;">📊 Admin Panel</a>
             </div>
         </div>
 
@@ -628,6 +628,12 @@
         }
 
         window.onload = function() {
+            const curUser = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+            const isAdmin = curUser !== 'wada1' && curUser !== 'wada3' && localStorage.getItem('sifarish_admin') === 'true';
+            const adminNav = document.getElementById('adminPanelNav');
+            if (adminNav) {
+                adminNav.style.display = isAdmin ? 'inline-block' : 'none';
+            }
             initRecycleBin();
         };
     </script>
