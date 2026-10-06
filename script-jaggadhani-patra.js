@@ -137,16 +137,20 @@ function collectKittaRows() {
 window.updateNepalSambatFromMiti = function () {
     const mitiVal = document.getElementById('inMiti').value.trim();
     const parts = mitiVal.split('/');
-    if (parts.length >= 1 && parts[0].length === 4) {
-        const bsYear = parseInt(parts[0], 10);
-        if (!isNaN(bsYear)) {
-            document.getElementById('inNepalSamvat').value = window.toNepaliDigit(bsYear - 937);
-            let bsMonth = 5;
-            if (parts.length >= 2) {
-                const parsedMonth = parseInt(parts[1], 10);
-                if (!isNaN(parsedMonth)) bsMonth = parsedMonth;
+    if (parts.length >= 1) {
+        const toEng = typeof window.toEnglishDigit === 'function' ? window.toEnglishDigit : (x => x);
+        const yStr = toEng(parts[0]);
+        if (yStr.length === 4) {
+            const bsYear = parseInt(yStr, 10);
+            if (!isNaN(bsYear)) {
+                document.getElementById('inNepalSamvat').value = window.toNepaliDigit(bsYear - 937);
+                let bsMonth = 5;
+                if (parts.length >= 2) {
+                    const parsedMonth = parseInt(toEng(parts[1]), 10);
+                    if (!isNaN(parsedMonth)) bsMonth = parsedMonth;
+                }
+                initializeFiscalYear(bsYear, bsMonth);
             }
-            initializeFiscalYear(bsYear, bsMonth);
         }
     }
 };

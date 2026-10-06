@@ -1345,15 +1345,57 @@
         } catch(e) {}
     }
 
+    // Universal Sifarish digit converter (Letter preview & print elements)
+    function convertSifarishDigitsToNepali() {
+        if (typeof window.convertSifarishDigitsToNepali === 'function' && window.convertSifarishDigitsToNepali !== convertSifarishDigitsToNepali) {
+            try { window.convertSifarishDigitsToNepali(); return; } catch(e) {}
+        }
+        const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+        const containers = document.querySelectorAll('.a4-page, #printArea, #printPage1, #printPage2, .preview-panel .document, .print-container, #printDocument');
+        if (containers.length > 0) {
+            containers.forEach(container => {
+                const walker = document.createTreeWalker(
+                    container,
+                    NodeFilter.SHOW_TEXT,
+                    {
+                        acceptNode: function (node) {
+                            const parent = node.parentElement;
+                            if (!parent) return NodeFilter.FILTER_REJECT;
+                            const tag = parent.tagName;
+                            if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+                            if (parent.closest('.no-nepali-digits, .no-convert, .english-text, [data-no-nepali="true"]')) return NodeFilter.FILTER_REJECT;
+                            const id = parent.id || '';
+                            if (id.endsWith('EN') || id.endsWith('EN_tbl') || id.includes('DOB_AD') || id.endsWith('_AD')) return NodeFilter.FILTER_REJECT;
+                            if (/[0-9]/.test(node.nodeValue)) {
+                                return NodeFilter.FILTER_ACCEPT;
+                            }
+                            return NodeFilter.FILTER_SKIP;
+                        }
+                    },
+                    false
+                );
+                const nodesToUpdate = [];
+                while (walker.nextNode()) {
+                    nodesToUpdate.push(walker.currentNode);
+                }
+                nodesToUpdate.forEach(node => {
+                    node.nodeValue = toNep(node.nodeValue);
+                });
+            });
+        }
+    }
+
     // Convert any English digits in citizenship display elements to Nepali Unicode digits
     function convertCitElementsToNepali() {
+        try { convertSifarishDigitsToNepali(); } catch(e) {}
         const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
         const citSelectors = [
             '#lblCitNo', '#lblCitDetailsSpan', '#lblDetailCitNo', '#lblFatherCit_tbl',
             '#lblMotherCit_tbl', '#lblGuardianCit_tbl', '#lblTapasilCit', '#lblCitBlock',
             '#lblCitBlockCust', '#lblCitDate', '#lblDetailCitDate', '#lblFatherCitDate_tbl',
             '#lblMotherCitDate_tbl', '#lblCitDistrict', '#lblTapasilGuardianCit', '#lblCitInfoSpan',
-            '#lblHusbandCit', '#lblWifeCit', '#lblDeceasedCitNo', '#lblGuardianCit', '#lblGrandfatherCit'
+            '#lblHusbandCit', '#lblWifeCit', '#lblDeceasedCitNo', '#lblGuardianCit', '#lblGrandfatherCit',
+            '#lblChalani', '#lblMiti', '#lblNepalSamvat', '#lblWadaBody', '#lblBodyWada', '#lblBodyChalani'
         ];
         citSelectors.forEach(sel => {
             const el = document.querySelector(sel);
@@ -1361,8 +1403,7 @@
                 el.innerText = toNep(el.innerText);
             }
         });
-        // Broad search for any display spans/divs with cit or nagarik in their id
-        const matched = document.querySelectorAll('[id*="Cit"], [id*="cit"], [id*="nagarik"], [id*="Nagrik"]');
+        const matched = document.querySelectorAll('[id*="Cit"], [id*="cit"], [id*="nagarik"], [id*="Nagrik"], [id*="Chalani"], [id*="chalani"]');
         matched.forEach(el => {
             if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.innerText && /[0-9]/.test(el.innerText)) {
                 el.innerText = toNep(el.innerText);
@@ -1370,6 +1411,9 @@
         });
     }
     window.convertCitElementsToNepali = convertCitElementsToNepali;
+    if (!window.convertSifarishDigitsToNepali) {
+        window.convertSifarishDigitsToNepali = convertSifarishDigitsToNepali;
+    }
 
     // Enhance Abhilekh modal with operator badge and user-filtered records
     function enhanceAbhilekhModal() {

@@ -101,51 +101,206 @@ window.toEnglishDigit = function (num) {
     });
 };
 
-// Global Citizenship Number Auto-Conversion (English 0-9 -> Nepali ०-९)
-(function setupCitizenshipConverter() {
-    function isCitField(el) {
-        if (!el || el.tagName !== 'INPUT' || (el.type !== 'text' && el.type !== 'search' && el.type !== '')) return false;
-        const id = (el.id || '').toLowerCase();
-        const name = (el.name || '').toLowerCase();
-        const cls = (el.className || '').toLowerCase();
-        const placeholder = (el.placeholder || '').toLowerCase();
-        if (id.includes('cit') || id.includes('nagarik') || id.includes('nagrik') || id.includes('citizenship')) return true;
-        if (name.includes('cit') || name.includes('nagarik') || name.includes('nagrik') || name.includes('citizenship')) return true;
-        if (cls.includes('member-document') || cls.includes('cit-input') || cls.includes('cit-field')) return true;
-        if (placeholder.includes('नागरिकता') || placeholder.includes('ना.प्र.नं') || placeholder.includes('ना.नं') || placeholder.includes('नाप्रनं') || placeholder.includes('नागरिक')) return true;
+// Universal Sifarish letter digit converter (transforms ASCII 0-9 into Nepali digits ०-९ in preview and print)
+window.convertSifarishDigitsToNepali = function () {
+    const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
+    const containers = document.querySelectorAll('.a4-page, #printArea, #printPage1, #printPage2, .preview-panel .document, .print-container, #printDocument');
+    if (!containers || containers.length === 0) return;
 
-        const parent = el.closest('.input-group, .form-group, td, tr, div');
-        if (parent) {
-            const lbl = parent.querySelector('label');
-            if (lbl && /नागरिकता|ना\.?प्र\.?नं|ना\.?नं|नागरिक/i.test(lbl.innerText || '')) return true;
-            const prev = el.previousElementSibling;
-            if (prev && /नागरिकता|ना\.?प्र\.?नं|ना\.?नं|नागरिक/i.test(prev.innerText || '')) return true;
+    containers.forEach(container => {
+        const walker = document.createTreeWalker(
+            container,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: function (node) {
+                    const parent = node.parentElement;
+                    if (!parent) return NodeFilter.FILTER_REJECT;
+                    const tag = parent.tagName;
+                    if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+                    if (parent.closest('.no-nepali-digits, .no-convert, .english-text, [data-no-nepali="true"]')) return NodeFilter.FILTER_REJECT;
+                    const id = parent.id || '';
+                    if (id.endsWith('EN') || id.endsWith('EN_tbl') || id.includes('DOB_AD') || id.endsWith('_AD')) return NodeFilter.FILTER_REJECT;
+                    if (/[0-9]/.test(node.nodeValue)) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                    return NodeFilter.FILTER_SKIP;
+                }
+            },
+            false
+        );
+
+        const nodesToUpdate = [];
+        while (walker.nextNode()) {
+            nodesToUpdate.push(walker.currentNode);
         }
-        return false;
+
+        nodesToUpdate.forEach(node => {
+            node.nodeValue = toNep(node.nodeValue);
+        });
+    });
+};
+
+// Backward compatibility alias
+window.convertCitElementsToNepali = function () {
+    if (typeof window.convertSifarishDigitsToNepali === 'function') {
+        window.convertSifarishDigitsToNepali();
+    }
+};
+
+// Universal Sifarish Input Auto-Conversion (English 0-9 -> Nepali ०-९)
+(function setupUniversalSifarishDigitConverter() {
+    function isEligibleInput(el) {
+        if (!el) return false;
+        const tag = el.tagName;
+        if (tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
+
+        if (tag === 'INPUT') {
+            const type = (el.type || 'text').toLowerCase();
+            if (type === 'password' || type === 'email' || type === 'number' || 
+                type === 'file' || type === 'checkbox' || type === 'radio' || 
+                type === 'range' || type === 'button' || type === 'submit' || 
+                type === 'reset' || type === 'color' || type === 'hidden') {
+                return false;
+            }
+        }
+
+        const id = el.id || '';
+        const cls = el.className || '';
+        if (cls.includes('no-nepali-digits') || cls.includes('no-convert') || cls.includes('english-input') || cls.includes('english-text')) return false;
+        if (id.endsWith('EN') || id.endsWith('_AD') || id.includes('DOB_AD')) return false;
+        if (el.dataset && (el.dataset.noNepaliDigit === 'true' || el.dataset.noNepaliDigits === 'true')) return false;
+
+        const path = (window.location.pathname || '').toLowerCase();
+        if (path.includes('login.html')) return false;
+        if (path.includes('calculator.html') || path.includes('malpot-calculator.html') || path.includes('jaribana-hisab.html')) return false;
+
+        if (path.includes('admin.html')) {
+            const lowerId = id.toLowerCase();
+            const lowerName = (el.name || '').toLowerCase();
+            if (lowerId.includes('pass') || lowerId.includes('pwd') || lowerId.includes('user') || lowerId.includes('key') || lowerId.includes('token') || lowerId.includes('secret') || lowerId.includes('email') ||
+                lowerName.includes('pass') || lowerName.includes('pwd') || lowerName.includes('user') || lowerName.includes('key') || lowerName.includes('token') || lowerName.includes('email')) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    function handleCitInput(el) {
-        if (!isCitField(el)) return;
+    function handleDigitInput(el) {
+        if (!isEligibleInput(el)) return;
         const val = el.value;
-        if (/[0-9]/.test(val)) {
+        if (val && /[0-9]/.test(val)) {
             const start = el.selectionStart;
             const end = el.selectionEnd;
             el.value = window.toNepaliDigit(val);
-            if (start !== null && end !== null) {
-                el.setSelectionRange(start, end);
+            if (start !== null && end !== null && typeof el.setSelectionRange === 'function') {
+                try {
+                    el.setSelectionRange(start, end);
+                } catch (e) {}
             }
             if (typeof updateDoc === 'function') {
                 try { updateDoc(); } catch (e) {}
             }
-            if (typeof convertCitElementsToNepali === 'function') {
-                try { convertCitElementsToNepali(); } catch (e) {}
+            if (typeof window.convertSifarishDigitsToNepali === 'function') {
+                try { window.convertSifarishDigitsToNepali(); } catch (e) {}
             }
         }
     }
 
-    document.addEventListener('input', e => handleCitInput(e.target), true);
-    document.addEventListener('paste', e => setTimeout(() => handleCitInput(e.target), 10), true);
-    document.addEventListener('blur', e => handleCitInput(e.target), true);
+    function convertAllExistingInputs() {
+        try {
+            const inputs = document.querySelectorAll('.input-panel input, .input-panel textarea, form input, form textarea, table input, .kitta-row-block input');
+            inputs.forEach(inp => {
+                if (isEligibleInput(inp) && inp.value && /[0-9]/.test(inp.value)) {
+                    inp.value = window.toNepaliDigit(inp.value);
+                }
+            });
+            if (typeof updateDoc === 'function') {
+                try { updateDoc(); } catch (e) {}
+            }
+            if (typeof window.convertSifarishDigitsToNepali === 'function') {
+                try { window.convertSifarishDigitsToNepali(); } catch (e) {}
+            }
+        } catch (e) {}
+    }
+
+    let isConvertingObserver = false;
+    function setupLetterObserver() {
+        const containers = document.querySelectorAll('.a4-page, #printArea, #printPage1, #printPage2');
+        if (!containers || containers.length === 0) return;
+
+        const observer = new MutationObserver((mutations) => {
+            if (isConvertingObserver) return;
+            let needsConversion = false;
+            for (const m of mutations) {
+                if (m.type === 'characterData' && /[0-9]/.test(m.target.nodeValue)) {
+                    needsConversion = true;
+                    break;
+                } else if (m.type === 'childList') {
+                    for (const node of m.addedNodes) {
+                        if (node.nodeType === Node.TEXT_NODE && /[0-9]/.test(node.nodeValue)) {
+                            needsConversion = true;
+                            break;
+                        } else if (node.nodeType === Node.ELEMENT_NODE && /[0-9]/.test(node.textContent)) {
+                            needsConversion = true;
+                            break;
+                        }
+                    }
+                    if (needsConversion) break;
+                }
+            }
+            if (needsConversion) {
+                isConvertingObserver = true;
+                try {
+                    window.convertSifarishDigitsToNepali();
+                } finally {
+                    isConvertingObserver = false;
+                }
+            }
+        });
+
+        containers.forEach(c => {
+            try {
+                observer.observe(c, { childList: true, subtree: true, characterData: true });
+            } catch (e) {}
+        });
+    }
+
+    document.addEventListener('input', e => handleDigitInput(e.target), true);
+    document.addEventListener('paste', e => setTimeout(() => handleDigitInput(e.target), 10), true);
+    document.addEventListener('blur', e => handleDigitInput(e.target), true);
+    document.addEventListener('change', e => handleDigitInput(e.target), true);
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            convertAllExistingInputs();
+            setupLetterObserver();
+        });
+    } else {
+        setTimeout(() => {
+            convertAllExistingInputs();
+            setupLetterObserver();
+        }, 50);
+    }
+
+    window.addEventListener('load', () => {
+        convertAllExistingInputs();
+        setupLetterObserver();
+    });
+
+    window.addEventListener('beforeprint', () => {
+        if (typeof window.convertSifarishDigitsToNepali === 'function') {
+            try { window.convertSifarishDigitsToNepali(); } catch (e) {}
+        }
+    });
+
+    if (typeof window.print === 'function') {
+        const nativePrint = window.print;
+        window.print = function () {
+            try { window.convertSifarishDigitsToNepali(); } catch (e) {}
+            return nativePrint.apply(this, arguments);
+        };
+    }
 })();
 
 function clearSession() {
