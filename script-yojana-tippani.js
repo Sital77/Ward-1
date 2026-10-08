@@ -163,10 +163,13 @@ function resetForm() {
 
     // Clear Bank
     document.getElementById('inPayeeName').value = '';
-    document.getElementById('inBankName').value = '';
+    const selBank = document.getElementById('inBankSelect');
+    if (selBank) selBank.value = '';
+    const customBankWrap = document.getElementById('customBankInputWrap');
+    if (customBankWrap) customBankWrap.style.display = 'none';
+    const inBank = document.getElementById('inBankName');
+    if (inBank) inBank.value = '';
     document.getElementById('inAccountNo').value = '';
-    document.querySelectorAll('input[name="bankRadio"]').forEach(r => r.checked = false);
-    updateBankRadioVisuals();
 
     // Signatory
     document.getElementById('inSignAuthority').value = 'अनिता अधिकारी|वडा सचिव';
@@ -180,7 +183,7 @@ function resetForm() {
     updateDoc();
 }
 
-// ── Bank Radio Scrolling Feature ──────────────────────
+// ── Bank Select Dropdown Feature ──────────────────────
 const PRESET_BANKS = [
     'सिद्धार्थ बैंक लिमिटेड, गौरादह शाखा',
     'एनआईसी एशिया बैंक लिमिटेड, गौरादह शाखा',
@@ -192,63 +195,40 @@ const PRESET_BANKS = [
     'एक्सेल डेभलपमेन्ट बैंक लिमिटेड, बैगुन्धुरा शाखा'
 ];
 
-function onBankRadioChange(radio) {
-    const bankInput = document.getElementById('inBankName');
-    updateBankRadioVisuals();
-
-    if (radio.value === 'CUSTOM') {
-        if (bankInput) {
-            if (PRESET_BANKS.includes(bankInput.value.trim())) {
-                bankInput.value = '';
+function onBankSelectChange(val) {
+    const customWrap = document.getElementById('customBankInputWrap');
+    const inputEl = document.getElementById('inBankName');
+    
+    if (val === 'CUSTOM') {
+        if (customWrap) customWrap.style.display = 'block';
+        if (inputEl) {
+            if (PRESET_BANKS.includes(inputEl.value.trim())) {
+                inputEl.value = '';
             }
-            bankInput.focus();
+            inputEl.focus();
         }
     } else {
-        if (bankInput) {
-            bankInput.value = radio.value;
+        if (customWrap) customWrap.style.display = 'none';
+        if (inputEl) {
+            inputEl.value = val;
         }
     }
     updateDoc();
 }
 
-function updateBankRadioVisuals() {
-    document.querySelectorAll('.bank-radio-item').forEach(label => {
-        const inp = label.querySelector('input[type="radio"]');
-        if (inp && inp.checked) {
-            label.classList.add('selected');
-        } else {
-            label.classList.remove('selected');
-        }
-    });
-}
-
-function onBankInputChanged() {
-    const val = document.getElementById('inBankName').value.trim();
-    syncBankRadioFromValue(val);
-}
-
-function syncBankRadioFromValue(val) {
-    const radios = document.querySelectorAll('input[name="bankRadio"]');
-    let matched = false;
-
-    radios.forEach(r => {
-        if (r.value !== 'CUSTOM' && r.value === val) {
-            r.checked = true;
-            matched = true;
-            r.closest('.bank-radio-item')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        } else if (r.value !== 'CUSTOM') {
-            r.checked = false;
-        }
-    });
-
-    const customRadio = document.querySelector('input[name="bankRadio"][value="CUSTOM"]');
-    if (!matched && val) {
-        if (customRadio) customRadio.checked = true;
-    } else if (!matched && !val) {
-        if (customRadio) customRadio.checked = false;
+function getSelectedBankName() {
+    const bankSelect = document.getElementById('inBankSelect');
+    const inBank = document.getElementById('inBankName');
+    if (!bankSelect) {
+        return inBank ? inBank.value.trim() : '';
     }
-
-    updateBankRadioVisuals();
+    if (bankSelect.value === 'CUSTOM') {
+        return inBank ? inBank.value.trim() : '';
+    }
+    if (bankSelect.value) {
+        return bankSelect.value;
+    }
+    return inBank ? inBank.value.trim() : '';
 }
 
 // ── Budget Title Auto-sync ────────────────────────────
@@ -511,7 +491,7 @@ function updateDoc() {
 
     // Bank
     const payeeName = document.getElementById('inPayeeName').value.trim();
-    const bankName = document.getElementById('inBankName').value.trim();
+    const bankName = getSelectedBankName();
     const rawAccountNo = document.getElementById('inAccountNo').value.trim();
     const accountNo = toNepaliDigit(rawAccountNo);
 
@@ -758,7 +738,7 @@ async function printAndSaveSystem() {
         evalDate:               document.getElementById('inEvalDate').value.trim() || '',
         wardMonDate:            document.getElementById('inWardMonitoringDate').value.trim() || '',
         payeeName:              payeeName,
-        bankName:               document.getElementById('inBankName').value.trim() || '',
+        bankName:               getSelectedBankName(),
         accountNo:              document.getElementById('inAccountNo').value.trim() || '',
         signAuth:               document.getElementById('inSignAuthority').value,
         customSignName:         document.getElementById('inCustomSignName').value.trim(),
@@ -906,9 +886,25 @@ async function loadRecordToForm(id) {
 
     // Bank
     document.getElementById('inPayeeName').value = rec.payeeName || '';
-    document.getElementById('inBankName').value = rec.bankName || '';
+    const savedBank = rec.bankName || '';
+    const selBank = document.getElementById('inBankSelect');
+    const customBankWrap = document.getElementById('customBankInputWrap');
+    const inBank = document.getElementById('inBankName');
+
+    if (PRESET_BANKS.includes(savedBank)) {
+        if (selBank) selBank.value = savedBank;
+        if (customBankWrap) customBankWrap.style.display = 'none';
+        if (inBank) inBank.value = savedBank;
+    } else if (savedBank) {
+        if (selBank) selBank.value = 'CUSTOM';
+        if (customBankWrap) customBankWrap.style.display = 'block';
+        if (inBank) inBank.value = savedBank;
+    } else {
+        if (selBank) selBank.value = '';
+        if (customBankWrap) customBankWrap.style.display = 'none';
+        if (inBank) inBank.value = '';
+    }
     document.getElementById('inAccountNo').value = rec.accountNo || '';
-    syncBankRadioFromValue(rec.bankName || '');
 
     // Signatory
     document.getElementById('inSignAuthority').value = rec.signAuth || 'अनिता अधिकारी|वडा सचिव';
@@ -996,8 +992,11 @@ window.onload = function () {
     adjustTippaniFontSize(savedFontSize);
 
     initApprovedPlansUI();
-    updateBankRadioVisuals();
-    syncBankRadioFromValue(document.getElementById('inBankName').value.trim());
+    const selBank = document.getElementById('inBankSelect');
+    const inBank = document.getElementById('inBankName');
+    if (selBank && selBank.value && selBank.value !== 'CUSTOM' && inBank) {
+        inBank.value = selBank.value;
+    }
 
     updateDoc();
 };
