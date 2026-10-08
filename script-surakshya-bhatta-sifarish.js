@@ -70,6 +70,43 @@ function adjustSignaturePosition(value) {
     if (docFooter) docFooter.style.marginTop = value + "px";
 }
 
+function resetForm() {
+    document.getElementById('editRecordIndex').value = '';
+    document.getElementById('formMainTitle').innerText = '🛡️ सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस';
+    const btnNew = document.getElementById('btnNewForm');
+    if (btnNew) btnNew.style.display = 'none';
+
+    // Clear beneficiary
+    document.getElementById('inBeneficiaryName').value = '';
+    document.getElementById('inAccountNo').value = '';
+    document.getElementById('inCardNo').value = '';
+
+    // Clear guardian
+    document.getElementById('selRelation').value = 'छोरा';
+    document.getElementById('inCustomRelation').value = '';
+    handleRelationChange();
+    document.getElementById('inGuardianName').value = '';
+
+    // Reset guardian cit
+    const chkCit = document.getElementById('chkGuardianCit');
+    if (chkCit) chkCit.checked = false;
+    document.getElementById('inGuardianCitNo').value = '';
+    document.getElementById('inGuardianCitDate').value = '';
+    document.getElementById('inGuardianCitDistrict').value = 'झापा';
+    toggleGuardianCitSection();
+
+    // Reset signatory & margin
+    document.getElementById('inSignAuthority').value = 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
+    document.getElementById('inCustomSignName').value = '';
+    document.getElementById('inCustomSignTitle').value = '';
+    toggleCustomSign();
+    document.getElementById('inSigMargin').value = '40';
+    adjustSignaturePosition(40);
+
+    initializeAutomaticDate();
+    updateDoc();
+}
+
 // ── Modal toggle ─────────────────────────────────────
 function toggleModal(show) {
     const modal = document.getElementById('abhilekhModal');
@@ -376,12 +413,16 @@ async function printAndSaveSystem() {
         } else {
             const docRef = await db.collection("surakshyaBhattaRecords").add(obj);
             document.getElementById('editRecordIndex').value = docRef.id;
-            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + beneficiaryName;
         }
+        const btnNew = document.getElementById('btnNewForm');
+        if (btnNew) btnNew.style.display = 'inline-block';
         window.print();
     } catch (e) {
         console.error(e);
-        alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");
+        if (confirm("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट नहुँदा पनि प्रिन्ट गर्न चाहनुहुन्छ?")) {
+            window.print();
+        }
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -518,6 +559,8 @@ async function loadRecordToForm(id) {
     adjustSignaturePosition(margin);
 
     updateDoc();
+    const btnNew = document.getElementById('btnNewForm');
+    if (btnNew) btnNew.style.display = 'inline-block';
     toggleModal(false);
 }
 
@@ -532,6 +575,8 @@ async function deleteRecord(id) {
     try {
         if (typeof window.softDeleteRecord === 'function') {
             await window.softDeleteRecord('surakshyaBhattaRecords', id, {
+                title: rec.beneficiaryName || rec.name || '',
+                name: rec.beneficiaryName || rec.name || '',
                 beneficiaryName: rec.beneficiaryName || rec.name || '',
                 guardianName: rec.guardianName || '',
                 accountNo: rec.accountNo || '',
