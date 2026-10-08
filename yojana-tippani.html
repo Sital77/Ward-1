@@ -316,22 +316,26 @@
             width: 100%;
         }
 
-        .signature-block .sig-role {
-            font-size: 11pt;
-            font-weight: bold;
-            color: #000;
-            margin-bottom: 2px;
-        }
+        /* sig-role style is now merged with the dashed-line block below */
 
-        .signature-block .sig-name {
+        .signature-block .sig-role {
             font-size: 11pt;
             font-weight: bold;
             border-top: 1.5px dashed #000;
             padding-top: 5px;
             display: inline-block;
-            min-width: 140px;
+            min-width: 160px;
             text-align: center;
             color: #000;
+            margin-bottom: 1px;
+        }
+
+        .signature-block .sig-name {
+            font-size: 11pt;
+            font-weight: bold;
+            text-align: center;
+            color: #000;
+            margin-top: 0;
         }
 
         .signature-block .sig-title {
@@ -834,6 +838,7 @@
                         <div class="sig-title" id="lblSigTitle">वडा सचिव</div>
                     </div>
                 </div>
+                <!-- Note: sig-role gets dashed border-top so order is: ---/पेश गर्ने/Name/Title -->
 
             </div><!-- /tippani-content -->
 

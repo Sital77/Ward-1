@@ -566,7 +566,7 @@ function updateDoc() {
     const lblPNameVal = document.getElementById('lblPayeeName');
     if (lblPNameVal) lblPNameVal.innerText = payeeName || '................................';
 
-    // Signatory
+    // Signatory (dashed line is on sig-role per CSS: ---/पेश गर्ने/Name/Title)
     const signSelect = document.getElementById('inSignAuthority').value;
     let sigName = "", sigTitle = "";
     const lblSigName = document.getElementById('lblSigName');
@@ -576,12 +576,12 @@ function updateDoc() {
     if (signSelect === 'BLANK') {
         sigName = "";
         sigTitle = "";
-        if (lblSigName) lblSigName.style.borderTop = "none";
         if (lblSigRole) lblSigRole.style.display = "none";
+        if (lblSigName) { lblSigName.innerText = ""; }
+        if (lblSigTitle) { lblSigTitle.innerText = ""; }
     } else {
-        if (lblSigName) lblSigName.style.borderTop = "1.5px dashed #000";
         if (lblSigRole) {
-            lblSigRole.style.display = "block";
+            lblSigRole.style.display = "inline-block";
             lblSigRole.innerText = "पेश गर्ने";
         }
         if (signSelect === 'CUSTOM') {
@@ -592,10 +592,9 @@ function updateDoc() {
             sigName = parts[0] || '';
             sigTitle = parts[1] || '';
         }
+        if (lblSigName) lblSigName.innerText = sigName;
+        if (lblSigTitle) lblSigTitle.innerText = sigTitle;
     }
-
-    if (lblSigName) lblSigName.innerText = sigName;
-    if (lblSigTitle) lblSigTitle.innerText = sigTitle;
 }
 
 // ── Date Automation ───────────────────────────────────
