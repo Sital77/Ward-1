@@ -51,6 +51,12 @@ function toggleGuardianCitSection() {
     if (sec) sec.style.display = chk.checked ? 'block' : 'none';
 }
 
+function toggleCardNoSection() {
+    const chk = document.getElementById('chkCardNo');
+    const sec = document.getElementById('cardNoSection');
+    if (sec) sec.style.display = (chk && chk.checked) ? 'block' : 'none';
+}
+
 function handleRelationChange() {
     const sel = document.getElementById('selRelation').value;
     const grp = document.getElementById('customRelationGroup');
@@ -79,7 +85,10 @@ function resetForm() {
     // Clear beneficiary
     document.getElementById('inBeneficiaryName').value = '';
     document.getElementById('inAccountNo').value = '';
+    const chkCard = document.getElementById('chkCardNo');
+    if (chkCard) chkCard.checked = false;
     document.getElementById('inCardNo').value = '';
+    toggleCardNoSection();
 
     // Clear guardian
     document.getElementById('selRelation').value = 'छोरा';
@@ -187,10 +196,10 @@ function updateDoc() {
             let citText = ` (नागरिकता प्र.नं. ${citNo || '..................'}`;
             if (citDate) citText += `, जारी मिति: ${citDate}`;
             if (citDistrict) citText += `, जारी जिल्ला: ${citDistrict}`;
-            citText += `)`;
+            citText += `) को`;
             lblCitBlock.innerText = citText;
         } else {
-            lblCitBlock.innerText = "";
+            lblCitBlock.innerText = "को";
         }
     }
 
@@ -201,6 +210,11 @@ function updateDoc() {
     const lblTblAcc = document.getElementById('lblTblAccountNo');
     if (lblTblAcc) lblTblAcc.innerText = accountNo || '..................';
 
+    const chkCard = document.getElementById('chkCardNo') ? document.getElementById('chkCardNo').checked : false;
+    const rowTblCard = document.getElementById('rowTblCardNo');
+    if (rowTblCard) {
+        rowTblCard.style.display = chkCard ? '' : 'none';
+    }
     const lblTblCard = document.getElementById('lblTblCardNo');
     if (lblTblCard) lblTblCard.innerText = cardNo || '..................';
 
@@ -384,7 +398,10 @@ async function printAndSaveSystem() {
         beneficiaryName:      beneficiaryName,
         name:                 beneficiaryName, // standard search field alias
         accountNo:            document.getElementById('inAccountNo').value.trim() || '',
-        cardNo:               document.getElementById('inCardNo').value.trim() || '',
+        hasCardNo:            document.getElementById('chkCardNo') ? document.getElementById('chkCardNo').checked : false,
+        cardNo:               (document.getElementById('chkCardNo') && document.getElementById('chkCardNo').checked)
+                                ? document.getElementById('inCardNo').value.trim()
+                                : '',
         relation:             relation,
         guardianName:         guardianName,
         hasGuardianCit:       document.getElementById('chkGuardianCit').checked,
@@ -523,7 +540,13 @@ async function loadRecordToForm(id) {
     // Beneficiary
     document.getElementById('inBeneficiaryName').value = rec.beneficiaryName || rec.name || '';
     document.getElementById('inAccountNo').value = rec.accountNo || '';
+    // Optional Card No
+    const chkCard = document.getElementById('chkCardNo');
+    if (chkCard) {
+        chkCard.checked = !!(rec.hasCardNo || (rec.cardNo && rec.cardNo !== '-'));
+    }
     document.getElementById('inCardNo').value = rec.cardNo || '';
+    toggleCardNoSection();
 
     // Guardian
     const standardRelations = ['छोरा', 'छोरी', 'श्रीमान', 'श्रीमती', 'बुहारी', 'नाति', 'नातिनी', 'भाइ', 'दाइ', 'दिदी', 'बहिनी', 'हकवाला', 'संरक्षक'];

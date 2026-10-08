@@ -205,9 +205,17 @@
                 <input type="text" id="inAccountNo" placeholder="उदा: ०६०१२००४५६७८९०१२" oninput="updateDoc()">
             </div>
 
-            <div class="form-group">
-                <label>सामाजिक सुरक्षा परिचयपत्र नं.:</label>
-                <input type="text" id="inCardNo" placeholder="उदा: ०१-२०८०-०१२३४" oninput="updateDoc()">
+            <!-- Optional Card No Toggle -->
+            <label class="optional-toggle" style="margin-top: 10px;">
+                <input type="checkbox" id="chkCardNo" onchange="toggleCardNoSection(); updateDoc();">
+                <span>सामाजिक सुरक्षा परिचयपत्र नं. राख्नुस (वैकल्पिक)</span>
+            </label>
+
+            <div id="cardNoSection" style="display: none; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 6px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>सामाजिक सुरक्षा परिचयपत्र नं. (वैकल्पिक):</label>
+                    <input type="text" id="inCardNo" placeholder="उदा: ०१-२०८०-०१२३४" oninput="updateDoc()">
+                </div>
             </div>
         </div>
 
@@ -367,7 +375,7 @@
 
             <!-- ── Body Paragraph ── -->
             <div class="letter-body-para" id="bodyText" style="text-indent: 50px;">
-                प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong> को नाममा तहाँ बैंकमा खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज सामाजिक सुरक्षा लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको सामाजिक सुरक्षा बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज लाभग्राहीको खातामा रहेको सामाजिक सुरक्षा भत्ता बापतको रकम भुक्तानीका लागि निजको <strong id="lblRelation">छोरा</strong> <strong id="lblGuardianName">..................</strong><span id="lblGuardianCitBlock"></span> को दस्तखतबाट समेत रकम झिक्ने/खाता सञ्चालन गर्ने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
+                प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong>को नाममा तहाँ बैंकमा खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज सामाजिक सुरक्षा लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको सामाजिक सुरक्षा बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज लाभग्राहीको खातामा रहेको सामाजिक सुरक्षा भत्ता बापतको रकम भुक्तानीका लागि निजको <strong id="lblRelation">छोरा</strong> <strong id="lblGuardianName">..................</strong><span id="lblGuardianCitBlock">को</span> दस्तखतबाट समेत रकम झिक्ने/खाता सञ्चालन गर्ने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>
 
             <!-- ── Beneficiary Details Summary ── -->
@@ -382,7 +390,7 @@
                         <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">बैंक खाता नं. :</td>
                         <td style="padding: 2px 0;"><strong id="lblTblAccountNo">..................</strong></td>
                     </tr>
-                    <tr>
+                    <tr id="rowTblCardNo" style="display: none;">
                         <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">परिचयपत्र नं. :</td>
                         <td style="padding: 2px 0;"><strong id="lblTblCardNo">..................</strong></td>
                     </tr>
