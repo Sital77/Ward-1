@@ -948,6 +948,11 @@
             });
         }
 
+        // yojana-tippani has dedicated compact Kalimati font & single-page layout - do not apply generic 14pt overrides
+        if (templateId === 'yojana-tippani' || window.location.pathname.includes('yojana-tippani.html')) {
+            return;
+        }
+
         // 1. Get saved styling values or defaults (Size: 11pt for nabalak-parichayapatra, 14pt for others)
         const isNabalak = (templateId === 'nabalak-parichayapatra' || window.location.pathname.includes('nabalak-parichayapatra.html'));
         const defaultFontSize = isNabalak ? '11' : '14';

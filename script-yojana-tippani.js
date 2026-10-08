@@ -103,6 +103,31 @@ function adjustSignaturePosition(value) {
     if (docFooter) docFooter.style.marginTop = value + "px";
 }
 
+function adjustTippaniFontSize(val) {
+    const lbl = document.getElementById('lblTippaniFontSizeVal');
+    if (lbl) lbl.innerText = toNepaliDigit(val) + " pt";
+    
+    const para = document.getElementById('bodyText');
+    if (para) para.style.fontSize = val + "pt";
+    
+    const table = document.querySelector('.tippani-table');
+    if (table) table.style.fontSize = (parseFloat(val) - 0.75) + "pt";
+
+    const title = document.querySelector('.tippani-main-title');
+    if (title) title.style.fontSize = (parseFloat(val) + 2.5) + "pt";
+
+    const subj = document.querySelector('.tippani-subject');
+    if (subj) subj.style.fontSize = (parseFloat(val) + 1.5) + "pt";
+
+    const addr = document.querySelector('.tippani-addressee');
+    if (addr) addr.style.fontSize = (parseFloat(val) + 0.5) + "pt";
+
+    const tapHead = document.querySelector('.tapasill-heading');
+    if (tapHead) tapHead.style.fontSize = (parseFloat(val) + 0.5) + "pt";
+
+    localStorage.setItem('tippani_custom_fontsize', val);
+}
+
 function toggleModal(show) {
     const modal = document.getElementById('abhilekhModal');
     if (modal) modal.style.display = show ? 'flex' : 'none';
@@ -118,6 +143,8 @@ function resetForm() {
     // Clear Letterhead & Dates
     document.getElementById('inChalani').value = '';
     document.getElementById('inDartaNo').value = '';
+    const inNS = document.getElementById('inNepalSamvat');
+    if (inNS) inNS.value = '११४६';
 
     // Clear Project
     document.getElementById('inProjectName').value = '';
@@ -155,8 +182,8 @@ function resetForm() {
     document.getElementById('inCustomSignName').value = '';
     document.getElementById('inCustomSignTitle').value = '';
     toggleCustomSign();
-    document.getElementById('inSigMargin').value = '10';
-    adjustSignaturePosition(10);
+    document.getElementById('inSigMargin').value = '8';
+    adjustSignaturePosition(8);
 
     initializeAutomaticDate();
     updateDoc();
@@ -168,6 +195,7 @@ function updateDoc() {
     const chalani = toNepaliDigit(document.getElementById('inChalani').value.trim());
     const dartaNo = toNepaliDigit(document.getElementById('inDartaNo').value.trim());
     const miti = toNepaliDigit(document.getElementById('inMiti').value.trim());
+    const ns = toNepaliDigit(document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '११४६');
 
     // Project & Agreement
     const projectName = document.getElementById('inProjectName').value.trim();
@@ -197,15 +225,17 @@ function updateDoc() {
     const rawAccountNo = document.getElementById('inAccountNo').value.trim();
     const accountNo = toNepaliDigit(rawAccountNo);
 
-    // Letterhead Update
+    // Letterhead Update (Standard Ward 1)
     const lblAY = document.getElementById('lblAY');
     if (lblAY) lblAY.innerText = ay;
     const lblChalani = document.getElementById('lblChalani');
-    if (lblChalani) lblChalani.innerText = chalani;
+    if (lblChalani) lblChalani.innerText = chalani || '..........';
     const lblDarta = document.getElementById('lblDartaNo');
-    if (lblDarta) lblDarta.innerText = dartaNo;
+    if (lblDarta) lblDarta.innerText = dartaNo || '..........';
     const lblMiti = document.getElementById('lblMiti');
     if (lblMiti) lblMiti.innerText = miti || '........';
+    const lblNS = document.getElementById('lblNepalSamvat');
+    if (lblNS) lblNS.innerText = ns || '११४६';
 
     // Body Paragraph Placeholders
     const lblArea = document.getElementById('lblProjectArea');
@@ -348,7 +378,7 @@ function initializeAutomaticDate() {
             bsMonthVal = bsM;
             let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
             if (bsD > 32) bsD = 30;
-            bsDayVal = bsD;
+            const bsDayVal = bsD;
             const bsMStr = String(bsMonthVal).padStart(2, '0');
             const bsDStr = String(bsDayVal).padStart(2, '0');
             nepaliBSDateStr = toNepaliDigit(`${bsYearVal}-${bsMStr}-${bsDStr}`);
@@ -409,6 +439,7 @@ async function printAndSaveSystem() {
         chalani:                document.getElementById('inChalani').value.trim() || '-',
         dartaNo:                document.getElementById('inDartaNo').value.trim() || '-',
         miti:                   document.getElementById('inMiti').value.trim() || '-',
+        nepalSamvat:            document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '११४६',
         projectName:            projectName,
         name:                   projectName || budgetTitle || payeeName, // Standard search alias
         projectArea:            document.getElementById('inProjectArea').value.trim() || '',
@@ -548,6 +579,8 @@ async function loadRecordToForm(id) {
     document.getElementById('inChalani').value = rec.chalani !== '-' ? rec.chalani : '';
     document.getElementById('inDartaNo').value = rec.dartaNo !== '-' ? rec.dartaNo : '';
     document.getElementById('inMiti').value = rec.miti !== '-' ? rec.miti : '';
+    const inNS = document.getElementById('inNepalSamvat');
+    if (inNS) inNS.value = rec.nepalSamvat || '११४६';
 
     // Project
     document.getElementById('inProjectName').value = rec.projectName || '';
@@ -582,7 +615,7 @@ async function loadRecordToForm(id) {
     document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
     toggleCustomSign();
 
-    const margin = rec.sigMargin || '10';
+    const margin = rec.sigMargin || '8';
     document.getElementById('inSigMargin').value = margin;
     adjustSignaturePosition(margin);
 
@@ -625,7 +658,13 @@ async function deleteRecord(id) {
 // Page Bootstrap Init
 window.onload = function () {
     initializeAutomaticDate();
-    adjustSignaturePosition(10);
+    adjustSignaturePosition(8);
+    const savedFontSize = localStorage.getItem('tippani_custom_fontsize') || '10.5';
+    const fsSlider = document.getElementById('inTippaniFontSize');
+    if (fsSlider) {
+        fsSlider.value = savedFontSize;
+    }
+    adjustTippaniFontSize(savedFontSize);
 };
 
 window.addEventListener('templateInjected', function () {
