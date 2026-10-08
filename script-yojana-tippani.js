@@ -107,23 +107,11 @@ function adjustTippaniFontSize(val) {
     const lbl = document.getElementById('lblTippaniFontSizeVal');
     if (lbl) lbl.innerText = toNepaliDigit(val) + " pt";
     
-    const para = document.getElementById('bodyText');
-    if (para) para.style.fontSize = val + "pt";
-    
-    const table = document.querySelector('.tippani-table');
-    if (table) table.style.fontSize = (parseFloat(val) - 0.75) + "pt";
-
-    const title = document.querySelector('.tippani-main-title');
-    if (title) title.style.fontSize = (parseFloat(val) + 2.5) + "pt";
-
-    const subj = document.querySelector('.tippani-subject');
-    if (subj) subj.style.fontSize = (parseFloat(val) + 1.5) + "pt";
-
-    const addr = document.querySelector('.tippani-addressee');
-    if (addr) addr.style.fontSize = (parseFloat(val) + 0.5) + "pt";
-
-    const tapHead = document.querySelector('.tapasill-heading');
-    if (tapHead) tapHead.style.fontSize = (parseFloat(val) + 0.5) + "pt";
+    // Set uniform font size across all text elements in tippani-content
+    const elements = document.querySelectorAll('.tippani-content, .tippani-content *, .tippani-title-block, .tippani-main-title, .tippani-subject, .tippani-addressee, .letter-body-para, .tapasill-heading, .tippani-table, .tippani-table td, .tippani-footer, .tippani-footer *');
+    elements.forEach(el => {
+        el.style.fontSize = val + "pt";
+    });
 
     localStorage.setItem('tippani_custom_fontsize', val);
 }
@@ -182,8 +170,8 @@ function resetForm() {
     document.getElementById('inCustomSignName').value = '';
     document.getElementById('inCustomSignTitle').value = '';
     toggleCustomSign();
-    document.getElementById('inSigMargin').value = '8';
-    adjustSignaturePosition(8);
+    document.getElementById('inSigMargin').value = '10';
+    adjustSignaturePosition(10);
 
     initializeAutomaticDate();
     updateDoc();
@@ -658,13 +646,22 @@ async function deleteRecord(id) {
 // Page Bootstrap Init
 window.onload = function () {
     initializeAutomaticDate();
-    adjustSignaturePosition(8);
-    const savedFontSize = localStorage.getItem('tippani_custom_fontsize') || '10.5';
+    adjustSignaturePosition(10);
+
+    const inSig = document.getElementById('inSignAuthority');
+    if (inSig) {
+        inSig.value = 'अनिता अधिकारी|वडा सचिव, वडा नं. १';
+    }
+    toggleCustomSign();
+
+    const savedFontSize = localStorage.getItem('tippani_custom_fontsize') || '11';
     const fsSlider = document.getElementById('inTippaniFontSize');
     if (fsSlider) {
         fsSlider.value = savedFontSize;
     }
     adjustTippaniFontSize(savedFontSize);
+
+    updateDoc();
 };
 
 window.addEventListener('templateInjected', function () {
