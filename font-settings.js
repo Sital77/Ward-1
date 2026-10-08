@@ -55,6 +55,7 @@
         'surakshya-bhatta-sifarish': { collection: 'surakshyaBhattaRecords', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस' },
         'arko-bibaha-nagareko': { collection: 'surakshyaBhattaRecords', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस' },
         'yojana-bank-sifarish': { collection: 'yojanaBankRecords', title: 'योजनाको बैंक खाता सिफारिस' },
+        'yojana-tippani': { collection: 'yojanaTippaniRecords', title: 'वडा स्तरीय योजना टिप्पणी-आदेश' },
         'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' },
         'aamdani-pramanit': { collection: 'aamdaniPramanitRecords', title: 'आम्दानी प्रमाणित सिफारिस' },
         'bargikaran-sifarish': { collection: 'bargikaranSifarishRecords', title: 'जग्गा वर्गीकरण सिफारिस' },
@@ -273,6 +274,7 @@
     else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
     else if (path.includes('surakshya-bhatta-sifarish.html') || path.includes('arko-bibaha-nagareko.html')) templateId = 'surakshya-bhatta-sifarish';
     else if (path.includes('yojana-bank-sifarish.html')) templateId = 'yojana-bank-sifarish';
+    else if (path.includes('yojana-tippani.html')) templateId = 'yojana-tippani';
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
     else if (path.includes('nabalak-parichayapatra.html')) templateId = 'nabalak-parichayapatra';
     else if (path.includes('jaggadhani-pratilipi.html')) templateId = 'jaggadhani-pratilipi';
@@ -290,8 +292,8 @@
         setTimeout(resolve, 3500); // 3.5s fallback timeout
     });
 
-    // yojana-bank-sifarish, bank-sifarish, and surakshya-bhatta-sifarish have their own complete JS logic - skip template loading entirely
-    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish');
+    // yojana-bank-sifarish, bank-sifarish, surakshya-bhatta-sifarish, and yojana-tippani have their own complete JS logic - skip template loading entirely
+    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish' || templateId === 'yojana-tippani');
 
     if (templateId && !isDynamic && !skipTemplateLoad) {
         // Intercept window.onload assigner
@@ -742,6 +744,7 @@
                 'surakshya-bhatta-sifarish': 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस',
                 'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
                 'yojana-samjhauta': 'योजना सम्झौता सिफारिस',
+                'yojana-tippani': 'वडा स्तरीय योजना टिप्पणी-आदेश',
                 'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
                 'aamdani-pramanit': 'आम्दानी प्रमाणित सिफारिस',
                 'bargikaran-sifarish': 'जग्गा वर्गीकरण सिफारिस',
@@ -764,6 +767,7 @@
                 'surakshya-bhatta-sifarish': 'व्यक्तिगत प्रमाणित',
                 'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
                 'yojana-samjhauta': 'कार्यालय/प्रशासन',
+                'yojana-tippani': 'कार्यालय/प्रशासन',
                 'bank-sifarish': 'व्यक्तिगत प्रमाणित',
                 'aamdani-pramanit': 'व्यक्तिगत प्रमाणित',
                 'bargikaran-sifarish': 'जग्गा सम्बन्धि',

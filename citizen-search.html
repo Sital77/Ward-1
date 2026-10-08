@@ -425,6 +425,7 @@
         const COLLECTION_SPECS = [
             { name: 'yojanaBankRecords', label: '📂 योजना बैंक खाता', page: 'yojana-bank-sifarish.html' },
             { name: 'yojanaSamjhautaRecords', label: '📝 योजना सम्झौता', page: 'yojana-samjhauta.html' },
+            { name: 'yojanaTippaniRecords', label: '📑 योजना टिप्पणी-आदेश', page: 'yojana-tippani.html' },
             { name: 'charKillaRecords', label: '📐 चारकिल्ला सिफारिस', page: 'charkilla.html' },
             { name: 'gharBatoRecords', label: '🏠 घरबाटो प्रमाणित', page: 'gharbato.html' },
             { name: 'suchanaTansRecords', label: '📢 सूचना टाँस पत्र', page: 'suchana-tans.html' },
@@ -527,6 +528,9 @@
                 d.guardianCitNo,
                 d.beneficiaryName,
                 d.guardianName,
+                d.payeeName,
+                d.budgetTitle,
+                d.dartaNo,
                 d.accountNo,
                 d.cardNo,
                 d.chalani,
@@ -553,7 +557,7 @@
                     <div class="empty-results">
                         <div class="empty-results-icon">📂</div>
                         <h3>नागरिक वा संस्थाको नाम टाइप गर्नुहोस्</h3>
-                        <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै २० वटा सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
+                        <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै २१ वटा सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
                     </div>`;
                 return;
             }

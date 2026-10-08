@@ -22,6 +22,7 @@
     const ALL_COLLECTIONS = [
         'yojanaBankRecords',
         'yojanaSamjhautaRecords',
+        'yojanaTippaniRecords',
         'charKillaRecords',
         'gharBatoRecords',
         'suchanaTansRecords',

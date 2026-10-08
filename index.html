@@ -2029,6 +2029,7 @@
             'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
             'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
             'yojana-samjhauta': 'योजना सम्झौता सिफारिस',
+            'yojana-tippani': 'वडा स्तरीय योजना टिप्पणी-आदेश',
             'nabalak-parichayapatra': 'नाबालक परिचय पत्र सिफारिस'
         };
 
@@ -2055,6 +2056,7 @@
                 'jaggadhani-patra': 'जग्गा सम्बन्धि',
                 'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
                 'yojana-samjhauta': 'कार्यालय/प्रशासन',
+                'yojana-tippani': 'कार्यालय/प्रशासन',
                 'nabalak-parichayapatra': 'व्यक्तिगत प्रमाणित'
             };
 
@@ -2166,7 +2168,8 @@
             'bargikaran-sifarish': '🗺️',
             'aamdani-pramanit': '💰',
             'yojana-bank-sifarish': '🏦',
-            'yojana-samjhauta': '🤝'
+            'yojana-samjhauta': '🤝',
+            'yojana-tippani': '📑'
         };
         const borderMap = {
             'suchana-tans': '#d6bcfa',
@@ -2184,7 +2187,8 @@
             'bargikaran-sifarish': '#3182ce',
             'aamdani-pramanit': '#f6e05e',
             'yojana-bank-sifarish': '#9ae6b4',
-            'yojana-samjhauta': '#feebc8'
+            'yojana-samjhauta': '#feebc8',
+            'yojana-tippani': '#cbd5e0'
         };
         const categoryEmojis = {
             'जग्गा सम्बन्धि': '🗺️',
@@ -2213,7 +2217,8 @@
             { id: 'jaggadhani-patra', title: 'जग्गाधनीपूर्जा रजिष्ट्रेसन', category: 'जग्गा सम्बन्धि', status: 'Active' },
             { id: 'aamdani-pramanit', title: 'आम्दानी प्रमाणित सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'yojana-bank-sifarish', title: 'योजनाको बैंक खाता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
-            { id: 'yojana-samjhauta', title: 'योजना सम्झौता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' }
+            { id: 'yojana-samjhauta', title: 'योजना सम्झौता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
+            { id: 'yojana-tippani', title: 'वडा स्तरीय योजना टिप्पणी-आदेश', category: 'कार्यालय/प्रशासन', status: 'Active' }
         ];
 
         function renderSifarishGrid(remoteList) {
@@ -2234,7 +2239,7 @@
             let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'nabalak-parichayapatra'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -2251,9 +2256,9 @@
                     const displayName = nepaliTitleMap[t.id] || (t.title && !/^[a-zA-Z0-9_\-\s]+$/.test(t.title) ? t.title : (nepaliTitleMap[t.id] || t.title));
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'nabalak-parichayapatra'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
                     let targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
-                    if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta') {
+                    if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta' || t.id === 'yojana-tippani') {
                         targetUrl += "?v=" + new Date().getTime();
                     }
 
