@@ -88,6 +88,101 @@
             color: #c05621;
         }
 
+        /* ── Scrollable Radio Feature for Bank ── */
+        .bank-radio-scroll {
+            max-height: 155px;
+            overflow-y: auto;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            padding: 6px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-bottom: 6px;
+        }
+
+        .bank-radio-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .bank-radio-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .bank-radio-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        .bank-radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #2d3748;
+            transition: all 0.15s ease;
+            border: 1.5px solid transparent;
+            user-select: none;
+            background: #fdfdfd;
+        }
+
+        .bank-radio-item:hover {
+            background: #f7fafc;
+            border-color: #e2e8f0;
+            color: #1a202c;
+        }
+
+        .bank-radio-item:has(input[type="radio"]:checked),
+        .bank-radio-item.selected {
+            background: #ebf8ff;
+            border-color: #3182ce;
+            color: #2b6cb0;
+            font-weight: 700;
+        }
+
+        .bank-radio-item.custom-opt {
+            background: #fffaf0;
+            border-color: #feebc8;
+            color: #c05621;
+            font-weight: 600;
+        }
+
+        .bank-radio-item.custom-opt:hover {
+            background: #feebc8;
+        }
+
+        .bank-radio-item.custom-opt:has(input[type="radio"]:checked),
+        .bank-radio-item.custom-opt.selected {
+            background: #feebc8;
+            border-color: #dd6b20;
+            color: #9c4221;
+            font-weight: 700;
+        }
+
+        .bank-radio-item input[type="radio"] {
+            accent-color: #3182ce;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .letterhead-container .email-t,
+        .email-t {
+            font-family: Arial, Helvetica, sans-serif !important;
+            font-size: 11pt;
+            margin-top: 2px;
+            font-weight: 500;
+            color: #e51a23;
+        }
+
         /* ══════════ A4 PAGE & STRICT 1-PAGE LAYOUT ══════════ */
         .a4-page {
             width: 210mm;
@@ -446,8 +541,53 @@
             </div>
 
             <div class="form-group">
-                <label>बैंकको नाम तथा शाखा:</label>
-                <input type="text" id="inBankName" placeholder="उदा: प्राइम कमर्सियल बैंक लि गौरादह शाखा" oninput="updateDoc()">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label style="margin-bottom: 0; font-weight: 700; color: #c05621;">🏦 बैंकको नाम तथा शाखा:</label>
+                    <span style="font-size: 0.76rem; color: #718096; background: #edf2f7; padding: 2px 7px; border-radius: 4px;">📜 स्क्रोल गरी छान्नुहोस्</span>
+                </div>
+                
+                <!-- 📜 Scrollable Radio List for Banks -->
+                <div class="bank-radio-scroll" id="bankRadioContainer">
+                    <label class="bank-radio-item" id="lblBank_siddhartha">
+                        <input type="radio" name="bankRadio" value="सिद्धार्थ बैंक लिमिटेड, गौरादह शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ सिद्धार्थ बैंक लिमिटेड, गौरादह शाखा</span>
+                    </label>
+                    <label class="bank-radio-item" id="lblBank_nic">
+                        <input type="radio" name="bankRadio" value="एनआईसी एशिया बैंक लिमिटेड, गौरादह शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ एनआईसी एशिया बैंक लिमिटेड, गौरादह शाखा</span>
+                    </label>
+                    <label class="bank-radio-item" id="lblBank_krishi">
+                        <input type="radio" name="bankRadio" value="कृषि विकास बैंक लिमिटेड, गौरादह शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ कृषि विकास बैंक लिमिटेड, गौरादह शाखा</span>
+                    </label>
+                    <label class="bank-radio-item" id="lblBank_prime_gauradaha">
+                        <input type="radio" name="bankRadio" value="प्राइम कमर्सियल बैंक लिमिटेड, गौरादह शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ प्राइम कमर्सियल बैंक लिमिटेड, गौरादह शाखा</span>
+                    </label>
+                    <label class="bank-radio-item" id="lblBank_prime_gwaldubba">
+                        <input type="radio" name="bankRadio" value="प्राइम कमर्सियल बैंक लिमिटेड, ग्वालडुब्बा शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ प्राइम कमर्सियल बैंक लिमिटेड, ग्वालडुब्बा शाखा</span>
+                    </label>
+                    <label class="bank-radio-item" id="lblBank_saptakoshi">
+                        <input type="radio" name="bankRadio" value="सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड, गौरादह शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड, गौरादह शाखा</span>
+                    </label>
+                    <label class="bank-radio-item" id="lblBank_excel_gauradaha">
+                        <input type="radio" name="bankRadio" value="एक्सेल डेभलपमेन्ट बैंक लिमिटेड, गौरादह शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ एक्सेल डेभलपमेन्ट बैंक लिमिटेड, गौरादह शाखा</span>
+                    </label>
+                    <label class="bank-radio-item" id="lblBank_excel_baigundhura">
+                        <input type="radio" name="bankRadio" value="एक्सेल डेभलपमेन्ट बैंक लिमिटेड, बैगुन्धुरा शाखा" onchange="onBankRadioChange(this)">
+                        <span>🏛️ एक्सेल डेभलपमेन्ट बैंक लिमिटेड, बैगुन्धुरा शाखा</span>
+                    </label>
+                    <label class="bank-radio-item custom-opt" id="lblBank_custom">
+                        <input type="radio" name="bankRadio" value="CUSTOM" onchange="onBankRadioChange(this)">
+                        <span>✍️ आफैँ हाल्नुस</span>
+                    </label>
+                </div>
+
+                <!-- Input field: displays selection or accepts custom typing -->
+                <input type="text" id="inBankName" placeholder="छानिएको बैंक वा आफैँ बैंकको नाम लेख्नुहोस्..." oninput="onBankInputChanged(); updateDoc()">
             </div>
 
             <div class="form-group">
@@ -540,7 +680,7 @@
                     <div class="wada-title">१ नं. वडा कार्यालय</div>
                     <div class="loc-t">गौरादह, झापा</div>
                     <div class="prov-t">कोशी प्रदेश, नेपाल</div>
-                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
+                    <div class="email-t no-convert english-text no-nepali-digits" style="font-family: Arial, Helvetica, sans-serif !important;">Email: ward1.gauradaha@gmail.com</div>
                 </div>
                 <div class="lh-right">
                     <div class="miti-block">मिति : <span id="lblMiti">२०८३-०६-२२</span></div>

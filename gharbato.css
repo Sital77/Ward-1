@@ -435,6 +435,7 @@ select:focus {
 .email-title {
     font-size: 11pt;
     margin-top: 2px;
+    font-family: Arial, Helvetica, sans-serif !important;
 }
 
 .meta-line {

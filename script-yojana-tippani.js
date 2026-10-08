@@ -164,6 +164,8 @@ function resetForm() {
     document.getElementById('inPayeeName').value = '';
     document.getElementById('inBankName').value = '';
     document.getElementById('inAccountNo').value = '';
+    document.querySelectorAll('input[name="bankRadio"]').forEach(r => r.checked = false);
+    updateBankRadioVisuals();
 
     // Signatory
     document.getElementById('inSignAuthority').value = 'अनिता अधिकारी|वडा सचिव, वडा नं. १';
@@ -175,6 +177,77 @@ function resetForm() {
 
     initializeAutomaticDate();
     updateDoc();
+}
+
+// ── Bank Radio Scrolling Feature ──────────────────────
+const PRESET_BANKS = [
+    'सिद्धार्थ बैंक लिमिटेड, गौरादह शाखा',
+    'एनआईसी एशिया बैंक लिमिटेड, गौरादह शाखा',
+    'कृषि विकास बैंक लिमिटेड, गौरादह शाखा',
+    'प्राइम कमर्सियल बैंक लिमिटेड, गौरादह शाखा',
+    'प्राइम कमर्सियल बैंक लिमिटेड, ग्वालडुब्बा शाखा',
+    'सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड, गौरादह शाखा',
+    'एक्सेल डेभलपमेन्ट बैंक लिमिटेड, गौरादह शाखा',
+    'एक्सेल डेभलपमेन्ट बैंक लिमिटेड, बैगुन्धुरा शाखा'
+];
+
+function onBankRadioChange(radio) {
+    const bankInput = document.getElementById('inBankName');
+    updateBankRadioVisuals();
+
+    if (radio.value === 'CUSTOM') {
+        if (bankInput) {
+            if (PRESET_BANKS.includes(bankInput.value.trim())) {
+                bankInput.value = '';
+            }
+            bankInput.focus();
+        }
+    } else {
+        if (bankInput) {
+            bankInput.value = radio.value;
+        }
+    }
+    updateDoc();
+}
+
+function updateBankRadioVisuals() {
+    document.querySelectorAll('.bank-radio-item').forEach(label => {
+        const inp = label.querySelector('input[type="radio"]');
+        if (inp && inp.checked) {
+            label.classList.add('selected');
+        } else {
+            label.classList.remove('selected');
+        }
+    });
+}
+
+function onBankInputChanged() {
+    const val = document.getElementById('inBankName').value.trim();
+    syncBankRadioFromValue(val);
+}
+
+function syncBankRadioFromValue(val) {
+    const radios = document.querySelectorAll('input[name="bankRadio"]');
+    let matched = false;
+
+    radios.forEach(r => {
+        if (r.value !== 'CUSTOM' && r.value === val) {
+            r.checked = true;
+            matched = true;
+            r.closest('.bank-radio-item')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else if (r.value !== 'CUSTOM') {
+            r.checked = false;
+        }
+    });
+
+    const customRadio = document.querySelector('input[name="bankRadio"][value="CUSTOM"]');
+    if (!matched && val) {
+        if (customRadio) customRadio.checked = true;
+    } else if (!matched && !val) {
+        if (customRadio) customRadio.checked = false;
+    }
+
+    updateBankRadioVisuals();
 }
 
 // ── Live Preview Updater ──────────────────────────────
@@ -596,6 +669,7 @@ async function loadRecordToForm(id) {
     document.getElementById('inPayeeName').value = rec.payeeName || '';
     document.getElementById('inBankName').value = rec.bankName || '';
     document.getElementById('inAccountNo').value = rec.accountNo || '';
+    syncBankRadioFromValue(rec.bankName || '');
 
     // Signatory
     document.getElementById('inSignAuthority').value = rec.signAuth || 'अनिता अधिकारी|वडा सचिव, वडा नं. १';
@@ -660,6 +734,9 @@ window.onload = function () {
         fsSlider.value = savedFontSize;
     }
     adjustTippaniFontSize(savedFontSize);
+
+    updateBankRadioVisuals();
+    syncBankRadioFromValue(document.getElementById('inBankName').value.trim());
 
     updateDoc();
 };

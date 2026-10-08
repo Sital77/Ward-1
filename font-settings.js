@@ -511,10 +511,11 @@
             el.innerHTML = el.innerHTML.replace(/वडा\s*न[ं]?\s*[\.\-]*\s*[१३२४५६७८९\d]+/g, `वडा नं. ${replaceDigit}`);
         });
 
-        // Email address
+        // Email address (strictly English ward1.gauradaha@gmail.com)
         const email = (ward === '3') ? 'gauradahaward3@gmail.com' : 'ward1.gauradaha@gmail.com';
         document.querySelectorAll('.email-t').forEach(el => {
             el.innerText = `Email: ${email}`;
+            el.classList.add('no-convert', 'english-text', 'no-nepali-digits');
         });
 
         // Stamps & System Footers
@@ -1403,7 +1404,7 @@
                             if (!parent) return NodeFilter.FILTER_REJECT;
                             const tag = parent.tagName;
                             if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
-                            if (parent.closest('.no-nepali-digits, .no-convert, .english-text, [data-no-nepali="true"]')) return NodeFilter.FILTER_REJECT;
+                            if (parent.closest('.no-nepali-digits, .no-convert, .english-text, .email-t, .email-title, [data-no-nepali="true"]') || (node.nodeValue && node.nodeValue.includes('@'))) return NodeFilter.FILTER_REJECT;
                             const id = parent.id || '';
                             if (id.endsWith('EN') || id.endsWith('EN_tbl') || id.includes('DOB_AD') || id.endsWith('_AD')) return NodeFilter.FILTER_REJECT;
                             if (/[0-9]/.test(node.nodeValue)) {

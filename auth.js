@@ -117,7 +117,7 @@ window.convertSifarishDigitsToNepali = function () {
                     if (!parent) return NodeFilter.FILTER_REJECT;
                     const tag = parent.tagName;
                     if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
-                    if (parent.closest('.no-nepali-digits, .no-convert, .english-text, [data-no-nepali="true"]')) return NodeFilter.FILTER_REJECT;
+                    if (parent.closest('.no-nepali-digits, .no-convert, .english-text, .email-t, .email-title, [data-no-nepali="true"]') || (node.nodeValue && node.nodeValue.includes('@'))) return NodeFilter.FILTER_REJECT;
                     const id = parent.id || '';
                     if (id.endsWith('EN') || id.endsWith('EN_tbl') || id.includes('DOB_AD') || id.endsWith('_AD')) return NodeFilter.FILTER_REJECT;
                     if (/[0-9]/.test(node.nodeValue)) {
