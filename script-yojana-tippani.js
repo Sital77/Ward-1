@@ -108,7 +108,7 @@ function adjustTippaniFontSize(val) {
     if (lbl) lbl.innerText = toNepaliDigit(val) + " pt";
     
     // Set uniform font size across all text elements in tippani-content
-    const elements = document.querySelectorAll('.tippani-content, .tippani-content *, .tippani-title-block, .tippani-main-title, .tippani-subject, .tippani-addressee, .letter-body-para, .tapasill-heading, .tippani-table, .tippani-table td, .tippani-footer, .tippani-footer *');
+    const elements = document.querySelectorAll('.tippani-content, .tippani-content *, .tippani-title-block, .tippani-main-title, .tippani-subject, .tippani-addressee, .letter-body-para, .tapasill-heading, .tippani-table, .tippani-table td, .doc-footer, .doc-footer *, .signature-block, .signature-block *');
     elements.forEach(el => {
         el.style.fontSize = val + "pt";
     });
@@ -169,7 +169,7 @@ function resetForm() {
     updateBankRadioVisuals();
 
     // Signatory
-    document.getElementById('inSignAuthority').value = 'अनिता अधिकारी|वडा सचिव, वडा नं. १';
+    document.getElementById('inSignAuthority').value = 'अनिता अधिकारी|वडा सचिव';
     document.getElementById('inCustomSignName').value = '';
     document.getElementById('inCustomSignTitle').value = '';
     toggleCustomSign();
@@ -591,17 +591,27 @@ function updateDoc() {
     let sigName = "", sigTitle = "";
     const lblSigName = document.getElementById('lblSigName');
     const lblSigTitle = document.getElementById('lblSigTitle');
+    const lblSigRole = document.getElementById('lblSigRole');
 
     if (signSelect === 'BLANK') {
         sigName = "";
         sigTitle = "";
-    } else if (signSelect === 'CUSTOM') {
-        sigName = document.getElementById('inCustomSignName').value.trim() || '....................';
-        sigTitle = document.getElementById('inCustomSignTitle').value.trim() || '....................';
+        if (lblSigName) lblSigName.style.borderTop = "none";
+        if (lblSigRole) lblSigRole.style.display = "none";
     } else {
-        const parts = signSelect.split('|');
-        sigName = parts[0] || '';
-        sigTitle = parts[1] || '';
+        if (lblSigName) lblSigName.style.borderTop = "1.5px dashed #000";
+        if (lblSigRole) {
+            lblSigRole.style.display = "block";
+            lblSigRole.innerText = "पेश गर्ने";
+        }
+        if (signSelect === 'CUSTOM') {
+            sigName = document.getElementById('inCustomSignName').value.trim() || '....................';
+            sigTitle = document.getElementById('inCustomSignTitle').value.trim() || '....................';
+        } else {
+            const parts = signSelect.split('|');
+            sigName = parts[0] || '';
+            sigTitle = parts[1] || '';
+        }
     }
 
     if (lblSigName) lblSigName.innerText = sigName;
@@ -901,7 +911,7 @@ async function loadRecordToForm(id) {
     syncBankRadioFromValue(rec.bankName || '');
 
     // Signatory
-    document.getElementById('inSignAuthority').value = rec.signAuth || 'अनिता अधिकारी|वडा सचिव, वडा नं. १';
+    document.getElementById('inSignAuthority').value = rec.signAuth || 'अनिता अधिकारी|वडा सचिव';
     document.getElementById('inCustomSignName').value = rec.customSignName || '';
     document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
     toggleCustomSign();
@@ -974,7 +984,7 @@ window.onload = function () {
 
     const inSig = document.getElementById('inSignAuthority');
     if (inSig) {
-        inSig.value = 'अनिता अधिकारी|वडा सचिव, वडा नं. १';
+        inSig.value = 'अनिता अधिकारी|वडा सचिव';
     }
     toggleCustomSign();
 
