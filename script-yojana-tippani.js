@@ -125,6 +125,7 @@ function toggleModal(show) {
 function resetForm() {
     document.getElementById('editRecordIndex').value = '';
     document.getElementById('formMainTitle').innerText = '📑 वडा स्तरीय योजना टिप्पणी-आदेश';
+    clearSelectedPlan();
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'none';
 
@@ -248,6 +249,234 @@ function syncBankRadioFromValue(val) {
     }
 
     updateBankRadioVisuals();
+}
+
+// ── Budget Title Auto-sync ────────────────────────────
+function syncBudgetTitle() {
+    const pName = document.getElementById('inProjectName').value.trim();
+    const bTitle = document.getElementById('inBudgetTitle');
+    if (bTitle && (!bTitle.value || bTitle.dataset.autofilled === "true")) {
+        if (pName) {
+            bTitle.value = pName + " कार्यक्रम";
+            bTitle.dataset.autofilled = "true";
+        } else {
+            bTitle.value = "";
+            bTitle.dataset.autofilled = "false";
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════
+// ── WARD 1 APPROVED PROJECTS PRESET MANAGEMENT (48 PLANS) ──
+// ════════════════════════════════════════════════════════════
+let currentSectorFilter = 'ALL';
+
+function initApprovedPlansUI() {
+    if (typeof WARD1_APPROVED_PROJECTS === 'undefined' || !Array.isArray(WARD1_APPROVED_PROJECTS)) {
+        return;
+    }
+    populateApprovedPlansDropdown();
+    populateProjectDatalist();
+}
+
+function populateApprovedPlansDropdown(filterQuery = '', sectorFilter = currentSectorFilter) {
+    const sel = document.getElementById('selectApprovedPlan');
+    if (!sel || typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
+
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="">-- स्वीकृत योजना छान्नुहोस् (नाम र बजेट स्वतः भरिनेछ) --</option>';
+
+    let list = WARD1_APPROVED_PROJECTS;
+    if (sectorFilter && sectorFilter !== 'ALL') {
+        list = list.filter(p => p.sector === sectorFilter);
+    }
+    if (filterQuery && filterQuery.trim()) {
+        const q = filterQuery.trim().toLowerCase();
+        list = list.filter(p => 
+            p.name.toLowerCase().includes(q) || 
+            p.sector.toLowerCase().includes(q) ||
+            p.budgetNep.includes(q) ||
+            String(p.budget).includes(q)
+        );
+    }
+
+    // Group by sector
+    const sectors = [...new Set(list.map(p => p.sector))];
+    sectors.forEach(sec => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = sec;
+        const secItems = list.filter(p => p.sector === sec);
+        secItems.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `[रु. ${p.budgetNep}] ${p.name}`;
+            if (p.id === currentVal) opt.selected = true;
+            optgroup.appendChild(opt);
+        });
+        sel.appendChild(optgroup);
+    });
+}
+
+function populateProjectDatalist() {
+    const dl = document.getElementById('listApprovedProjectNames');
+    if (!dl || typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
+    dl.innerHTML = '';
+    WARD1_APPROVED_PROJECTS.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.label = `[रु. ${p.budgetNep}] ${p.sector}`;
+        dl.appendChild(opt);
+    });
+}
+
+function filterPlansBySector(sector, btn) {
+    currentSectorFilter = sector;
+    document.querySelectorAll('.sector-chip').forEach(c => c.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    
+    const searchVal = document.getElementById('inPlanQuickSearch') ? document.getElementById('inPlanQuickSearch').value : '';
+    populateApprovedPlansDropdown(searchVal, sector);
+}
+
+function onPlanSearchInput(val) {
+    const btnClear = document.getElementById('btnClearPlanSearch');
+    if (btnClear) btnClear.style.display = val ? 'inline-block' : 'none';
+    populateApprovedPlansDropdown(val, currentSectorFilter);
+}
+
+function clearPlanSearch() {
+    const inp = document.getElementById('inPlanQuickSearch');
+    if (inp) inp.value = '';
+    const btnClear = document.getElementById('btnClearPlanSearch');
+    if (btnClear) btnClear.style.display = 'none';
+    populateApprovedPlansDropdown('', currentSectorFilter);
+}
+
+function applySelectedPlan(planId) {
+    if (!planId || typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
+    const plan = WARD1_APPROVED_PROJECTS.find(p => p.id === planId);
+    if (!plan) return;
+
+    // 1. Fill Project Details
+    document.getElementById('inProjectName').value = plan.name;
+    document.getElementById('inProjectArea').value = plan.sector;
+
+    // 2. Fill Budget Details
+    const formattedGrant = toNepaliDigit(plan.budget.toLocaleString('en-IN')) + '/-';
+    document.getElementById('inGrantAmt').value = formattedGrant;
+
+    // 3. Sync Budget Title
+    const bTitle = document.getElementById('inBudgetTitle');
+    if (bTitle) {
+        bTitle.value = plan.name + ' कार्यक्रम';
+        bTitle.dataset.autofilled = 'true';
+    }
+
+    // 4. Auto-calculate total cost
+    calcTotalCost();
+
+    // 5. Update Selected Plan Badge
+    const badge = document.getElementById('selectedPlanBadge');
+    const badgeText = document.getElementById('selectedPlanText');
+    if (badge && badgeText) {
+        badgeText.innerHTML = `✅ <strong>${plan.name}</strong> • बजेट: <strong>रु. ${plan.budgetNep}/-</strong> (${plan.sector})`;
+        badge.style.display = 'flex';
+    }
+
+    // 6. Keep dropdown synced
+    const sel = document.getElementById('selectApprovedPlan');
+    if (sel) sel.value = plan.id;
+
+    // 7. Update Live Document Preview
+    updateDoc();
+}
+
+function onProjectNameInput(val) {
+    if (!val || typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
+    const trimmed = val.trim();
+    const matched = WARD1_APPROVED_PROJECTS.find(p => p.name === trimmed);
+    if (matched) {
+        document.getElementById('inProjectArea').value = matched.sector;
+        document.getElementById('inGrantAmt').value = toNepaliDigit(matched.budget.toLocaleString('en-IN')) + '/-';
+        calcTotalCost();
+
+        const badge = document.getElementById('selectedPlanBadge');
+        const badgeText = document.getElementById('selectedPlanText');
+        if (badge && badgeText) {
+            badgeText.innerHTML = `✅ <strong>${matched.name}</strong> • बजेट: <strong>रु. ${matched.budgetNep}/-</strong> (${matched.sector})`;
+            badge.style.display = 'flex';
+        }
+        const sel = document.getElementById('selectApprovedPlan');
+        if (sel) sel.value = matched.id;
+    }
+}
+
+function clearSelectedPlan() {
+    const sel = document.getElementById('selectApprovedPlan');
+    if (sel) sel.value = '';
+    const badge = document.getElementById('selectedPlanBadge');
+    if (badge) badge.style.display = 'none';
+    
+    document.getElementById('inProjectName').value = '';
+    document.getElementById('inProjectArea').value = '';
+    document.getElementById('inGrantAmt').value = '';
+    const bTitle = document.getElementById('inBudgetTitle');
+    if (bTitle) {
+        bTitle.value = '';
+        bTitle.dataset.autofilled = 'false';
+    }
+    calcTotalCost();
+    updateDoc();
+}
+
+function togglePlanTableModal(show) {
+    const m = document.getElementById('planTableModal');
+    if (m) m.style.display = show ? 'flex' : 'none';
+    if (show) {
+        const searchInput = document.getElementById('modalPlanSearchField');
+        if (searchInput) searchInput.value = '';
+        renderModalPlansTable('');
+    }
+}
+
+function renderModalPlansTable(search = '') {
+    const tbody = document.getElementById('modalPlanTableBody');
+    if (!tbody || typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
+    tbody.innerHTML = '';
+
+    const q = (search || '').trim().toLowerCase();
+    const list = WARD1_APPROVED_PROJECTS.filter(p => 
+        !q || 
+        p.name.toLowerCase().includes(q) || 
+        p.sector.toLowerCase().includes(q) ||
+        p.budgetNep.includes(q) ||
+        String(p.budget).includes(q)
+    );
+
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px; color:#a0aec0;">कुनै योजना भेटिएन।</td></tr>';
+        return;
+    }
+
+    list.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onmouseover = () => tr.style.backgroundColor = '#f0fff4';
+        tr.onmouseout = () => tr.style.backgroundColor = '';
+        tr.innerHTML = `
+            <td style="text-align: center; font-weight: bold; color: #4a5568;">${toNepaliDigit(idx + 1)}</td>
+            <td style="font-size: 0.85rem; color: #2b6cb0; font-weight: 600;">${p.sector}</td>
+            <td style="font-weight: 600; color: #1a202c;">${p.name}</td>
+            <td style="text-align: right; font-weight: 700; color: #276749; white-space: nowrap;">रु. ${p.budgetNep}/-</td>
+            <td style="text-align: center;">
+                <button type="button" style="background: #2f855a; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;"
+                    onclick="applySelectedPlan('${p.id}'); togglePlanTableModal(false);">
+                    👉 छान्नुहोस्
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 // ── Live Preview Updater ──────────────────────────────
@@ -682,6 +911,27 @@ async function loadRecordToForm(id) {
     adjustSignaturePosition(margin);
 
     updateDoc();
+
+    // Sync Preset Plan selection badge if matches
+    if (typeof WARD1_APPROVED_PROJECTS !== 'undefined') {
+        const matched = WARD1_APPROVED_PROJECTS.find(p => p.name === (rec.projectName || '').trim());
+        if (matched) {
+            const sel = document.getElementById('selectApprovedPlan');
+            if (sel) sel.value = matched.id;
+            const badge = document.getElementById('selectedPlanBadge');
+            const badgeText = document.getElementById('selectedPlanText');
+            if (badge && badgeText) {
+                badgeText.innerHTML = `✅ <strong>${matched.name}</strong> • बजेट: <strong>रु. ${matched.budgetNep}/-</strong> (${matched.sector})`;
+                badge.style.display = 'flex';
+            }
+        } else {
+            const badge = document.getElementById('selectedPlanBadge');
+            if (badge) badge.style.display = 'none';
+            const sel = document.getElementById('selectApprovedPlan');
+            if (sel) sel.value = '';
+        }
+    }
+
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'inline-block';
     toggleModal(false);
@@ -735,6 +985,7 @@ window.onload = function () {
     }
     adjustTippaniFontSize(savedFontSize);
 
+    initApprovedPlansUI();
     updateBankRadioVisuals();
     syncBankRadioFromValue(document.getElementById('inBankName').value.trim());
 

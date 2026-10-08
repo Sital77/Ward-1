@@ -174,6 +174,49 @@
             flex-shrink: 0;
         }
 
+        /* ── Preset Ward Plan Selector Card & Chips ── */
+        .plan-sector-chips {
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .plan-sector-chips::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .plan-sector-chips::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .sector-chip {
+            padding: 4px 9px;
+            background: #ffffff;
+            border: 1px solid #cbd5e0;
+            border-radius: 14px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #4a5568;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .sector-chip:hover {
+            background: #e2e8f0;
+            color: #1a202c;
+        }
+
+        .sector-chip.active {
+            background: #2f855a;
+            border-color: #276749;
+            color: #ffffff;
+            box-shadow: 0 1px 4px rgba(47, 133, 90, 0.3);
+        }
+
         .letterhead-container .email-t,
         .email-t {
             font-family: Arial, Helvetica, sans-serif !important;
@@ -432,13 +475,59 @@
             </div>
         </div>
 
+        <!-- ══ 1.5. RETRIEVE APPROVED WARD PLAN & BUDGET (PRESET 48 PROJECTS) ══ -->
+        <div class="section-card preset-plan-card" style="background: #f0fff4; border: 1.5px solid #48bb78; border-radius: 10px; padding: 13px; margin-bottom: 14px;">
+            <div class="section-label" style="color: #22543d; font-weight: 800; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span>📋 वडा स्तरीय योजना तथा बजेट छान्नुहोस् (४८ योजना)</span>
+                <button type="button" onclick="togglePlanTableModal(true)" style="background: #2f855a; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                    📑 पूरै तालिका हेर्नुहोस्
+                </button>
+            </div>
+
+            <!-- Sector Filter Buttons (Chips) -->
+            <div class="plan-sector-chips">
+                <button type="button" class="sector-chip active" onclick="filterPlansBySector('ALL', this)">सबै (४८)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('सामाजिक विकास तर्फ', this)">सामाजिक (१०)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('भौतिक पूर्वाधार तर्फ', this)">भौतिक (११)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('आर्थिक विकास तर्फ', this)">आर्थिक (५)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('सुशासन तथा क्षमता विकास तर्फ', this)">सुशासन (८)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('खेलकुद तर्फ', this)">खेलकुद (४)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('भौतिक मर्मत तथा सम्भार तर्फ', this)">मर्मत (२)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('सडक बत्ती तर्फ', this)">सडक बत्ती (२)</button>
+                <button type="button" class="sector-chip" onclick="filterPlansBySector('वन तथा वातावरण तर्फ', this)">वातावरण (३)</button>
+            </div>
+
+            <!-- Quick Search Input -->
+            <div style="position: relative; margin-bottom: 8px;">
+                <input type="text" id="inPlanQuickSearch" placeholder="🔍 योजनाको नाम वा बजेट खोज्नुहोस् (उदा: स्वास्थ्य बीमा, सडक, फुटसल)..." 
+                    oninput="onPlanSearchInput(this.value)"
+                    style="width: 100%; padding: 8px 30px 8px 32px; border: 1.5px solid #9ae6b4; border-radius: 8px; font-size: 0.88rem; background: #fff; box-sizing: border-box;">
+                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; color: #48bb78;">🔍</span>
+                <button type="button" id="btnClearPlanSearch" onclick="clearPlanSearch()" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: none; background: transparent; cursor: pointer; color: #a0aec0; font-size: 1rem;">✖</button>
+            </div>
+
+            <!-- Grouped Dropdown for Selection -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <select id="selectApprovedPlan" onchange="applySelectedPlan(this.value)" style="width: 100%; padding: 9px 10px; border: 1.5px solid #48bb78; border-radius: 8px; font-size: 0.88rem; background: #fff; cursor: pointer; color: #2d3748; font-weight: 500;">
+                    <option value="">-- स्वीकृत योजना छान्नुहोस् (नाम र बजेट स्वतः भरिनेछ) --</option>
+                </select>
+            </div>
+
+            <!-- Selected Plan Notification Badge -->
+            <div id="selectedPlanBadge" style="display: none; margin-top: 8px; padding: 8px 12px; background: #e6fffa; border: 1px solid #81e6d9; border-radius: 8px; font-size: 0.83rem; color: #234e52; justify-content: space-between; align-items: center;">
+                <div id="selectedPlanText" style="font-weight: 600;"></div>
+                <button type="button" onclick="clearSelectedPlan()" style="background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 0.8rem; font-weight: 700; padding: 2px 6px;">❌ हटाउनुस्</button>
+            </div>
+        </div>
+
         <!-- ══ 2. PROJECT & AGREEMENT DETAILS ══ -->
         <div class="section-card body-section">
             <div class="section-label">🏗️ योजना तथा सम्झौता विवरण</div>
 
             <div class="form-group">
                 <label>योजना / कार्यक्रमको नाम:</label>
-                <input type="text" id="inProjectName" placeholder="उदा: स्वास्थ्य बीमा साझेदारी ८०/२०" oninput="syncBudgetTitle(); updateDoc()">
+                <input type="text" id="inProjectName" list="listApprovedProjectNames" placeholder="उदा: स्वास्थ्य बीमा साझेदारी (८०/२०%)" oninput="onProjectNameInput(this.value); syncBudgetTitle(); updateDoc()">
+                <datalist id="listApprovedProjectNames"></datalist>
             </div>
 
             <div class="form-group">
@@ -661,6 +750,37 @@
         </div>
     </div>
 
+    <!-- ══════════════ APPROVED PLANS BUDGET MODAL ══════════════ -->
+    <div class="modal-overlay" id="planTableModal" style="display:none;">
+        <div class="modal-content" style="max-width: 950px; max-height: 88vh; display: flex; flex-direction: column;">
+            <button class="modal-close" onclick="togglePlanTableModal(false)">×</button>
+            <h3 class="modal-title" style="color: #22543d; margin-bottom: 4px;">
+                📑 गौरादह नगरपालिका वडा नं. १ - वडा स्तरीय योजना तथा बजेट विवरण (आ.व. २०८३/०८४)
+            </h3>
+            <p style="font-size: 0.82rem; color: #718096; margin-top: 0; margin-bottom: 10px;">
+                कुल ४८ योजनाहरू • कुल बजेट रु. ६,९४५,९३९/- • कुनै पनि योजनामा क्लिक गरी सिधै टिप्पणी-आदेश फारममा भर्नुहोस्
+            </p>
+            <div class="search-container" style="margin-bottom: 10px;">
+                <input type="text" id="modalPlanSearchField" placeholder="🔍 योजनाको नाम, क्षेत्र वा बजेट रकमबाट खोज्नुहोस्..."
+                    oninput="renderModalPlansTable(this.value)">
+            </div>
+            <div style="flex: 1; overflow-y: auto; max-height: 60vh; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table class="db-table" style="margin: 0; width: 100%;">
+                    <thead style="position: sticky; top: 0; background: #2f855a; color: #fff; z-index: 2;">
+                        <tr>
+                            <th style="width:7%; color: #fff;">क्र.सं.</th>
+                            <th style="width:25%; color: #fff;">योजनाको क्षेत्र / उपशीर्षक</th>
+                            <th style="width:43%; color: #fff;">योजना / कार्यक्रमको नाम</th>
+                            <th style="width:15%; color: #fff; text-align: right;">बजेट (रु.)</th>
+                            <th style="width:10%; color: #fff; text-align: center;">कार्य</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalPlanTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- ══════════════ PREVIEW PANEL (A4 Letter) ══════════════ -->
     <div class="preview-panel">
         <div class="a4-page">
@@ -795,6 +915,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="font-settings.js"></script>
+    <script src="ward1-yojana-data.js"></script>
     <script src="script-yojana-tippani.js"></script>
 </body>
 
