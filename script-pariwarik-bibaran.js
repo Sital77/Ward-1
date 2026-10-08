@@ -325,8 +325,8 @@ window.updateDoc = function () {
                 <tr>
                     <th style="width: 8%;">क्र.स.</th>
                     <th style="width: 42%;">नाम थर</th>
-                    <th style="width: 30%;">ना.प्र.नं./ज.द.नं.</th>
-                    <th style="width: 20%;">नाता</th>
+                    <th style="width: 32%;">ना.प्र.नं./ज.द.नं.</th>
+                    <th style="width: 18%;">नाता</th>
                 </tr>
             `;
         }

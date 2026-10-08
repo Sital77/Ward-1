@@ -7,7 +7,62 @@
     <title>घर बाटो प्रमाणित प्रणाली - गौरादह नगरपालिका</title>
     <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
     <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=4.0">
+    <style>
+        .details-table {
+            width: calc(100% - 6px) !important;
+            max-width: calc(100% - 6px) !important;
+            margin: 8px auto !important;
+            table-layout: fixed !important;
+            border-collapse: collapse !important;
+            border: 1.5px solid #000 !important;
+            box-sizing: border-box !important;
+        }
+
+        .details-table th,
+        .details-table td {
+            border: 1px solid #000 !important;
+            box-sizing: border-box !important;
+        }
+
+        .details-table th:first-child,
+        .details-table td:first-child {
+            border-left: 1.5px solid #000 !important;
+        }
+
+        .details-table th:last-child,
+        .details-table td:last-child {
+            border-right: 1.5px solid #000 !important;
+        }
+
+        @media print {
+            .a4-page {
+                padding: 0 4px !important;
+                box-sizing: border-box !important;
+            }
+
+            .details-table {
+                width: calc(100% - 6px) !important;
+                max-width: calc(100% - 6px) !important;
+                margin: 8px auto !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                border: 1.5px solid #000 !important;
+                box-sizing: border-box !important;
+                page-break-inside: avoid !important;
+            }
+
+            .details-table th:first-child,
+            .details-table td:first-child {
+                border-left: 1.5px solid #000 !important;
+            }
+
+            .details-table th:last-child,
+            .details-table td:last-child {
+                border-right: 1.5px solid #000 !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -286,8 +341,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="font-settings.js?v=2.5"></script>
-    <script src="script.js?v=2.5"></script>
+    <script src="font-settings.js?v=4.0"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 
 </html>

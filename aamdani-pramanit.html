@@ -7,7 +7,7 @@
     <title>आम्दानी प्रमाणित सिफारिस - गौरादह नगरपालिका</title>
     <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
     <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=4.0">
     <style>
         .table-builder {
             margin-top: 15px;
@@ -102,34 +102,128 @@
         }
 
         .print-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+            width: calc(100% - 6px) !important;
+            max-width: calc(100% - 6px) !important;
+            margin: 8px auto 12px auto !important;
+            table-layout: fixed !important;
+            border-collapse: collapse !important;
+            border: 1.5px solid #000 !important;
+            box-sizing: border-box !important;
         }
 
         .print-table th,
         .print-table td {
-            border: 1px solid #000;
-            padding: 6px 8px;
-            text-align: center;
-            font-size: 13.5pt;
+            border: 1px solid #000 !important;
+            padding: 6px 8px !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 12.5pt !important;
+            line-height: 1.35 !important;
+            box-sizing: border-box !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
         }
 
         .print-table th {
-            font-weight: bold;
+            font-weight: bold !important;
+            background-color: #f7fafc;
+        }
+
+        .print-table th:first-child,
+        .print-table td:first-child {
+            border-left: 1.5px solid #000 !important;
+        }
+
+        .print-table th:last-child,
+        .print-table td:last-child {
+            border-right: 1.5px solid #000 !important;
+        }
+
+        .print-table td:nth-child(2) {
+            text-align: left !important;
+            padding-left: 12px !important;
+        }
+
+        .print-table td:nth-child(3) {
+            text-align: right !important;
+            padding-right: 12px !important;
         }
 
         @media print {
-            .input-panel {
+            @page {
+                size: A4 portrait;
+                margin: 0.3in 0.5in 0.25in 0.5in;
+            }
+
+            html, body {
+                width: 100% !important;
+                height: auto !important;
+                background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .input-panel,
+            .modal-overlay {
                 display: none !important;
             }
 
             .preview-panel {
+                margin-left: 0 !important;
+                padding: 0 !important;
                 width: 100% !important;
+                background: #fff !important;
+                display: block !important;
+                overflow: visible !important;
             }
 
-            .modal-overlay {
-                display: none !important;
+            .a4-page {
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: unset !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 0 4px !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+                page-break-inside: avoid !important;
+            }
+
+            .print-table {
+                width: calc(100% - 6px) !important;
+                max-width: calc(100% - 6px) !important;
+                margin: 8px auto 12px auto !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                border: 1.5px solid #000 !important;
+                box-sizing: border-box !important;
+                page-break-inside: avoid !important;
+            }
+
+            .print-table th,
+            .print-table td {
+                padding: 5px 6px !important;
+                font-size: 11.5pt !important;
+                line-height: 1.3 !important;
+                border: 1px solid #000 !important;
+                box-sizing: border-box !important;
+            }
+
+            .print-table th:first-child,
+            .print-table td:first-child {
+                border-left: 1.5px solid #000 !important;
+            }
+
+            .print-table th:last-child,
+            .print-table td:last-child {
+                border-right: 1.5px solid #000 !important;
+            }
+
+            .doc-footer {
+                margin-top: 25px !important;
+                page-break-inside: avoid !important;
             }
         }
     </style>
@@ -346,27 +440,27 @@
 
             <div class="letter-body">
                 उपरोक्त सम्बन्धमा <span id="lblDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblWadaBody" class="fill-space" style="min-width:20px;">१</span> का स्थायी बसोबास गर्ने <span id="lblOwnerName" class="fill-space" style="font-weight: bold; min-width:180px;">.......</span> <span id="lblCitBlock" style="display:none;">(ना.प्र.नं: <span id="lblCitNo" class="fill-space" style="min-width:100px;"></span>, जारी मिति: <span id="lblCitDate" class="fill-space" style="min-width:80px;"></span>) </span>ले यस वडा कार्यालयमा दिनुभएको निवेदन माग अनुसार निज निवेदकको नाममा <span id="globalLandAddr"><span id="lblLandDist" class="fill-space" style="min-width:50px;">झापा</span> जिल्ला <span id="lblLandPalika" class="fill-space" style="min-width:120px;">गौरादह नगरपालिका</span> वडा नं. <span id="lblLandWada" class="fill-space" style="min-width:20px;">१</span> मा दर्ता कायम रहेको </span><span id="lblLandDetails">सिट नं. ..... कि.नं. ..... को ज.वि. .....</span> क्षेत्रफल भएको जग्गामा तपशिल अनुसार <span id="lblIncomeType" class="fill-space" style="min-width:150px;">कृषि तथा पशुपालन</span> गरी वार्षिक रू.<span id="lblTotalAmt" class="fill-space" style="min-width:100px; font-weight:bold;">...........</span>।- (अक्षरेपी <span id="lblTotalWords" class="fill-space" style="min-width:200px;">..........................</span> मात्र) आम्दानी गर्ने गरेको व्यहोरा प्रमाणित गरिन्छ ।
-                <br><br>
-                <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 10px;">तपसिल:</div>
-                <table class="print-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 15%;">क्रम</th>
-                            <th style="width: 55%;">व्यवसाय</th>
-                            <th style="width: 30%;">बार्षिक आम्दानी (रू)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="outputTableBody">
-                        <!-- Dynamic rows injected here -->
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="2" style="text-align: right; font-weight: bold; padding-right: 15px;">जम्मा</td>
-                            <td style="font-weight: bold;">रू. <span id="lblTotalTableAmount">/-</span></td>
-                        </tr>
-                    </tfoot>
-                </table>
             </div>
+
+            <div style="text-align: center; font-weight: bold; font-size: 13pt; margin: 10px 0 8px 0;"><u>तपसिल:</u></div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width: 12%;">क्रम</th>
+                        <th style="width: 58%;">व्यवसाय</th>
+                        <th style="width: 30%;">वार्षिक आम्दानी (रू)</th>
+                    </tr>
+                </thead>
+                <tbody id="outputTableBody">
+                    <!-- Dynamic rows injected here -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" style="text-align: right; font-weight: bold; padding-right: 15px;">जम्मा</td>
+                        <td style="font-weight: bold; text-align: right; padding-right: 12px;">रू. <span id="lblTotalTableAmount">/-</span></td>
+                    </tr>
+                </tfoot>
+            </table>
 
             <div class="doc-footer" id="docFooterSection" style="margin-top: 40px; display: flex; justify-content: flex-end;">
                 <div class="signature-block" style="text-align: center;">
@@ -380,8 +474,8 @@
 
     <!-- Main Logic & Font Settings Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="font-settings.js?v=2.6"></script>
-    <script src="script-aamdani-pramanit.js?v=2.6"></script>
+    <script src="font-settings.js?v=4.0"></script>
+    <script src="script-aamdani-pramanit.js?v=4.0"></script>
 </body>
 
 </html>

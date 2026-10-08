@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link rel="preload" href="logo-file-sital.pdf" as="fetch">
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -165,6 +166,11 @@
             transform: translateX(4px);
         }
 
+        .quick-menu-item:active {
+            transform: scale(0.97);
+            background: #e2e8f0;
+        }
+
         .q-icon {
             font-size: 1.35rem;
             width: 36px;
@@ -216,6 +222,10 @@
 
         body.dark-mode .quick-menu-item:hover {
             background: #2d3748;
+        }
+
+        body.dark-mode .quick-menu-item:active {
+            background: #374151;
         }
 
         body.dark-mode .q-icon {
@@ -631,6 +641,90 @@
         .input-field:focus {
             border-color: #3182ce;
             outline: none;
+        }
+
+        .modal-title,
+        .input-group label {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .input-clear-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-clear-wrapper .input-field {
+            padding-right: 42px;
+        }
+
+        .btn-input-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #e2e8f0;
+            color: #718096;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+            z-index: 2;
+        }
+
+        .btn-input-clear:hover {
+            background: #cbd5e1;
+            color: #e53e3e;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        body.dark-mode .btn-input-clear {
+            background: #4a5568;
+            color: #cbd5e0;
+        }
+
+        body.dark-mode .btn-input-clear:hover {
+            background: #718096;
+            color: #fc8181;
+        }
+
+        .portal-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(30px);
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .portal-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         .btn-action {
@@ -1097,7 +1191,7 @@
                             <small>१०० दिने सुरक्षित भण्डार</small>
                         </div>
                     </a>
-                    <button onclick="printLogoFile()" class="quick-menu-item">
+                    <button id="quickPrintLogoBtn" onclick="printLogoFile()" class="quick-menu-item" title="लेटरहेड लोगो फाइल तत्काल प्रिन्ट गर्नुहोस्">
                         <span class="q-icon">🖨️</span>
                         <div class="q-text">
                             <strong>लोगो छाप्नुस</strong>
@@ -1278,11 +1372,17 @@
             <h2 class="modal-title" style="color: #3182ce; border-bottom-color:#bee3f8;">🔍 जग्गा वर्गीकरण खोज</h2>
             <div class="input-group">
                 <label>नक्सा सिट नं. (वैकल्पिक):</label>
-                <input type="text" id="mapSheetInput" class="input-field" placeholder="जस्तै: 1790138">
+                <div class="input-clear-wrapper">
+                    <input type="text" id="mapSheetInput" class="input-field" placeholder="जस्तै: 1790138" oninput="toggleInputClear('mapSheetInput')" onkeydown="if(event.key==='Enter') findClassification()">
+                    <button type="button" id="clearMapSheetBtn" class="btn-input-clear" onclick="clearSearchInput('mapSheetInput')" title="हटाउनुहोस्" style="display: none;">×</button>
+                </div>
             </div>
             <div class="input-group">
                 <label>कित्ता नम्बर:</label>
-                <input type="text" id="kittaInput" class="input-field" placeholder="जस्तै: 1586">
+                <div class="input-clear-wrapper">
+                    <input type="text" id="kittaInput" class="input-field" placeholder="जस्तै: 1586" oninput="toggleInputClear('kittaInput')" onkeydown="if(event.key==='Enter') findClassification()">
+                    <button type="button" id="clearKittaBtn" class="btn-input-clear" onclick="clearSearchInput('kittaInput')" title="हटाउनुहोस्" style="display: none;">×</button>
+                </div>
             </div>
             <button class="btn-action" style="--theme-color: #3182ce;"
                 onclick="findClassification()">खोज्नुहोस्</button>
@@ -1344,9 +1444,74 @@
         src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="nissa-data.js"></script>
     <script>
-        function openModal(id) { const modal = document.getElementById(id); modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 10); }
-        function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300); }
-        window.onclick = function (e) { if (e.target.classList.contains('modal-overlay') && e.target.id !== 'modal-sif-login') { e.target.classList.remove('active'); setTimeout(() => e.target.style.display = 'none', 300); } }
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            if (id === 'modal-bargikaran') {
+                setTimeout(() => {
+                    const kInp = document.getElementById('kittaInput');
+                    if (kInp) kInp.focus();
+                    toggleInputClear('kittaInput');
+                    toggleInputClear('mapSheetInput');
+                }, 100);
+            }
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.remove('active');
+            setTimeout(() => {
+                if (!modal.classList.contains('active')) modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                const activeModals = document.querySelectorAll('.modal-overlay.active');
+                activeModals.forEach(m => {
+                    if (m.id !== 'modal-sif-login') closeModal(m.id);
+                });
+            }
+        });
+
+        // Safe backdrop click handling (PREVENTS accidental close on dragging/selecting text inside inputs)
+        let overlayMouseDownTarget = null;
+        document.addEventListener('mousedown', function (e) {
+            overlayMouseDownTarget = e.target.classList.contains('modal-overlay') ? e.target : null;
+        });
+
+        document.addEventListener('mouseup', function (e) {
+            if (overlayMouseDownTarget && e.target === overlayMouseDownTarget && e.target.id !== 'modal-sif-login') {
+                closeModal(e.target.id);
+            }
+            overlayMouseDownTarget = null;
+        });
+
+        // Quick Clear helper for search inputs
+        function toggleInputClear(id) {
+            const input = document.getElementById(id);
+            const btn = id === 'kittaInput' ? document.getElementById('clearKittaBtn') : document.getElementById('clearMapSheetBtn');
+            if (btn && input) {
+                btn.style.display = input.value.trim() ? 'inline-flex' : 'none';
+            }
+        }
+
+        function clearSearchInput(id) {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = '';
+                input.focus();
+                toggleInputClear(id);
+                const resultDiv = document.getElementById("classificationResult");
+                if (resultDiv && !document.getElementById("kittaInput").value && !document.getElementById("mapSheetInput").value) {
+                    resultDiv.innerHTML = "नतिजा यहाँ देखिनेछ...";
+                }
+            }
+        }
 
         // ===== ⚡ QUICK ACTIONS SLIDING DROPDOWN =====
         function toggleQuickMenu(event) {
@@ -1598,7 +1763,52 @@
 
         let dataCache = null;
         async function fetchLandData() { if (dataCache) return dataCache; try { const response = await fetch('./convertcsv.json'); if (!response.ok) throw new Error('Data file not found.'); dataCache = await response.json(); return dataCache; } catch (error) { throw error; } }
-        async function findClassification() { const kittaInput = document.getElementById("kittaInput").value.trim(); const mapSheetInput = document.getElementById("mapSheetInput").value.trim(); const resultDiv = document.getElementById("classificationResult"); if (!kittaInput && !mapSheetInput) { resultDiv.innerHTML = `<span style="color:#e53e3e;">⚠️ कृपया कित्ता वा नक्सा सिट नं. लेख्नुहोस्।</span>`; return; } resultDiv.innerHTML = `<span style="color:#3182ce;">🌀 खोजी हुँदैछ...</span>`; try { const data = await fetchLandData(); let results = data.filter(item => { const itemKitta = String(item.H || "").trim(); const itemMapSheet = String(item.G || "").trim(); if (kittaInput && mapSheetInput) return itemKitta === kittaInput && itemMapSheet === mapSheetInput; else if (kittaInput) return itemKitta === kittaInput; else if (mapSheetInput) return itemMapSheet === mapSheetInput; return false; }); if (results.length > 0) { let html = `<div style="color:#3182ce; font-weight:700; margin-bottom:8px;">${results.length} नतिजा भेटियो:</div><ul style="padding-left: 20px;">`; results.forEach(res => { html += `<li style="margin-bottom:8px;"><strong>कित्ता नं:</strong> ${res.H} | <strong>सिट नं:</strong> ${res.G} | <strong>साविक:</strong> ${res.F}<br><span style="color:#e51a23; font-weight:700;">👉 भु-उपयोग: ${res.I}</span></li>`; }); html += "</ul>"; resultDiv.innerHTML = html; } else { resultDiv.innerHTML = `<span style="color:#e53e3e;">❌ विवरण भेटिएन।</span>`; } } catch (error) { resultDiv.innerHTML = `<span style="color:#e53e3e;">🚫 डाटा लोड गर्न त्रुटि भयो (convertcsv.json छैन)।</span>`; } }
+        async function findClassification() {
+            function toEngDigits(str) {
+                if (!str) return '';
+                const nepDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+                let s = String(str);
+                for (let i = 0; i < 10; i++) {
+                    s = s.split(nepDigits[i]).join(String(i));
+                }
+                return s.trim();
+            }
+
+            const rawKitta = document.getElementById("kittaInput").value.trim();
+            const rawMapSheet = document.getElementById("mapSheetInput").value.trim();
+            const kittaInput = toEngDigits(rawKitta);
+            const mapSheetInput = toEngDigits(rawMapSheet);
+            const resultDiv = document.getElementById("classificationResult");
+
+            if (!kittaInput && !mapSheetInput) {
+                resultDiv.innerHTML = `<span style="color:#e53e3e;">⚠️ कृपया कित्ता वा नक्सा सिट नं. लेख्नुहोस्।</span>`;
+                return;
+            }
+            resultDiv.innerHTML = `<span style="color:#3182ce;">🌀 खोजी हुँदैछ...</span>`;
+            try {
+                const data = await fetchLandData();
+                let results = data.filter(item => {
+                    const itemKitta = String(item.H || "").trim();
+                    const itemMapSheet = String(item.G || "").trim();
+                    if (kittaInput && mapSheetInput) return itemKitta === kittaInput && itemMapSheet === mapSheetInput;
+                    else if (kittaInput) return itemKitta === kittaInput;
+                    else if (mapSheetInput) return itemMapSheet === mapSheetInput;
+                    return false;
+                });
+                if (results.length > 0) {
+                    let html = `<div style="color:#3182ce; font-weight:700; margin-bottom:8px;">${results.length} नतिजा भेटियो:</div><ul style="padding-left: 20px;">`;
+                    results.forEach(res => {
+                        html += `<li style="margin-bottom:8px;"><strong>कित्ता नं:</strong> ${res.H} | <strong>सिट नं:</strong> ${res.G} | <strong>साविक:</strong> ${res.F}<br><span style="color:#e51a23; font-weight:700;">👉 भु-उपयोग: ${res.I}</span></li>`;
+                    });
+                    html += "</ul>";
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<span style="color:#e53e3e;">❌ कित्ता नं. ${rawKitta || ''} को विवरण भेटिएन।</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color:#e53e3e;">🚫 डाटा लोड गर्न त्रुटि भयो (convertcsv.json छैन)।</span>`;
+            }
+        }
         // ===== निस्सा खोजी (NISSA SEARCH SYSTEM) =====
         let nissaData = { BS: [], BD: [], AB: [] };
         let nissaLoaded = false;
@@ -2153,11 +2363,13 @@
             initPortalNepaliDate();
             updateDashboardWardDisplay();
             fetchLandData().catch(e => { /* logged */ });
+            preloadLogoPdf();
         });
 
-        // Logo PDF print function
-        function printLogoFile() {
-            const pdfUrl = 'logo-file-sital.pdf';
+        // Fast & Preloaded Logo PDF print system
+        let isLogoFileReady = false;
+
+        function preloadLogoPdf() {
             let iframe = document.getElementById('logoPrintIframe');
             if (!iframe) {
                 iframe = document.createElement('iframe');
@@ -2169,26 +2381,77 @@
                 iframe.style.height = '0';
                 iframe.style.border = 'none';
                 iframe.style.visibility = 'hidden';
-                iframe.src = pdfUrl;
-                document.body.appendChild(iframe);
+                iframe.src = 'logo-file-sital.pdf';
                 iframe.onload = function () {
-                    setTimeout(function () {
-                        try {
-                            iframe.contentWindow.focus();
-                            iframe.contentWindow.print();
-                        } catch (e) {
-                            window.open(pdfUrl, '_blank');
-                        }
-                    }, 600);
+                    isLogoFileReady = true;
                 };
-            } else {
+                document.body.appendChild(iframe);
+            }
+        }
+
+        function printLogoFile() {
+            // 1. Immediately close quick menu dropdown for snappy, instant response
+            const menu = document.getElementById('quickMenuDropdown');
+            const toggleBtn = document.getElementById('quickMenuToggle');
+            if (menu && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+                if (toggleBtn) toggleBtn.classList.remove('active');
+                setTimeout(() => { if (!menu.classList.contains('show')) menu.style.display = 'none'; }, 180);
+            }
+
+            // 2. Instant feedback toast to user
+            showPortalToast('🖨️ लोगो प्रिन्ट फाइल खुल्दैछ...', '🖨️');
+
+            const pdfUrl = 'logo-file-sital.pdf';
+            let iframe = document.getElementById('logoPrintIframe');
+
+            const doPrint = function (targetIframe) {
                 try {
-                    iframe.contentWindow.focus();
-                    iframe.contentWindow.print();
+                    targetIframe.contentWindow.focus();
+                    targetIframe.contentWindow.print();
                 } catch (e) {
                     window.open(pdfUrl, '_blank');
                 }
+            };
+
+            if (iframe && isLogoFileReady) {
+                // Instantly print since PDF was already preloaded in background!
+                doPrint(iframe);
+            } else if (iframe) {
+                // Preload was already triggered, print immediately when ready
+                iframe.onload = function () {
+                    isLogoFileReady = true;
+                    setTimeout(() => doPrint(iframe), 80);
+                };
+            } else {
+                preloadLogoPdf();
+                const newIframe = document.getElementById('logoPrintIframe');
+                if (newIframe) {
+                    newIframe.onload = function () {
+                        isLogoFileReady = true;
+                        setTimeout(() => doPrint(newIframe), 80);
+                    };
+                } else {
+                    window.open(pdfUrl, '_blank');
+                }
             }
+        }
+
+        // Portal-wide lightweight toast notification
+        function showPortalToast(message, icon) {
+            let toast = document.getElementById('portalToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'portalToast';
+                toast.className = 'portal-toast';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<span style="font-size:1.15rem;">${icon || 'ℹ️'}</span> <span>${message}</span>`;
+            toast.classList.add('show');
+            clearTimeout(window._portalToastTimer);
+            window._portalToastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
         }
 
         // Anti-debugging source code protection

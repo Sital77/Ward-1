@@ -452,24 +452,42 @@ select:focus {
 }
 
 .details-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0;
-    font-size: 11pt;
+    width: calc(100% - 6px) !important;
+    max-width: calc(100% - 6px) !important;
+    margin: 8px auto !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    border: 1.5px solid #000 !important;
+    box-sizing: border-box !important;
+    font-size: 10.5pt;
     color: #000;
 }
 
 .details-table th,
 .details-table td {
-    border: 1px solid #000;
-    padding: 6px 4px;
-    text-align: center;
-    vertical-align: middle;
+    border: 1px solid #000 !important;
+    padding: 5px 3px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.3 !important;
+}
+
+.details-table th:first-child,
+.details-table td:first-child {
+    border-left: 1.5px solid #000 !important;
+}
+
+.details-table th:last-child,
+.details-table td:last-child {
+    border-right: 1.5px solid #000 !important;
 }
 
 .details-table th {
     background-color: #f3f4f6;
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
 .landuse-container {
@@ -544,8 +562,16 @@ input[type="range"]::-webkit-slider-thumb:hover {
 /* 🖨️ PRINT FIX */
 @media print {
     @page {
-        size: A4;
-        margin: 0.32in 0.67in 0.12in 0.67in;
+        size: A4 portrait;
+        margin: 0.3in 0.5in 0.25in 0.5in;
+    }
+
+    html, body {
+        width: 100% !important;
+        height: auto !important;
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .input-panel,
@@ -558,14 +584,63 @@ input[type="range"]::-webkit-slider-thumb:hover {
         padding: 0 !important;
         background-color: #ffffff !important;
         display: block !important;
+        width: 100% !important;
+        overflow: visible !important;
     }
 
     .a4-page {
         box-shadow: none !important;
-        padding: 0 !important;
+        padding: 0 4px !important;
+        margin: 0 !important;
         width: 100% !important;
+        max-width: 100% !important;
+        min-height: unset !important;
         height: auto !important;
-        page-break-inside: avoid;
+        max-height: none !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .details-table {
+        width: calc(100% - 6px) !important;
+        max-width: calc(100% - 6px) !important;
+        margin: 8px auto !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        border: 1.5px solid #000 !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+    }
+
+    .details-table th,
+    .details-table td {
+        padding: 4px 2px !important;
+        font-size: 10pt !important;
+        line-height: 1.25 !important;
+        border: 1px solid #000 !important;
+        box-sizing: border-box !important;
+    }
+
+    .details-table th:first-child,
+    .details-table td:first-child {
+        border-left: 1.5px solid #000 !important;
+    }
+
+    .details-table th:last-child,
+    .details-table td:last-child {
+        border-right: 1.5px solid #000 !important;
+    }
+
+    .sig-space {
+        height: 35px !important;
+    }
+
+    .doc-footer {
+        padding-bottom: 0 !important;
+        margin-top: 15px !important;
+        page-break-inside: avoid !important;
     }
 }
 

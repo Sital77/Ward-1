@@ -1107,9 +1107,9 @@
                     --doc-text-color: ${col};
                 }
                 
-                /* Apply Font size, line spacing (1.5) and color to all document body elements EXCEPT letterhead */
+                /* Apply Font size, line spacing (1.5) and color to all document body elements EXCEPT letterhead and tables */
                 .a4-page,
-                .a4-page *:not(.letterhead-container):not(.letterhead-container *):not(.doc-header-wrapper):not(.doc-header-wrapper *):not(.meta-line):not(.meta-line *):not(.lh-right):not(.lh-right *):not(.lh-center):not(.lh-center *):not(.lh-left):not(.lh-left *):not(.header-section):not(.header-section *):not(.doc-header):not(.doc-header *):not(.patra-chalani-row):not(.patra-chalani-row *):not(.qr-code-box):not(.qr-code-box *) {
+                .a4-page *:not(.letterhead-container):not(.letterhead-container *):not(.doc-header-wrapper):not(.doc-header-wrapper *):not(.meta-line):not(.meta-line *):not(.lh-right):not(.lh-right *):not(.lh-center):not(.lh-center *):not(.lh-left):not(.lh-left *):not(.header-section):not(.header-section *):not(.doc-header):not(.doc-header *):not(.patra-chalani-row):not(.patra-chalani-row *):not(.qr-code-box):not(.qr-code-box *):not(.details-table):not(.details-table *):not(.print-table):not(.print-table *):not(.land-table):not(.land-table *):not(.tapasil-table):not(.tapasil-table *):not(.tapasheel-table):not(.tapasheel-table *):not(.db-table):not(.db-table *) {
                     font-size: var(--doc-font-size) !important;
                     color: var(--doc-text-color) !important;
                     line-height: 1.5 !important;
@@ -1120,6 +1120,9 @@
                 .details-table,
                 .details-table td,
                 .details-table th,
+                .print-table,
+                .print-table td,
+                .print-table th,
                 .land-table,
                 .land-table td,
                 .land-table th,
@@ -1153,6 +1156,33 @@
                 .signature-block,
                 .signature-block * {
                     font-style: normal !important;
+                }
+
+                /* Proportional table font scaling so all tables strictly fit A4 page dimensions */
+                .details-table,
+                .details-table * {
+                    font-size: clamp(8.5pt, calc(var(--doc-font-size) * 0.76), 11pt) !important;
+                    line-height: 1.3 !important;
+                    word-break: break-word !important;
+                    overflow-wrap: break-word !important;
+                }
+                .print-table,
+                .print-table * {
+                    font-size: clamp(9pt, calc(var(--doc-font-size) * 0.85), 12.5pt) !important;
+                    line-height: 1.35 !important;
+                    word-break: break-word !important;
+                    overflow-wrap: break-word !important;
+                }
+                .land-table,
+                .land-table *,
+                .tapasil-table,
+                .tapasil-table *,
+                .tapasheel-table,
+                .tapasheel-table * {
+                    font-size: clamp(8.5pt, calc(var(--doc-font-size) * 0.78), 11.5pt) !important;
+                    line-height: 1.3 !important;
+                    word-break: break-word !important;
+                    overflow-wrap: break-word !important;
                 }
 
                 /* Nabalak Parichayapatra table & compact layout scaling */
