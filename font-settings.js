@@ -52,7 +52,8 @@
         'bibaha-pramanit': { collection: 'bibahaRecords', title: 'विवाह प्रमाणित' },
         'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' },
         'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
-        'arko-bibaha-nagareko': { collection: 'arkoBibahaRecords', title: 'अर्को विवाह नगरेको प्रमाणित' },
+        'surakshya-bhatta-sifarish': { collection: 'surakshyaBhattaRecords', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस' },
+        'arko-bibaha-nagareko': { collection: 'surakshyaBhattaRecords', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस' },
         'yojana-bank-sifarish': { collection: 'yojanaBankRecords', title: 'योजनाको बैंक खाता सिफारिस' },
         'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' },
         'aamdani-pramanit': { collection: 'aamdaniPramanitRecords', title: 'आम्दानी प्रमाणित सिफारिस' },
@@ -270,7 +271,7 @@
     else if (path.includes('pariwarik-bibaran.html')) templateId = 'pariwarik-bibaran';
     else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
     else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
-    else if (path.includes('arko-bibaha-nagareko.html')) templateId = 'arko-bibaha-nagareko';
+    else if (path.includes('surakshya-bhatta-sifarish.html') || path.includes('arko-bibaha-nagareko.html')) templateId = 'surakshya-bhatta-sifarish';
     else if (path.includes('yojana-bank-sifarish.html')) templateId = 'yojana-bank-sifarish';
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
     else if (path.includes('nabalak-parichayapatra.html')) templateId = 'nabalak-parichayapatra';
@@ -738,7 +739,7 @@
                 'bibaha-pramanit': 'विवाह प्रमाणित',
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
                 'abhilekh-pramanit': 'अभिलेख प्रमाणित',
-                'arko-bibaha-nagareko': 'अर्को विवाह नगरेको प्रमाणित',
+                'surakshya-bhatta-sifarish': 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस',
                 'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
                 'yojana-samjhauta': 'योजना सम्झौता सिफारिस',
                 'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
@@ -760,7 +761,7 @@
                 'bibaha-pramanit': 'व्यक्तिगत प्रमाणित',
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
-                'arko-bibaha-nagareko': 'व्यक्तिगत प्रमाणित',
+                'surakshya-bhatta-sifarish': 'व्यक्तिगत प्रमाणित',
                 'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
                 'yojana-samjhauta': 'कार्यालय/प्रशासन',
                 'bank-sifarish': 'व्यक्तिगत प्रमाणित',
