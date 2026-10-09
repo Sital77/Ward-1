@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>गौरादह नगरपालिका - एकीकृत डिजिटल पोर्टल</title>
-    <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap"
@@ -1168,7 +1168,7 @@
 
     <div class="mega-dashboard">
         <div class="top-bar-buttons">
-            <button id="themeToggle">🌙 Dark</button>
+            <button id="themeToggle">🌙 अँध्यारो मोड</button>
             
             <div class="quick-menu-container">
                 <button id="quickMenuToggle" class="btn-quick-menu" onclick="toggleQuickMenu(event)" title="थप सेवा तथा विकल्पहरू">
@@ -1177,14 +1177,14 @@
                 </button>
                 
                 <div id="quickMenuDropdown" class="quick-menu-dropdown">
-                    <a href="citizen-search.html" class="quick-menu-item">
+                    <a href="citizen-search.html" id="quickMenuCitizenSearch" class="quick-menu-item" style="display: none;">
                         <span class="q-icon">🔍</span>
                         <div class="q-text">
                             <strong>नागरिक खोजी</strong>
                             <small>एकीकृत सिफारिस इतिहास</small>
                         </div>
                     </a>
-                    <a href="recycle-bin.html" class="quick-menu-item">
+                    <a href="recycle-bin.html" id="quickMenuRecycleBin" class="quick-menu-item" style="display: none;">
                         <span class="q-icon">🗑️</span>
                         <div class="q-text">
                             <strong>रद्दीको टोकरी</strong>
@@ -1194,7 +1194,7 @@
                     <button id="quickPrintLogoBtn" onclick="printLogoFile()" class="quick-menu-item" title="लेटरहेड लोगो फाइल तत्काल प्रिन्ट गर्नुहोस्">
                         <span class="q-icon">🖨️</span>
                         <div class="q-text">
-                            <strong>लोगो छाप्नुस</strong>
+                            <strong>लोगो छाप्नुहोस्</strong>
                             <small>लेटरहेड लोगो फाइल</small>
                         </div>
                     </button>
@@ -1210,8 +1210,8 @@
         </div>
 
         <div class="muni-header">
-            <img class="gov-logo" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg"
-                alt="Nepal Emblem">
+            <img class="gov-logo" src="assets/emblem_of_nepal.svg"
+                alt="नेपालको निशान छाप">
             <div class="muni-title">गौरादह नगरपालिका</div>
             <div class="wada-title">वडा कार्यालयको</div>
             <div class="sub-title">डिजिटल सेवा तथा सिफारिस व्यवस्थापन पोर्टल</div>
@@ -1233,7 +1233,7 @@
             <div class="portal-card card-tax" onclick="openModal('modal-tax')">
                 <div class="card-icon">🏢</div>
                 <div class="card-title">व्यवसाय कर</div>
-                <div class="card-desc">पुँजी र प्रकृतिका आधारमा व्यवसाय कर हिसाब गर्नुस्।</div>
+                <div class="card-desc">पुँजी र प्रकृतिका आधारमा व्यवसाय कर हिसाब गर्नुहोस्।</div>
             </div>
 
             <div class="portal-card card-calc" onclick="openModal('modal-nissa-khoji')">
@@ -1273,7 +1273,7 @@
             </div>
         </div>
 
-        <div class="system-footer">गौरादह नगरपालिका वडा नं.१ • डिजिटल प्रणाली ©Sital Adhikari</div>
+        <div class="system-footer">गौरादह नगरपालिका वडा नं. १ • डिजिटल प्रणाली • विकासकर्ता: शीतल अधिकारी</div>
     </div>
 
     <div class="modal-overlay" id="modal-land">
@@ -1286,12 +1286,12 @@
                     <input type="number" id="sqmInput" class="input-field" placeholder="उदा: ३३८.६३"
                         oninput="updateTotal()">
                     <button class="btn-action" style="--theme-color: #d69e2e; width: 120px; margin-top:0;"
-                        onclick="addLand()">थप्नुस्</button>
+                        onclick="addLand()">थप्नुहोस्</button>
                 </div>
             </div>
             <div id="landList"></div>
             <div class="result-box" id="resLand" style="border-left-color: #d69e2e;">📊 जम्मा: 0.00 m²<br>🌿 0
-                बिघा<br>🌾 0 कठ्ठा<br>🏡 0.00 धुर</div>
+                बिघा<br>🌾 0 कट्ठा<br>🏡 0.00 धुर</div>
         </div>
     </div>
 
@@ -1358,10 +1358,23 @@
     <div class="modal-overlay" id="modal-act">
         <div class="modal-content modal-large">
             <button class="modal-close" onclick="closeModal('modal-act')">×</button>
-            <h2 class="modal-title" style="color: #dd6b20; border-bottom-color:#fbd38d;">📜 गौरादह नगरपालिका आर्थिक ऐन
-                तथा दररेट</h2>
-            <div style="width: 100%; height: 70vh; border: 2px solid #e2e8f0; border-radius: 12px; overflow:hidden;">
-                <iframe src="aarthik-ain.html" width="100%" height="100%" style="border:none;"></iframe>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-bottom:2px solid #fbd38d; padding-bottom:10px; margin-bottom:14px; padding-right:45px;">
+                <h2 style="color: #dd6b20; margin:0; font-size:1.35rem; font-weight:800;">📜 गौरादह नगरपालिका आर्थिक ऐन तथा दररेट</h2>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" onclick="printActDocument()" style="background:#2b6cb0; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:700; font-size:0.88rem; cursor:pointer;">🖨️ प्रिन्ट गर्नुहोस्</button>
+                    <a href="aarthik-ain.html" target="_blank" style="background:#dd6b20; color:#fff; text-decoration:none; padding:6px 14px; border-radius:6px; font-weight:700; font-size:0.88rem; display:inline-flex; align-items:center; gap:4px;">पूर्ण पृष्ठमा खोल्नुहोस् ↗</a>
+                </div>
+            </div>
+            <div style="width: 100%; height: 72vh; border: 2px solid #e2e8f0; border-radius: 12px; overflow:hidden; position:relative; background:#fff;">
+                <iframe id="actIframe" src="aarthik-ain.html" width="100%" height="100%" style="border:none;" title="गौरादह नगरपालिका आर्थिक ऐन" onerror="handleActIframeError()"></iframe>
+                <div id="actIframeError" style="display:none; padding:40px 20px; text-align:center; color:#c53030;">
+                    <div style="font-size:2.5rem; margin-bottom:8px;">⚠️</div>
+                    <h3>आर्थिक ऐन फाइल लोड हुन सकेन</h3>
+                    <p style="margin-top:8px; color:#718096;">कृपया सिधै खोल्न तलको बटन प्रयोग गर्नुहोस्:</p>
+                    <div style="margin-top:14px;">
+                        <a href="aarthik-ain.html" target="_blank" style="background:#dd6b20; color:#fff; text-decoration:none; padding:8px 18px; border-radius:6px; font-weight:700; display:inline-block;">आर्थिक ऐन सिधै खोल्नुहोस् ↗</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1399,7 +1412,7 @@
                     <button onclick="sifarishLogout()"
                         style="background:linear-gradient(135deg,#c53030,#9b2c2c);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">🚪 लग-आउट</button>
                     <button id="modalAdminBtn" onclick="openAdminPanel()"
-                        style="display:none; background:linear-gradient(135deg,#3182ce,#2b6cb0);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">⚙️ Admin व्यवस्थापन</button>
+                        style="display:none; background:linear-gradient(135deg,#3182ce,#2b6cb0);color:#fff;border:none;padding:7px 14px;font-size:0.88rem;font-weight:600;border-radius:8px;cursor:pointer;font-family:inherit;">⚙️ प्रशासक व्यवस्थापन</button>
                     <h2 style="color:#e51a23; font-size:1.5rem; font-weight:800; margin:0; display:flex; align-items:center; gap:6px;">🗂️ सिफारिस प्रणाली भित्र स्वागत छ</h2>
                 </div>
                 <!-- 🔍 Live Recommendation Search Box 🔍 -->
@@ -1423,7 +1436,7 @@
     <div class="modal-overlay" id="modal-sif-login">
         <div class="sif-login-wrap">
             <div class="sif-login-left">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg" alt="Nepal Emblem">
+                <img src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप">
                 <div class="sl-title">गौरादह नगरपालिका<br>वडा नं. १<br>सिफारिस प्रणाली</div>
                 <div class="sl-sub">© गौरादह नगरपालिका वडा कार्यालय</div>
             </div>
@@ -1434,15 +1447,13 @@
                 <label class="sif-lbl" for="sifPass">पासवर्ड</label>
                 <input class="sif-inp" type="password" id="sifPass" placeholder="••••••••"
                     autocomplete="current-password">
-                <div class="sif-err" id="sifErr"><span>⚠️</span><span>आईडी वा पासवर्ड गलत छ !</span></div>
+                <div class="sif-err" id="sifErr"><span>⚠️</span><span>आईडी वा पासवर्ड गलत छ!</span></div>
                 <button class="sif-btn" id="sifLoginBtn" onclick="doSifLogin()">लग-इन</button>
             </div>
         </div>
     </div>
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
-    <script src="nissa-data.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
     <script>
         function openModal(id) {
             const modal = document.getElementById(id);
@@ -1721,7 +1732,7 @@
                     firebase.auth().signOut().catch(()=>{});
                 }
                 if (btn) { btn.disabled = false; btn.textContent = 'लग-इन'; }
-                if (errEl) { errEl.style.display = 'flex'; errEl.innerHTML = '<span>⚠️</span><span>आईडी वा पासवर्ड गलत छ !</span>'; }
+                if (errEl) { errEl.style.display = 'flex'; errEl.innerHTML = '<span>⚠️</span><span>आईडी वा पासवर्ड गलत छ!</span>'; }
             }
         }
 
@@ -1749,14 +1760,14 @@
         });
 
         const toggleBtn = document.getElementById("themeToggle");
-        if (localStorage.getItem("theme") === "dark") { document.body.classList.add("dark-mode"); toggleBtn.textContent = "☀️ Light"; }
-        toggleBtn.addEventListener("click", () => { document.body.classList.toggle("dark-mode"); const isDark = document.body.classList.contains("dark-mode"); toggleBtn.textContent = isDark ? "☀️ Light" : "🌙 Dark"; localStorage.setItem("theme", isDark ? "dark" : "light"); });
+        if (localStorage.getItem("theme") === "dark") { document.body.classList.add("dark-mode"); toggleBtn.textContent = "☀️ उज्यालो मोड"; }
+        toggleBtn.addEventListener("click", () => { document.body.classList.toggle("dark-mode"); const isDark = document.body.classList.contains("dark-mode"); toggleBtn.textContent = isDark ? "☀️ उज्यालो मोड" : "🌙 अँध्यारो मोड"; localStorage.setItem("theme", isDark ? "dark" : "light"); });
 
         let lands = [];
         function addLand() { let val = parseFloat(document.getElementById("sqmInput").value); if (isNaN(val) || val <= 0) { alert("⚠️ कृपया सहि वर्ग मिटर लेख्नुहोस्!"); return; } lands.push(val); document.getElementById("sqmInput").value = ""; showList(); updateTotal(); }
         function removeLand(i) { lands.splice(i, 1); showList(); updateTotal(); }
         function showList() { const listDiv = document.getElementById("landList"); listDiv.innerHTML = ""; lands.forEach((v, i) => { const div = document.createElement('div'); div.className = "list-item"; div.innerHTML = `<span>${i + 1}) ${v} m²</span><button class="remove-btn" onclick="removeLand(${i})">❌</button>`; listDiv.appendChild(div); }); }
-        function updateTotal() { let totalSqm = lands.reduce((a, b) => a + b, 0); let currentInput = parseFloat(document.getElementById("sqmInput").value); if (!isNaN(currentInput) && currentInput > 0) totalSqm += currentInput; const biggha = 6772.63, kattha = 338.63, dhur = 16.931; let b = Math.floor(totalSqm / biggha), r = totalSqm % biggha; let k = Math.floor(r / kattha); r = r % kattha; let d = (r / dhur).toFixed(2); document.getElementById("resLand").innerHTML = `<div style="font-size:1.2rem; color:#b7791f; margin-bottom:10px;">📊 जम्मा: <strong>${totalSqm.toFixed(2)} m²</strong></div>🌿 ${b} बिघा &nbsp;|&nbsp; 🌾 ${k} कठ्ठा &nbsp;|&nbsp; 🏡 ${d} धुर`; }
+        function updateTotal() { let totalSqm = lands.reduce((a, b) => a + b, 0); let currentInput = parseFloat(document.getElementById("sqmInput").value); if (!isNaN(currentInput) && currentInput > 0) totalSqm += currentInput; const biggha = 6772.63, kattha = 338.63, dhur = 16.931; let b = Math.floor(totalSqm / biggha), r = totalSqm % biggha; let k = Math.floor(r / kattha); r = r % kattha; let d = (r / dhur).toFixed(2); document.getElementById("resLand").innerHTML = `<div style="font-size:1.2rem; color:#b7791f; margin-bottom:10px;">📊 जम्मा: <strong>${totalSqm.toFixed(2)} m²</strong></div>🌿 ${b} बिघा &nbsp;|&nbsp; 🌾 ${k} कट्ठा &nbsp;|&nbsp; 🏡 ${d} धुर`; }
 
         function formatNepaliNumber(num) { let n = num.toString().split("."); let x1 = n[0]; let x2 = n.length > 1 ? "." + n[1] : ""; let last3 = x1.substring(x1.length - 3); let other = x1.substring(0, x1.length - 3); if (other !== "") last3 = "," + last3; return other.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + last3 + x2; }
         function calculateTax() { let C = parseFloat(document.getElementById("capitalInput").value); let type = document.getElementById("businessType").value; let tax = 0; if (isNaN(C) || C <= 0) { alert("⚠️ कृपया सहि पुँजी लेख्नुहोस्!"); return; } if (type === "nonLiquor") { if (C <= 5) tax = 500; else if (C <= 10) tax = 1000; else if (C <= 15) tax = 1500; else if (C <= 20) tax = 2000; else tax = 2000 + (C - 20) * 50; } else { if (C <= 5) tax = 1000; else if (C <= 10) tax = 2000; else if (C <= 15) tax = 3000; else if (C <= 20) tax = 4000; else tax = 4000 + (C - 20) * 100; } document.getElementById("taxResult").innerHTML = `पुँजी: रु. ${formatNepaliNumber(C * 100000)}<br><span style="color:#276749; font-size:1.3rem;">👉 जम्मा कर: रु. ${formatNepaliNumber(tax)}</span>`; }
@@ -1809,76 +1820,136 @@
                 resultDiv.innerHTML = `<span style="color:#e53e3e;">🚫 डाटा लोड गर्न त्रुटि भयो (convertcsv.json छैन)।</span>`;
             }
         }
-        // ===== निस्सा खोजी (NISSA SEARCH SYSTEM) =====
+        // ===== निस्सा खोजी (NISSA SEARCH SYSTEM - SECURED) =====
         let nissaData = { BS: [], BD: [], AB: [] };
+        window.nissaData = nissaData;
         let nissaLoaded = false;
+        let isNissaLoading = false;
+        let nissaLoadPromise = null;
 
         function loadNissaData() {
-            if (nissaLoaded) return;
-            try {
-                const bsRes = (typeof NISSA_RAW_BS !== 'undefined') ? NISSA_RAW_BS : [];
-                const bdRes = (typeof NISSA_RAW_BD !== 'undefined') ? NISSA_RAW_BD : [];
-                const abRes = (typeof NISSA_RAW_AB !== 'undefined') ? NISSA_RAW_AB : [];
-
-                // Normalize BS data (English keys)
-                nissaData.BS = bsRes.map(item => ({
-                    category: 'BS',
-                    sn: item.sn || '',
-                    form_no: item.form_no || '',
-                    reg_no: item.reg_no || '',
-                    name: item.name || '',
-                    cit_no: item.cit_no || '',
-                    parcel_code: item.parcel_code || '',
-                    area: item.area || '',
-                    remarks: item.remarks || item.duration || ''
-                }));
-
-                // Normalize BD data (Nepali keys)
-                nissaData.BD = bdRes.map(item => ({
-                    category: 'BD',
-                    sn: item['सि.नं'] || '',
-                    form_no: item['निवेदन फारम नं.'] || '',
-                    reg_no: item['निवेदन दर्ता (कोड) नं.'] || '',
-                    name: item['परिवारमूलीको र निजको पति / पत्नीको नाम'] || '',
-                    cit_no: item['परिवारमूलीको ना. प्र. प. नं.'] || '',
-                    parcel_code: item['कित्ता कोड'] || '',
-                    area: item['जग्गाको अनुमानित क्षेत्रफल (स्थानीय एकाइ)'] || '',
-                    remarks: item['कैफियत'] || ''
-                }));
-
-                // Normalize AB data (English keys like BS)
-                nissaData.AB = abRes.map(item => ({
-                    category: 'AB',
-                    sn: item.sn || '',
-                    form_no: item.form_no || '',
-                    reg_no: item.reg_no || '',
-                    name: item.name || '',
-                    cit_no: item.cit_no || '',
-                    parcel_code: item.parcel_code || '',
-                    area: item.area || '',
-                    remarks: item.remarks || item.duration || ''
-                }));
-
-                nissaLoaded = true;
-                document.getElementById('nissaCountBS').textContent = nissaData.BS.length;
-                document.getElementById('nissaCountBD').textContent = nissaData.BD.length;
-                document.getElementById('nissaCountAB').textContent = nissaData.AB.length;
-                document.getElementById('nissaCountTotal').textContent = nissaData.BS.length + nissaData.BD.length + nissaData.AB.length;
-            } catch (e) {
-
+            if (nissaLoaded) return Promise.resolve(nissaData);
+            if (nissaLoadPromise) return nissaLoadPromise;
+            const isAuth = localStorage.getItem('sifarish_auth') === 'true';
+            if (!isAuth) {
+                console.warn('Unauthorized nissa access attempt blocked.');
+                return Promise.resolve(null);
             }
-        }
+            nissaLoadPromise = (async () => {
+                isNissaLoading = true;
+                const resultsDiv = document.getElementById('nissaResults');
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = `
+                        <div style="text-align:center; padding:35px; color:#4a5568;">
+                            <div style="font-size:2rem; margin-bottom:8px;">⏳</div>
+                            <strong>सुरक्षित डाटाबेसबाट निस्सा रेकर्डहरू लोड गरिँदैछ...</strong>
+                            <p style="font-size:0.85rem; color:#718096; margin-top:4px;">कृपया केही सेकेन्ड पर्खनुहोस्...</p>
+                        </div>`;
+                }
 
-        // Override openModal to load data when nissa modal opens
+                try {
+                    nissaData = { BS: [], BD: [], AB: [] };
+                    let pageToken = '';
+                    let totalFetched = 0;
+
+                    do {
+                        let url = 'https://firestore.googleapis.com/v1/projects/gauradaha-ward1/databases/(default)/documents/nissa_records?pageSize=300';
+                        if (pageToken) url += `&pageToken=${encodeURIComponent(pageToken)}`;
+                        const resp = await fetch(url);
+                        if (!resp.ok) throw new Error(`Firestore HTTP ${resp.status}`);
+                        const resData = await resp.json();
+                        const docs = resData.documents || [];
+                        docs.forEach(doc => {
+                            const f = doc.fields || {};
+                            const getVal = (v) => v ? (v.stringValue || v.integerValue || '') : '';
+                            const cat = getVal(f.category) || 'BS';
+                            if (nissaData[cat]) {
+                                nissaData[cat].push({
+                                    category: cat,
+                                    sn: getVal(f.sn),
+                                    form_no: getVal(f.form_no),
+                                    reg_no: getVal(f.reg_no),
+                                    name: getVal(f.name),
+                                    cit_no: getVal(f.cit_no),
+                                    parcel_code: getVal(f.parcel_code),
+                                    area: getVal(f.area),
+                                    remarks: getVal(f.remarks)
+                                });
+                            }
+                        });
+                        totalFetched += docs.length;
+                        pageToken = resData.nextPageToken || '';
+                    } while (pageToken);
+
+                    window.__nissaSnapSize = totalFetched;
+                    window.nissaData = nissaData;
+                    nissaLoaded = true;
+                    isNissaLoading = false;
+                    const countBSEl = document.getElementById('nissaCountBS');
+                    const countBDEl = document.getElementById('nissaCountBD');
+                    const countABEl = document.getElementById('nissaCountAB');
+                    const countTotalEl = document.getElementById('nissaCountTotal');
+                    if (countBSEl) countBSEl.textContent = nissaData.BS.length;
+                    if (countBDEl) countBDEl.textContent = nissaData.BD.length;
+                    if (countABEl) countABEl.textContent = nissaData.AB.length;
+                    if (countTotalEl) countTotalEl.textContent = nissaData.BS.length + nissaData.BD.length + nissaData.AB.length;
+                    if (resultsDiv) {
+                        resultsDiv.innerHTML = `
+                            <div style="text-align:center; padding:40px 20px; color:#a0aec0;">
+                                <div style="font-size:3rem; margin-bottom:10px;">🔍</div>
+                                <div style="font-size:1.05rem; font-weight:600;">नाम लेखेर खोज्नुहोस्</div>
+                                <div style="font-size:0.85rem; margin-top:4px;">माथिको बक्समा नाम टाइप गर्नुहोस् — मिल्दो जुल्दो विवरण देखिनेछ</div>
+                            </div>`;
+                    }
+                    return nissaData;
+                } catch (err) {
+                    isNissaLoading = false;
+                    nissaLoadPromise = null;
+                    window.__lastNissaError = err.toString();
+                    console.error("Nissa loading error:", err);
+                    if (resultsDiv) {
+                        resultsDiv.innerHTML = `
+                            <div style="text-align:center; padding:30px; color:#e53e3e;">
+                                ⚠️ निस्सा रेकर्ड लोड गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्।
+                            </div>`;
+                    }
+                    throw err;
+                }
+            })();
+            return nissaLoadPromise;
+        }
+        window.loadNissaData = loadNissaData;
+
+        // Override openModal to guard nissa modal with authentication
         const originalOpenModal = openModal;
         openModal = function(id) {
-            originalOpenModal(id);
             if (id === 'modal-nissa-khoji') {
+                const isAuth = localStorage.getItem('sifarish_auth') === 'true';
+                if (!isAuth) {
+                    alert('⚠️ पहुँच निषेध: निस्सा खोजी (सुकुम्बासी, दलित तथा अव्यवस्थित बसोबासीको व्यक्तिगत विवरण) हेर्न वडा कर्मचारीको आधिकारिक लग-इन अनिवार्य छ। कृपया पहिले लग-इन गर्नुहोस्।');
+                    localStorage.setItem('sifarish_redirect', 'index.html');
+                    window.location.href = 'login.html';
+                    return;
+                }
                 loadNissaData();
             }
+            originalOpenModal(id);
         };
 
-        function searchNissa() {
+        async function searchNissa() {
+            if (localStorage.getItem('sifarish_auth') !== 'true') {
+                const infoDiv = document.getElementById('nissaResultInfo');
+                if (infoDiv) {
+                    infoDiv.style.display = 'block';
+                    infoDiv.innerHTML = '<span style="color:#e53e3e;">🔒 खोजी गर्न आधिकारिक लग-इन आवश्यक छ।</span>';
+                }
+                return;
+            }
+
+            if (!nissaLoaded) {
+                await loadNissaData();
+            }
+
             const query = document.getElementById('nissaNameInput').value.trim().toLowerCase();
             const category = document.getElementById('nissaCategoryFilter').value;
             const resultsDiv = document.getElementById('nissaResults');
@@ -1991,6 +2062,14 @@
             if (modalAdminBtn) {
                 modalAdminBtn.style.display = (isAuth && isAdmin) ? 'inline-block' : 'none';
             }
+            const citLink = document.getElementById('quickMenuCitizenSearch');
+            if (citLink) {
+                citLink.style.display = isAuth ? 'flex' : 'none';
+            }
+            const binLink = document.getElementById('quickMenuRecycleBin');
+            if (binLink) {
+                binLink.style.display = (isAuth && isAdmin) ? 'flex' : 'none';
+            }
         }
         updateTopBarButtons();
 
@@ -2001,7 +2080,7 @@
             if (localStorage.getItem('sifarish_auth') === 'true' && isAdmin) {
                 window.location.href = 'admin.html';
             } else {
-                alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin अनुमति आवश्यक छ।');
+                alert('⚠️ प्रशासक व्यवस्थापन पृष्ठमा प्रवेश गर्न प्रशासक अनुमति आवश्यक छ।');
                 if (localStorage.getItem('sifarish_auth') === 'true') {
                     return;
                 }
@@ -2280,7 +2359,7 @@
                 addCard.className = 'sifarish-link-card';
                 addCard.style.cssText = 'border-color: #3182ce; background: linear-gradient(135deg, #ebf8ff, #bee3f8); border-style: dashed; border-width: 2px; font-weight: bold; color: #2b6cb0;';
                 addCard.href = 'admin.html?action=create';
-                addCard.innerHTML = `<span class="emoji">➕</span> नयाँ सिफारिस थप्नुहोस् (Admin Panel)`;
+                addCard.innerHTML = `<span class="emoji">➕</span> नयाँ सिफारिस थप्नुहोस् (प्रशासन प्यानल)`;
                 container.appendChild(addCard);
             }
         }
@@ -2300,42 +2379,88 @@
             renderSifarishGrid([]);
         });
 
-        // Automatic Nepali Date Calculation and Display
+        // Economic Act Modal Helpers
+        function printActDocument() {
+            const iframe = document.getElementById('actIframe');
+            if (iframe && iframe.contentWindow) {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch (e) {
+                    window.open('aarthik-ain.html', '_blank');
+                }
+            } else {
+                window.open('aarthik-ain.html', '_blank');
+            }
+        }
+
+        function handleActIframeError() {
+            const err = document.getElementById('actIframeError');
+            if (err) err.style.display = 'block';
+        }
+
+        // Automatic Nepali Date Calculation and Display with Asia/Kathmandu Timezone
         function initPortalNepaliDate() {
             try {
                 const nepaliMonths = ["बैशाख", "जेठ", "असार", "साउन", "भदौ", "असोज", "कार्तिक", "मंसिर", "पुष", "माघ", "फागुन", "चैत"];
                 const nepaliDays = ["आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
-                const today = new Date();
-                const dayName = nepaliDays[today.getDay()];
-                let bsY = today.getFullYear() + 57;
-                let bsM = 3;
-                let bsD = today.getDate() >= 16 ? today.getDate() - 15 : today.getDate() + 16;
-                if (bsD > 32) bsD = 30;
-                const converter = window["@sbmdkl/nepali-date-converter"];
-                if (!converter && (window._portalDateRetries || 0) < 5) {
-                    window._portalDateRetries = (window._portalDateRetries || 0) + 1;
-                    setTimeout(initPortalNepaliDate, 400);
+                
+                // Use Asia/Kathmandu time zone explicitly
+                let today;
+                try {
+                    const kDateStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kathmandu" });
+                    today = new Date(kDateStr);
+                } catch(tzErr) {
+                    const now = new Date();
+                    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    today = new Date(utc + (5.75 * 3600000));
                 }
+
+                const dayName = nepaliDays[today.getDay()];
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const dateKey = `${yyyy}-${mm}-${dd}`;
+
+                let bsY = 2083;
+                let bsM = 6;
+                let bsD = 23;
+                let converted = false;
+
+                const converter = window["@sbmdkl/nepali-date-converter"];
                 if (converter && typeof converter.adToBs === 'function') {
                     try {
-                        const yyyy = today.getFullYear();
-                        const mm = String(today.getMonth() + 1).padStart(2, '0');
-                        const dd = String(today.getDate()).padStart(2, '0');
-                        const bsDate = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+                        const bsDate = converter.adToBs(dateKey);
                         if (typeof bsDate === 'string') {
                             const pts = bsDate.split(/[-/]/);
-                            bsY = parseInt(pts[0], 10); bsM = parseInt(pts[1], 10); bsD = parseInt(pts[2], 10);
+                            bsY = parseInt(pts[0], 10);
+                            bsM = parseInt(pts[1], 10);
+                            bsD = parseInt(pts[2], 10);
+                            converted = true;
                         } else if (bsDate && typeof bsDate === 'object') {
-                            bsY = bsDate.bsYear || bsY; bsM = bsDate.bsMonth || bsM; bsD = bsDate.bsDay || bsD;
+                            bsY = bsDate.bsYear || bsY;
+                            bsM = bsDate.bsMonth || bsM;
+                            bsD = bsDate.bsDay || bsD;
+                            converted = true;
                         }
-                    } catch (e) { }
+                    } catch (e) {}
                 }
+
+                // If not converted yet, retry once script loads
+                if (!converted && (window._portalDateRetries || 0) < 5) {
+                    window._portalDateRetries = (window._portalDateRetries || 0) + 1;
+                    setTimeout(initPortalNepaliDate, 200);
+                }
+
                 const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
                 const dateEl = document.getElementById('indexNepaliDate');
                 if (dateEl) {
-                    dateEl.innerHTML = `🗓️ <strong>आजको नेपाली मिति:</strong> ${toNep(bsY)} ${nepaliMonths[bsM - 1] || 'असार'} ${toNep(bsD)} गते, ${dayName}`;
+                    const monthName = nepaliMonths[bsM - 1] || 'असोज';
+                    dateEl.innerHTML = `🗓️ <strong>आजको नेपाली मिति:</strong> ${toNep(bsY)} ${monthName} ${toNep(bsD)} गते, ${dayName}`;
                 }
-            } catch (e) { }
+            } catch (e) {
+                console.warn("Date render error:", e);
+            }
         }
 
         function updateDashboardWardDisplay() {
@@ -2349,7 +2474,7 @@
                     }
                 });
                 document.querySelectorAll('.system-footer').forEach(el => {
-                    el.innerText = `गौरादह नगरपालिका वडा नं.${nepWard} • डिजिटल प्रणाली ©Sital Adhikari`;
+                    el.innerText = `गौरादह नगरपालिका वडा नं. ${nepWard} • डिजिटल प्रणाली • विकासकर्ता: शीतल अधिकारी`;
                 });
                 document.title = `गौरादह नगरपालिका वडा नं. ${nepWard} - डिजिटल सेवा तथा सिफारिस व्यवस्थापन पोर्टल`;
             } catch (e) {}

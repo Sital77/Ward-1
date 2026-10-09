@@ -490,7 +490,7 @@ function renderKittaTable() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px 15px;">
-                    कुनै पनि कित्ता थपिएको छैन। देब्रेपट्टीको फारम भरेर <strong>"➕ कित्ता थप्नुस्"</strong> क्लिक गर्नुहोस्।
+                    कुनै पनि कित्ता थपिएको छैन। देब्रेपट्टीको फारम भरेर <strong>"➕ कित्ता थप्नुहोस्"</strong> क्लिक गर्नुहोस्।
                 </td>
             </tr>
         `;

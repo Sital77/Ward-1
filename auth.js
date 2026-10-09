@@ -346,7 +346,13 @@ function sanitizeHTML(html) {
     }
 
     if (currentPath.includes('admin.html') && !isAdminSession()) {
-        alert('⚠️ Admin व्यवस्थापन पृष्ठमा प्रवेश गर्न Admin अनुमति आवश्यक छ।');
+        alert('⚠️ प्रशासक व्यवस्थापन पृष्ठमा प्रवेश गर्न प्रशासक अनुमति आवश्यक छ।');
+        window.location.replace('index.html');
+        return;
+    }
+
+    if (currentPath.includes('recycle-bin.html') && !isAdminSession()) {
+        alert('⚠️ रद्दीको टोकरी हेर्न तथा व्यवस्थापन गर्न प्रशासक (Admin) अनुमति आवश्यक छ।');
         window.location.replace('index.html');
         return;
     }

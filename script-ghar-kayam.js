@@ -84,7 +84,7 @@ function addHouseRow(data = null) {
                 </div>
                 <div class="form-group">
                     <label>हाल वडा नं.:</label>
-                    <input type="text" class="inp-hal-wada" placeholder="गौरादह न.पा वडा नं.१" value="${data ? data.halWada : ''}" oninput="updateDoc()">
+                    <input type="text" class="inp-hal-wada" placeholder="गौरादह न.पा वडा नं. १" value="${data ? data.halWada : ''}" oninput="updateDoc()">
                 </div>
             </div>
 

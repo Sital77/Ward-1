@@ -4,7 +4,7 @@
 
     // Ensure Nepal emblem favicon is present across all pages
     (function ensureFavicon() {
-        const faviconUrl = 'https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg';
+        const faviconUrl = 'assets/emblem_of_nepal.svg';
         let link = document.querySelector("link[rel~='icon']");
         if (!link) {
             link = document.createElement('link');
@@ -573,7 +573,7 @@
             nabalakStamp.innerText = 'गौरादह नगरपालिका वडा नं. ' + replaceDigit + ' कार्यालय';
         }
         document.querySelectorAll('.system-footer').forEach(el => {
-            el.innerText = `गौरादह नगरपालिका वडा नं.${replaceDigit} • डिजिटल प्रणाली ©Sital Adhikari`;
+            el.innerText = `गौरादह नगरपालिका वडा नं. ${replaceDigit} • डिजिटल प्रणाली • विकासकर्ता: शीतल अधिकारी`;
         });
 
         // 3. Form Default Inputs & Selects for Ward

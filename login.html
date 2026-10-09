@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>लग-इन | गौरादह नगरपालिका वडा नं. १ सिफारिस प्रणाली</title>
     <meta name="description" content="गौरादह नगरपालिका वडा नं. १ सिफारिस प्रणाली लगइन पृष्ठ">
-    <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -407,8 +407,8 @@
     <div class="login-card">
         <!-- LEFT BLUE PANEL -->
         <div class="login-left">
-            <img class="emblem" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg"
-                alt="Nepal Emblem">
+            <img class="emblem" src="assets/emblem_of_nepal.svg"
+                alt="नेपालको निशान छाप">
             <div class="gov-label">नेपाल सरकार</div>
             <div class="divider"></div>
             <div class="system-name">गौरादह नगरपालिका<br>वडा कार्यालय<br>सिफारिस प्रणाली</div>
@@ -456,7 +456,7 @@
 
             <div class="error-msg" id="errorMsg">
                 <span>⚠️</span>
-                <span id="errorText">आईडी वा पासवर्ड गलत छ !</span>
+                <span id="errorText">आईडी वा पासवर्ड गलत छ!</span>
             </div>
 
             <button class="btn-login" id="btnLogin" onclick="doLogin()">
@@ -761,22 +761,6 @@
             const cleanUser = username.trim().toLowerCase();
 
             try {
-                // Always use LOCAL persistence for permanent login
-                try {
-                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                } catch(pErr) {}
-
-                // Try Firebase Auth in background / safe block
-                try {
-                    await firebase.auth().signInAnonymously();
-                } catch(e) {
-                    try {
-                        const fbE = atob('YWRoaWthcmlzaHJpdGFsQGdtYWlsLmNvbQ==');
-                        const fbP = atob('YWRtaW4xMjM=');
-                        await firebase.auth().signInWithEmailAndPassword(fbE, fbP);
-                    } catch(e2) {}
-                }
-
                 const passwordHash = await hashPassword(password);
 
                 const secureHashes = {
@@ -835,6 +819,12 @@
                     isAdmin = false;
                 }
 
+                // Establish authenticated Firebase session safely without hardcoded secrets
+                try {
+                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    await firebase.auth().signInAnonymously();
+                } catch(pErr) {}
+
                 // Save ward, username, and session info locally
                 localStorage.setItem('sifarish_ward', finalWard);
                 localStorage.setItem('sifarish_user', username.trim());
@@ -862,7 +852,7 @@
                 btn.style.background = '';
 
                 if (!document.getElementById('errorText').textContent.includes('सेकेन्ड')) {
-                    document.getElementById('errorText').textContent = 'आईडी वा पासवर्ड गलत छ !';
+                    document.getElementById('errorText').textContent = 'आईडी वा पासवर्ड गलत छ!';
                 }
                 errorMsg.classList.add('show');
                 card.classList.add('shake');

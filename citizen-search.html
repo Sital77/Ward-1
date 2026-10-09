@@ -359,7 +359,7 @@
         <!-- Header -->
         <div class="header">
             <div class="header-title">
-                <img src="assets/emblem_of_nepal.svg" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg'" alt="Nepal Emblem">
+                <img src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप">
                 <div>
                     <h1>🔍 एकीकृत नागरिक तथा सिफारिस खोजी</h1>
                     <p>गौरादह नगरपालिका वडा नं. १ • सम्पूर्ण सिफारिसहरूको एकीकृत प्रोफाइल खोज इन्जिन</p>
@@ -367,7 +367,7 @@
             </div>
             <div class="header-actions">
                 <a href="index.html" class="btn-nav">🏠 गृहपृष्ठ</a>
-                <a href="recycle-bin.html" class="btn-nav">🗑️ रद्दीको टोकरी</a>
+                <a href="recycle-bin.html" id="navRecycleBin" class="btn-nav" style="display: none;">🗑️ रद्दीको टोकरी</a>
             </div>
         </div>
 
@@ -467,6 +467,23 @@
 
         // Preload records across all collections once in memory for ultra-fast instant search
         async function preloadAllRecords() {
+            if (typeof isSessionValid === 'function' && !isSessionValid()) {
+                console.warn('Unauthorized access to citizen records blocked.');
+                const container = document.getElementById('searchResultsContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="empty-results" style="border: 2px solid #e53e3e; background: #fff5f5; border-radius: 12px; padding: 30px;">
+                            <div class="empty-results-icon">🔒</div>
+                            <h3 style="color: #c53030;">पहुँच निषेध: आधिकारिक लग-इन आवश्यक छ</h3>
+                            <p style="color: #742a2a; margin-top: 8px;">नागरिकहरूको व्यक्तिगत विवरण तथा एकीकृत सिफारिस इतिहास सुरक्षित राख्न यो सुविधा वडा कार्यालयका आधिकारिक कर्मचारीहरूका लागि मात्र उपलब्ध छ।</p>
+                            <div style="margin-top: 16px;">
+                                <a href="login.html" class="btn-nav" style="background: #c53030; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; display: inline-block;">🔑 लग-इन गर्नुहोस्</a>
+                            </div>
+                        </div>`;
+                }
+                return;
+            }
+
             if (cachedAllRecords || isPreloading) return;
             isPreloading = true;
             console.log('⚡ Preloading all collections for instant citizen search...');
@@ -707,7 +724,13 @@
         }
 
         window.onload = function() {
-            preloadAllRecords();
+            const binNav = document.getElementById('navRecycleBin');
+            if (binNav && typeof isAdminSession === 'function') {
+                binNav.style.display = isAdminSession() ? 'inline-flex' : 'none';
+            }
+            if (typeof isSessionValid === 'function' && isSessionValid()) {
+                preloadAllRecords();
+            }
         };
     </script>
 </body>

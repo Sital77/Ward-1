@@ -328,7 +328,7 @@
         <!-- Header -->
         <div class="header">
             <div class="header-title">
-                <img src="assets/emblem_of_nepal.svg" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Emblem_of_Nepal.svg'" alt="Nepal Emblem">
+                <img src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप">
                 <div>
                     <h1>🗑️ रद्दीको टोकरी (Recycle Bin)</h1>
                     <p>गौरादह नगरपालिका वडा नं. १ • हटाइएका सिफारिसहरूको सुरक्षित १०० दिने भण्डार</p>
@@ -336,7 +336,7 @@
             </div>
             <div class="header-actions">
                 <a href="index.html" class="btn-nav">🏠 गृहपृष्ठ</a>
-                <a href="admin.html" class="btn-nav" id="adminPanelNav" style="display:none;">📊 Admin Panel</a>
+                <a href="admin.html" class="btn-nav" id="adminPanelNav" style="display:none;">📊 प्रशासन प्यानल</a>
             </div>
         </div>
 
@@ -467,6 +467,21 @@
 
         // Load Deleted Records in Realtime
         function initRecycleBin() {
+            if (typeof isAdminSession === 'function' && !isAdminSession()) {
+                console.warn('Unauthorized recycle bin access blocked.');
+                const tbody = document.getElementById('binTableBody');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr><td colspan="7" style="text-align:center; padding:40px; background:#fff5f5; color:#c53030;">
+                            <div style="font-size:2rem; margin-bottom:8px;">🔒</div>
+                            <strong style="font-size:1.1rem;">पहुँच निषेध: प्रशासक (Admin) अनुमति आवश्यक छ</strong>
+                            <p style="margin-top:6px; color:#742a2a;">रद्दीको टोकरीका रेकर्डहरू हेर्न, पुनर्स्थापना गर्न वा हटाउन प्रशासक अनुमति अनिवार्य गरिएको छ।</p>
+                            <div style="margin-top:14px;"><a href="index.html" class="btn-nav" style="background:#c53030; color:#fff; padding:6px 16px; border-radius:6px; text-decoration:none; display:inline-block;">🏠 गृहपृष्ठमा फर्कनुहोस्</a></div>
+                        </td></tr>`;
+                }
+                return;
+            }
+
             // Auto purge records > 100 days
             if (typeof window.purgeExpiredDeletedRecords === 'function') {
                 window.purgeExpiredDeletedRecords().then(purged => {
@@ -630,13 +645,25 @@
         }
 
         window.onload = function() {
-            const curUser = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
-            const isAdmin = curUser !== 'wada1' && curUser !== 'wada3' && localStorage.getItem('sifarish_admin') === 'true';
+            const isAdmin = typeof isAdminSession === 'function' ? isAdminSession() : false;
             const adminNav = document.getElementById('adminPanelNav');
             if (adminNav) {
                 adminNav.style.display = isAdmin ? 'inline-block' : 'none';
             }
-            initRecycleBin();
+            if (isAdmin) {
+                initRecycleBin();
+            } else {
+                const tbody = document.getElementById('binTableBody');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr><td colspan="7" style="text-align:center; padding:40px; background:#fff5f5; color:#c53030;">
+                            <div style="font-size:2rem; margin-bottom:8px;">🔒</div>
+                            <strong style="font-size:1.1rem;">पहुँच निषेध: प्रशासक (Admin) अनुमति आवश्यक छ</strong>
+                            <p style="margin-top:6px; color:#742a2a;">रद्दीको टोकरीका रेकर्डहरू हेर्न, पुनर्स्थापना गर्न वा हटाउन प्रशासक अनुमति अनिवार्य गरिएको छ।</p>
+                            <div style="margin-top:14px;"><a href="index.html" class="btn-nav" style="background:#c53030; color:#fff; padding:6px 16px; border-radius:6px; text-decoration:none; display:inline-block;">🏠 गृहपृष्ठमा फर्कनुहोस्</a></div>
+                        </td></tr>`;
+                }
+            }
         };
     </script>
 </body>

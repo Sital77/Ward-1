@@ -1,0 +1,15 @@
+# Ignore raw citizen data files to protect citizen privacy
+*nissa*data*.js
+*nissa*data*.json
+*AB_data.json
+*BD_data.json
+*BS_data.json
+1ab_data.json
+1bd_data.json
+1bs_data.json
+1AB_data.json
+1BD_data.json
+1BS_data.json
+nissa-data.js
+private_data/
+*.log

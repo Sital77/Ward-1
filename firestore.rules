@@ -7,21 +7,39 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isAuthenticated() && (request.auth.token.admin == true || request.auth.uid == 'admin' || request.auth.token.email == 'adhikarishrital@gmail.com');
+    }
+
     // Ward users collection: Only authenticated users can read/write their own info
     match /ward_users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (request.auth.token.admin == true || request.auth.uid == userId);
+      allow write: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
     }
 
     // System Backups: Only authenticated staff can create/read backups; deletion requires admin
     match /system_backups/{backupId} {
       allow read, create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && request.auth.token.admin == true;
+      allow update, delete: if isAdmin();
     }
 
-    // Deleted Records Log / Recycle Bin
+    // Deleted Records Log / Recycle Bin: Viewing and permanent purge restricted to admin; staff can log soft-delete
     match /deleted_records_log/{logId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Nissa Records (Squatters, Dalit, Landless records): Authenticated staff read-only, admin write
+    match /nissa_records/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Recommendation Templates (Letter layouts)
+    match /sifarish_templates/{templateId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // All Sifarish Recommendation Collections
@@ -30,8 +48,8 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create, update: if isAuthenticated();
       
-      // Prevent hard-delete by standard users if soft-delete is enforced
-      allow delete: if isAuthenticated();
+      // Hard delete restricted to admin
+      allow delete: if isAdmin();
     }
   }
 }
