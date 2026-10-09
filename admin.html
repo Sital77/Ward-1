@@ -20,6 +20,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
     <script src="auth.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="nepal-sambat-tithi.js"></script>
 </head>
 <body>
 
@@ -2506,7 +2507,20 @@
             }
             const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
             const el = document.getElementById('adminNepaliDate');
-            if (el) el.innerHTML = `🗓️ <strong>आजको नेपाली मिति:</strong> ${toNep(bsY)} ${nepaliMonths[bsM - 1] || 'असार'} ${toNep(bsD)} गते, ${dayName}`;
+            if (el) {
+                const monthName = nepaliMonths[bsM - 1] || 'असोज';
+                const bsDateText = `${toNep(bsY)} ${monthName} ${toNep(bsD)} गते, ${dayName}`;
+                let nsYear = '११४६';
+                let nsTithiFormatted = '';
+                if (window.NepalSambat && typeof window.NepalSambat.getTithi === 'function') {
+                    const nsInfo = window.NepalSambat.getTithi(today);
+                    if (nsInfo) {
+                        nsYear = nsInfo.year || nsYear;
+                        nsTithiFormatted = nsInfo.formatted || '';
+                    }
+                }
+                el.innerHTML = `🗓️ <strong>हाल मिति:</strong> ${bsDateText} &bull; ने.सं. ${nsYear}${nsTithiFormatted ? ` • ${nsTithiFormatted}` : ''}`;
+            }
         } catch(e) {}
     }
     initAdminNepaliDate();

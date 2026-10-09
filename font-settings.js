@@ -1477,7 +1477,46 @@
                     card.parentNode.insertBefore(badge, card);
                 }
             }
-            badge.innerHTML = `<span>🗓️ <strong>स्वचालित नेपाली मिति:</strong></span> <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; letter-spacing: 0.5px;">${dateStr}</span>`;
+
+            const renderBadgeContent = () => {
+                let nsYear = '११४६';
+                let nsTithiFormatted = '';
+                if (window.NepalSambat && typeof window.NepalSambat.getTithi === 'function') {
+                    const nsInfo = window.NepalSambat.getTithi(today);
+                    if (nsInfo) {
+                        nsYear = nsInfo.year || nsYear;
+                        nsTithiFormatted = nsInfo.formatted || '';
+                    }
+                }
+                const formattedMiti = dateStr.replace('मिति :', '').trim();
+                badge.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <span>🗓️ <strong>हाल मिति:</strong></span>
+                            <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; letter-spacing: 0.5px; margin-left: 6px;">${formattedMiti}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; background: rgba(255,255,255,0.18); padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                            <span>ने.सं. ${nsYear}</span>
+                            ${nsTithiFormatted ? `<span style="opacity:0.6;">•</span><span>${nsTithiFormatted}</span>` : ''}
+                        </div>
+                    </div>`;
+            };
+
+            // Dynamically load nepal-sambat-tithi.js if not yet loaded
+            if (!window.NepalSambat && !document.querySelector('script[src*="nepal-sambat-tithi.js"]')) {
+                const nsScript = document.createElement('script');
+                nsScript.src = 'nepal-sambat-tithi.js';
+                nsScript.onload = () => {
+                    renderBadgeContent();
+                    if (window.NepalSambat && typeof window.NepalSambat.setupAutoRefresh === 'function') {
+                        window.NepalSambat.setupAutoRefresh(renderBadgeContent);
+                    }
+                };
+                document.head.appendChild(nsScript);
+            } else if (window.NepalSambat && typeof window.NepalSambat.setupAutoRefresh === 'function') {
+                window.NepalSambat.setupAutoRefresh(renderBadgeContent);
+            }
+            renderBadgeContent();
 
             // Dynamic Ward Number & Signatures Initialization
             try {

@@ -16,6 +16,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="backup-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="nepal-sambat-tithi.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -2456,7 +2458,34 @@
                 const dateEl = document.getElementById('indexNepaliDate');
                 if (dateEl) {
                     const monthName = nepaliMonths[bsM - 1] || 'असोज';
-                    dateEl.innerHTML = `🗓️ <strong>आजको नेपाली मिति:</strong> ${toNep(bsY)} ${monthName} ${toNep(bsD)} गते, ${dayName}`;
+                    const bsDateText = `${toNep(bsY)} ${monthName} ${toNep(bsD)} गते, ${dayName}`;
+
+                    // Retrieve Nepal Sambat tithi and day number from dedicated verified module
+                    let nsYear = '११४६';
+                    let nsTithiFormatted = '';
+                    if (window.NepalSambat && typeof window.NepalSambat.getTithi === 'function') {
+                        const nsInfo = window.NepalSambat.getTithi(today);
+                        if (nsInfo) {
+                            nsYear = nsInfo.year || nsYear;
+                            nsTithiFormatted = nsInfo.formatted || '';
+                        }
+                    }
+
+                    dateEl.innerHTML = `
+                        <div style="font-weight:700; font-size:14.5px; line-height:1.4;">
+                            🗓️ <strong>हाल मिति:</strong> ${bsDateText}
+                        </div>
+                        <div style="font-size:13px; font-weight:600; opacity:0.95; margin-top:3px; display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span>ने.सं. ${nsYear}</span>
+                            ${nsTithiFormatted ? `<span style="opacity:0.6;">•</span><span>${nsTithiFormatted}</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Register automatic midnight transition update
+                if (window.NepalSambat && typeof window.NepalSambat.setupAutoRefresh === 'function' && !window._portalNsRefreshRegistered) {
+                    window._portalNsRefreshRegistered = true;
+                    window.NepalSambat.setupAutoRefresh(initPortalNepaliDate);
                 }
             } catch (e) {
                 console.warn("Date render error:", e);
