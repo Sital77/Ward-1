@@ -610,6 +610,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label>बालबालिकाको व्यक्तिगत परिचयपत्र नं.:</label>
+                    <input type="text" id="inChildBeneficiaryId" placeholder="उदा: २०२३०२०९०२५१६" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
                     <label>🏦 बालबालिकाको सामाजिक सुरक्षा खाता नं.:</label>
                     <input type="text" id="inChildAccountNo" placeholder="उदा: ०६२४२०५०७७९६१०१७" oninput="updateDoc()">
                 </div>
@@ -1072,6 +1077,44 @@
                 return toNepaliDigit(cleaned);
             }
 
+            // Helper to extract an exact 13-digit identification number (Nepali or English digits)
+            // Deduplicates and returns exactly 13 digits formatted in Nepali numerals.
+            function extract13DigitId(str) {
+                if (!str) return '';
+                // Match 13 Nepali digits
+                const nepMatch = str.match(/(?:^|[^\d०-९])([०-९]{13})(?:[^\d०-९]|$)/);
+                if (nepMatch) return nepMatch[1];
+                // Match 13 English digits and convert to Nepali
+                const engMatch = str.match(/(?:^|[^\d०-९])([0-9]{13})(?:[^\d०-९]|$)/);
+                if (engMatch) return toNepaliDigit(engMatch[1]);
+                return '';
+            }
+
+            // Strictly matches National ID (राष्ट्रिय परिचयपत्र नं. / NID) labels
+            function isNationalIdLabel(lbl) {
+                if (!lbl) return false;
+                const clean = lbl.trim().replace(/^[\s:\-\.]+/, '').replace(/[\s:\-\.]+$/, '');
+                return /^(?:मृतकको\s*)?(?:राष्ट्रिय\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|NID|National\s*ID(?:\s*No\.?)?)$/i.test(clean);
+            }
+
+            // Matches standalone परिचयपत्र नं. or explicit व्यक्तिगत परिचयपत्र नं. (never confusing with राष्ट्रिय/NID)
+            function isPersonalIdLabel(lbl) {
+                if (!lbl) return false;
+                const clean = lbl.trim().replace(/^[\s:\-\.]+/, '').replace(/[\s:\-\.]+$/, '');
+                // Strictly reject National ID / Disability ID / Voter ID
+                if (/राष्ट्रिय|national|nid|अपांगता|मतदाता/i.test(clean)) return false;
+
+                // Explicit personal ID
+                if (/^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity(?:\s*(?:No\.?|Number))?)$/i.test(clean)) {
+                    return true;
+                }
+                // Standalone identity card label
+                if (/^(?:परिचय\s*पत्र(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|परिचयपत्र(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|परिचय\s*(?:नं\.?|नम्बर|न\.?|No\.?))$/i.test(clean)) {
+                    return true;
+                }
+                return false;
+            }
+
             // 1. Tab/Colon/Space-separated Line-by-Line Parsing (Social Security MIS portal format)
             const lines = pastedText.split(/\r?\n/);
             lines.forEach((line, index) => {
@@ -1086,16 +1129,16 @@
                     parts = [trimmed.substring(0, idx).trim(), trimmed.substring(idx + 1).replace(/^[\-\s:]+/, '').trim()];
                 } else {
                     // Check if label and value are separated by whitespace without colon/tab
-                    const mPersonal = trimmed.match(/^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity\s*(?:No\.?)?)\s+([0-9०-९A-Za-z\/\-]+.*)$/i);
                     const mNid = trimmed.match(/^(?:मृतकको\s*)?(?:राष्ट्रिय\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|NID|National\s*ID(?:\s*No\.?)?)\s+([0-9०-९A-Za-z\/\-]+.*)$/i);
+                    const mPersonal = trimmed.match(/^(?:(?<!राष्ट्रिय\s*|अपांगता\s*|मतदाता\s*)(?:(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*)?परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity(?:\s*(?:No\.?|Number))?))\s+([0-9०-९A-Za-z\/\-]+.*)$/i);
                     const mCit = trimmed.match(/^(?:(?:मृतकको\s*)?(?:नागरिकता|ना\.प्र\.|जन्मदर्ता)\s*(?:नं\.?|नम्बर)?)\s+([0-9०-९A-Za-z\/\-]+.*)$/i);
                     const mAcc = trimmed.match(/^(?:(?:सामाजिक\s*सुरक्षा\s*(?:बैंक\s*)?)?खाता\s*(?:नं\.?|नम्बर)?|Account\s*No\.?)\s+([0-9०-९A-Za-z\/\-]+.*)$/i);
                     const mDeath = trimmed.match(/^(?:(?:लगत\s*कट्टा|लगतकट्टा|मृत्यु)\s*मिति(?:\s*\([^)]*\))?)\s+([२०८९०-९0-9]{4}[\/\-][२०८९०-९0-9]{2}[\/\-][२०८९०-९0-9]{2}.*)$/i);
 
-                    if (mPersonal) {
-                        parts = ['व्यक्तिगत परिचयपत्र नं.', mPersonal[1].trim()];
-                    } else if (mNid) {
+                    if (mNid) {
                         parts = ['राष्ट्रिय परिचयपत्र नं.', mNid[1].trim()];
+                    } else if (mPersonal) {
+                        parts = ['व्यक्तिगत परिचयपत्र नं.', mPersonal[1].trim()];
                     } else if (mCit) {
                         parts = ['नागरिकता नं.', mCit[1].trim()];
                     } else if (mAcc) {
@@ -1107,7 +1150,7 @@
 
                 if (parts.length >= 2) {
                     const k = parts[0].trim();
-                    const v = parts[1].trim().replace(/^[\s:\-]+/, '').replace(/[,\s]+$/, '');
+                    const v = parts.slice(1).join(' ').trim().replace(/^[\s:\-]+/, '').replace(/[,\s]+$/, '');
 
                     // Applicant / Heir Name in deceased mode
                     if (/^(?:निवेदकको\s*(?:पुरा\s*)?नाम|हकदारको\s*(?:पुरा\s*)?नाम|Applicant\s*Name)$/i.test(k)) {
@@ -1117,7 +1160,7 @@
                     else if (/^(?:निवेदकको\s*नागरिकता\s*नं\.?|हकदारको\s*नागरिकता\s*नं\.?)$/i.test(k)) {
                         if (v && v !== '०' && v !== '0' && !parsedData.applicantCitNo) parsedData.applicantCitNo = v;
                     }
-                    // Name matching (avoids बाबुको नाम, आमाको नाम, हजुरबुबाको नाम, संरक्षकको नाम, बैंकको नाम, आदि)
+                    // Name matching (avoids बाबुको नाम, आमाको नाम, हजुरबुबाको नाम, संरक्षकको नाम, बैंकको नाम, रुजु गर्ने व्यक्तिको नाम, आदि)
                     else if (/^(?:मृतकको\s*(?:पुरा\s*)?नाम|नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|देवनागरीमा|Beneficiary\s*Name|Name)$/i.test(k)) {
                         if (v && !parsedData.name) parsedData.name = v;
                     }
@@ -1137,24 +1180,32 @@
                     else if (/^(?:मृतकको\s*नागरिकता\s*नं\.?|मृतकको\s*नागरिकता\s*नम्बर|नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|जन्मदर्ता\s*नं\.?|जन्मदर्ता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)$/i.test(k)) {
                         if (v && v !== '०' && v !== '0' && !parsedData.citNo) parsedData.citNo = v;
                     }
-                    // Personal ID / व्यक्तिगत परिचयपत्र नं. (Strictly distinct from National ID / NID)
-                    else if (/^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity\s*(?:No\.?)?)$/i.test(k)) {
-                        const mVal = v.match(/^([0-9०-९A-Za-z\/\-]+)/);
-                        const cleanPid = mVal ? mVal[1] : v;
-                        if (cleanPid && cleanPid !== '०' && cleanPid !== '0' && cleanPid !== 'NotStarted' && !parsedData.personalId) {
-                            parsedData.personalId = cleanPid;
-                        }
-                    }
                     // National ID / राष्ट्रिय परिचयपत्र नं. (Strictly distinct from Personal ID)
-                    else if (/^(?:मृतकको\s*)?(?:राष्ट्रिय\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|NID|National\s*ID(?:\s*No\.?)?)$/i.test(k)) {
+                    else if (isNationalIdLabel(k)) {
                         const mVal = v.match(/^([0-9०-९A-Za-z\/\-]+)/);
                         const cleanNid = mVal ? mVal[1] : v;
                         if (cleanNid && cleanNid !== '०' && cleanNid !== '0' && cleanNid !== 'NotStarted' && !parsedData.nid) {
                             parsedData.nid = cleanNid;
                         }
                     }
-                    // Card No / Allowance Card No (when not preceded by व्यक्तिगत, राष्ट्रिय, or अपांगता)
-                    else if (/^(?:(?<![वब]्यक्तिगत\s*|राष्ट्रिय\s*|अपांगता\s*)परिचय\s*पत्र\s*नं\.?|(?<![वब]्यक्तिगत\s*|राष्ट्रिय\s*|अपांगता\s*)परिचय\s*पत्र\s*नम्बर|(?<![वब]्यक्तिगत\s*|राष्ट्रिय\s*|अपांगता\s*)परिचयपत्र\s*नं\.?|(?<![वब]्यक्तिगत\s*|राष्ट्रिय\s*|अपांगता\s*)परिचयपत्र\s*नम्बर|भत्ता\s*कार्ड\s*नं\.?|भत्ता\s*कार्ड\s*नम्बर|कार्ड\s*नम्बर)$/i.test(k)) {
+                    // Personal ID / व्यक्तिगत परिचयपत्र नं. / परिचयपत्र नं. (Strictly distinct from National ID / NID)
+                    else if (isPersonalIdLabel(k)) {
+                        const id13 = extract13DigitId(v);
+                        if (id13 && !parsedData.personalId) {
+                            parsedData.personalId = id13;
+                            parsedData.cardNo = id13;
+                        } else if (/^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID)/i.test(k)) {
+                            // Fallback for explicit personal ID if non-13 digit (e.g. test format)
+                            const mVal = v.match(/^([0-9०-९A-Za-z\/\-]+)/);
+                            const cleanPid = mVal ? mVal[1] : v;
+                            if (cleanPid && cleanPid !== '०' && cleanPid !== '0' && cleanPid !== 'NotStarted' && !parsedData.personalId) {
+                                parsedData.personalId = cleanPid;
+                                parsedData.cardNo = cleanPid;
+                            }
+                        }
+                    }
+                    // Allowance Card No (भत्ता कार्ड नं)
+                    else if (/^(?:भत्ता\s*कार्ड\s*नं\.?|भत्ता\s*कार्ड\s*नम्बर|कार्ड\s*नम्बर)$/i.test(k)) {
                         if (v && !parsedData.cardNo) parsedData.cardNo = v;
                     }
                     // Account No
@@ -1182,38 +1233,51 @@
                     }
                 }
 
-                // Check for value on NEXT line if current line was just a label
-                if (!parsedData.personalId && /^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी))[:\s\-\.]*$/i.test(trimmed)) {
-                    for (let j = index + 1; j <= Math.min(index + 3, lines.length - 1); j++) {
+                // Lookahead: Check for value on NEXT line(s) if current line was just a personal ID label
+                if (!parsedData.personalId && isPersonalIdLabel(trimmed)) {
+                    let candidateLines = [];
+                    for (let j = index + 1; j <= Math.min(index + 4, lines.length - 1); j++) {
                         const nextTrimmed = lines[j].trim();
                         if (!nextTrimmed) continue;
-                        if (!/^(?:नाम|मृत्यु|नागरिकता|खाता|लगतकट्टा|राष्ट्रिय|भत्ता|बैंक|संरक्षक|[वब]्यक्तिगत)/i.test(nextTrimmed)) {
-                            const valMatch = nextTrimmed.match(/^([0-9०-९A-Za-z\/\-]+)/);
+                        if (/^(?:नाम|मृत्यु|नागरिकता|खाता|लगतकट्टा|राष्ट्रिय|भत्ता|बैंक|संरक्षक|हकदार|निवेदक|रुजु|[वब]्यक्तिगत|लक्षित|बाबु|आमा)/i.test(nextTrimmed)) {
+                            break;
+                        }
+                        candidateLines.push(nextTrimmed);
+                    }
+                    const candidateStr = candidateLines.join(' ');
+                    const id13 = extract13DigitId(candidateStr);
+                    if (id13) {
+                        parsedData.personalId = id13;
+                        parsedData.cardNo = id13;
+                    } else if (/^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID)/i.test(trimmed)) {
+                        if (candidateLines.length > 0) {
+                            const valMatch = candidateLines[0].match(/^([0-9०-९A-Za-z\/\-]+)/);
                             if (valMatch && valMatch[1] !== '०' && valMatch[1] !== '0') {
                                 parsedData.personalId = valMatch[1];
-                                break;
+                                parsedData.cardNo = valMatch[1];
                             }
                         }
-                        break;
                     }
                 }
 
-                if (!parsedData.nid && /^(?:मृतकको\s*)?(?:राष्ट्रिय\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|NID|National\s*ID)[:\s\-\.]*$/i.test(trimmed)) {
+                // Lookahead: Check for value on NEXT line(s) for National ID (strictly NID, not personal ID)
+                if (!parsedData.nid && isNationalIdLabel(trimmed)) {
                     for (let j = index + 1; j <= Math.min(index + 3, lines.length - 1); j++) {
                         const nextTrimmed = lines[j].trim();
                         if (!nextTrimmed) continue;
-                        if (!/^(?:नाम|मृत्यु|नागरिकता|खाता|लगतकट्टा|राष्ट्रिय|भत्ता|बैंक|संरक्षक|[वब]्यक्तिगत)/i.test(nextTrimmed)) {
-                            const valMatch = nextTrimmed.match(/^([0-9०-९A-Za-z\/\-]+)/);
-                            if (valMatch && valMatch[1] !== '०' && valMatch[1] !== '0') {
-                                parsedData.nid = valMatch[1];
-                                break;
-                            }
+                        if (/^(?:नाम|मृत्यु|नागरिकता|खाता|लगतकट्टा|राष्ट्रिय|भत्ता|बैंक|संरक्षक|हकदार|निवेदक|रुजु|[वब]्यक्तिगत|लक्षित|बाबु|आमा)/i.test(nextTrimmed)) {
+                            break;
+                        }
+                        const valMatch = nextTrimmed.match(/^([0-9०-९A-Za-z\/\-]+)/);
+                        if (valMatch && valMatch[1] !== '०' && valMatch[1] !== '0' && valMatch[1] !== 'NotStarted') {
+                            parsedData.nid = valMatch[1];
+                            break;
                         }
                         break;
                     }
                 }
 
-                // Additional check for Lagat Katta Miti when date is on the following line in table copy
+                // Lookahead: Check for Lagat Katta Miti when date is on the following line in table copy
                 if (!parsedData.deathDate && /^(?:लगतकट्टा\s*मिति|लगत\s*कट्टा\s*मिति|मृत्यु\s*मिति)/i.test(trimmed)) {
                     for (let j = index + 1; j <= Math.min(index + 3, lines.length - 1); j++) {
                         const dateMatch = lines[j].match(/([२०८९०-९0-9]{4}[\/\-][२०८९०-९0-9]{2}[\/\-][२०८९०-९0-9]{2})/);
@@ -1254,9 +1318,19 @@
             }
             // Strict personal ID regex extraction (Never confusing with National ID / NID)
             if (!parsedData.personalId) {
-                const m = pastedText.match(/(?:^|[\r\n\t,;\s])(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity\s*(?:No\.?)?)\s*[:\-\s\t]+([0-9०-९A-Za-z\/\-]+)/i);
-                if (m && m[1].trim() !== '०' && m[1].trim() !== '0' && m[1].trim() !== 'NotStarted') {
-                    parsedData.personalId = m[1].trim();
+                const m = pastedText.match(/(?:^|[\r\n\t,;\s])(?<!राष्ट्रिय\s*|अपांगता\s*|मतदाता\s*)(?:(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*)?परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity(?:\s*(?:No\.?|Number))?)[\s:\-\t\r\n]+([0-9०-९\r\n\s\/\-]+)/i);
+                if (m) {
+                    const id13 = extract13DigitId(m[1]);
+                    if (id13) {
+                        parsedData.personalId = id13;
+                        if (!parsedData.cardNo) parsedData.cardNo = id13;
+                    } else if (/^[वब]्यक्तिगत|Personal/i.test(m[0].trim())) {
+                        const mVal = m[1].trim().match(/^([0-9०-९A-Za-z\/\-]+)/);
+                        if (mVal && mVal[1] !== '०' && mVal[1] !== '0' && mVal[1] !== 'NotStarted') {
+                            parsedData.personalId = mVal[1];
+                            if (!parsedData.cardNo) parsedData.cardNo = mVal[1];
+                        }
+                    }
                 }
             }
             // Strict national ID regex extraction (Never confusing with personal ID)
@@ -1321,8 +1395,8 @@
                     extractCount++;
                 }
                 // Strictly populate "व्यक्तिगत परिचयपत्र नं." from personalId only (NEVER from nid)
-                if (parsedData.personalId) {
-                    let rawPid = parsedData.personalId;
+                if (parsedData.personalId && document.getElementById('inDeceasedNid')) {
+                    let rawPid = toNepaliDigit(parsedData.personalId);
                     if (/^[0-9०-९A-Za-z\s\-\/]+$/.test(rawPid) && /[0-9०-९A-Za-z]/.test(rawPid)) {
                         document.getElementById('inDeceasedNid').value = rawPid;
                         extractCount++;
@@ -1376,6 +1450,20 @@
                     extractCount++;
                 }
 
+                // Strictly populate "व्यक्तिगत परिचयपत्र नं." from personalId only (NEVER from nid)
+                if (parsedData.personalId) {
+                    let rawPid = toNepaliDigit(parsedData.personalId);
+                    if (/^[0-9०-९A-Za-z\s\-\/]+$/.test(rawPid) && /[0-9०-९A-Za-z]/.test(rawPid)) {
+                        if (document.getElementById('inChildBeneficiaryId')) {
+                            document.getElementById('inChildBeneficiaryId').value = rawPid;
+                            extractCount++;
+                        }
+                        if (document.getElementById('inCardNo')) {
+                            document.getElementById('inCardNo').value = rawPid;
+                        }
+                    }
+                }
+
                 if (parsedData.accountNo) {
                     let rawAcc = parsedData.accountNo;
                     if (/^[0-9०-९\s\-]+$/.test(rawAcc) && /[0-9०-९]/.test(rawAcc)) {
@@ -1415,9 +1503,9 @@
                     document.getElementById('inName').value = parsedData.name;
                     extractCount++;
                 }
-                const cardVal = parsedData.cardNo || parsedData.personalId;
-                if (cardVal) {
-                    let rawCard = cardVal;
+                const cardVal = parsedData.personalId || parsedData.cardNo;
+                if (cardVal && document.getElementById('inCardNo')) {
+                    let rawCard = toNepaliDigit(cardVal);
                     if (/^[0-9०-९A-Za-z\s\-]+$/.test(rawCard) && /[0-9०-९A-Za-z]/.test(rawCard)) {
                         document.getElementById('inCardNo').value = rawCard;
                         extractCount++;
@@ -1659,6 +1747,7 @@
                 const childName = document.getElementById('inChildBeneficiaryName').value.trim() || '.........................';
                 const targetGroup = document.getElementById('inChildTargetGroup').value.trim() || 'दलित बालबालिका';
                 const childAccNo = document.getElementById('inChildAccountNo').value.trim() || '..................................';
+                const childBeneficiaryId = (document.getElementById('inChildBeneficiaryId') || {}).value ? document.getElementById('inChildBeneficiaryId').value.trim() : '';
 
                 bodyTextEl.innerHTML = `
                     प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${childRelation}</span> <span style="font-weight:bold;">${childName}</span>ले <span style="font-weight:bold;">${targetGroup}</span> अन्तर्गत सामाजिक सुरक्षा भत्ता प्राप्त गरिरहनुभएको र हाल निजको सामाजिक सुरक्षा अन्तर्गत ${targetGroup}ले प्राप्त गर्ने भत्ताको उमेर सिमा पुरा भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं.<span style="font-weight:bold;">${childAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${guardianRel}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकाश गरी उक्त बैंक खाता बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ l
@@ -1671,6 +1760,12 @@
                         <td class="sep-col">:</td>
                         <td class="val-col"><b>${childName}</b></td>
                     </tr>
+                    ${childBeneficiaryId ? `
+                    <tr>
+                        <td class="label-col">व्यक्तिगत परिचय पत्र नं.</td>
+                        <td class="sep-col">:</td>
+                        <td class="val-col"><b>${childBeneficiaryId}</b></td>
+                    </tr>` : ''}
                     <tr>
                         <td class="label-col">खाता नं.</td>
                         <td class="sep-col">:</td>
@@ -1921,6 +2016,7 @@
 
                 // Child Account Closure specific
                 childBeneficiaryName: document.getElementById('inChildBeneficiaryName') ? document.getElementById('inChildBeneficiaryName').value.trim() : '',
+                childBeneficiaryId:   document.getElementById('inChildBeneficiaryId') ? document.getElementById('inChildBeneficiaryId').value.trim() : '',
                 childRelation:        childRelationVal,
                 childGuardianRelation: childGuardianRelationVal,
                 childTargetGroup:     document.getElementById('inChildTargetGroup') ? document.getElementById('inChildTargetGroup').value.trim() : '',
@@ -2172,6 +2268,9 @@
             // Restore Child Account Closure fields
             if (document.getElementById('inChildBeneficiaryName')) {
                 document.getElementById('inChildBeneficiaryName').value = rec.childBeneficiaryName || '';
+            }
+            if (document.getElementById('inChildBeneficiaryId')) {
+                document.getElementById('inChildBeneficiaryId').value = rec.childBeneficiaryId || '';
             }
             if (document.getElementById('inChildTargetGroup')) {
                 document.getElementById('inChildTargetGroup').value = rec.childTargetGroup || 'दलित बालबालिका';
