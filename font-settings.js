@@ -877,30 +877,44 @@
             } catch(e) {}
         }
 
-        // Enforce Nepal Samvat 1146 globally across all forms and live previews
-        const enforceNepalSamvat1146 = () => {
+        // Maintain full Nepal Samvat year, tithi, and day number for printable document letterhead
+        const syncDocumentNepalSambat = () => {
             const inNS = document.getElementById('inNepalSamvat');
-            if (inNS && inNS.value !== '११४६') {
+            if (inNS && (!inNS.value || inNS.value.trim() === '' || inNS.value === '-')) {
                 inNS.value = '११४६';
-                if (typeof updateDoc === 'function') updateDoc();
             }
-            const lblNS = document.getElementById('lblNepalSamvat');
-            if (lblNS && lblNS.innerText !== '११४६') {
-                lblNS.innerText = '११४६';
-            }
+            const inMiti = document.getElementById('inMiti') || document.getElementById('inSubmitMiti') || document.getElementById('inCustomCertifiedMiti');
+            const lblMiti = document.getElementById('lblMiti');
+            const dateVal = inMiti ? inMiti.value : (lblMiti ? lblMiti.innerText : '');
+            let yr = inNS ? inNS.value.trim() : '११४६';
+
+            const fullNS = (window.NepalSambat && typeof window.NepalSambat.formatPrint === 'function')
+                ? window.NepalSambat.formatPrint(yr, dateVal)
+                : (yr || '११४६');
+
+            const lblNSList = document.querySelectorAll('#lblNepalSamvat, .lbl-nepal-samvat');
+            lblNSList.forEach(lblNS => {
+                if (lblNS && lblNS.innerText !== fullNS) {
+                    lblNS.innerText = fullNS;
+                }
+            });
         };
-        enforceNepalSamvat1146();
-        setTimeout(enforceNepalSamvat1146, 50);
-        setTimeout(enforceNepalSamvat1146, 300);
-        setTimeout(enforceNepalSamvat1146, 1000);
-        window.addEventListener('templateInjected', enforceNepalSamvat1146);
+        syncDocumentNepalSambat();
+        setTimeout(syncDocumentNepalSambat, 50);
+        setTimeout(syncDocumentNepalSambat, 300);
+        setTimeout(syncDocumentNepalSambat, 1000);
+        window.addEventListener('templateInjected', syncDocumentNepalSambat);
+        window.addEventListener('beforeprint', syncDocumentNepalSambat);
         document.addEventListener('input', (e) => {
-            if (e.target && e.target.id === 'inMiti') {
-                setTimeout(enforceNepalSamvat1146, 10);
+            if (e.target && (e.target.id === 'inMiti' || e.target.id === 'inNepalSamvat')) {
+                setTimeout(syncDocumentNepalSambat, 10);
             }
         });
 
         const btnPrint = document.querySelector('.btn-print');
+        if (btnPrint) {
+            btnPrint.addEventListener('click', syncDocumentNepalSambat, true);
+        }
         if (!btnPrint) return;
 
         // Initialize Firebase / Firestore if it wasn't done yet (e.g., dynamic-sifarish page)

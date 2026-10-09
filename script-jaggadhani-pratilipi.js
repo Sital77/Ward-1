@@ -149,7 +149,7 @@ function updateDoc() {
     document.getElementById('lblAY').innerText          = ay;
     document.getElementById('lblChalani').innerText     = chalani;
     document.getElementById('lblMiti').innerText        = miti;
-    document.getElementById('lblNepalSamvat').innerText = ns;
+    document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(ns, miti) : ns;
 
     // Applicant & Residence
     const loggedWard = localStorage.getItem('sifarish_ward') || '1';

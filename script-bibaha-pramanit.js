@@ -226,7 +226,7 @@ function updateDoc() {
     if (document.getElementById('lblAY')) document.getElementById('lblAY').innerText = ay;
     if (document.getElementById('lblChalani')) document.getElementById('lblChalani').innerText = chalani;
     if (document.getElementById('lblMiti')) document.getElementById('lblMiti').innerText = miti;
-    if (document.getElementById('lblNepalSamvat')) document.getElementById('lblNepalSamvat').innerText = ns;
+    if (document.getElementById('lblNepalSamvat')) document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(ns, miti) : ns;
 
     // Receiver
     const recRadios = document.getElementsByName('recRadio');

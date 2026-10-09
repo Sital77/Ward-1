@@ -373,7 +373,7 @@
             document.getElementById('lblPatraSankhya').innerText = patraVal;
             document.getElementById('lblChalani').innerText = chalaniVal || '.......';
             document.getElementById('lblMiti').innerText = mitiVal || '.......';
-            document.getElementById('lblNepalSamvat').innerText = nsVal || '.......';
+            document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(nsVal, mitiVal) : (nsVal || '.......');
 
             // Update dynamic placeholders
             placeholders.forEach(p => {

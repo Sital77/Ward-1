@@ -169,7 +169,8 @@ function updateDoc() {
     safeSetText('lblPatraSankhya', document.getElementById('inPatraSankhya').value);
     safeSetText('lblChalani', document.getElementById('inChalani').value || '');
     safeSetText('lblMiti', document.getElementById('inMiti').value || '........');
-    safeSetText('lblNepalSamvat', document.getElementById('inNepalSamvat').value || '........');
+    const inNSVal_script = document.getElementById('inNepalSamvat').value || '........';
+    safeSetText('lblNepalSamvat', (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(inNSVal_script, document.getElementById('inMiti')?.value) : inNSVal_script);
     safeSetText('lblOfficeName', document.getElementById('inOffice').value || '........');
 
     const officeAddr = document.getElementById('inOfficeAddress').value;

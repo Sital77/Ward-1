@@ -278,7 +278,8 @@ window.updateDoc = function() {
     safeSetText('lblMiti', miti && miti.value ? miti.value : '........');
 
     const nepalSamvat = document.getElementById('inNepalSamvat');
-    safeSetText('lblNepalSamvat', nepalSamvat && nepalSamvat.value ? nepalSamvat.value : '........');
+    const nsAamdani = nepalSamvat && nepalSamvat.value ? nepalSamvat.value : '........';
+    safeSetText('lblNepalSamvat', (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(nsAamdani, miti && miti.value) : nsAamdani);
 
     const office = document.getElementById('inOffice');
     safeSetText('lblOfficeName', office && office.value ? office.value : '........');

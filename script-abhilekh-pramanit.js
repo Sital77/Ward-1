@@ -233,7 +233,7 @@ function updateDoc() {
     const lblMiti = document.getElementById('lblMiti');
     if (lblMiti) lblMiti.innerText = miti || '........';
     const lblNS = document.getElementById('lblNepalSamvat');
-    if (lblNS) lblNS.innerText = ns || '........';
+    if (lblNS) lblNS.innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(ns, miti) : (ns || '........');
 
     // Recipient address & Subject
     const receiverAddressContainer = document.getElementById('receiverAddressContainer') || document.getElementById('lblReceiverAddress') || document.querySelector('.receiver-address-block');

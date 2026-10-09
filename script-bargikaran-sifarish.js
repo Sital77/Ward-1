@@ -344,7 +344,7 @@ window.updateDoc = function () {
     if (lblMiti) lblMiti.innerText = window.toNepaliDigit(miti) || '२०८३/';
 
     const lblNepalSamvat = document.getElementById('lblNepalSamvat');
-    if (lblNepalSamvat) lblNepalSamvat.innerText = window.toNepaliDigit(nepalSamvat) || '११४६';
+    if (lblNepalSamvat) lblNepalSamvat.innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(nepalSamvat, document.getElementById('inMiti')?.value) : (window.toNepaliDigit(nepalSamvat) || '११४६');
 
     const lblReceiver = document.getElementById('lblReceiver');
     if (lblReceiver) lblReceiver.innerText = receiver || 'श्री यो जोजस सँग सम्बन्धित छ ।';

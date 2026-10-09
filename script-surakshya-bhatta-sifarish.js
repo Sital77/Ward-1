@@ -166,7 +166,7 @@ function updateDoc() {
     const lblMiti = document.getElementById('lblMiti');
     if (lblMiti) lblMiti.innerText = miti || '........';
     const lblNS = document.getElementById('lblNepalSamvat');
-    if (lblNS) lblNS.innerText = ns || '........';
+    if (lblNS) lblNS.innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(ns, miti) : (ns || '........');
 
     // Update Bank & Subject
     const lblBankName = document.getElementById('lblBankName');

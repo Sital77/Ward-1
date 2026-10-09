@@ -747,7 +747,8 @@
             document.getElementById('lblAY').innerText = ay;
             document.getElementById('lblChalani').innerText = chalani || '..........';
             document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
-            document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value.trim() || '';
+            const inNSVal_yojana_s = document.getElementById('inNepalSamvat').value.trim() || '';
+            document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(inNSVal_yojana_s, document.getElementById('inMiti')?.value) : inNSVal_yojana_s;
 
             const budgetTypeStr = getSelectedBudgetType();
             const fiscalYearStr = document.getElementById('inFiscalYear').value.trim() || '२०८३/०८४';

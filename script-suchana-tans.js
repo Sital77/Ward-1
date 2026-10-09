@@ -83,7 +83,7 @@ function updateDoc() {
     const lblMiti = document.getElementById('lblMiti');
     if (lblMiti) lblMiti.innerText = miti;
     const lblNepalSamvat = document.getElementById('lblNepalSamvat');
-    if (lblNepalSamvat) lblNepalSamvat.innerText = ns;
+    if (lblNepalSamvat) lblNepalSamvat.innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(ns, miti) : ns;
 
     // Body
     if (document.getElementById('lblBodyAY')) document.getElementById('lblBodyAY').innerText = bodyAY;

@@ -202,7 +202,8 @@ window.updateDoc = function () {
     document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
     document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '';
     document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value || '........';
-    document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value || '........';
+    const inNSVal_pariwarik = document.getElementById('inNepalSamvat').value || '........';
+    document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(inNSVal_pariwarik, document.getElementById('inMiti')?.value) : inNSVal_pariwarik;
 
     const selectedWada = document.getElementById('inWadaNo').value;
     document.getElementById('lblWadaBody1').innerText = selectedWada;

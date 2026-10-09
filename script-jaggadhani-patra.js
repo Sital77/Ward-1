@@ -292,7 +292,7 @@ window.updateDoc = function () {
     document.getElementById('lblPatraSankhya').innerText = patra;
     document.getElementById('lblChalani').innerText = chalani;
     document.getElementById('lblMiti').innerText = miti;
-    document.getElementById('lblNepalSamvat').innerText = ns;
+    document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(ns, miti) : ns;
 
     const applicantName = document.getElementById('inApplicantName').value.trim() || '.......';
     const selectedWada = document.getElementById('inWadaNo').value || '१';

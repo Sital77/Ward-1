@@ -184,7 +184,7 @@ function updateDoc() {
     document.getElementById('lblAY').innerText          = ay;
     document.getElementById('lblChalani').innerText     = chalani;
     document.getElementById('lblMiti').innerText        = miti;
-    document.getElementById('lblNepalSamvat').innerText = ns;
+    document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(ns, miti) : ns;
     if (document.getElementById('lblSifarisWada')) {
         document.getElementById('lblSifarisWada').innerText = wada;
     }

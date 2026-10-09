@@ -3,12 +3,10 @@
  * Source: https://www.nepalsambat.com/#calendar (via ashesh panchang calendar widget)
  * Provides official daily Nepal Sambat year, tithi name, and day number in Devanagari.
  * 
- * Complies with strict architectural requirements:
- * 1. Preserves existing Bikram Sambat date conversion and "हाल मिति:" system completely.
- * 2. Matches source date to local Nepal time (Asia/Kathmandu timezone, UTC+5:45).
- * 3. Uses official Devanagari numerals and exact Devanagari spelling from source calendar.
- * 4. Automatically refreshes every day on Nepal-local midnight and tab focus.
- * 5. 100% offline-ready with zero CORS issues and 0ms latency.
+ * Supports:
+ * 1. Screen date banner badges and homepage headers
+ * 2. Printable recommendation document output (letterhead ने.स. : ११४६ ञलागा चतुर्दशी २९)
+ * 3. Saved-record reopening, print preview, and PDF generation
  */
 (function(window) {
     'use strict';
@@ -90,9 +88,27 @@
 
     /**
      * Retrieve source-verified Nepal Sambat tithi info for today or given date.
-     * @param {Date|string} [dateParam] - Optional date; defaults to today in Nepal.
+     * Accepts:
+     * - Empty/undefined: Today in Kathmandu local time
+     * - BS Date String: "२०८३/०६/२३", "2083/06/23", "2083-06-23"
+     * - AD Date String or Date object
+     * @param {Date|string} [dateParam]
      */
     function getNepalSambatTithi(dateParam) {
+        // 1. Direct check if dateParam is a BS date string
+        if (typeof dateParam === 'string' && dateParam.trim()) {
+            const cleanStr = toArabic(dateParam).trim();
+            const bsMatch = cleanStr.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+            if (bsMatch) {
+                const yr = parseInt(bsMatch[1], 10);
+                if (yr >= 2080 && yr <= 2085) {
+                    const bsKey = `${yr}-${String(bsMatch[2]).padStart(2, '0')}-${String(bsMatch[3]).padStart(2, '0')}`;
+                    const res = lookupKey(bsKey);
+                    if (res) return res;
+                }
+            }
+        }
+
         const ktm = getKathmanduDate(dateParam);
         const cacheKey = `ns_tithi_cache_${ktm.adKey}`;
 
@@ -107,10 +123,10 @@
             }
         } catch(e) {}
 
-        // 1. Direct AD lookup
+        // Direct AD lookup
         let res = lookupKey(ktm.adKey);
 
-        // 2. BS lookup via existing conversion library if needed
+        // BS lookup via existing conversion library if needed
         if (!res && window['@sbmdkl/nepali-date-converter']) {
             try {
                 const conv = window['@sbmdkl/nepali-date-converter'];
@@ -149,6 +165,49 @@
     }
 
     /**
+     * Formats printed/displayed Nepal Sambat text for document letterhead.
+     * Takes existing year (e.g. "११४६") and document date (e.g. "२०८३/०६/२३").
+     * Returns "११४६ ञलागा चतुर्दशी २९" or gracefully "११४६" if tithi is unavailable.
+     */
+    function formatPrint(yearInput, dateInput) {
+        let yr = toDevanagari(yearInput || '११४६').trim();
+        // If yearInput already includes the full string (e.g. "११४६ ञलागा चतुर्दशी २९"), prevent duplication
+        if (yr.includes(' ')) {
+            yr = yr.split(' ')[0];
+        }
+        if (!yr || yr === '-' || yr === '........') {
+            yr = '११४६';
+        }
+
+        const tithiObj = getNepalSambatTithi(dateInput);
+        if (tithiObj && tithiObj.formatted && tithiObj.formatted.trim()) {
+            return `${yr} ${tithiObj.formatted.trim()}`;
+        }
+        return yr;
+    }
+
+    /**
+     * Globally updates all letterhead #lblNepalSamvat elements on the active page
+     */
+    function updateDocumentLabels() {
+        try {
+            const inNS = document.getElementById('inNepalSamvat');
+            const inMiti = document.getElementById('inMiti') || document.getElementById('inSubmitMiti') || document.getElementById('inCustomCertifiedMiti');
+            const lblMiti = document.getElementById('lblMiti');
+            const dateVal = inMiti ? inMiti.value : (lblMiti ? lblMiti.innerText : '');
+            let yr = inNS ? inNS.value.trim() : '११४६';
+            const fullText = formatPrint(yr, dateVal);
+
+            const allLbls = document.querySelectorAll('#lblNepalSamvat, .lbl-nepal-samvat');
+            allLbls.forEach(lbl => {
+                if (lbl && lbl.innerText !== fullText) {
+                    lbl.innerText = fullText;
+                }
+            });
+        } catch(e) {}
+    }
+
+    /**
      * Watches for Nepal-local midnight transitions and auto-refreshes callbacks
      */
     function setupAutoRefresh(callback) {
@@ -160,6 +219,7 @@
                 if (typeof callback === 'function') {
                     callback(getNepalSambatTithi());
                 }
+                updateDocumentLabels();
             }
         };
 
@@ -170,10 +230,26 @@
         setInterval(tick, 60000);
     }
 
+    // Auto-update letterhead labels before printing and on page interactions
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+        window.addEventListener('beforeprint', updateDocumentLabels);
+        document.addEventListener('DOMContentLoaded', updateDocumentLabels);
+        document.addEventListener('input', (e) => {
+            if (e.target && (e.target.id === 'inMiti' || e.target.id === 'inNepalSamvat')) {
+                setTimeout(updateDocumentLabels, 20);
+            }
+        });
+        setTimeout(updateDocumentLabels, 100);
+        setTimeout(updateDocumentLabels, 500);
+        setTimeout(updateDocumentLabels, 1200);
+    }
+
     // Export cleanly to global scope
     window.NepalSambat = window.NepalSambat || {};
     window.NepalSambat.getTithi = getNepalSambatTithi;
     window.NepalSambat.getToday = () => getNepalSambatTithi();
+    window.NepalSambat.formatPrint = formatPrint;
+    window.NepalSambat.updateDocumentLabels = updateDocumentLabels;
     window.NepalSambat.toDevanagari = toDevanagari;
     window.NepalSambat.toArabic = toArabic;
     window.NepalSambat.getKathmanduDate = getKathmanduDate;

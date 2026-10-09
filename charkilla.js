@@ -157,7 +157,8 @@ function updateDoc() {
     document.getElementById('lblPatraSankhya').innerText = document.getElementById('inPatraSankhya').value;
     document.getElementById('lblChalani').innerText = document.getElementById('inChalani').value || '';
     document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value || '........';
-    document.getElementById('lblNepalSamvat').innerText = document.getElementById('inNepalSamvat').value || '........';
+    const inNSVal_charkilla = document.getElementById('inNepalSamvat').value || '........';
+    document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(inNSVal_charkilla, document.getElementById('inMiti')?.value) : inNSVal_charkilla;
     
     const selectedWada = document.getElementById('inWadaNo').value;
     document.getElementById('lblWadaBody').innerText = selectedWada;
