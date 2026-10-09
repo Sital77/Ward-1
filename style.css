@@ -631,19 +631,20 @@ input[type="range"]::-webkit-slider-thumb:hover {
     border-collapse: collapse !important;
     border: 1.5px solid #000 !important;
     box-sizing: border-box !important;
-    font-size: 10.5pt;
+    font-size: 12.5pt;
 }
 
 .details-table th,
 .details-table td {
     border: 1px solid #000 !important;
-    padding: 5px 3px !important;
+    padding: 5px 4px !important;
     text-align: center !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
     word-break: break-word !important;
     overflow-wrap: break-word !important;
-    line-height: 1.3 !important;
+    line-height: 1.35 !important;
+    font-size: 12.5pt !important;
 }
 
 .details-table th:first-child,
@@ -704,6 +705,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     display: inline-block;
     min-width: 100px;
     text-align: center;
+    font-size: 13pt;
 }
 
 /* ===== THREE-COLUMN LETTERHEAD (पारिवारिक विवरण शैली) ===== */
@@ -984,9 +986,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
     .details-table th,
     .details-table td {
-        padding: 4px 2px !important;
-        font-size: 10pt !important;
-        line-height: 1.25 !important;
+        padding: 5px 4px !important;
+        font-size: 12.5pt !important;
+        line-height: 1.35 !important;
         border: 1px solid #000 !important;
         box-sizing: border-box !important;
     }
@@ -1020,7 +1022,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
     .doc-footer {
         padding-bottom: 0 !important;
-        margin-top: 15px !important;
         page-break-inside: avoid !important;
+    }
+
+    .sig-name {
+        font-size: 13pt !important;
+    }
+
+    .sig-title {
+        font-size: 13pt !important;
     }
 }

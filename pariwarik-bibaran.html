@@ -7,27 +7,9 @@
     <title>पारिवारिक विवरण प्रमाणित प्रणाली - गौरादह नगरपालिका</title>
     <link rel="stylesheet" href="charkilla.css?v=4.0">
     <style>
-        .signature-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .sig-title-line {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .sig-name {
-            font-weight: bold;
-            border-top: 1.5px dashed #000;
-            padding-top: 6px;
-            display: inline-block;
-            min-width: 100px;
-            text-align: center;
-        }
+        /* ===== UNIFIED DOCUMENT TYPOGRAPHY ===== */
+        /* All document text uses a consistent size hierarchy:
+           Subject title: 15pt | Body text: 13pt | Table: 12.5pt | Tapsil heading: 13pt */
 
         /* Custom input table style improvements */
         .member-row-block {
@@ -52,11 +34,11 @@
             margin-bottom: 8px;
         }
 
-        /* Override details table font size and layout constraints to strictly fit A4 */
+        /* ===== DETAILS TABLE — Uniform size matching body text ===== */
         .details-table {
             width: calc(100% - 6px) !important;
             max-width: calc(100% - 6px) !important;
-            font-size: 11.5pt !important;
+            font-size: 12.5pt !important;
             margin: 8px auto !important;
             border-collapse: collapse !important;
             border: 1.5px solid #000 !important;
@@ -66,7 +48,7 @@
 
         .details-table th,
         .details-table td {
-            font-size: 11.5pt !important;
+            font-size: 12.5pt !important;
             padding: 5px 4px !important;
             border: 1px solid #000 !important;
             text-align: center !important;
@@ -98,7 +80,41 @@
             padding-left: 8px !important;
         }
 
-        /* ===== PRINT: Page layout fix ===== */
+        /* ===== SIGNATURE BLOCK — Fixed position for consistent print ===== */
+        .doc-footer {
+            display: flex !important;
+            justify-content: flex-end !important;
+            width: 100%;
+            padding-bottom: 15px;
+        }
+
+        .signature-block {
+            text-align: center;
+            width: 240px;
+            font-size: 13pt;
+        }
+
+        .sig-title-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sig-name {
+            font-weight: bold;
+            border-top: 1.5px dashed #000;
+            padding-top: 6px;
+            display: inline-block;
+            min-width: 100px;
+            text-align: center;
+            font-size: 13pt;
+        }
+
+        .sig-title {
+            font-size: 13pt;
+        }
+
+        /* ===== PRINT: Consistent layout ===== */
         @media print {
             @page {
                 size: A4 portrait;
@@ -141,9 +157,11 @@
                 page-break-inside: avoid !important;
             }
 
+            /* Table: SAME size as screen — no shrinkage on print */
             .details-table {
                 width: calc(100% - 6px) !important;
                 max-width: calc(100% - 6px) !important;
+                font-size: 12.5pt !important;
                 margin: 8px auto !important;
                 table-layout: fixed !important;
                 border-collapse: collapse !important;
@@ -154,9 +172,9 @@
 
             .details-table th,
             .details-table td {
-                padding: 4px 3px !important;
-                font-size: 11pt !important;
-                line-height: 1.3 !important;
+                padding: 5px 4px !important;
+                font-size: 12.5pt !important;
+                line-height: 1.35 !important;
                 border: 1px solid #000 !important;
                 box-sizing: border-box !important;
             }
@@ -171,14 +189,26 @@
                 border-right: 1.5px solid #000 !important;
             }
 
+            /* Signature: preserve user-set margin-top inline style */
+            .doc-footer {
+                padding-bottom: 0 !important;
+                page-break-inside: avoid !important;
+            }
+
             .sig-space {
                 height: 35px !important;
             }
 
-            .doc-footer {
-                margin-top: 15px !important;
-                padding-bottom: 0 !important;
-                page-break-inside: avoid !important;
+            .signature-block {
+                font-size: 13pt !important;
+            }
+
+            .sig-name {
+                font-size: 13pt !important;
+            }
+
+            .sig-title {
+                font-size: 13pt !important;
             }
         }
     </style>
@@ -386,19 +416,19 @@
             </div>
 
             <div class="header-red-line"></div>
-            <div class="address-to" style="font-weight: bold; font-size: 14pt; margin-top: 4px; margin-bottom: 10px;">
+            <div class="address-to" style="font-weight: bold; font-size: 13pt; margin-top: 4px; margin-bottom: 10px;">
                 श्री यो जो जससँग सम्बन्धित छ ।
             </div>
 
             <div class="subject-container" style="text-align: center; margin: 6px 0 12px 0;">
                 <div class="subject-title"
-                    style="font-size: 16pt; font-weight: bold; text-decoration: underline; display: inline-block;">
+                    style="font-size: 15pt; font-weight: bold; text-decoration: underline; display: inline-block;">
                     <span style="color: #e51a23;">विषय:-</span> पारिवारिक विवरण प्रमाणित सम्बन्धमा ।
                 </div>
             </div>
 
             <div class="letter-body"
-                style="text-align: justify; text-justify: inter-word; font-size: 13.5pt; line-height: 1.7; margin-bottom: 10px; text-indent: 50px;">
+                style="text-align: justify; text-justify: inter-word; font-size: 13pt; line-height: 1.7; margin-bottom: 10px; text-indent: 50px;">
                 प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं. <span id="lblWadaBody1" class="fill-space"
                     style="min-width:25px;">१</span> बसोबास गर्ने <span id="lblApplicantName" class="fill-space"
                     style="font-weight: bold; min-width:150px; padding-right:0;">.......</span><span id="lblCitBlock"
@@ -429,7 +459,7 @@
                     <div class="sig-space"></div>
                     <div class="sig-title-line">
                         <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
-                        <div class="sig-title" id="lblSigTitle" style="font-weight:normal;">वडा अध्यक्ष</div>
+                        <div class="sig-title" id="lblSigTitle">वडा अध्यक्ष</div>
                     </div>
                 </div>
             </div>
