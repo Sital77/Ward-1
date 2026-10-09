@@ -807,11 +807,199 @@
             });
         }).catch(() => {});
 
-        // ── Helpers ─────────────────────────────────────────
+                // ── Helpers ─────────────────────────────────────────
         function toNepaliDigit(num) {
             if (num === null || num === undefined) return '';
             const nd = ['०','१','२','३','४','५','६','७','८','९'];
             return num.toString().split('').map(d => nd[d] || d).join('');
+        }
+
+        // Helper to clean name: ensures Nepali only, strips English transliterations and relation labels
+        function cleanNepaliName(str) {
+            if (!str) return '';
+            let cleaned = str.trim();
+            // Reject if value is solely a relationship term or placeholder
+            if (/^(?:हजुरबुबा|हजुरबुबाको\s*नाम|हजुरआमा|हजुरआमाको\s*नाम|बाबु|बाबुको\s*नाम|बुवा|बुबा|आमा|आमाको\s*नाम|संरक्षक|संरक्षकको\s*नाम|बसोबास\s*गर्ने\s*हजुरबुबा|बसोबास\s*गर्ने\s*हजुरबुबाको\s*नाम|निवेदक|हकदार)$/i.test(cleaned)) {
+                return '';
+            }
+            // Strip leading prefixes if they were attached
+            cleaned = cleaned.replace(/^(?:हजुरबुबाको\s*(?:पुरा\s*)?नाम|बाबुको\s*(?:पुरा\s*)?नाम|आमाको\s*(?:पुरा\s*)?नाम|संरक्षकको\s*(?:पुरा\s*)?नाम|लाभग्राहीको\s*(?:पुरा\s*)?नाम|मृतकको\s*(?:पुरा\s*)?नाम|निवेदकको\s*(?:पुरा\s*)?नाम|हकदारको\s*(?:पुरा\s*)?नाम|नाम\s*थर|नाम)[\s:\-\t]*/i, '').trim();
+
+            // If Devanagari characters are present, extract ONLY the Devanagari portion
+            if (/[\u0900-\u097F]/.test(cleaned)) {
+                let nepOnly = cleaned
+                    .replace(/[A-Za-z0-9]+/g, '')
+                    .replace(/[()[\]{}:;,/\\_\-+=|?*^%$#@!~`"]+/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                if (/[\u0900-\u097F]{2,}/.test(nepOnly)) {
+                    if (/^(?:हजुरबुबा|हजुरबुबाको\s*नाम|हजुरआमा|हजुरआमाको\s*नाम|बाबु|बाबुको\s*नाम|बुवा|बुबा|आमा|आमाको\s*नाम|संरक्षक|संरक्षकको\s*नाम|बसोबास\s*गर्ने\s*हजुरबुबा|बसोबास\s*गर्ने\s*हजुरबुबाको\s*नाम|निवेदक|हकदार)$/i.test(nepOnly)) {
+                        return '';
+                    }
+                    return nepOnly;
+                }
+            }
+            // If only English letters or no Devanagari, return empty string (never guess English as Nepali)
+            return '';
+        }
+
+        function getDisplayName(rawVal, defaultPlaceholder = '.........................') {
+            if (!rawVal) return defaultPlaceholder;
+            const clean = cleanNepaliName(rawVal);
+            if (clean) return clean;
+            if (/^[.\-_\s]+$/.test(rawVal.trim())) return rawVal.trim();
+            return defaultPlaceholder;
+        }
+
+        // Helper to clean target group: ensures Nepali only, strips English and maps known English allowance types
+        function cleanTargetGroup(str) {
+            if (!str) return '';
+            let cleaned = str.trim();
+            // If Nepali characters exist, strip English transliteration and return Nepali portion
+            const nepaliMatch = cleaned.match(/[\u0900-\u097F]+[\u0900-\u097F\s\/\-\(\)]*/);
+            if (nepaliMatch && nepaliMatch[0].trim().length > 2) {
+                let nepPart = nepaliMatch[0].trim()
+                    .replace(/[A-Za-z0-9]+/g, '')
+                    .replace(/[\s\/\-]+$/, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                if (nepPart.length > 2) {
+                    return nepPart;
+                }
+            }
+            // If only English, map known allowance types to official Nepali groups
+            const lower = cleaned.toLowerCase();
+            if (lower.includes('dalit') && (lower.includes('child') || lower.includes('nutrition') || lower.includes('balbalika'))) {
+                return 'दलित बालबालिका';
+            }
+            if (lower.includes('child') || lower.includes('nutrition')) {
+                return 'दलित बालबालिका';
+            }
+            if (lower.includes('senior') && lower.includes('dalit')) {
+                return 'दलित ज्येष्ठ नागरिक भत्ता';
+            }
+            if (lower.includes('senior') && (lower.includes('other') || lower.includes('citizens allowance other') || lower.includes('citizen other'))) {
+                return 'अन्य ज्येष्ठ नागरिक भत्ता';
+            }
+            if (lower.includes('senior')) {
+                return 'ज्येष्ठ नागरिक भत्ता';
+            }
+            if (lower.includes('single wom')) {
+                return 'एकल महिला भत्ता';
+            }
+            if (lower.includes('widow')) {
+                return 'विधवा भत्ता';
+            }
+            if (lower.includes('full disability') || lower.includes('red card')) {
+                return 'पूर्ण अपाङ्गता भत्ता';
+            }
+            if (lower.includes('severe disability') || lower.includes('blue card')) {
+                return 'अति अशक्त अपाङ्गता भत्ता';
+            }
+            if (lower.includes('endangered')) {
+                return 'लोपोन्मुख जाति भत्ता';
+            }
+            // Do not guess if unknown English
+            return '';
+        }
+
+        function getDisplayTargetGroup(rawVal, defaultGroup = '...........') {
+            if (!rawVal) return defaultGroup;
+            const clean = cleanTargetGroup(rawVal);
+            if (clean) return clean;
+            if (/^[.\-_\s]+$/.test(rawVal.trim())) return rawVal.trim();
+            return defaultGroup;
+        }
+
+        // Helper to clean and deduplicate bank account numbers (returns single account number in Nepali digits)
+        function cleanAccountNo(str) {
+            if (!str) return '';
+            let cleaned = str.trim();
+            const chunks = cleaned.match(/[0-9०-९]{8,}/g);
+            if (chunks && chunks.length > 0) {
+                return toNepaliDigit(chunks[0]);
+            }
+            const tokens = cleaned.split(/[\s\t,]+/).map(t => t.trim()).filter(Boolean);
+            if (tokens.length > 0) {
+                for (let token of tokens) {
+                    if (/[0-9०-९]{5,}/.test(token)) {
+                        return toNepaliDigit(token);
+                    }
+                }
+            }
+            return toNepaliDigit(cleaned);
+        }
+
+        function getDisplayAccountNo(rawVal, defaultPlaceholder = '..................................') {
+            if (!rawVal) return defaultPlaceholder;
+            const clean = cleanAccountNo(rawVal);
+            if (clean && clean !== 'NotStarted') return clean;
+            if (/^[.\-_\s]+$/.test(rawVal.trim())) return rawVal.trim();
+            return defaultPlaceholder;
+        }
+
+        // Helper to clean and deduplicate citizenship / registration numbers
+        function cleanCitNo(str) {
+            if (!str) return '';
+            let cleaned = str.trim();
+            const tokens = cleaned.split(/[\s\t]+/).map(t => t.trim()).filter(Boolean);
+            if (tokens.length >= 2) {
+                const nep0 = toNepaliDigit(tokens[0]);
+                const nep1 = toNepaliDigit(tokens[1]);
+                if (nep0 === nep1 || tokens[0].replace(/[0-9०-९]/g, '') === tokens[1].replace(/[0-9०-९]/g, '')) {
+                    return nep0;
+                }
+                if (/[0-9०-९\/\-]/.test(tokens[0])) {
+                    return nep0;
+                }
+            }
+            return toNepaliDigit(cleaned);
+        }
+
+        function getDisplayCitNo(rawVal, defaultPlaceholder = '..................') {
+            if (!rawVal) return defaultPlaceholder;
+            const clean = cleanCitNo(rawVal);
+            if (clean && clean !== '०' && clean !== '0') return clean;
+            if (/^[.\-_\s]+$/.test(rawVal.trim())) return rawVal.trim();
+            return defaultPlaceholder;
+        }
+
+        // Helper to format date into YYYY/MM/DD with Nepali digits
+        function formatMitiDate(dateStr) {
+            if (!dateStr) return '';
+            let cleaned = dateStr.replace(/-/g, '/').trim();
+            return toNepaliDigit(cleaned);
+        }
+
+        // Helper to extract an exact 13-digit identification number (Nepali or English digits)
+        function extract13DigitId(str) {
+            if (!str) return '';
+            const nepMatch = str.match(/(?:^|[^\d०-९])([०-९]{13})(?:[^\d०-९]|$)/);
+            if (nepMatch) return nepMatch[1];
+            const engMatch = str.match(/(?:^|[^\d०-९])([0-9]{13})(?:[^\d०-९]|$)/);
+            if (engMatch) return toNepaliDigit(engMatch[1]);
+            return '';
+        }
+
+        // Strictly matches National ID (राष्ट्रिय परिचयपत्र नं. / NID) labels
+        function isNationalIdLabel(lbl) {
+            if (!lbl) return false;
+            const clean = lbl.trim().replace(/^[\s:\-\.]+/, '').replace(/[\s:\-\.]+$/, '');
+            return /^(?:मृतकको\s*)?(?:राष्ट्रिय\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|NID|National\s*ID(?:\s*No\.?)?)$/i.test(clean);
+        }
+
+        // Matches standalone परिचयपत्र नं. or explicit व्यक्तिगत परिचयपत्र नं. (never confusing with राष्ट्रिय/NID)
+        function isPersonalIdLabel(lbl) {
+            if (!lbl) return false;
+            const clean = lbl.trim().replace(/^[\s:\-\.]+/, '').replace(/[\s:\-\.]+$/, '');
+            if (/राष्ट्रिय|national|nid|अपांगता|मतदाता/i.test(clean)) return false;
+            if (/^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity(?:\s*(?:No\.?|Number))?)$/i.test(clean)) {
+                return true;
+            }
+            if (/^(?:परिचय\s*पत्र(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|परिचयपत्र(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|परिचय\s*(?:नं\.?|नम्बर|न\.?|No\.?))$/i.test(clean)) {
+                return true;
+            }
+            return false;
         }
 
         function getFiscalYear() {
@@ -967,9 +1155,21 @@
             document.getElementById('childChkBoxWrapper').style.display   = (mode === 'OPEN_ACCOUNT') ? 'block' : 'none';
             
             const chkIsChild = document.getElementById('chkIsChild');
+            // Checkbox must always default to OFF unless editing an existing saved child record
+            if (chkIsChild && !document.getElementById('editRecordIndex').value) {
+                chkIsChild.checked = false;
+                const secGuardian = document.getElementById('secGuardianDetails');
+                if (secGuardian) secGuardian.style.display = 'none';
+            }
             const secGuardian = document.getElementById('secGuardianDetails');
             if (secGuardian) {
                 secGuardian.style.display = (mode === 'OPEN_ACCOUNT' && chkIsChild && chkIsChild.checked) ? 'block' : 'none';
+            }
+            // Clear inputs when switching fresh tabs (not edit mode)
+            if (!document.getElementById('editRecordIndex').value) {
+                const pasteBox = document.getElementById('pasteTextarea');
+                if (pasteBox) pasteBox.value = '';
+                clearBadge();
             }
 
             document.getElementById('secPasteBox').style.display = 'block';
@@ -1070,51 +1270,6 @@
                 guardianRelation: ''
             };
 
-            // Helper to format date into YYYY/MM/DD with Nepali digits
-            function formatMitiDate(dateStr) {
-                if (!dateStr) return '';
-                let cleaned = dateStr.replace(/-/g, '/').trim();
-                return toNepaliDigit(cleaned);
-            }
-
-            // Helper to extract an exact 13-digit identification number (Nepali or English digits)
-            // Deduplicates and returns exactly 13 digits formatted in Nepali numerals.
-            function extract13DigitId(str) {
-                if (!str) return '';
-                // Match 13 Nepali digits
-                const nepMatch = str.match(/(?:^|[^\d०-९])([०-९]{13})(?:[^\d०-९]|$)/);
-                if (nepMatch) return nepMatch[1];
-                // Match 13 English digits and convert to Nepali
-                const engMatch = str.match(/(?:^|[^\d०-९])([0-9]{13})(?:[^\d०-९]|$)/);
-                if (engMatch) return toNepaliDigit(engMatch[1]);
-                return '';
-            }
-
-            // Strictly matches National ID (राष्ट्रिय परिचयपत्र नं. / NID) labels
-            function isNationalIdLabel(lbl) {
-                if (!lbl) return false;
-                const clean = lbl.trim().replace(/^[\s:\-\.]+/, '').replace(/[\s:\-\.]+$/, '');
-                return /^(?:मृतकको\s*)?(?:राष्ट्रिय\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|NID|National\s*ID(?:\s*No\.?)?)$/i.test(clean);
-            }
-
-            // Matches standalone परिचयपत्र नं. or explicit व्यक्तिगत परिचयपत्र नं. (never confusing with राष्ट्रिय/NID)
-            function isPersonalIdLabel(lbl) {
-                if (!lbl) return false;
-                const clean = lbl.trim().replace(/^[\s:\-\.]+/, '').replace(/[\s:\-\.]+$/, '');
-                // Strictly reject National ID / Disability ID / Voter ID
-                if (/राष्ट्रिय|national|nid|अपांगता|मतदाता/i.test(clean)) return false;
-
-                // Explicit personal ID
-                if (/^(?:मृतकको\s*)?(?:[वब]्यक्तिगत\s*परिचय\s*(?:पत्र)?(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|[वब]्यक्तिगत\s*(?:ID|आईडी|आइडी)|Personal\s*ID|Personal\s*Identity(?:\s*(?:No\.?|Number))?)$/i.test(clean)) {
-                    return true;
-                }
-                // Standalone identity card label
-                if (/^(?:परिचय\s*पत्र(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|परिचयपत्र(?:\s*(?:नं\.?|नम्बर|न\.?|No\.?))?|परिचय\s*(?:नं\.?|नम्बर|न\.?|No\.?))$/i.test(clean)) {
-                    return true;
-                }
-                return false;
-            }
-
             // 1. Tab/Colon/Space-separated Line-by-Line Parsing (Social Security MIS portal format)
             const lines = pastedText.split(/\r?\n/);
             lines.forEach((line, index) => {
@@ -1154,31 +1309,51 @@
 
                     // Applicant / Heir Name in deceased mode
                     if (/^(?:निवेदकको\s*(?:पुरा\s*)?नाम|हकदारको\s*(?:पुरा\s*)?नाम|Applicant\s*Name)$/i.test(k)) {
-                        if (v && !parsedData.applicantName) parsedData.applicantName = v;
+                        const cn = cleanNepaliName(v);
+                        if (cn && !parsedData.applicantName) parsedData.applicantName = cn;
                     }
                     // Applicant / Heir Cit No
                     else if (/^(?:निवेदकको\s*नागरिकता\s*नं\.?|हकदारको\s*नागरिकता\s*नं\.?)$/i.test(k)) {
-                        if (v && v !== '०' && v !== '0' && !parsedData.applicantCitNo) parsedData.applicantCitNo = v;
+                        const cc = cleanCitNo(v);
+                        if (cc && cc !== '०' && cc !== '0' && !parsedData.applicantCitNo) parsedData.applicantCitNo = cc;
                     }
                     // Name matching (avoids बाबुको नाम, आमाको नाम, हजुरबुबाको नाम, संरक्षकको नाम, बैंकको नाम, रुजु गर्ने व्यक्तिको नाम, आदि)
                     else if (/^(?:मृतकको\s*(?:पुरा\s*)?नाम|नाम|नाम,\s*थर|लाभग्राहीको\s*नाम|देवनागरीमा|Beneficiary\s*Name|Name)$/i.test(k)) {
-                        if (v && !parsedData.name) parsedData.name = v;
+                        const cn = cleanNepaliName(v);
+                        if (cn && !parsedData.name) parsedData.name = cn;
                     }
                     // Guardian Name
                     else if (/^(?:संरक्षकको\s*नाम|संरक्षकको\s*नाम,\s*थर|संरक्षक|Guardian\s*Name)$/i.test(k)) {
-                        if (v && !parsedData.guardianName) parsedData.guardianName = v;
+                        const cn = cleanNepaliName(v);
+                        if (cn) {
+                            parsedData.guardianName = cn;
+                            if (!parsedData.guardianRelation) parsedData.guardianRelation = 'संरक्षक';
+                        }
+                    }
+                    // Grandfather / Father / Mother Name (fallback for applicant/guardian in child close account)
+                    else if (/^(?:हजुरबुबाको\s*(?:पुरा\s*)?नाम|बाबुको\s*(?:पुरा\s*)?नाम|आमाको\s*(?:पुरा\s*)?नाम)$/i.test(k)) {
+                        const cn = cleanNepaliName(v);
+                        if (cn && !parsedData.guardianName) {
+                            parsedData.guardianName = cn;
+                            if (/हजुरबुबा/i.test(k)) parsedData.guardianRelation = 'हजुरबुबा';
+                            else if (/बाबु/i.test(k)) parsedData.guardianRelation = 'बुवा';
+                            else if (/आमा/i.test(k)) parsedData.guardianRelation = 'आमा';
+                        }
                     }
                     // Guardian Citizenship No
                     else if (/^(?:संरक्षकको\s*नागरिकता\s*नं\.?|संरक्षकको\s*नागरिकता\s*नम्बर|संरक्षकको\s*ना\.प्र\.नं\.?|संरक्षकको\s*नागरिकता|Guardian\s*Citizenship\s*No\.?)$/i.test(k)) {
-                        if (v && v !== '०' && v !== '0' && !parsedData.guardianCitNo) parsedData.guardianCitNo = v;
+                        const cc = cleanCitNo(v);
+                        if (cc && cc !== '०' && cc !== '0' && !parsedData.guardianCitNo) parsedData.guardianCitNo = cc;
                     }
                     // Guardian Relation
-                    else if (/^(?:संरक्षकको\s*नाता|संरक्षकसँगको\s*नाता)$/i.test(k)) {
-                        if (v && !parsedData.guardianRelation) parsedData.guardianRelation = v;
+                    else if (/^(?:संरक्षकको\s*नाता|संरक्षकसँगको\s*नाता|नाता)$/i.test(k)) {
+                        let cleanRel = v.replace(/[A-Za-z0-9]+/g, '').trim();
+                        if (cleanRel && !parsedData.guardianRelation) parsedData.guardianRelation = cleanRel;
                     }
                     // Citizenship No / Birth Registration No
                     else if (/^(?:मृतकको\s*नागरिकता\s*नं\.?|मृतकको\s*नागरिकता\s*नम्बर|नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|नागरीकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|जन्मदर्ता\s*नं\.?|जन्मदर्ता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)$/i.test(k)) {
-                        if (v && v !== '०' && v !== '0' && !parsedData.citNo) parsedData.citNo = v;
+                        const cc = cleanCitNo(v);
+                        if (cc && cc !== '०' && cc !== '0' && !parsedData.citNo) parsedData.citNo = cc;
                     }
                     // National ID / राष्ट्रिय परिचयपत्र नं. (Strictly distinct from Personal ID)
                     else if (isNationalIdLabel(k)) {
@@ -1210,11 +1385,13 @@
                     }
                     // Account No
                     else if (/^(?:सामाजिक\s*सुरक्षा\s*बैंक\s*खाता\s*नम्बर|सामाजिक\s*सुरक्षा\s*खाता\s*नं\.?|खाता\s*नं\.?|खाता\s*नम्बर|Account\s*No\.?|Bank\s*Account\s*No\.?)$/i.test(k)) {
-                        if (v && v !== 'NotStarted' && !parsedData.accountNo) parsedData.accountNo = v;
+                        const ca = cleanAccountNo(v);
+                        if (ca && ca !== 'NotStarted' && !parsedData.accountNo) parsedData.accountNo = ca;
                     }
                     // Target Group / Allowance Type
                     else if (/^(?:सामाजिक\s*सुरक्षा\s*भत्ताको\s*किसिम|भत्ताको\s*किसिम|लक्षित\s*समूह|लक्षित\s*वर्ग|Target\s*Group)$/i.test(k)) {
-                        if (v && !parsedData.targetGroup) parsedData.targetGroup = v;
+                        const ctg = cleanTargetGroup(v);
+                        if (ctg && !parsedData.targetGroup) parsedData.targetGroup = ctg;
                     }
                     // Lagat Katta Miti / Death Date
                     else if (/^(?:लगतकट्टा\s*मिति|लगत\s*कट्टा\s*मिति|मृत्यु\s*मिति)(?:\s*\([^)]*\))?$/i.test(k)) {
@@ -1292,28 +1469,57 @@
             // 2. Multiline / Regex fallback for unstructured text
             if (!parsedData.name) {
                 const m = pastedText.match(/(?:^|[\r\n])\s*(?:मृतकको\s*(?:पुरा\s*)?नाम|देवनागरीमा|लाभग्राहीको\s*नाम|नाम,\s*थर|(?:(?<!बाबुको\s*|आमाको\s*|हजुरबुबाको\s*|संरक्षकको\s*|बैंकको\s*|खातावालाको\s*|[वब]्यक्तिगत\s*|व्यक्तिको\s*)नाम))\s*[\t:]+\s*([^\r\n\t]+)/i);
-                if (m) parsedData.name = m[1].trim();
+                if (m) {
+                    const cn = cleanNepaliName(m[1].trim());
+                    if (cn) parsedData.name = cn;
+                }
             }
             if (!parsedData.guardianName) {
                 const m = pastedText.match(/(?:संरक्षकको\s*नाम(?:,\s*थर)?|Guardian\s*Name)\s*[\t:]+\s*([^\r\n\t]+)/i);
-                if (m) parsedData.guardianName = m[1].trim();
+                if (m) {
+                    const cn = cleanNepaliName(m[1].trim());
+                    if (cn) {
+                        parsedData.guardianName = cn;
+                        if (!parsedData.guardianRelation) parsedData.guardianRelation = 'संरक्षक';
+                    }
+                } else {
+                    const mGrand = pastedText.match(/(?:हजुरबुबाको\s*(?:पुरा\s*)?नाम|बाबुको\s*(?:पुरा\s*)?नाम|आमाको\s*(?:पुरा\s*)?नाम)\s*[\t:]+\s*([^\r\n\t]+)/i);
+                    if (mGrand) {
+                        const cn = cleanNepaliName(mGrand[1].trim());
+                        if (cn) {
+                            parsedData.guardianName = cn;
+                            if (/हजुरबुबा/i.test(mGrand[0])) parsedData.guardianRelation = 'हजुरबुबा';
+                            else if (/बाबु/i.test(mGrand[0])) parsedData.guardianRelation = 'बुवा';
+                            else if (/आमा/i.test(mGrand[0])) parsedData.guardianRelation = 'आमा';
+                        }
+                    }
+                }
             }
             if (!parsedData.guardianCitNo) {
                 const m = pastedText.match(/(?:संरक्षकको\s*(?:नागरिकता|ना\.प्र\.)\s*नं\.?|संरक्षकको\s*नागरिकता\s*नम्बर)\s*[\t:]+\s*([^\r\n\t,]+)(?:,\s*([^\r\n\t]+))?/i);
                 if (m && m[1].trim() !== '०' && m[1].trim() !== '0') {
-                    parsedData.guardianCitNo = m[1].trim();
-                    if (m[2] && !parsedData.guardianCitDistrict) parsedData.guardianCitDistrict = m[2].trim();
+                    const cc = cleanCitNo(m[1].trim());
+                    if (cc && cc !== '०' && cc !== '0') {
+                        parsedData.guardianCitNo = cc;
+                        if (m[2] && !parsedData.guardianCitDistrict) parsedData.guardianCitDistrict = m[2].trim();
+                    }
                 }
             }
             if (!parsedData.guardianRelation) {
                 const m = pastedText.match(/(?:संरक्षकको\s*नाता|संरक्षकसँगको\s*नाता)\s*[\t:]+\s*([^\r\n\t]+)/i);
-                if (m) parsedData.guardianRelation = m[1].trim();
+                if (m) {
+                    let cleanRel = m[1].replace(/[A-Za-z0-9]+/g, '').trim();
+                    if (cleanRel) parsedData.guardianRelation = cleanRel;
+                }
             }
             if (!parsedData.citNo) {
                 const m = pastedText.match(/(?:मृतकको\s*नागरिकता\s*नं\.?|मृतकको\s*नागरिकता\s*नम्बर|नागरिकता\s*नम्बर\/जन्मदर्ता\s*नम्बर|नागरिकता\s*नं\.?|नागरिकता\s*नम्बर|जन्मदर्ता\s*नं\.?|जन्मदर्ता\s*नम्बर|Citizenship\/Birth\s*Reg\.?\s*No\.?)\s*[\t:]+\s*([^\r\n\t,]+)(?:,\s*([^\r\n\t]+))?/i);
                 if (m && m[1].trim() !== '०' && m[1].trim() !== '0') {
-                    parsedData.citNo = m[1].trim();
-                    if (m[2]) parsedData.citDistrict = m[2].trim();
+                    const cc = cleanCitNo(m[1].trim());
+                    if (cc && cc !== '०' && cc !== '0') {
+                        parsedData.citNo = cc;
+                        if (m[2]) parsedData.citDistrict = m[2].trim();
+                    }
                 }
             }
             // Strict personal ID regex extraction (Never confusing with National ID / NID)
@@ -1346,11 +1552,17 @@
             }
             if (!parsedData.accountNo) {
                 const m = pastedText.match(/(?:सामाजिक\s*सुरक्षा\s*बैंक\s*खाता\s*नम्बर|सामाजिक\s*सुरक्षा\s*खाता\s*नं\.?|खाता\s*नं\.?|खाता\s*नम्बर|Account\s*No\.?)\s*[:\-\s\t]+([0-9०-९A-Za-z\/\-]+)/i);
-                if (m && m[1].trim() !== 'NotStarted') parsedData.accountNo = m[1].trim();
+                if (m && m[1].trim() !== 'NotStarted') {
+                    const ca = cleanAccountNo(m[1].trim());
+                    if (ca && ca !== 'NotStarted') parsedData.accountNo = ca;
+                }
             }
             if (!parsedData.targetGroup) {
                 const m = pastedText.match(/(?:सामाजिक\s*सुरक्षा\s*भत्ताको\s*किसिम|भत्ताको\s*किसिम|लक्षित\s*समूह|लक्षित\s*वर्ग|Target\s*Group)\s*[\t:]+\s*([^\r\n\t]+)/i);
-                if (m) parsedData.targetGroup = m[1].trim();
+                if (m) {
+                    const ctg = cleanTargetGroup(m[1].trim());
+                    if (ctg) parsedData.targetGroup = ctg;
+                }
             }
             if (!parsedData.deathDate) {
                 const m1 = pastedText.match(/(?:लगतकट्टा\s*मिति|लगत\s*कट्टा\s*मिति|मृत्यु\s*मिति)(?:\s*\([^)]*\))?\s*[\t:\r\n\s]+([२०८९०-९0-9]{4}[\/\-][२०८९०-९0-9]{2}[\/\-][२०८९०-९0-9]{2})/i);
@@ -1377,22 +1589,43 @@
             let extractCount = 0;
 
             if (isDeceased) {
+                // Reset mode inputs prior to fresh auto-extract
+                if (document.getElementById('inName')) document.getElementById('inName').value = '';
+                if (document.getElementById('inCitNo')) document.getElementById('inCitNo').value = '';
+                if (document.getElementById('inDeceasedName')) document.getElementById('inDeceasedName').value = '';
+                if (document.getElementById('inDeceasedCitNo')) document.getElementById('inDeceasedCitNo').value = '';
+                if (document.getElementById('inDeceasedNid')) document.getElementById('inDeceasedNid').value = '';
+                if (document.getElementById('inDeceasedAccountNo')) document.getElementById('inDeceasedAccountNo').value = '';
+                if (document.getElementById('inDeathDate')) document.getElementById('inDeathDate').value = '';
+
                 // Populate DECEASED mode inputs
                 if (parsedData.applicantName && document.getElementById('inName')) {
-                    document.getElementById('inName').value = parsedData.applicantName;
-                    extractCount++;
+                    const cn = cleanNepaliName(parsedData.applicantName);
+                    if (cn) {
+                        document.getElementById('inName').value = cn;
+                        extractCount++;
+                    }
                 }
                 if (parsedData.applicantCitNo && document.getElementById('inCitNo')) {
-                    document.getElementById('inCitNo').value = parsedData.applicantCitNo;
-                    extractCount++;
+                    const cc = cleanCitNo(parsedData.applicantCitNo);
+                    if (cc && cc !== '०' && cc !== '0') {
+                        document.getElementById('inCitNo').value = cc;
+                        extractCount++;
+                    }
                 }
                 if (parsedData.name) {
-                    document.getElementById('inDeceasedName').value = parsedData.name;
-                    extractCount++;
+                    const cn = cleanNepaliName(parsedData.name);
+                    if (cn) {
+                        document.getElementById('inDeceasedName').value = cn;
+                        extractCount++;
+                    }
                 }
                 if (parsedData.citNo) {
-                    document.getElementById('inDeceasedCitNo').value = parsedData.citNo;
-                    extractCount++;
+                    const cc = cleanCitNo(parsedData.citNo);
+                    if (cc && cc !== '०' && cc !== '0') {
+                        document.getElementById('inDeceasedCitNo').value = cc;
+                        extractCount++;
+                    }
                 }
                 // Strictly populate "व्यक्तिगत परिचयपत्र नं." from personalId only (NEVER from nid)
                 if (parsedData.personalId && document.getElementById('inDeceasedNid')) {
@@ -1403,9 +1636,9 @@
                     }
                 }
                 if (parsedData.accountNo) {
-                    let rawAcc = parsedData.accountNo;
-                    if (/^[0-9०-९\s\-]+$/.test(rawAcc) && /[0-9०-९]/.test(rawAcc)) {
-                        document.getElementById('inDeceasedAccountNo').value = rawAcc;
+                    const ca = cleanAccountNo(parsedData.accountNo);
+                    if (ca && ca !== 'NotStarted') {
+                        document.getElementById('inDeceasedAccountNo').value = ca;
                         extractCount++;
                     }
                 }
@@ -1425,18 +1658,43 @@
                 }
 
             } else if (isChildClose) {
-                // Populate CLOSE_ACCOUNT_CHILD mode inputs
-                if (parsedData.guardianName) {
-                    document.getElementById('inName').value = parsedData.guardianName;
-                    extractCount++;
+                // Reset mode inputs prior to fresh auto-extract
+                if (document.getElementById('inName')) document.getElementById('inName').value = '';
+                if (document.getElementById('inCitNo')) document.getElementById('inCitNo').value = '';
+                if (document.getElementById('inCitDistrict')) document.getElementById('inCitDistrict').value = '';
+                if (document.getElementById('inChildBeneficiaryName')) document.getElementById('inChildBeneficiaryName').value = '';
+                if (document.getElementById('inChildBeneficiaryId')) document.getElementById('inChildBeneficiaryId').value = '';
+                if (document.getElementById('inChildAccountNo')) document.getElementById('inChildAccountNo').value = '';
+                if (document.getElementById('inChildTargetGroup')) document.getElementById('inChildTargetGroup').value = 'दलित बालबालिका';
+                const chGRelSel = document.getElementById('inChildGuardianRelationSelect');
+                if (chGRelSel) {
+                    chGRelSel.value = 'बुवा';
+                    const customGRel = document.getElementById('inChildGuardianRelation');
+                    if (customGRel) { customGRel.style.display = 'none'; customGRel.value = ''; }
+                }
+                const chRelSel = document.getElementById('inChildRelationSelect');
+                if (chRelSel) {
+                    chRelSel.value = 'छोरी';
+                    const customRel = document.getElementById('inChildRelation');
+                    if (customRel) { customRel.style.display = 'none'; customRel.value = ''; }
                 }
 
-                if (parsedData.guardianCitNo) {
-                    document.getElementById('inCitNo').value = parsedData.guardianCitNo;
-                    extractCount++;
-                } else if (parsedData.citNo) {
-                    document.getElementById('inCitNo').value = parsedData.citNo;
-                    extractCount++;
+                // Populate CLOSE_ACCOUNT_CHILD mode inputs
+                if (parsedData.guardianName) {
+                    const cn = cleanNepaliName(parsedData.guardianName);
+                    if (cn) {
+                        document.getElementById('inName').value = cn;
+                        extractCount++;
+                    }
+                }
+
+                const citVal = parsedData.guardianCitNo || parsedData.citNo;
+                if (citVal) {
+                    const cc = cleanCitNo(citVal);
+                    if (cc && cc !== '०' && cc !== '0') {
+                        document.getElementById('inCitNo').value = cc;
+                        extractCount++;
+                    }
                 }
 
                 if (parsedData.guardianCitDistrict) {
@@ -1446,8 +1704,11 @@
                 }
 
                 if (parsedData.name) {
-                    document.getElementById('inChildBeneficiaryName').value = parsedData.name;
-                    extractCount++;
+                    const cn = cleanNepaliName(parsedData.name);
+                    if (cn) {
+                        document.getElementById('inChildBeneficiaryName').value = cn;
+                        extractCount++;
+                    }
                 }
 
                 // Strictly populate "व्यक्तिगत परिचयपत्र नं." from personalId only (NEVER from nid)
@@ -1465,16 +1726,35 @@
                 }
 
                 if (parsedData.accountNo) {
-                    let rawAcc = parsedData.accountNo;
-                    if (/^[0-9०-९\s\-]+$/.test(rawAcc) && /[0-9०-९]/.test(rawAcc)) {
-                        document.getElementById('inChildAccountNo').value = rawAcc;
+                    const ca = cleanAccountNo(parsedData.accountNo);
+                    if (ca && ca !== 'NotStarted') {
+                        document.getElementById('inChildAccountNo').value = ca;
                         extractCount++;
                     }
                 }
 
                 if (parsedData.targetGroup) {
-                    document.getElementById('inChildTargetGroup').value = parsedData.targetGroup;
-                    extractCount++;
+                    const ctg = cleanTargetGroup(parsedData.targetGroup);
+                    if (ctg) {
+                        document.getElementById('inChildTargetGroup').value = ctg;
+                        extractCount++;
+                    }
+                }
+
+                if (parsedData.guardianRelation) {
+                    const gRelSel = document.getElementById('inChildGuardianRelationSelect');
+                    const gRelInput = document.getElementById('inChildGuardianRelation');
+                    if (gRelSel) {
+                        const hasOpt = Array.from(gRelSel.options).some(o => o.value === parsedData.guardianRelation);
+                        if (hasOpt) {
+                            gRelSel.value = parsedData.guardianRelation;
+                            if (gRelInput) gRelInput.style.display = 'none';
+                        } else if (gRelInput) {
+                            gRelSel.value = 'CUSTOM';
+                            gRelInput.style.display = 'block';
+                            gRelInput.value = parsedData.guardianRelation;
+                        }
+                    }
                 }
 
                 if (parsedData.bankKey) {
@@ -1489,19 +1769,33 @@
                 }
 
             } else {
-                // Populate OPEN_ACCOUNT mode inputs
-                const isChildTarget = (parsedData.targetGroup && /बालबालिका|बाल\s*पोषण|नाबालक/i.test(parsedData.targetGroup)) || Boolean(parsedData.guardianName || parsedData.guardianCitNo);
-                if (isChildTarget) {
-                    const chkIsChild = document.getElementById('chkIsChild');
-                    if (chkIsChild) {
-                        chkIsChild.checked = true;
-                        toggleChildFields();
-                    }
+                // Reset mode inputs prior to fresh auto-extract
+                if (document.getElementById('inName')) document.getElementById('inName').value = '';
+                if (document.getElementById('inCardNo')) document.getElementById('inCardNo').value = '';
+                if (document.getElementById('inTargetGroup')) document.getElementById('inTargetGroup').value = '';
+                if (document.getElementById('inCitNo')) document.getElementById('inCitNo').value = '';
+                if (document.getElementById('inCitDistrict')) document.getElementById('inCitDistrict').value = '';
+                if (document.getElementById('inNid')) document.getElementById('inNid').value = '';
+                if (document.getElementById('inGuardianName')) document.getElementById('inGuardianName').value = '';
+                if (document.getElementById('inGuardianCitNo')) document.getElementById('inGuardianCitNo').value = '';
+                if (document.getElementById('inGuardianCitDistrict')) document.getElementById('inGuardianCitDistrict').value = '';
+
+                // chkIsChild must ALWAYS remain default false (OFF)
+                const chkIsChild = document.getElementById('chkIsChild');
+                if (chkIsChild) {
+                    chkIsChild.checked = false;
+                    toggleChildFields();
                 }
 
+                // Populate OPEN_ACCOUNT mode inputs
+                // CRITICAL FIX: chkIsChild must ALWAYS remain default false (OFF). Auto-extract / paste must NEVER turn it on!
+
                 if (parsedData.name) {
-                    document.getElementById('inName').value = parsedData.name;
-                    extractCount++;
+                    const cn = cleanNepaliName(parsedData.name);
+                    if (cn) {
+                        document.getElementById('inName').value = cn;
+                        extractCount++;
+                    }
                 }
                 const cardVal = parsedData.personalId || parsedData.cardNo;
                 if (cardVal && document.getElementById('inCardNo')) {
@@ -1512,12 +1806,18 @@
                     }
                 }
                 if (parsedData.targetGroup) {
-                    document.getElementById('inTargetGroup').value = parsedData.targetGroup;
-                    extractCount++;
+                    const ctg = cleanTargetGroup(parsedData.targetGroup);
+                    if (ctg) {
+                        document.getElementById('inTargetGroup').value = ctg;
+                        extractCount++;
+                    }
                 }
                 if (parsedData.citNo) {
-                    document.getElementById('inCitNo').value = parsedData.citNo;
-                    extractCount++;
+                    const cc = cleanCitNo(parsedData.citNo);
+                    if (cc && cc !== '०' && cc !== '0') {
+                        document.getElementById('inCitNo').value = cc;
+                        extractCount++;
+                    }
                     if (parsedData.citDistrict) {
                         document.getElementById('inCitDistrict').value = parsedData.citDistrict;
                     }
@@ -1530,12 +1830,18 @@
                     }
                 }
                 if (parsedData.guardianName && document.getElementById('inGuardianName')) {
-                    document.getElementById('inGuardianName').value = parsedData.guardianName;
-                    extractCount++;
+                    const cn = cleanNepaliName(parsedData.guardianName);
+                    if (cn) {
+                        document.getElementById('inGuardianName').value = cn;
+                        extractCount++;
+                    }
                 }
                 if (parsedData.guardianCitNo && document.getElementById('inGuardianCitNo')) {
-                    document.getElementById('inGuardianCitNo').value = parsedData.guardianCitNo;
-                    extractCount++;
+                    const cc = cleanCitNo(parsedData.guardianCitNo);
+                    if (cc && cc !== '०' && cc !== '0') {
+                        document.getElementById('inGuardianCitNo').value = cc;
+                        extractCount++;
+                    }
                 }
                 if (parsedData.guardianCitDistrict && document.getElementById('inGuardianCitDistrict')) {
                     document.getElementById('inGuardianCitDistrict').value = parsedData.guardianCitDistrict;
@@ -1632,8 +1938,8 @@
 
             if (isDeceased) {
                 // ── DECEASED ACCOUNT CLOSURE MODE ──
-                const applicantName = document.getElementById('inName').value.trim() || '.........................';
-                const citNo = document.getElementById('inCitNo').value.trim();
+                const applicantName = getDisplayName(document.getElementById('inName').value);
+                const citNo = getDisplayCitNo(document.getElementById('inCitNo').value, '');
                 const citDate = document.getElementById('inApplicantCitDate').value.trim();
                 const citDist = document.getElementById('inCitDistrict').value.trim();
 
@@ -1674,11 +1980,11 @@
                 }
                 if (!heirRelation) heirRelation = '.........';
 
-                const deceasedName = document.getElementById('inDeceasedName').value.trim() || '.........................';
+                const deceasedName = getDisplayName(document.getElementById('inDeceasedName').value);
                 const deathDate = document.getElementById('inDeathDate').value.trim() || '.....................';
-                const deceasedAccNo = document.getElementById('inDeceasedAccountNo').value.trim() || '..................................';
+                const deceasedAccNo = getDisplayAccountNo(document.getElementById('inDeceasedAccountNo').value);
                 const deceasedNid = document.getElementById('inDeceasedNid').value.trim() || '..................';
-                const deceasedCitNo = document.getElementById('inDeceasedCitNo').value.trim() || '..................';
+                const deceasedCitNo = getDisplayCitNo(document.getElementById('inDeceasedCitNo').value);
 
                 bodyTextEl.innerHTML = `
                     प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${heirRelation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ l
@@ -1710,8 +2016,13 @@
 
             } else if (isChildClose) {
                 // ── CHILD ACCOUNT CLOSURE MODE ──
-                const applicantName = document.getElementById('inName').value.trim() || '.........................';
-                const citNo = document.getElementById('inCitNo').value.trim();
+                let rawAppName = document.getElementById('inName').value.trim();
+                // Ensure relationship words like 'बसोबास गर्ने हजुरबुबा' or 'हजुरबुबा' are NEVER rendered as applicant name
+                if (/^(?:हजुरबुबा|हजुरबुबाको\s*नाम|बसोबास\s*गर्ने\s*हजुरबुबा|बसोबास\s*गर्ने\s*हजुरबुबाको\s*नाम)$/i.test(rawAppName)) {
+                    rawAppName = '';
+                }
+                const applicantName = getDisplayName(rawAppName);
+                const citNo = getDisplayCitNo(document.getElementById('inCitNo').value, '');
                 const citDist = document.getElementById('inCitDistrict').value.trim();
 
                 let citInfoStr = "";
@@ -1733,7 +2044,7 @@
                     childRelation = (document.getElementById('inChildRelation') || {}).value || 'छोरी';
                 }
 
-                // Guardian relation (उदा: बुवा)
+                // Guardian relation (उदा: बुवा, हजुरबुबा, आदि)
                 let guardianRel = "";
                 const gRelSel = document.getElementById('inChildGuardianRelationSelect');
                 if (gRelSel) {
@@ -1744,9 +2055,9 @@
                     guardianRel = (document.getElementById('inChildGuardianRelation') || {}).value || 'बुवा';
                 }
 
-                const childName = document.getElementById('inChildBeneficiaryName').value.trim() || '.........................';
-                const targetGroup = document.getElementById('inChildTargetGroup').value.trim() || 'दलित बालबालिका';
-                const childAccNo = document.getElementById('inChildAccountNo').value.trim() || '..................................';
+                const childName = getDisplayName(document.getElementById('inChildBeneficiaryName').value);
+                const targetGroup = getDisplayTargetGroup(document.getElementById('inChildTargetGroup').value, 'दलित बालबालिका');
+                const childAccNo = getDisplayAccountNo(document.getElementById('inChildAccountNo').value);
                 const childBeneficiaryId = (document.getElementById('inChildBeneficiaryId') || {}).value ? document.getElementById('inChildBeneficiaryId').value.trim() : '';
 
                 bodyTextEl.innerHTML = `
@@ -1775,10 +2086,10 @@
 
             } else {
                 // ── ACCOUNT OPENING MODE (DEFAULT) ──
-                const name        = document.getElementById('inName').value         || '';
+                const name        = getDisplayName(document.getElementById('inName').value, '.....................');
                 let cardNo        = document.getElementById('inCardNo').value       || '';
-                const targetGroup = document.getElementById('inTargetGroup').value || '';
-                const citNo       = document.getElementById('inCitNo').value        || '';
+                const targetGroup = getDisplayTargetGroup(document.getElementById('inTargetGroup').value, '...........');
+                const citNo       = getDisplayCitNo(document.getElementById('inCitNo').value, '');
                 const citDistrict = document.getElementById('inCitDistrict').value || '';
                 let nid           = document.getElementById('inNid').value          || '';
 
@@ -1798,8 +2109,8 @@
 
                 bodyTextEl.innerHTML = `
                     प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने
-                    <span id="lblName" style="font-weight:bold;">${name ? name : '.....................'}</span>को
-                    लक्षित समूह <span id="lblTargetGroup" style="font-weight:bold;">${targetGroup ? targetGroup : '...........'}</span> को
+                    <span id="lblName" style="font-weight:bold;">${name}</span>को
+                    लक्षित समूह <span id="lblTargetGroup" style="font-weight:bold;">${targetGroup}</span> को
                     आ.व. <span id="lblFiscalYear" style="font-weight:bold;">${fiscalYear ? fiscalYear : '.................'}</span> को
                     <span id="lblTrimester" style="font-weight:bold;">${trimester ? trimester : '..................'}</span>बाट सामाजिक सुरक्षा भत्ता प्राप्त गर्न योग्य हुनुभएको हुँदा निजले सामाजिक सुरक्षा भत्ता बापतको रकम प्राप्त गर्न बैँक खाता खोल्न आवश्यक रहेको हुँदा तहाँ कार्यालयको नियमानुसार बैँक खाता खोलिदिनुहुन सिफारिसका साथ अनुरोध छ ।
                 `;
@@ -1816,8 +2127,9 @@
                 if (citString && citDistrict.trim()) citString += `, ${citDistrict.trim()}`;
 
                 // Guardian info
-                let guardianName = (document.getElementById('inGuardianName') || {}).value || '';
-                let guardianCitNo = (document.getElementById('inGuardianCitNo') || {}).value || '';
+                let rawGuardianName = (document.getElementById('inGuardianName') || {}).value || '';
+                let guardianName = getDisplayName(rawGuardianName, '');
+                let guardianCitNo = getDisplayCitNo((document.getElementById('inGuardianCitNo') || {}).value, '');
                 let guardianCitDistrict = (document.getElementById('inGuardianCitDistrict') || {}).value || '';
                 let guardianRelation = '';
                 const gRelSel = document.getElementById('inGuardianRelationSelect');
@@ -1844,7 +2156,7 @@
                     <tr id="rowTapasilName">
                         <td class="label-col">नाम, थर</td>
                         <td class="sep-col">:</td>
-                        <td class="val-col"><span id="lblTapasilName">${name.trim() ? name.trim() : '..................'}</span></td>
+                        <td class="val-col"><span id="lblTapasilName">${name}</span></td>
                     </tr>
                     <tr id="rowTapasilCitNo">
                         <td class="label-col" id="lblTapasilCitLabel">${isChild ? "जन्म दर्ता नं." : "नागरिकता नं."}</td>
@@ -1854,7 +2166,7 @@
                     <tr id="rowTapasilGroup">
                         <td class="label-col">लक्षित समूह</td>
                         <td class="sep-col">:</td>
-                        <td class="val-col"><span id="lblTapasilGroup">${targetGroup.trim() ? targetGroup.trim() : '..................'}</span></td>
+                        <td class="val-col"><span id="lblTapasilGroup">${targetGroup}</span></td>
                     </tr>
                     ${nid.trim() ? `
                     <tr id="rowTapasilNid">
