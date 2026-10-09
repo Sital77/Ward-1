@@ -393,10 +393,14 @@
                 <!-- Dynamically Populated Text -->
             </div>
 
-            <div class="signature-section" style="margin-top: 40px; text-align: right; margin-right: 40px; position: relative; height: 120px;">
-                <div id="sigSpacing" style="height: 40px;"></div>
-                <div id="lblSignName" style="font-weight: bold; font-size: 13pt;">नगेन्द्र भण्डारी</div>
-                <div id="lblSignTitle" style="font-size: 13pt;">वडा अध्यक्ष</div>
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 40px;">
+                <div class="signature-block">
+                    <div class="sig-space"></div>
+                    <div class="sig-title-line">
+                        <div class="sig-name" id="lblSignName">नगेन्द्र भण्डारी</div>
+                        <div class="sig-title" id="lblSignTitle">वडा अध्यक्ष</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -767,8 +771,8 @@
             }
 
             let tapasilHtml = `
-                <div style="margin-top: 14px; font-weight: bold; font-size: 13pt;">तपसिल:</div>
-                <ul style="list-style-type: disc; margin-left: 24px; margin-top: 6px; font-size: 12.5pt; line-height: 1.8;">
+                <div class="tapsil-title" style="margin-top: 14px; font-weight: bold; font-size: var(--doc-font-size, 13pt);">तपसिल:</div>
+                <ul style="list-style-type: disc; margin-left: 24px; margin-top: 6px; font-size: var(--doc-font-size, 13pt); line-height: 1.7;">
                     <li>अध्यक्ष: <span style="font-weight:bold;">${pChair || '....................'}</span></li>
                     <li>सचिव: <span style="font-weight:bold;">${pSec || '....................'}</span></li>
                     <li>कोषाध्यक्ष: <span style="font-weight:bold;">${pTreas || '....................'}</span></li>
@@ -809,12 +813,21 @@
             }
         }
 
+        function adjustSignaturePosition(value) {
+            const marginVal = document.getElementById('marginVal');
+            if (marginVal) marginVal.innerText = toNepaliDigit(value) + " px";
+            const footer = document.getElementById('docFooterSection');
+            if (footer) footer.style.marginTop = value + "px";
+        }
+        window.adjustSignaturePosition = adjustSignaturePosition;
+
         // Initialize Date & Initial State
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof initPortalNepaliDate === 'function') initPortalNepaliDate();
 
             renderDatabaseTable();
             updateDoc();
+            adjustSignaturePosition(40);
         });
 
         // ── Abhilekh & Firestore Database Logic ──

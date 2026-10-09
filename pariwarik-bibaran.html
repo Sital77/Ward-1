@@ -38,7 +38,7 @@
         .details-table {
             width: calc(100% - 6px) !important;
             max-width: calc(100% - 6px) !important;
-            font-size: 12.5pt !important;
+            font-size: var(--table-font-size, 13pt) !important;
             margin: 8px auto !important;
             border-collapse: collapse !important;
             border: 1.5px solid #000 !important;
@@ -48,7 +48,7 @@
 
         .details-table th,
         .details-table td {
-            font-size: 12.5pt !important;
+            font-size: var(--table-font-size, 13pt) !important;
             padding: 5px 4px !important;
             border: 1px solid #000 !important;
             text-align: center !important;
@@ -161,7 +161,7 @@
             .details-table {
                 width: calc(100% - 6px) !important;
                 max-width: calc(100% - 6px) !important;
-                font-size: 12.5pt !important;
+                font-size: var(--table-font-size, 13pt) !important;
                 margin: 8px auto !important;
                 table-layout: fixed !important;
                 border-collapse: collapse !important;
@@ -173,7 +173,7 @@
             .details-table th,
             .details-table td {
                 padding: 5px 4px !important;
-                font-size: 12.5pt !important;
+                font-size: var(--table-font-size, 13pt) !important;
                 line-height: 1.35 !important;
                 border: 1px solid #000 !important;
                 box-sizing: border-box !important;
@@ -196,19 +196,19 @@
             }
 
             .sig-space {
-                height: 35px !important;
+                height: 40px !important;
             }
 
             .signature-block {
-                font-size: 13pt !important;
+                font-size: var(--sig-font-size, 13pt) !important;
             }
 
             .sig-name {
-                font-size: 13pt !important;
+                font-size: var(--sig-font-size, 13pt) !important;
             }
 
             .sig-title {
-                font-size: 13pt !important;
+                font-size: var(--sig-font-size, 13pt) !important;
             }
         }
     </style>
@@ -439,7 +439,7 @@
                 तपसिल बमोजिम रहेको हुँदा सो को व्यहोरा प्रमाणित गरिन्छ ।
             </div>
 
-            <div style="font-weight: bold; text-align: center; margin-bottom: 5px; font-size: 13pt;"><u>पारिवारिक विवरण
+            <div class="tapsil-title" style="font-weight: bold; text-align: center; margin-bottom: 5px; font-size: var(--doc-font-size, 13pt);"><u>पारिवारिक विवरण
                     तपसिल</u></div>
 
             <table class="details-table" id="familyDetailsTable">

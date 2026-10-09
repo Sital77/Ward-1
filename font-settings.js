@@ -469,6 +469,24 @@
                 }
             }
         }
+
+        // Normalize Tapasil headings and remove conflicting inline font-sizes from injected templates
+        tempDiv.querySelectorAll('div, p, span, h3, h4, u').forEach(el => {
+            if (el.textContent && el.textContent.includes('तपसिल') && !el.closest('table')) {
+                el.classList.add('tapsil-title');
+                if (el.parentElement && el.parentElement !== tempDiv) {
+                    el.parentElement.classList.add('tapsil-title');
+                }
+            }
+        });
+
+        // Strip hardcoded inline font-sizes that conflict with unified typography system
+        tempDiv.querySelectorAll('.letter-body, .letter-body-para, .details-table, .details-table *, .print-table, .print-table *, .tapsil-title, .tapsil-title *, .tapsil-item, .receiver-block, .address-to').forEach(el => {
+            if (el.style && el.style.fontSize) {
+                el.style.removeProperty('font-size');
+            }
+        });
+
         while (tempDiv.firstChild) {
             redLine.parentNode.insertBefore(tempDiv.firstChild, null);
         }
@@ -482,6 +500,15 @@
             }
             if (typeof updateDoc === 'function') {
                 updateDoc();
+            }
+            // Preserve user-configured signature margin after template injection
+            const sigSlider = document.getElementById('inSigMargin');
+            if (sigSlider) {
+                if (typeof adjustSignaturePosition === 'function') {
+                    adjustSignaturePosition(sigSlider.value);
+                } else if (typeof window.adjustSignaturePosition === 'function') {
+                    window.adjustSignaturePosition(sigSlider.value);
+                }
             }
             window.dispatchEvent(new Event('templateInjected'));
         }, 30);
@@ -954,13 +981,13 @@
             return;
         }
 
-        // 1. Get saved styling values or defaults (Size: 11pt for nabalak-parichayapatra, 14pt for others)
+        // 1. Get saved styling values or defaults (Size: 11pt for nabalak-parichayapatra, 13pt for others)
         const isNabalak = (templateId === 'nabalak-parichayapatra' || window.location.pathname.includes('nabalak-parichayapatra.html'));
-        const defaultFontSize = isNabalak ? '11' : '14';
+        const defaultFontSize = isNabalak ? '11' : '13';
         let savedSize = localStorage.getItem('doc_font_size_' + (templateId || 'global'));
         if (!savedSize) {
             const globalSize = localStorage.getItem('doc_font_size');
-            savedSize = (globalSize && globalSize !== '13' && globalSize !== '14' && globalSize !== '11') ? globalSize : defaultFontSize;
+            savedSize = (globalSize && globalSize !== '11') ? globalSize : defaultFontSize;
         }
         const savedItalic = localStorage.getItem('doc_font_style') === 'italic';
         const savedColor = localStorage.getItem('doc_text_color') || '#000000';
@@ -1111,39 +1138,124 @@
 
         // 4. Function to apply styles dynamically
         function applyStyles(sz, it, col) {
+            const baseSize = parseFloat(sz) || 13;
+            const isNabalakDoc = (templateId === 'nabalak-parichayapatra' || window.location.pathname.includes('nabalak-parichayapatra.html'));
+            const docBase = isNabalakDoc ? baseSize : Math.max(10, baseSize);
+            const tblSize = isNabalakDoc ? (docBase * 0.85) : docBase;
+            const subjSize = isNabalakDoc ? docBase : (docBase + 2);
+            const sigSize = isNabalakDoc ? (docBase * 0.9) : docBase;
+
             styleTag.textContent = `
                 :root {
-                    --doc-font-size: ${sz}pt;
+                    --doc-font-size: ${docBase}pt;
+                    --table-font-size: ${tblSize}pt;
+                    --subject-font-size: ${subjSize}pt;
+                    --sig-font-size: ${sigSize}pt;
                     --doc-font-style: ${it ? 'italic' : 'normal'};
                     --doc-text-color: ${col};
                 }
                 
-                /* Apply Font size, line spacing (1.5) and color to all document body elements EXCEPT letterhead and tables */
-                .a4-page,
-                .a4-page *:not(.letterhead-container):not(.letterhead-container *):not(.doc-header-wrapper):not(.doc-header-wrapper *):not(.meta-line):not(.meta-line *):not(.lh-right):not(.lh-right *):not(.lh-center):not(.lh-center *):not(.lh-left):not(.lh-left *):not(.header-section):not(.header-section *):not(.doc-header):not(.doc-header *):not(.patra-chalani-row):not(.patra-chalani-row *):not(.qr-code-box):not(.qr-code-box *):not(.details-table):not(.details-table *):not(.print-table):not(.print-table *):not(.land-table):not(.land-table *):not(.tapasil-table):not(.tapasil-table *):not(.tapasheel-table):not(.tapasheel-table *):not(.db-table):not(.db-table *) {
-                    font-size: var(--doc-font-size) !important;
+                /* Unified typography inheritance across document */
+                .a4-page {
+                    font-family: 'Mukta', sans-serif !important;
                     color: var(--doc-text-color) !important;
-                    line-height: 1.5 !important;
+                    font-size: var(--doc-font-size) !important;
+                    line-height: 1.6 !important;
                 }
                 
+                /* Body paragraphs, addressee, and general text */
                 .letter-body,
                 .letter-body-para,
-                .details-table,
-                .details-table td,
-                .details-table th,
-                .print-table,
-                .print-table td,
-                .print-table th,
-                .land-table,
-                .land-table td,
-                .land-table th,
-                .landuse-container,
                 .address-to,
-                .subject-container {
+                .bank-receiver,
+                .receiver-block,
+                .tapsil-container,
+                .tapsil-item,
+                .tapsil-label,
+                .tapsil-val,
+                .beneficiary-summary {
+                    font-size: var(--doc-font-size) !important;
+                    color: var(--doc-text-color) !important;
+                    line-height: 1.6 !important;
                     font-style: var(--doc-font-style) !important;
                 }
                 
-                /* Explicit exclusions to protect standard letterhead & signature normal styles */
+                /* Subject Line & Title */
+                .subject-container,
+                .subject-line,
+                .subject-title {
+                    font-style: normal !important;
+                    color: var(--doc-text-color) !important;
+                }
+                .subject-title {
+                    font-size: var(--subject-font-size) !important;
+                }
+                
+                /* तपसिल Headings & Content: Exactly matching document body */
+                .tapsil-title,
+                .tapsil-title *,
+                .tapasheel-label,
+                .tapasill-heading,
+                #tapasilHeaderBlock {
+                    font-size: var(--doc-font-size) !important;
+                    font-weight: bold !important;
+                    color: var(--doc-text-color) !important;
+                }
+
+                .tapasil-table,
+                .tapasil-table th,
+                .tapasil-table td,
+                .tapasheel-table,
+                .tapasheel-table th,
+                .tapasheel-table td,
+                .tapsil-container,
+                .tapsil-item,
+                .tapsil-label,
+                .tapsil-val {
+                    font-size: var(--doc-font-size) !important;
+                    color: var(--doc-text-color) !important;
+                    line-height: 1.6 !important;
+                    font-style: var(--doc-font-style) !important;
+                }
+                
+                /* Data Tables: strictly uniform and harmonious with document text */
+                .details-table,
+                .details-table th,
+                .details-table td,
+                .print-table,
+                .print-table th,
+                .print-table td,
+                .land-table,
+                .land-table th,
+                .land-table td,
+                .tippani-table,
+                .tippani-table th,
+                .tippani-table td {
+                    font-size: var(--table-font-size) !important;
+                    color: var(--doc-text-color) !important;
+                    line-height: 1.35 !important;
+                    font-style: var(--doc-font-style) !important;
+                    word-break: break-word !important;
+                    overflow-wrap: break-word !important;
+                }
+                
+                /* Signature section: uniform size matching document */
+                .signature-block,
+                .signature-block .sig-name,
+                .signature-block .sig-title,
+                .sig-name,
+                .sig-title,
+                #lblSigName,
+                #lblSigTitle {
+                    font-size: var(--sig-font-size) !important;
+                    font-style: normal !important;
+                }
+
+                .doc-footer {
+                    page-break-inside: avoid !important;
+                }
+                
+                /* Explicit exclusions to protect standard letterhead */
                 .letterhead-container,
                 .letterhead-container *,
                 .doc-header-wrapper,
@@ -1161,50 +1273,19 @@
                 .doc-header,
                 .doc-header *,
                 .patra-chalani-row,
-                .patra-chalani-row *,
-                .subject-title,
-                .subject-title *,
-                .signature-block,
-                .signature-block * {
+                .patra-chalani-row * {
                     font-style: normal !important;
-                }
-
-                /* Proportional table font scaling so all tables strictly fit A4 page dimensions */
-                .details-table,
-                .details-table * {
-                    font-size: clamp(8.5pt, calc(var(--doc-font-size) * 0.76), 11pt) !important;
-                    line-height: 1.3 !important;
-                    word-break: break-word !important;
-                    overflow-wrap: break-word !important;
-                }
-                .print-table,
-                .print-table * {
-                    font-size: clamp(9pt, calc(var(--doc-font-size) * 0.85), 12.5pt) !important;
-                    line-height: 1.35 !important;
-                    word-break: break-word !important;
-                    overflow-wrap: break-word !important;
-                }
-                .land-table,
-                .land-table *,
-                .tapasil-table,
-                .tapasil-table *,
-                .tapasheel-table,
-                .tapasheel-table * {
-                    font-size: clamp(8.5pt, calc(var(--doc-font-size) * 0.78), 11.5pt) !important;
-                    line-height: 1.3 !important;
-                    word-break: break-word !important;
-                    overflow-wrap: break-word !important;
                 }
 
                 /* Nabalak Parichayapatra table & compact layout scaling */
                 .nabalak-tbl,
                 .nabalak-tbl * {
-                    font-size: calc(var(--doc-font-size) * 0.82) !important;
-                    line-height: 1.35 !important;
+                    font-size: var(--table-font-size) !important;
+                    line-height: 1.3 !important;
                 }
                 .sifarish-para,
                 .sifarish-para * {
-                    font-size: calc(var(--doc-font-size) * 0.85) !important;
+                    font-size: var(--doc-font-size) !important;
                     line-height: 1.35 !important;
                 }
                 #lblPhotoBox,

@@ -379,16 +379,18 @@ select:focus {
 
 .a4-page {
     width: 210mm;
-    height: 297mm;
+    min-height: 297mm;
+    height: auto;
+    box-sizing: border-box;
     background-color: #ffffff;
     padding: 12mm 18mm 15mm 18mm;
     position: relative;
     color: #000;
-    font-size: 13pt;
+    font-size: var(--doc-font-size, 13pt);
     line-height: 1.5;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
 }
 
@@ -514,7 +516,7 @@ select:focus {
 }
 
 .sig-space {
-    height: 50px;
+    height: 40px;
 }
 
 .sig-title-line {
@@ -618,8 +620,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     .details-table th,
     .details-table td {
         padding: 4px 2px !important;
-        font-size: 10pt !important;
-        line-height: 1.25 !important;
+        font-size: var(--table-font-size, 13pt) !important;
+        line-height: 1.35 !important;
         border: 1px solid #000 !important;
         box-sizing: border-box !important;
     }
@@ -635,12 +637,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
     }
 
     .sig-space {
-        height: 35px !important;
+        height: 40px !important;
     }
 
     .doc-footer {
         padding-bottom: 0 !important;
-        margin-top: 15px !important;
         page-break-inside: avoid !important;
     }
 }
