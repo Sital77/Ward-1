@@ -361,7 +361,7 @@
                         if (localOverride && templateId === 'aamdani-pramanit' && (!localOverride.template_content.includes('globalLandAddr') || localOverride.template_content.includes('width: 250px;'))) {
                             localOverride = null;
                         }
-                        if (localOverride && templateId === 'pariwarik-bibaran' && (!localOverride.template_content.includes('outputTableHead') || !localOverride.template_content.includes('familyDetailsTable'))) {
+                        if (localOverride && templateId === 'pariwarik-bibaran' && (!localOverride.template_content.includes('outputTableHead') || !localOverride.template_content.includes('familyDetailsTable') || localOverride.template_content.includes('letter-body tapsil-title'))) {
                             localOverride = null;
                         }
                         if (localOverride && templateId === 'pan-sifarish' && (!localOverride.template_content.includes('lblCitBlockK') || !localOverride.template_content.includes('lblCitBlockBanda'))) {
@@ -402,7 +402,7 @@
                             isOutdated = true;
                         } else if (templateId === 'aamdani-pramanit' && (!data.template_content.includes('globalLandAddr') || data.template_content.includes('width: 250px;') || !data.template_content.includes('lblLandDetails'))) {
                             isOutdated = true;
-                        } else if (templateId === 'pariwarik-bibaran' && (!data.template_content.includes('outputTableHead') || !data.template_content.includes('familyDetailsTable'))) {
+                        } else if (templateId === 'pariwarik-bibaran' && (!data.template_content.includes('outputTableHead') || !data.template_content.includes('familyDetailsTable') || data.template_content.includes('letter-body tapsil-title'))) {
                             isOutdated = true;
                         } else if (templateId === 'pan-sifarish' && (!data.template_content.includes('lblCitBlockK') || !data.template_content.includes('lblCitBlockBanda'))) {
                             isOutdated = true;
@@ -470,18 +470,35 @@
             }
         }
 
-        // Normalize Tapasil headings and remove conflicting inline font-sizes from injected templates
+        // Strip any accidental tapsil-title class from body paragraphs or document pages
+        tempDiv.querySelectorAll('.letter-body, .letter-body-para, .a4-page, #bodyText, #bodyTextJanma').forEach(el => {
+            el.classList.remove('tapsil-title');
+        });
+
+        // Normalize Tapasil headings (ONLY standalone short headings, never body paragraphs or tables)
         tempDiv.querySelectorAll('div, p, span, h3, h4, u').forEach(el => {
-            if (el.textContent && el.textContent.includes('तपसिल') && !el.closest('table')) {
-                el.classList.add('tapsil-title');
-                if (el.parentElement && el.parentElement !== tempDiv) {
-                    el.parentElement.classList.add('tapsil-title');
+            if (el.classList.contains('letter-body') || 
+                el.classList.contains('letter-body-para') || 
+                el.closest('.letter-body') || 
+                el.closest('.letter-body-para') || 
+                el.closest('table')) {
+                return;
+            }
+            const txt = (el.textContent || '').trim();
+            if (txt.length > 0 && txt.length <= 40 && (txt.includes('तपसिल') || txt.includes('तपशिल'))) {
+                if (['U', 'SPAN', 'B', 'STRONG'].includes(el.tagName) && el.parentElement && el.parentElement !== tempDiv && !el.parentElement.classList.contains('a4-page')) {
+                    const pTxt = (el.parentElement.textContent || '').trim();
+                    if (pTxt.length <= 40) {
+                        el.parentElement.classList.add('tapsil-title');
+                        return;
+                    }
                 }
+                el.classList.add('tapsil-title');
             }
         });
 
         // Strip hardcoded inline font-sizes that conflict with unified typography system
-        tempDiv.querySelectorAll('.letter-body, .letter-body-para, .details-table, .details-table *, .print-table, .print-table *, .tapsil-title, .tapsil-title *, .tapsil-item, .receiver-block, .address-to').forEach(el => {
+        tempDiv.querySelectorAll('.letter-body, .letter-body-para, .details-table, .details-table *, .print-table, .print-table *, .tapsil-title, .tapsil-item, .receiver-block, .address-to').forEach(el => {
             if (el.style && el.style.fontSize) {
                 el.style.removeProperty('font-size');
             }
@@ -490,6 +507,11 @@
         while (tempDiv.firstChild) {
             redLine.parentNode.insertBefore(tempDiv.firstChild, null);
         }
+
+        // Clean any tapsil-title that leaked onto body paragraphs or page wrapper
+        redLine.parentNode.querySelectorAll('.letter-body, .letter-body-para, .a4-page, #bodyText, #bodyTextJanma').forEach(el => {
+            el.classList.remove('tapsil-title');
+        });
 
         // Immediately trigger live synchronization of dates and form fields into newly injected DOM
         setTimeout(() => {
@@ -1179,6 +1201,11 @@
                     line-height: 1.6 !important;
                     font-style: var(--doc-font-style) !important;
                 }
+
+                .letter-body,
+                .letter-body-para {
+                    font-weight: normal !important;
+                }
                 
                 /* Subject Line & Title */
                 .subject-container,
@@ -1193,7 +1220,6 @@
                 
                 /* तपसिल Headings & Content: Exactly matching document body */
                 .tapsil-title,
-                .tapsil-title *,
                 .tapasheel-label,
                 .tapasill-heading,
                 #tapasilHeaderBlock {
