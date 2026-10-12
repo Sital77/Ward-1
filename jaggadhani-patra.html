@@ -44,6 +44,94 @@
             background: #f8fafc;
             border-radius: 6px;
         }
+
+        /* ══════════════════════════════════════════════════════════
+           Scoped Custom SVG Letterhead (जग्गाधनीपूर्जा रजिष्ट्रेसन प्रविष्टि सिफारिसमा मात्र)
+           ══════════════════════════════════════════════════════════ */
+        .custom-svg-letterhead {
+            position: relative;
+            width: 100%;
+            margin-bottom: 6px;
+            page-break-inside: avoid;
+        }
+
+        .svg-letterhead-banner {
+            width: 100%;
+            height: auto;
+            display: block;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .svg-lh-meta-left {
+            position: absolute;
+            left: 4.5%;
+            bottom: 10.5%;
+            font-size: 11pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            z-index: 2;
+        }
+
+        .svg-lh-meta-right {
+            position: absolute;
+            right: 2.7%;
+            bottom: 10.5%;
+            text-align: right;
+            font-size: 10.5pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .svg-lh-meta-right .miti-block,
+        .svg-lh-meta-right .ns-block {
+            font-size: 10.5pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            white-space: nowrap;
+        }
+
+        .custom-svg-letterhead * {
+            font-style: normal !important;
+        }
+
+        @media print {
+            .custom-svg-letterhead {
+                width: 100% !important;
+                margin-bottom: 6px !important;
+                page-break-inside: avoid !important;
+            }
+
+            .svg-letterhead-banner {
+                width: 100% !important;
+                height: auto !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .svg-lh-meta-left {
+                left: 4.5% !important;
+                bottom: 10.5% !important;
+                font-size: 10.5pt !important;
+                font-weight: 600 !important;
+                line-height: 1.35 !important;
+                color: #000 !important;
+            }
+
+            .svg-lh-meta-right {
+                right: 2.7% !important;
+                bottom: 10.5% !important;
+                font-size: 10pt !important;
+                font-weight: 600 !important;
+                line-height: 1.35 !important;
+                color: #000 !important;
+            }
+        }
     </style>
 </head>
 
@@ -280,32 +368,23 @@
     <div class="preview-panel">
         <div class="a4-page">
 
-            <!-- ── Letterhead (Same as other forms) ── -->
-            <div class="letterhead-container">
-                <div class="lh-left">
-                    <img class="lh-logo" src="assets/emblem_of_nepal.svg"
-                        alt="Nepal Emblem">
-                    <div class="lh-meta">
-                        <div>प.सं. <span id="lblPatraSankhya">२०८३/०८४</span></div>
-                        <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
-                    </div>
+            <!-- ── Official Custom SVG Letterhead (जग्गाधनीपूर्जा रजिष्ट्रेसन प्रविष्टि सिफारिसका लागि मात्र) ── -->
+            <div class="custom-svg-letterhead">
+                <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड">
+                <div class="svg-lh-meta-left">
+                    <div>प.सं. <span id="lblPatraSankhya">२०८३/०८४</span></div>
+                    <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
                 </div>
-                <div class="lh-center">
-                    <div class="muni-n">गौरादह नगरपालिका</div>
-                    <div class="wada-title">१ नं. वडा कार्यालय</div>
-                    <div class="loc-t">गौरादह, झापा</div>
-                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
-                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
-                </div>
-                <div class="lh-right">
+                <div class="svg-lh-meta-right">
                     <div class="miti-block">मिति : <span id="lblMiti" class="fill-space"
                             style="min-width: 90px;">२०८३/</span></div>
-                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat" class="fill-space"
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat" class="fill-space"
                             style="min-width: 50px;">११४६</span></div>
                 </div>
             </div>
 
-            <div class="header-red-line"></div>
+            <!-- DOM Sentinel for compatibility -->
+            <div class="header-red-line" style="display: none;"></div>
 
             <!-- ── Receiver ── -->
             <div class="address-to" style="font-weight: bold; font-size: 13.5pt; margin-top: 8px; margin-bottom: 16px; line-height: 1.6;">
