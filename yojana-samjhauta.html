@@ -202,13 +202,14 @@
                 </div>
                 <div>
                     <label>मिति (वि.सं.):</label>
-                    <input type="text" id="inMiti" placeholder="उदा: २०८३/०४/१५" oninput="updateDoc()">
+                    <input type="text" id="inMiti" placeholder="उदा: २०८३/०४/१५" oninput="updateNepalSambatFromMiti(); updateDoc();">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>ने.सं. :</label>
                 <input type="text" id="inNepalSamvat" placeholder="उदा: ११४६" oninput="updateDoc()">
+                <input type="hidden" id="editRecordIndex" value="">
             </div>
         </div>
 
@@ -833,15 +834,27 @@
         });
 
         // ── Abhilekh & Firestore Database Logic ──
+        let globalDatabase = [];
+        window.globalDatabase = globalDatabase;
+
+        window.updateNepalSambatFromMiti = function() {
+            if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+                window.NepalSambat.updateNepalSambatFromMiti();
+            }
+        };
+
         function toggleModal(show) {
             document.getElementById('abhilekhModal').style.display = show ? 'flex' : 'none';
             if (show) renderDatabaseTable();
         }
 
         async function printAndSaveSystem() {
+            const editId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value.trim() : '';
             const record = {
                 miti: document.getElementById('inMiti').value.trim(),
                 chalani: document.getElementById('inChalani').value.trim(),
+                nepalSamvat: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
+                ns: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
                 projectName: document.getElementById('inProjectName').value.trim(),
                 committeeName: document.getElementById('inCommitteeName').value.trim(),
                 chairman: document.getElementById('inChairman').value.trim(),
@@ -851,17 +864,50 @@
                 amount: document.getElementById('inBudgetAmt').value.trim(),
                 createdBy: localStorage.getItem('sifarish_user') || 'wada1',
                 createdWard: localStorage.getItem('sifarish_ward') || '1',
+                hasNepalSambatTithi: true,
+                nsFeatureVersion: 1,
+                nsRolloutCommit: (window.NepalSambat && window.NepalSambat.CONFIG) ? window.NepalSambat.CONFIG.rolloutCommit : 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
                 timestamp: Date.now()
             };
 
             try {
-                await db.collection("yojanaSamjhautaRecords").add(record);
+                if (editId) {
+                    await db.collection("yojanaSamjhautaRecords").doc(editId).set(record, { merge: true });
+                } else {
+                    await db.collection("yojanaSamjhautaRecords").add(record);
+                }
             } catch (e) {
                 console.warn("Save record warning:", e);
             }
 
             window.print();
         }
+
+        window.editFromDB = function(id) {
+            const rec = globalDatabase.find(r => r.id === id);
+            if (!rec) return;
+
+            if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+                window.NepalSambat.setCurrentRecord(rec);
+            }
+
+            if (document.getElementById('editRecordIndex')) {
+                document.getElementById('editRecordIndex').value = id;
+            }
+
+            if (document.getElementById('inMiti')) document.getElementById('inMiti').value = rec.miti || '';
+            if (document.getElementById('inChalani')) document.getElementById('inChalani').value = rec.chalani === '-' ? '' : (rec.chalani || '');
+            if (document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = (rec.nepalSamvat !== '-' && rec.nepalSamvat) ? rec.nepalSamvat : ((rec.ns !== '-' && rec.ns) ? rec.ns : '');
+            if (document.getElementById('inProjectName')) document.getElementById('inProjectName').value = rec.projectName || '';
+            if (document.getElementById('inCommitteeName')) document.getElementById('inCommitteeName').value = rec.committeeName || '';
+            if (document.getElementById('inChairman')) document.getElementById('inChairman').value = rec.chairman || '';
+            if (document.getElementById('inSecretary')) document.getElementById('inSecretary').value = rec.secretary || '';
+            if (document.getElementById('inTreasurer')) document.getElementById('inTreasurer').value = rec.treasurer || '';
+            if (document.getElementById('inBudgetAmt')) document.getElementById('inBudgetAmt').value = rec.amount || '';
+
+            toggleModal(false);
+            updateDoc();
+        };
 
         async function renderDatabaseTable() {
             const tbody = document.getElementById('dbTableBody');
@@ -871,10 +917,14 @@
 
             try {
                 const snap = await db.collection("yojanaSamjhautaRecords").orderBy("timestamp", "desc").limit(50).get();
+                globalDatabase = [];
+                snap.forEach(doc => {
+                    globalDatabase.push({ id: doc.id, ...doc.data() });
+                });
+                window.globalDatabase = globalDatabase;
                 let html = '';
 
-                snap.forEach(doc => {
-                    const data = doc.data();
+                globalDatabase.forEach(data => {
                     const cName = (data.committeeName || '').toLowerCase();
                     const pName = (data.projectName || '').toLowerCase();
                     const chalani = (data.chalani || '').toLowerCase();
@@ -891,8 +941,9 @@
                                 <td><strong>${data.projectName || '-'}</strong></td>
                                 <td>${data.committeeName || '-'}</td>
                                 <td>रू. ${data.amount || '-'}</td>
-                                <td style="text-align:center;">
-                                    <button onclick="deleteRecord('${doc.id}')" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">हटाइयो</button>
+                                <td style="text-align:center; white-space:nowrap;">
+                                    <button onclick="editFromDB('${data.id}')" style="background:#2563eb; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; margin-right:4px;">✏️ सम्पादन</button>
+                                    <button onclick="deleteRecord('${data.id}')" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">हटाइयो</button>
                                 </td>
                             </tr>
                         `;

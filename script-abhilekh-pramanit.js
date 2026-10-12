@@ -16,6 +16,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db  = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 
 // Auth ready भएपछि मात्र snapshot listener start गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
@@ -25,6 +26,7 @@ let globalDatabase = [];
             globalDatabase.push({ id: doc.id, ...doc.data() });
         });
         globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+        window.globalDatabase = globalDatabase;
         renderDatabaseTable();
         populateBirthRecordsDropdown();
     });
@@ -519,8 +521,12 @@ function initializeFiscalYear(bsYear, bsMonth) {
 }
 
 function updateNepalSambatFromMiti() {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
         if (typeof updateDoc === 'function') updateDoc();
     }
@@ -528,8 +534,19 @@ function updateNepalSambatFromMiti() {
 
 // ── Nepal Sambat widget proxy API loader ─────────────
 async function fetchCurrentNepalSambat() {
+    if (window.NepalSambat && typeof window.NepalSambat.getCurrentRecord === 'function' && window.NepalSambat.getCurrentRecord()) {
+        return;
+    }
+    const editIdx = document.getElementById('editRecordIndex');
+    if (editIdx && editIdx.value) {
+        return;
+    }
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
         if (typeof updateDoc === 'function') updateDoc();
     }
@@ -611,9 +628,12 @@ async function printAndSaveSystem() {
         customSignName:  document.getElementById('inCustomSignName').value.trim(),
         customSignTitle: document.getElementById('inCustomSignTitle').value.trim(),
         sigMargin:       document.getElementById('inSigMargin').value,
-        createdBy:       localStorage.getItem('sifarish_user') || 'wada1',
-        createdWard:     localStorage.getItem('sifarish_ward') || '1',
-        timestamp:       Date.now()
+        createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard:         localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion:    1,
+        nsRolloutCommit:     (window.NepalSambat && window.NepalSambat.CONFIG) ? window.NepalSambat.CONFIG.rolloutCommit : 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
+        timestamp:           Date.now()
     };
 
     const btn = document.querySelector('.btn-print');
@@ -714,6 +734,10 @@ async function loadRecordToForm(id) {
 
     if (!confirm("के तपाईं यो रेकर्ड सम्पादन गर्न चाहनुहुन्छ? यसले हालको फॉर्मको डाटा प्रतिस्थापन गर्नेछ ।")) {
         return;
+    }
+
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
     }
 
     document.getElementById('editRecordIndex').value = rec.id;

@@ -13,3 +13,4 @@
 nissa-data.js
 private_data/
 *.log
+*.patch

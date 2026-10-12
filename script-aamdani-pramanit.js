@@ -17,6 +17,7 @@ let incomeRowCounter = 0;
 let activeIncomeRowIds = [];
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 
 // Auth ready snapshot listener
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
@@ -234,6 +235,10 @@ window.toggleCustomSign = function() {
 };
 
 window.updateNepalSambatFromMiti = function() {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
     if (inNS && !inNS.value) {
         inNS.value = '११४६';
@@ -649,6 +654,10 @@ window.editFromDB = function(recordId) {
     const record = globalDatabase.find(r => r.id === recordId);
     if (!record) return;
 
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(record);
+    }
+
     const editField = document.getElementById('editRecordIndex');
     if (editField) editField.value = recordId;
 
@@ -658,7 +667,7 @@ window.editFromDB = function(recordId) {
     if (document.getElementById('inPatraSankhya')) document.getElementById('inPatraSankhya').value = record.patraSankhya || '२०८३/०८४';
     if (document.getElementById('inChalani')) document.getElementById('inChalani').value = record.chalani === '-' ? '' : (record.chalani || '');
     if (document.getElementById('inMiti')) document.getElementById('inMiti').value = record.miti || '';
-    if (document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = record.nepalSamvat || '';
+    if (document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = (record.nepalSamvat !== '-' && record.nepalSamvat) ? record.nepalSamvat : ((record.ns !== '-' && record.ns) ? record.ns : '');
     
     if (document.getElementById('inOffice')) document.getElementById('inOffice').value = record.office || '';
     if (document.getElementById('inName')) document.getElementById('inName').value = record.name || '';
@@ -772,6 +781,7 @@ window.printAndSaveSystem = async function() {
         chalani: document.getElementById('inChalani') ? document.getElementById('inChalani').value : '',
         miti: document.getElementById('inMiti') ? document.getElementById('inMiti').value : '',
         nepalSamvat: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value : '',
+        ns: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value : '',
         office: document.getElementById('inOffice') ? document.getElementById('inOffice').value : '',
         name: document.getElementById('inName') ? document.getElementById('inName').value : '',
         citNo: document.getElementById('inCitNo') ? document.getElementById('inCitNo').value : '',
@@ -792,6 +802,9 @@ window.printAndSaveSystem = async function() {
         incomeRows: incomeRowsData,
         createdBy: localStorage.getItem('sifarish_user') || 'wada1',
         createdWard: localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion: 1,
+        nsRolloutCommit: 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
         timestamp: Date.now()
     };
 

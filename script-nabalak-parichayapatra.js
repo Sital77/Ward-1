@@ -16,6 +16,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 let currentUploadedPhotoData = null;
 
 // Auth ready भएपछि मात्र snapshot listener start गर्ने
@@ -26,6 +27,7 @@ let currentUploadedPhotoData = null;
             globalDatabase.push({ id: doc.id, ...doc.data() });
         });
         globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        window.globalDatabase = globalDatabase;
         renderDatabaseTable();
     });
 }).catch(() => {});
@@ -663,8 +665,34 @@ function adjustSignaturePosition(marginVal) {
 }
 
 function updateNepalSambatFromMiti() {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS && !inNS.value) inNS.value = '११४६';
+    if (inNS && !inNS.value) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
+    }
+}
+
+async function fetchCurrentNepalSambat() {
+    if (window.NepalSambat && typeof window.NepalSambat.getCurrentRecord === 'function' && window.NepalSambat.getCurrentRecord()) {
+        return;
+    }
+    const editIdx = document.getElementById('editRecordIndex');
+    if (editIdx && editIdx.value) {
+        return;
+    }
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
+    const inNS = document.getElementById('inNepalSamvat');
+    if (inNS && !inNS.value) {
+        inNS.value = '११४६';
+        if (typeof updateDoc === 'function') updateDoc();
+    }
 }
 
 // ── Auto-fill Date on Page Load ─────────────────────
@@ -754,6 +782,10 @@ async function deleteFromDB(id) {
 function populateFormForEdit(recordId) {
     const r = globalDatabase.find(item => item.id === recordId);
     if (!r) return;
+
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(r);
+    }
 
     document.getElementById('editRecordIndex').value = r.id || '';
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड (नाबालक परिचय पत्र)";
@@ -924,9 +956,12 @@ async function printAndSaveSystem() {
         grandmotherNid: (document.getElementById('inGrandmotherNidNo') ? document.getElementById('inGrandmotherNidNo').value.trim() : ''),
         signAuth: document.getElementById('inSignAuthority').value,
         sigMargin: document.getElementById('inSigMargin').value,
-        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
-        createdWard: localStorage.getItem('sifarish_ward') || '1',
-        timestamp: Date.now()
+        createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard:         localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion:    1,
+        nsRolloutCommit:     (window.NepalSambat && window.NepalSambat.CONFIG) ? window.NepalSambat.CONFIG.rolloutCommit : 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
+        timestamp:           Date.now()
     };
 
     const btn = document.querySelector('.btn-print');

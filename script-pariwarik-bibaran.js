@@ -13,6 +13,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 let rowCounter = 0;
 let activeRowIds = [];
 let isFirstRowSynced = true;
@@ -425,6 +426,9 @@ window.printAndSaveSystem = async function () {
         members: familyRecords,
         createdBy: localStorage.getItem('sifarish_user') || 'wada1',
         createdWard: localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion: 1,
+        nsRolloutCommit: 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
         timestamp: Date.now()
     };
 
@@ -511,6 +515,10 @@ window.editFromDB = function (id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
+
     isFirstRowSynced = false;
     document.getElementById('editRecordIndex').value = id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
@@ -518,7 +526,7 @@ window.editFromDB = function (id) {
     document.getElementById('inPatraSankhya').value = rec.patra;
     document.getElementById('inChalani').value = rec.chalani === '-' ? '' : rec.chalani;
     document.getElementById('inMiti').value = rec.miti;
-    document.getElementById('inNepalSamvat').value = rec.ns;
+    document.getElementById('inNepalSamvat').value = rec.ns !== '-' ? (rec.ns || '') : '';
     document.getElementById('inWadaNo').value = rec.wada;
     document.getElementById('inSabikWada').value = rec.sabikWada;
     document.getElementById('inName').value = rec.name;
@@ -697,20 +705,35 @@ function initializeAutomaticDate() {
 }
 
 window.updateNepalSambatFromMiti = function () {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
         if (typeof window.updateDoc === 'function') window.updateDoc();
     }
-}
+};
 
 window.fetchCurrentNepalSambat = async function () {
+    if (window.NepalSambat && typeof window.NepalSambat.getCurrentRecord === 'function' && window.NepalSambat.getCurrentRecord()) {
+        return;
+    }
+    const editIdx = document.getElementById('editRecordIndex');
+    if (editIdx && editIdx.value) {
+        return;
+    }
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
         if (typeof window.updateDoc === 'function') window.updateDoc();
     }
-}
+};
 
 // User edit tracking setup for owner name input
 document.addEventListener("DOMContentLoaded", () => {

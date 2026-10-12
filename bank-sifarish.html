@@ -792,6 +792,7 @@
         const db  = firebase.firestore();
 
         let globalDatabase = [];
+        window.globalDatabase = globalDatabase;
 
         // Auth ready snapshot listener
         (window._firebaseAuthReady || Promise.resolve()).then(() => {
@@ -801,6 +802,7 @@
                     globalDatabase.push({ id: doc.id, ...doc.data() });
                 });
                 globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
+                window.globalDatabase = globalDatabase;
                 renderDatabaseTable();
             }, err => {
 
@@ -2341,6 +2343,9 @@
                 sigMargin:           document.getElementById('inSigMargin').value,
                 createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
                 createdWard:         localStorage.getItem('sifarish_ward') || '1',
+                hasNepalSambatTithi: true,
+                nsFeatureVersion:    1,
+                nsRolloutCommit:     (window.NepalSambat && window.NepalSambat.CONFIG) ? window.NepalSambat.CONFIG.rolloutCommit : 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
                 timestamp:           Date.now()
             };
 
@@ -2435,6 +2440,10 @@
         function editFromDB(id) {
             const rec = globalDatabase.find(r => r.id === id);
             if (!rec) return;
+
+            if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+                window.NepalSambat.setCurrentRecord(rec);
+            }
 
             document.getElementById('editRecordIndex').value = id;
             document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
@@ -2668,7 +2677,9 @@
         }
 
         function updateNepalSambatFromMiti() {
-            // Keeps Sambat sync active
+            if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+                window.NepalSambat.updateNepalSambatFromMiti();
+            }
         }
 
         // Initialize on load

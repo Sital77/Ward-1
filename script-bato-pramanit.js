@@ -13,6 +13,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 let rowCounter = 0;
 let activeRowIds = [];
 
@@ -23,6 +24,7 @@ let activeRowIds = [];
         snapshot.forEach((doc) => {
             globalDatabase.push({ id: doc.id, ...doc.data() });
         });
+        window.globalDatabase = globalDatabase;
         // नयाँ सिफारिस माथि देखिने गरी समय (Timestamp) अनुसार मिलाउने
         globalDatabase.sort((a, b) => b.timestamp - a.timestamp);
         renderDatabaseTable();
@@ -432,9 +434,12 @@ window.printAndSaveSystem = async function () {
         customSignName: document.getElementById('inCustomSignName').value,
         customSignTitle: document.getElementById('inCustomSignTitle').value,
         sigMargin: document.getElementById('inSigMargin').value,
-        createdBy: localStorage.getItem('sifarish_user') || 'wada1',
-        createdWard: localStorage.getItem('sifarish_ward') || '1',
-        timestamp: Date.now() 
+        createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
+        createdWard:         localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion:    1,
+        nsRolloutCommit:     (window.NepalSambat && window.NepalSambat.CONFIG) ? window.NepalSambat.CONFIG.rolloutCommit : 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
+        timestamp:           Date.now() 
     };
 
     try {
@@ -514,6 +519,10 @@ window.renderDatabaseTable = function () {
 window.editFromDB = function (id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
+
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
 
     document.getElementById('editRecordIndex').value = id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
@@ -715,20 +724,35 @@ function initializeAutomaticDate() {
 }
 
 window.updateNepalSambatFromMiti = function () {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
         if (typeof window.updateDoc === 'function') window.updateDoc();
     }
-}
+};
 
 window.fetchCurrentNepalSambat = async function () {
+    if (window.NepalSambat && typeof window.NepalSambat.getCurrentRecord === 'function' && window.NepalSambat.getCurrentRecord()) {
+        return;
+    }
+    const editIdx = document.getElementById('editRecordIndex');
+    if (editIdx && editIdx.value) {
+        return;
+    }
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
         if (typeof window.updateDoc === 'function') window.updateDoc();
     }
-}
+};
 
 window.onload = function () {
     initializeAutomaticDate();

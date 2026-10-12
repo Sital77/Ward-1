@@ -1029,6 +1029,7 @@
         // ================= DATABASE / ABHILEKH LOGIC =================
 
         let globalDatabase = [];
+        window.globalDatabase = globalDatabase;
 
         // Realtime Firestore listener
         (window._firebaseAuthReady || Promise.resolve()).then(() => {
@@ -1045,6 +1046,12 @@
                 console.warn("Firestore snapshot error:", err);
             });
         }).catch(() => {});
+
+                window.updateNepalSambatFromMiti = function () {
+            if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+                window.NepalSambat.updateNepalSambatFromMiti();
+            }
+        };
 
         function formatTimestamp(ts) {
             if (!ts) return '';
@@ -1086,6 +1093,9 @@
                 sigMargin: document.getElementById('inSigMargin').value,
                 createdBy: localStorage.getItem('sifarish_user') || 'wada1',
                 createdWard: localStorage.getItem('sifarish_ward') || '1',
+                hasNepalSambatTithi: true,
+                nsFeatureVersion: 1,
+                nsRolloutCommit: 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
                 timestamp: Date.now()
             };
 
@@ -1216,6 +1226,10 @@
             const rec = globalDatabase.find(r => r.id === id);
             if (!rec) return;
 
+            if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+                window.NepalSambat.setCurrentRecord(rec);
+            }
+
             document.getElementById('editRecordIndex').value = id;
             document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
 
@@ -1230,7 +1244,7 @@
             }
             document.getElementById('inChalani').value = rec.chalani || '';
             document.getElementById('inMiti').value = rec.miti || '';
-            document.getElementById('inNepalSamvat').value = rec.ns || '';
+            document.getElementById('inNepalSamvat').value = rec.ns !== '-' ? (rec.ns || '') : '';
             
             document.getElementById('inCommitteeName').value = rec.committeeName || '';
             document.getElementById('inChairman').value = rec.chairman || '';

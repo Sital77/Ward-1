@@ -16,6 +16,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 
 // Auth ready भएपछि मात्र snapshot listener सुरु गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
@@ -77,6 +78,9 @@ function adjustSignaturePosition(value) {
 }
 
 function resetForm() {
+    if (window.NepalSambat && typeof window.NepalSambat.clearCurrentRecord === 'function') {
+        window.NepalSambat.clearCurrentRecord();
+    }
     document.getElementById('editRecordIndex').value = '';
     document.getElementById('formMainTitle').innerText = '🛡️ सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस';
     const btnNew = document.getElementById('btnNewForm');
@@ -349,18 +353,33 @@ function initializeFiscalYear(bsYear, bsMonth) {
 }
 
 function updateNepalSambatFromMiti() {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
-        updateDoc();
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 
 async function fetchCurrentNepalSambat() {
+    if (window.NepalSambat && typeof window.NepalSambat.getCurrentRecord === 'function' && window.NepalSambat.getCurrentRecord()) {
+        return;
+    }
+    const editIdx = document.getElementById('editRecordIndex');
+    if (editIdx && editIdx.value) {
+        return;
+    }
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) {
+    if (inNS && !inNS.value) {
         inNS.value = '११४६';
-        updateDoc();
+        if (typeof updateDoc === 'function') updateDoc();
     }
 }
 
@@ -414,6 +433,9 @@ async function printAndSaveSystem() {
         sigMargin:            document.getElementById('inSigMargin').value,
         createdBy:            localStorage.getItem('sifarish_user') || 'wada1',
         createdWard:          localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi:  true,
+        nsFeatureVersion:     1,
+        nsRolloutCommit:      'd2ba29cef12ba2cfdd7cb211861af69f57880811',
         timestamp:            Date.now()
     };
 
@@ -518,6 +540,10 @@ async function loadRecordToForm(id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
+
     if (!confirm("के तपाईं यो रेकर्ड सम्पादन गर्न चाहनुहुन्छ? यसले हालको फारमको डाटा प्रतिस्थापन गर्नेछ ।")) {
         return;
     }
@@ -590,6 +616,10 @@ async function loadRecordToForm(id) {
 async function deleteRecord(id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
+
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
 
     if (!confirm(`के तपाईं "${rec.beneficiaryName || 'यो रेकर्ड'}" लाई रद्दीको टोकरीमा पठाउन चाहनुहुन्छ?`)) {
         return;

@@ -19,6 +19,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 let rowCounter = 0;
 let activeRowIds = [];
 const LOCAL_STORAGE_KEY = 'bargikaran_sifarish_records_local';
@@ -171,6 +172,10 @@ window.initializeAutomaticDate = function () {
 };
 
 window.updateNepalSambatFromMiti = function () {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
     try {
         const mitiVal = document.getElementById('inMiti').value || '';
         const parts = mitiVal.split('/');
@@ -492,6 +497,7 @@ window.printAndSaveSystem = function () {
         chalani: chalaniNo,
         miti: miti,
         nepalSamvat: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
+        ns: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
         receiver: document.getElementById('inReceiver') ? document.getElementById('inReceiver').value.trim() : '',
         subject: document.getElementById('inSubject') ? document.getElementById('inSubject').value.trim() : '',
         applicantName: applicantName,
@@ -512,6 +518,9 @@ window.printAndSaveSystem = function () {
         customSignTitle: document.getElementById('inCustomSignTitle') ? document.getElementById('inCustomSignTitle').value.trim() : '',
         createdBy: localStorage.getItem('sifarish_user') || 'wada1',
         createdWard: localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion: 1,
+        nsRolloutCommit: 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
         timestamp: Date.now()
     };
 
@@ -642,13 +651,17 @@ window.loadRecordForEdit = function (index) {
     const rec = list[index] || globalDatabase[index];
     if (!rec) return;
 
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
+
     const editRecordIndex = document.getElementById('editRecordIndex');
     if (editRecordIndex) editRecordIndex.value = index;
 
     if (rec.patraSankhya && document.getElementById('inPatraSankhya')) document.getElementById('inPatraSankhya').value = rec.patraSankhya;
     if (rec.chalani && document.getElementById('inChalani')) document.getElementById('inChalani').value = rec.chalani;
     if (rec.miti && document.getElementById('inMiti')) document.getElementById('inMiti').value = rec.miti;
-    if (rec.nepalSamvat && document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = rec.nepalSamvat;
+    if (document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = (rec.nepalSamvat !== '-' && rec.nepalSamvat) ? rec.nepalSamvat : ((rec.ns !== '-' && rec.ns) ? rec.ns : '');
     if (rec.receiver && document.getElementById('inReceiver')) document.getElementById('inReceiver').value = rec.receiver;
     if (rec.subject && document.getElementById('inSubject')) document.getElementById('inSubject').value = rec.subject;
     if (rec.applicantName && document.getElementById('inName')) document.getElementById('inName').value = rec.applicantName;

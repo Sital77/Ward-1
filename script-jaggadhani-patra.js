@@ -16,6 +16,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 let rowCounter = 0;
 let activeRowIds = [];
 
@@ -135,6 +136,9 @@ function collectKittaRows() {
 }
 
 window.updateNepalSambatFromMiti = function () {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+    }
     const mitiVal = document.getElementById('inMiti').value.trim();
     const parts = mitiVal.split('/');
     if (parts.length >= 1) {
@@ -143,7 +147,9 @@ window.updateNepalSambatFromMiti = function () {
         if (yStr.length === 4) {
             const bsYear = parseInt(yStr, 10);
             if (!isNaN(bsYear)) {
-                document.getElementById('inNepalSamvat').value = window.toNepaliDigit(bsYear - 937);
+                if (!window.NepalSambat) {
+                    document.getElementById('inNepalSamvat').value = window.toNepaliDigit(bsYear - 937);
+                }
                 let bsMonth = 5;
                 if (parts.length >= 2) {
                     const parsedMonth = parseInt(toEng(parts[1]), 10);
@@ -499,6 +505,9 @@ window.printAndSaveSystem = async function () {
         subject: "जग्गाधनीपूर्जा रजिष्ट्रेसन सिफारिस",
         createdBy: localStorage.getItem('sifarish_user') || 'wada1',
         createdWard: localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion: 1,
+        nsRolloutCommit: 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
         timestamp: Date.now()
     };
 
@@ -565,13 +574,17 @@ window.editRecord = function (id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
+
     document.getElementById('editRecordIndex').value = id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
 
     document.getElementById('inPatraSankhya').value = rec.patra || '२०८३/०८४';
     document.getElementById('inChalani').value = (rec.chalani === '-' ? '' : rec.chalani) || '';
     document.getElementById('inMiti').value = rec.miti || '२०८३/';
-    document.getElementById('inNepalSamvat').value = rec.ns || '११४६';
+    document.getElementById('inNepalSamvat').value = rec.ns !== '-' ? (rec.ns || '') : '';
 
     document.getElementById('inApplicantName').value = rec.name || '';
     document.getElementById('inWadaNo').value = rec.wada || '१';

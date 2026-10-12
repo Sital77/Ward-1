@@ -16,6 +16,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 
 // Auth ready भएपछि snapshot listener सुरु गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
@@ -132,8 +133,11 @@ function resetForm() {
     // Clear Letterhead & Dates
     document.getElementById('inChalani').value = '';
     document.getElementById('inDartaNo').value = '';
+    if (window.NepalSambat && typeof window.NepalSambat.clearCurrentRecord === 'function') {
+        window.NepalSambat.clearCurrentRecord();
+    }
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) inNS.value = '११४६';
+    if (inNS) inNS.value = '';
 
     // Clear Project
     document.getElementById('inProjectName').value = '';
@@ -699,6 +703,13 @@ function initializeFiscalYear(bsYear, bsMonth) {
     } catch (error) {}
 }
 
+function updateNepalSambatFromMiti() {
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
+}
+
 // ── Print & Save ──────────────────────────────────────
 async function printAndSaveSystem() {
     const projectName = document.getElementById('inProjectName').value.trim();
@@ -718,7 +729,8 @@ async function printAndSaveSystem() {
         chalani:                document.getElementById('inChalani').value.trim() || '-',
         dartaNo:                document.getElementById('inDartaNo').value.trim() || '-',
         miti:                   document.getElementById('inMiti').value.trim() || '-',
-        nepalSamvat:            document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '११४६',
+        nepalSamvat:            document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
+        ns:                     document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
         projectName:            projectName,
         name:                   projectName || budgetTitle || payeeName, // Standard search alias
         projectArea:            document.getElementById('inProjectArea').value.trim() || '',
@@ -746,6 +758,9 @@ async function printAndSaveSystem() {
         type:                   'वडा स्तरीय योजना टिप्पणी-आदेश',
         createdBy:              localStorage.getItem('sifarish_user') || 'wada1',
         createdWard:            localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi:    true,
+        nsFeatureVersion:       1,
+        nsRolloutCommit:        'd2ba29cef12ba2cfdd7cb211861af69f57880811',
         timestamp:              Date.now()
     };
 
@@ -845,6 +860,10 @@ async function loadRecordToForm(id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
+
     if (!confirm("के तपाईं यो रेकर्ड सम्पादन गर्न चाहनुहुन्छ? यसले हालको फारमको डाटा प्रतिस्थापन गर्नेछ ।")) {
         return;
     }
@@ -859,7 +878,7 @@ async function loadRecordToForm(id) {
     document.getElementById('inDartaNo').value = rec.dartaNo !== '-' ? rec.dartaNo : '';
     document.getElementById('inMiti').value = rec.miti !== '-' ? rec.miti : '';
     const inNS = document.getElementById('inNepalSamvat');
-    if (inNS) inNS.value = rec.nepalSamvat || '११४६';
+    if (inNS) inNS.value = (rec.nepalSamvat !== '-' && rec.nepalSamvat) ? rec.nepalSamvat : ((rec.ns !== '-' && rec.ns) ? rec.ns : '');
 
     // Project
     document.getElementById('inProjectName').value = rec.projectName || '';

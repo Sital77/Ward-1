@@ -16,6 +16,7 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
 let globalDatabase = [];
+window.globalDatabase = globalDatabase;
 
 // Track if user explicitly edited husband or wife sections directly
 let husbandDirectlyEdited = false;
@@ -442,7 +443,7 @@ async function printAndSaveSystem() {
         patra:               getSelectedAY(),
         chalani:             document.getElementById('inChalani').value.trim() || '-',
         miti:                document.getElementById('inMiti').value.trim() || '-',
-        ns:                  document.getElementById('inNepalSamvat').value.trim() || '११४६',
+        ns:                  document.getElementById('inNepalSamvat').value.trim() || '-',
         recRadio:            document.querySelector('input[name="recRadio"]:checked')?.value || 'जो जस सँग सम्बन्धित छ',
         customReceiver:      document.getElementById('inCustomReceiver')?.value.trim() || '',
         subject:             'विवाह प्रमाणित सम्बन्धमा ।',
@@ -498,6 +499,9 @@ async function printAndSaveSystem() {
         name:                `${hName} र ${wName}`,
         createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
         createdWard:         localStorage.getItem('sifarish_ward') || '1',
+        hasNepalSambatTithi: true,
+        nsFeatureVersion:    1,
+        nsRolloutCommit:     'd2ba29cef12ba2cfdd7cb211861af69f57880811',
         timestamp:           Date.now()
     };
 
@@ -591,6 +595,10 @@ function editFromDB(id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
+
     document.getElementById('editRecordIndex').value = id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड (विवाह प्रमाणित)";
 
@@ -605,7 +613,7 @@ function editFromDB(id) {
 
     document.getElementById('inChalani').value     = rec.chalani === '-' ? '' : (rec.chalani || '');
     document.getElementById('inMiti').value        = rec.miti === '-' ? '' : (rec.miti || '');
-    document.getElementById('inNepalSamvat').value = rec.ns || '११४६';
+    document.getElementById('inNepalSamvat').value = rec.ns !== '-' ? (rec.ns || '') : '';
 
     // Recipient
     const recRadios = document.getElementsByName('recRadio');
@@ -705,20 +713,10 @@ async function deleteFromDB(id) {
 
 // ── Auto-convert Date to Nepal Samvat ──────────────────
 function updateNepalSambatFromMiti() {
-    const mitiVal = (document.getElementById('inMiti')?.value || '').trim();
-    if (!mitiVal) return;
-
-    try {
-        const parts = mitiVal.split(/[-/]/);
-        if (parts.length >= 3) {
-            const y = parseInt(parts[0], 10);
-            const m = parseInt(parts[1], 10);
-            const d = parseInt(parts[2], 10);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d) && window.NepaliFunctions) {
-                // Converter available
-            }
-        }
-    } catch (e) {}
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+        window.NepalSambat.updateNepalSambatFromMiti();
+        return;
+    }
 }
 
 // ── Page Initialization ────────────────────────────────

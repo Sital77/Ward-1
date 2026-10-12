@@ -880,21 +880,18 @@
         // Maintain full Nepal Samvat year, tithi, and day number for printable document letterhead
         const syncDocumentNepalSambat = () => {
             const inNS = document.getElementById('inNepalSamvat');
-            if (inNS && (!inNS.value || inNS.value.trim() === '' || inNS.value === '-')) {
-                inNS.value = '११४६';
-            }
             const inMiti = document.getElementById('inMiti') || document.getElementById('inSubmitMiti') || document.getElementById('inCustomCertifiedMiti');
             const lblMiti = document.getElementById('lblMiti');
-            const dateVal = inMiti ? inMiti.value : (lblMiti ? lblMiti.innerText : '');
-            let yr = inNS ? inNS.value.trim() : '११४६';
+            const dateVal = (inMiti && inMiti.value && inMiti.value.trim() !== '') ? inMiti.value.trim() : (lblMiti ? lblMiti.innerText.trim() : '');
+            let yr = inNS ? inNS.value.trim() : '';
 
             const fullNS = (window.NepalSambat && typeof window.NepalSambat.formatPrint === 'function')
                 ? window.NepalSambat.formatPrint(yr, dateVal)
-                : (yr || '११४६');
+                : (yr || '');
 
             const lblNSList = document.querySelectorAll('#lblNepalSamvat, .lbl-nepal-samvat');
             lblNSList.forEach(lblNS => {
-                if (lblNS && lblNS.innerText !== fullNS) {
+                if (lblNS && fullNS !== undefined && lblNS.innerText !== fullNS) {
                     lblNS.innerText = fullNS;
                 }
             });
@@ -1458,9 +1455,12 @@
             const toNep = (n) => String(n).split('').map(c => '०१२३४५६७८९'[parseInt(c)] || c).join('');
             const dateStr = `मिति : ${toNep(bsY)} ${nepaliMonths[bsM - 1] || 'असार'} ${toNep(bsD)} गते, ${dayName}`;
             
-            // Auto-populate date fields if they are empty or have hardcoded placeholders
+            // Auto-populate date fields if they are empty or have hardcoded placeholders (only for new records)
             setTimeout(() => {
                 try {
+                    const isRecordLoaded = (window.NepalSambat && typeof window.NepalSambat.getCurrentRecord === 'function' && window.NepalSambat.getCurrentRecord()) ||
+                                           (document.getElementById('editRecordIndex') && document.getElementById('editRecordIndex').value);
+                    if (isRecordLoaded) return;
                     const yStr = toNep(bsY);
                     const mStr = toNep(String(bsM).padStart(2, '0'));
                     const dStr = toNep(String(bsD).padStart(2, '0'));
@@ -1469,13 +1469,17 @@
                     let updated = false;
                     mFields.forEach(id => {
                         const el = document.getElementById(id);
-                        if (el && (!el.value || el.value.trim() === '' || el.value === '२०८३/' || el.value === '२०८३/०२/२७' || el.value === '२०८३/०२/१८')) {
+                        if (el && (!el.value || el.value.trim() === '' || el.value === '२०८३/')) {
                             el.value = autoMiti;
                             updated = true;
                         }
                     });
-                    if (updated && typeof updateDoc === 'function') {
-                        updateDoc();
+                    if (updated) {
+                        if (typeof window.updateNepalSambatFromMiti === 'function') {
+                            window.updateNepalSambatFromMiti();
+                        } else if (typeof updateDoc === 'function') {
+                            updateDoc();
+                        }
                     }
                 } catch(err) {
 
