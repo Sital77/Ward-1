@@ -8,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
     <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
     <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/emblem_of_nepal.svg" type="image/svg+xml" fetchpriority="high">
     <link rel="stylesheet" href="charkilla.css">
     <style>
         .signature-block {
@@ -81,6 +82,20 @@
             padding: 0;
             border: none;
             box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .svg-letterhead-emblem {
+            position: absolute;
+            left: 3.5%;
+            top: 10%;
+            height: 53%;
+            width: auto;
+            aspect-ratio: 1500 / 1266;
+            object-fit: contain;
+            z-index: 2;
+            pointer-events: none;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -202,6 +217,19 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .svg-letterhead-emblem {
+                position: absolute !important;
+                left: 3.5% !important;
+                top: 10% !important;
+                height: 53% !important;
+                width: auto !important;
+                aspect-ratio: 1500 / 1266 !important;
+                object-fit: contain !important;
+                z-index: 2 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -521,6 +549,7 @@
             <!-- ── Official Custom SVG Letterhead (जग्गाधनीपूर्जा रजिष्ट्रेसन प्रविष्टि सिफारिसका लागि मात्र) ── -->
             <div class="custom-svg-letterhead">
                 <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड" width="561" height="138" loading="eager" fetchpriority="high" decoding="sync">
+                <img class="svg-letterhead-emblem" src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="svg-lh-meta-left">
                     <div>प.सं. <span id="lblPatraSankhya">२०८३/०८४</span></div>
                     <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>

@@ -594,6 +594,20 @@ select:focus {
     print-color-adjust: exact;
 }
 
+.svg-letterhead-emblem {
+    position: absolute;
+    left: 3.5%;
+    top: 10%;
+    height: 53%;
+    width: auto;
+    aspect-ratio: 1500 / 1266;
+    object-fit: contain;
+    z-index: 2;
+    pointer-events: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
 .svg-lh-meta-left {
     position: absolute;
     left: 0;
@@ -968,6 +982,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
         margin: 0 !important;
         padding: 0 !important;
         border: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .svg-letterhead-emblem {
+        position: absolute !important;
+        left: 3.5% !important;
+        top: 10% !important;
+        height: 53% !important;
+        width: auto !important;
+        aspect-ratio: 1500 / 1266 !important;
+        object-fit: contain !important;
+        z-index: 2 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }

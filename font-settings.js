@@ -1358,6 +1358,8 @@
                 .custom-svg-letterhead,
                 .custom-svg-letterhead *,
                 .svg-letterhead-banner,
+                .svg-letterhead-emblem,
+                .svg-letterhead-emblem *,
                 .doc-header-wrapper,
                 .doc-header-wrapper *,
                 .meta-line,
