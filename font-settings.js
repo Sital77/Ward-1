@@ -1009,18 +1009,15 @@
             });
         }
 
-        // yojana-tippani has dedicated compact Kalimati font & single-page layout - do not apply generic 14pt overrides
-        if (templateId === 'yojana-tippani' || window.location.pathname.includes('yojana-tippani.html')) {
-            return;
-        }
-
-        // 1. Get saved styling values or defaults (Size: 11pt for nabalak-parichayapatra, 13pt for others)
-        const isNabalak = (templateId === 'nabalak-parichayapatra' || window.location.pathname.includes('nabalak-parichayapatra.html'));
-        const defaultFontSize = isNabalak ? '11' : '13';
+        // 1. Get saved styling values or canonical default (13pt)
+        const defaultFontSize = '13';
         let savedSize = localStorage.getItem('doc_font_size_' + (templateId || 'global'));
         if (!savedSize) {
             const globalSize = localStorage.getItem('doc_font_size');
             savedSize = (globalSize && globalSize !== '11') ? globalSize : defaultFontSize;
+        }
+        if (!savedSize || savedSize === '11') {
+            savedSize = defaultFontSize;
         }
         const savedItalic = localStorage.getItem('doc_font_style') === 'italic';
         const savedColor = localStorage.getItem('doc_text_color') || '#000000';
@@ -1172,15 +1169,17 @@
         // 4. Function to apply styles dynamically
         function applyStyles(sz, it, col) {
             const baseSize = parseFloat(sz) || 13;
-            const isNabalakDoc = (templateId === 'nabalak-parichayapatra' || window.location.pathname.includes('nabalak-parichayapatra.html'));
-            const docBase = isNabalakDoc ? baseSize : Math.max(10, baseSize);
-            const tblSize = isNabalakDoc ? (docBase * 0.85) : docBase;
-            const subjSize = isNabalakDoc ? docBase : (docBase + 2);
-            const sigSize = isNabalakDoc ? (docBase * 0.9) : docBase;
+            const docBase = baseSize;
+            const tblSize = baseSize;
+            const subjSize = baseSize + 1.5;
+            const sigSize = baseSize;
 
             styleTag.textContent = `
                 :root {
+                    --doc-font-family: 'Mukta', sans-serif;
                     --doc-font-size: ${docBase}pt;
+                    --doc-line-height: 1.85;
+                    --doc-para-spacing: 16px;
                     --table-font-size: ${tblSize}pt;
                     --subject-font-size: ${subjSize}pt;
                     --sig-font-size: ${sigSize}pt;
@@ -1190,65 +1189,110 @@
                 
                 /* Unified typography inheritance across document */
                 .a4-page {
-                    font-family: 'Mukta', sans-serif !important;
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     color: var(--doc-text-color) !important;
                     font-size: var(--doc-font-size) !important;
-                    line-height: 1.6 !important;
+                    line-height: var(--doc-line-height, 1.85) !important;
                 }
                 
-                /* Body paragraphs, addressee, and general text */
+                /* Body paragraphs and general recommendation text */
                 .letter-body,
                 .letter-body-para,
+                #bodyText,
+                #defaultLetterBody,
+                #customLetterBody,
+                #bodyKholne,
+                #bodyBanda,
+                #bodyTextJanma,
+                #bodyTextBibaha,
+                #bodyTextTransfer,
+                #lblParagraph1,
+                #lblParagraph2,
+                .landuse-container,
+                #lblLandUseStatement {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+                    font-size: var(--doc-font-size) !important;
+                    font-weight: normal !important;
+                    color: var(--doc-text-color) !important;
+                    line-height: var(--doc-line-height, 1.85) !important;
+                    font-style: var(--doc-font-style) !important;
+                    text-align: justify !important;
+                    text-justify: inter-word !important;
+                    text-indent: 50px !important;
+                    margin-top: 0 !important;
+                    margin-bottom: var(--doc-para-spacing, 16px) !important;
+                    word-break: normal !important;
+                    overflow-wrap: break-word !important;
+                }
+
+                /* Addressee / Recipient blocks */
                 .address-to,
                 .bank-receiver,
                 .receiver-block,
-                .tapsil-container,
-                .tapsil-item,
-                .tapsil-label,
-                .tapsil-val,
-                .beneficiary-summary {
+                .receiver-address-block,
+                .tippani-addressee,
+                #receiverAddressContainer,
+                #lblReceiverAddress,
+                #lblReceiver {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--doc-font-size) !important;
+                    font-weight: bold !important;
                     color: var(--doc-text-color) !important;
-                    line-height: 1.6 !important;
-                    font-style: var(--doc-font-style) !important;
-                }
-
-                .letter-body,
-                .letter-body-para {
-                    font-weight: normal !important;
+                    line-height: 1.5 !important;
+                    margin-top: 10px !important;
+                    margin-bottom: 16px !important;
+                    font-style: normal !important;
                 }
                 
                 /* Subject Line & Title */
-                .subject-container,
-                .subject-line,
-                .subject-title {
-                    font-style: normal !important;
-                    color: var(--doc-text-color) !important;
+                .subject-container {
+                    text-align: center !important;
+                    margin: 12px 0 18px 0 !important;
                 }
-                .subject-title {
+                .subject-title,
+                .subject-line,
+                .tippani-title-block,
+                .tippani-main-title,
+                .tippani-subject {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--subject-font-size) !important;
+                    font-weight: bold !important;
+                    color: var(--doc-text-color) !important;
+                    line-height: 1.35 !important;
+                    font-style: normal !important;
+                }
+                .subject-title,
+                .subject-line,
+                .tippani-subject {
+                    text-decoration: underline !important;
                 }
                 
                 /* तपसिल Headings & Content: Exactly matching document body */
+                .tapasil-container,
+                .tapsil-container {
+                    margin-top: 14px !important;
+                    margin-bottom: 14px !important;
+                }
+
+                .tapasil-title,
                 .tapsil-title,
                 .tapasheel-label,
                 .tapasill-heading,
                 #tapasilHeaderBlock {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--doc-font-size) !important;
                     font-weight: bold !important;
                     color: var(--doc-text-color) !important;
+                    text-align: center !important;
+                    margin: 14px 0 8px 0 !important;
+                    line-height: 1.4 !important;
                 }
 
-                .tapasil-table,
-                .tapasil-table th,
-                .tapasil-table td,
-                .tapasheel-table,
-                .tapasheel-table th,
-                .tapasheel-table td,
-                .tapsil-container,
                 .tapsil-item,
                 .tapsil-label,
-                .tapsil-val {
+                .tapsil-val,
+                .beneficiary-summary {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--doc-font-size) !important;
                     color: var(--doc-text-color) !important;
                     line-height: 1.6 !important;
@@ -1267,7 +1311,14 @@
                 .land-table td,
                 .tippani-table,
                 .tippani-table th,
-                .tippani-table td {
+                .tippani-table td,
+                .tapasil-table,
+                .tapasil-table th,
+                .tapasil-table td,
+                .tapasheel-table,
+                .tapasheel-table th,
+                .tapasheel-table td {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--table-font-size) !important;
                     color: var(--doc-text-color) !important;
                     line-height: 1.35 !important;
@@ -1284,8 +1335,17 @@
                 .sig-title,
                 #lblSigName,
                 #lblSigTitle {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--sig-font-size) !important;
                     font-style: normal !important;
+                }
+                .sig-name,
+                #lblSigName {
+                    font-weight: bold !important;
+                }
+                .sig-title,
+                #lblSigTitle {
+                    font-weight: normal !important;
                 }
 
                 .doc-footer {
@@ -1295,6 +1355,9 @@
                 /* Explicit exclusions to protect standard letterhead */
                 .letterhead-container,
                 .letterhead-container *,
+                .custom-svg-letterhead,
+                .custom-svg-letterhead *,
+                .svg-letterhead-banner,
                 .doc-header-wrapper,
                 .doc-header-wrapper *,
                 .meta-line,
@@ -1314,16 +1377,31 @@
                     font-style: normal !important;
                 }
 
-                /* Nabalak Parichayapatra table & compact layout scaling */
+                .svg-lh-meta-left,
+                .svg-lh-meta-left *,
+                .svg-lh-meta-right,
+                .svg-lh-meta-right *,
+                .svg-lh-meta-right .miti-block,
+                .svg-lh-meta-right .ns-block,
+                .lh-meta,
+                .lh-right .miti-block,
+                .lh-right .ns-block {
+                    font-size: 11pt !important;
+                    font-weight: 600 !important;
+                    line-height: 1.35 !important;
+                }
+
+                /* Nabalak Parichayapatra table & recommendation layout */
                 .nabalak-tbl,
                 .nabalak-tbl * {
-                    font-size: var(--table-font-size) !important;
+                    font-size: 8.5pt !important;
                     line-height: 1.3 !important;
                 }
                 .sifarish-para,
                 .sifarish-para * {
+                    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--doc-font-size) !important;
-                    line-height: 1.35 !important;
+                    line-height: 1.6 !important;
                 }
                 #lblPhotoBox,
                 #lblPhotoBox * {

@@ -9,9 +9,20 @@
     font-style: normal;
 }
 
+:root {
+    --doc-font-family: 'Mukta', sans-serif;
+    --doc-font-size: 13pt;
+    --doc-line-height: 1.85;
+    --doc-para-spacing: 16px;
+    --table-font-size: 13pt;
+    --subject-font-size: 14.5pt;
+    --sig-font-size: 13pt;
+    --meta-font-size: 11pt;
+}
+
 * {
     box-sizing: border-box;
-    font-family: 'Mukta', sans-serif;
+    font-family: var(--doc-font-family, 'Mukta', sans-serif);
 }
 
 body {
@@ -407,7 +418,7 @@ select:focus {
 
 .a4-page,
 .a4-page * {
-    font-family: 'Mukta', sans-serif;
+    font-family: var(--doc-font-family, 'Mukta', sans-serif);
 }
 
 .a4-page {
@@ -420,11 +431,130 @@ select:focus {
     position: relative;
     color: #000;
     font-size: var(--doc-font-size, 13pt);
-    line-height: 1.5;
+    line-height: var(--doc-line-height, 1.85);
     display: flex;
     flex-direction: column;
     overflow: visible;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+/* ══════════════════════════════════════════════════════════
+   CANONICAL RECOMMENDATION TYPOGRAPHY STANDARD (13pt Base)
+   ══════════════════════════════════════════════════════════ */
+
+/* Main recommendation body paragraphs */
+.letter-body,
+.letter-body-para,
+#bodyText,
+#defaultLetterBody,
+#customLetterBody,
+#bodyKholne,
+#bodyBanda,
+#bodyTextJanma,
+#bodyTextBibaha,
+#bodyTextTransfer,
+#lblParagraph1,
+#lblParagraph2 {
+    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+    font-size: var(--doc-font-size, 13pt) !important;
+    font-weight: normal !important;
+    line-height: var(--doc-line-height, 1.85) !important;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    text-indent: 50px;
+    margin-top: 0;
+    margin-bottom: var(--doc-para-spacing, 16px) !important;
+    color: #000;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+/* Addressee / Recipient blocks */
+.address-to,
+.bank-receiver,
+.receiver-block,
+.receiver-address-block,
+.tippani-addressee,
+#receiverAddressContainer,
+#lblReceiverAddress,
+#lblReceiver {
+    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+    font-size: var(--doc-font-size, 13pt) !important;
+    font-weight: bold !important;
+    line-height: 1.5 !important;
+    margin-top: 10px !important;
+    margin-bottom: 16px !important;
+    color: #000;
+    font-style: normal !important;
+}
+
+/* Subject line and headings */
+.subject-container {
+    text-align: center;
+    margin: 12px 0 18px 0 !important;
+}
+
+.subject-title,
+.subject-line,
+.tippani-title-block,
+.tippani-main-title,
+.tippani-subject {
+    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+    font-size: var(--subject-font-size, 14.5pt) !important;
+    font-weight: bold !important;
+    line-height: 1.35 !important;
+    color: #000;
+}
+
+.subject-title,
+.subject-line,
+.tippani-subject {
+    text-decoration: underline !important;
+    display: inline-block;
+}
+
+/* तपसिल (Tapasil) headings and field details */
+.tapasil-container,
+.tapsil-container {
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+
+.tapasil-title,
+.tapsil-title,
+.tapasheel-label,
+.tapasill-heading,
+#tapasilHeaderBlock {
+    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+    font-size: var(--doc-font-size, 13pt) !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    margin: 14px 0 8px 0 !important;
+    line-height: 1.4 !important;
+    color: #000;
+}
+
+.tapsil-item,
+.tapsil-label,
+.tapsil-val,
+.beneficiary-summary {
+    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+    font-size: var(--doc-font-size, 13pt) !important;
+    line-height: 1.6 !important;
+    color: #000;
+}
+
+/* Land Use Statement */
+.landuse-container,
+#lblLandUseStatement {
+    font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+    font-size: var(--doc-font-size, 13pt) !important;
+    line-height: var(--doc-line-height, 1.85) !important;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+    color: #000;
 }
 
 /* Explicitly keep letterhead elements in Mukta font */
@@ -568,7 +698,7 @@ select:focus {
     border-collapse: collapse !important;
     border: 1.5px solid #000 !important;
     box-sizing: border-box !important;
-    font-size: 12.5pt;
+    font-size: var(--table-font-size, 13pt);
     color: #000;
 }
 
@@ -602,8 +732,10 @@ select:focus {
 
 .landuse-container {
     margin-top: 15px;
+    margin-bottom: 15px;
     text-align: justify;
-    font-size: 12.5pt;
+    font-size: var(--doc-font-size, 13pt);
+    line-height: var(--doc-line-height, 1.85);
     display: none;
 }
 
@@ -866,6 +998,90 @@ input[type="range"]::-webkit-slider-thumb:hover {
         color: #000 !important;
     }
 
+    /* Canonical Recommendation Print Typography (13pt Base) */
+    .letter-body,
+    .letter-body-para,
+    #bodyText,
+    #defaultLetterBody,
+    #customLetterBody,
+    #bodyKholne,
+    #bodyBanda,
+    #bodyTextJanma,
+    #bodyTextBibaha,
+    #bodyTextTransfer,
+    #lblParagraph1,
+    #lblParagraph2 {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+        font-size: var(--doc-font-size, 13pt) !important;
+        line-height: var(--doc-line-height, 1.85) !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        text-indent: 50px !important;
+        margin-bottom: var(--doc-para-spacing, 16px) !important;
+        color: #000 !important;
+    }
+
+    .address-to,
+    .bank-receiver,
+    .receiver-block,
+    .receiver-address-block,
+    .tippani-addressee,
+    #receiverAddressContainer,
+    #lblReceiverAddress,
+    #lblReceiver {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+        font-size: var(--doc-font-size, 13pt) !important;
+        font-weight: bold !important;
+        line-height: 1.5 !important;
+        margin-top: 10px !important;
+        margin-bottom: 16px !important;
+        color: #000 !important;
+    }
+
+    .subject-title,
+    .subject-line,
+    .tippani-title-block,
+    .tippani-main-title,
+    .tippani-subject {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+        font-size: var(--subject-font-size, 14.5pt) !important;
+        font-weight: bold !important;
+        line-height: 1.35 !important;
+        color: #000 !important;
+    }
+
+    .tapasil-title,
+    .tapsil-title,
+    .tapasheel-label,
+    .tapasill-heading,
+    #tapasilHeaderBlock {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+        font-size: var(--doc-font-size, 13pt) !important;
+        font-weight: bold !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
+    }
+
+    .tapsil-item,
+    .tapsil-label,
+    .tapsil-val,
+    .beneficiary-summary {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+        font-size: var(--doc-font-size, 13pt) !important;
+        line-height: 1.6 !important;
+        color: #000 !important;
+    }
+
+    .landuse-container,
+    #lblLandUseStatement {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+        font-size: var(--doc-font-size, 13pt) !important;
+        line-height: var(--doc-line-height, 1.85) !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        color: #000 !important;
+    }
+
     .details-table {
         width: calc(100% - 6px) !important;
         max-width: calc(100% - 6px) !important;
@@ -878,7 +1094,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
     }
 
     .details-table th,
-    .details-table td {
+    .details-table td,
+    .print-table th,
+    .print-table td,
+    .tippani-table th,
+    .tippani-table td,
+    .tapasil-table th,
+    .tapasil-table td,
+    .land-table th,
+    .land-table td {
         padding: 5px 4px !important;
         font-size: var(--table-font-size, 13pt) !important;
         line-height: 1.35 !important;
@@ -906,11 +1130,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
     }
 
     .sig-name {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--sig-font-size, 13pt) !important;
+        font-weight: bold !important;
     }
 
     .sig-title {
+        font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--sig-font-size, 13pt) !important;
+        font-weight: normal !important;
     }
 }
 
@@ -1083,21 +1311,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
     }
 
     .bank-receiver {
-        font-size: 11.5pt !important;
         margin-top: 8px !important;
         margin-bottom: 12px !important;
-        line-height: 1.45 !important;
     }
 
     .subject-line {
-        font-size: 12pt !important;
         margin: 10px 0 14px 0 !important;
-    }
-
-    .letter-body-para {
-        font-size: 11.5pt !important;
-        line-height: 1.8 !important;
-        text-align: justify !important;
     }
 
     .doc-footer {
@@ -1105,12 +1324,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     }
 
     .sig-name {
-        font-size: 11.5pt !important;
         min-width: 80px !important;
-    }
-
-    .sig-title {
-        font-size: 10.5pt !important;
     }
 
     /* Modal dialog on mobile */
