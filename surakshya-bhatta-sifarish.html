@@ -92,6 +92,161 @@
         }
 
         /* ══════════════════════════════════════════════════════════
+           Beneficiary Lookup and Search Dropdown
+           ══════════════════════════════════════════════════════════ */
+        .beneficiary-search-container {
+            position: relative;
+            background: #ffffff;
+            border: 1.5px solid #63b3ed;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .beneficiary-search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .beneficiary-search-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #2b6cb0;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .beneficiary-search-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .beneficiary-search-input {
+            width: 100%;
+            padding: 9px 36px 9px 12px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            box-sizing: border-box;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .beneficiary-search-input:focus {
+            background: #fff;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+        }
+
+        .btn-clear-search {
+            position: absolute;
+            right: 8px;
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            color: #a0aec0;
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+        }
+
+        .btn-clear-search:hover {
+            color: #e53e3e;
+        }
+
+        .beneficiary-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 320px;
+            overflow-y: auto;
+            background: #ffffff;
+            border: 1.5px solid #3182ce;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .beneficiary-result-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #edf2f7;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .beneficiary-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .beneficiary-result-item:hover,
+        .beneficiary-result-item.highlighted {
+            background: #ebf8ff;
+        }
+
+        .result-primary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .result-name {
+            font-weight: 700;
+            color: #1a202c;
+            font-size: 0.98rem;
+        }
+
+        .result-type-badge {
+            background: #e2e8f0;
+            color: #2d3748;
+            font-size: 0.72rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .result-meta {
+            font-size: 0.8rem;
+            color: #4a5568;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            line-height: 1.4;
+        }
+
+        .result-meta-item {
+            display: flex;
+            gap: 4px;
+        }
+
+        .result-meta-label {
+            color: #718096;
+        }
+
+        .selected-badge-container {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 6px;
+            font-size: 0.83rem;
+            color: #22543d;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ══════════════════════════════════════════════════════════
            Approved Official Custom SVG Letterhead
            ══════════════════════════════════════════════════════════ */
         .custom-svg-letterhead {
@@ -223,7 +378,9 @@
     <div class="input-panel">
         <div class="header-action-container">
             <h2 class="panel-title" id="formMainTitle">🛡️ सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस</h2>
-            <div style="display: flex; gap: 6px;">
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" class="btn-import-excel" onclick="triggerExcelImport()" title="एक्सेल फाइलबाट लाभग्राही सूची अद्यावधिक गर्नुहोस्" style="padding: 6px 12px; background: #ebf8ff; border: 1px solid #90cdf4; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #2b6cb0;">📥 एक्सेल अद्यावधिक</button>
+                <input type="file" id="inExcelFilePicker" accept=".xls,.xlsx,.csv" style="display: none;" onchange="handleExcelFileSelect(event)">
                 <button type="button" class="btn-new" id="btnNewForm" onclick="resetForm()" style="display: none; padding: 6px 12px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #2b6cb0;">➕ नयाँ</button>
                 <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
             </div>
@@ -280,6 +437,33 @@
         <!-- ══ BENEFICIARY DETAILS SECTION ══ -->
         <div class="section-card body-section">
             <div class="section-label">👤 लाभग्राहीको विवरण</div>
+
+            <!-- 🔍 Beneficiary Lookup (Excel / Firestore) -->
+            <div class="beneficiary-search-container" id="beneficiaryLookupContainer">
+                <div class="beneficiary-search-header">
+                    <label class="beneficiary-search-label" for="inBeneficiarySearch">
+                        🔍 लाभग्राही खोज्नुहोस् (नाम वा सामाजिक सुरक्षा परिचयपत्र नं.)
+                    </label>
+                    <span id="beneficiaryRegisterStatus" style="font-size: 0.75rem; color: #2b6cb0; font-weight: 600;"></span>
+                </div>
+                <div class="beneficiary-search-input-wrap">
+                    <input type="text" id="inBeneficiarySearch" class="beneficiary-search-input"
+                        placeholder="लाभग्राहीको नाम वा परिचयपत्र नं. टाइप गरी खोज्नुहोस्..."
+                        autocomplete="off"
+                        oninput="onBeneficiarySearchInput(this.value)"
+                        onfocus="onBeneficiarySearchFocus()">
+                    <button type="button" class="btn-clear-search" id="btnClearBeneficiarySearch" onclick="clearBeneficiarySearch()" title="खोजी हटाउनुस्">✕</button>
+                    <div id="beneficiarySearchResults" class="beneficiary-results-dropdown"></div>
+                </div>
+                <div id="selectedBeneficiaryBadge" class="selected-badge-container">
+                    <div>
+                        <span style="font-weight: 700; color: #276749;">✓ सूचीबाट चयन गरिएको:</span>
+                        <span id="selectedBeneficiaryNameText" style="font-weight: 700; margin-left: 4px;"></span>
+                        <span id="selectedBeneficiaryMetaText" style="color: #2f855a; margin-left: 6px;"></span>
+                    </div>
+                    <button type="button" onclick="unlinkSelectedBeneficiary()" style="background: none; border: none; color: #c53030; cursor: pointer; font-size: 0.8rem; font-weight: 700;" title="चयन हटाउनुहोस्">हटाउनुस् ✕</button>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label>लाभग्राहीको नाम, थर:</label>
@@ -446,20 +630,20 @@
                 प्रस्तुत विषयमा झापा जिल्ला, गौरादह नगरपालिका वडा नं.१ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong> को नाममा तहाँ बैंकमा बचत खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको चालू आर्थिक वर्षको <strong id="lblKista1">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज अशक्त लाभग्राहीको खातामा जम्मा भएको <strong id="lblKista2">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम निजको संरक्षक (नाता: <strong id="lblRelation">छोरा</strong>) <strong id="lblGuardianName">..................</strong> (नागरिकता प्र.नं. <span id="lblGuardianCitNo">..................</span>, जारी मिति: <span id="lblGuardianCitDate">..................</span>) लाई रकम बुझिलिने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>
 
-            <!-- ── Beneficiary Details Summary ── -->
+            <!-- ── Beneficiary Details Summary (तपसिल) ── -->
             <div class="beneficiary-summary" id="beneficiarySummaryBlock">
-                <div style="font-weight: 700; margin-bottom: 4px;">लाभग्राहीको विवरण :</div>
+                <div style="font-weight: 700; margin-bottom: 4px;">तपसिल :</div>
                 <table style="width: auto; min-width: 350px; border-collapse: collapse; font-size: 13pt; margin-left: 10px;">
                     <tr>
-                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">नाम :</td>
+                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">लाभग्राहीको नाम, थर :</td>
                         <td style="padding: 2px 0;"><strong id="lblTblBeneficiaryName">..................</strong></td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">बचत खाता नं. :</td>
+                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">बैंक खाता नम्बर :</td>
                         <td style="padding: 2px 0;"><strong id="lblTblAccountNo">..................</strong></td>
                     </tr>
                     <tr id="rowTblCardNo" style="display: none;">
-                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">परिचयपत्र नं. :</td>
+                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
                         <td style="padding: 2px 0;"><strong id="lblTblCardNo">..................</strong></td>
                     </tr>
                 </table>

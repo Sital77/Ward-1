@@ -14,3 +14,12 @@ nissa-data.js
 private_data/
 *.log
 *.patch
+
+# Ignore Excel beneficiary data and exports to protect citizen privacy
+[eE]xcel data/
+*.xls
+*.xlsx
+*.csv
+*beneficiary*data*.json
+*beneficiary*data*.js
+

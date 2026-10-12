@@ -18,6 +18,13 @@ const db = firebase.firestore();
 let globalDatabase = [];
 window.globalDatabase = globalDatabase;
 
+// ── Social Security Beneficiary Register State (Excel / Firestore) ──
+let beneficiaryRegister = [];
+let isBeneficiaryRegisterLoaded = false;
+let selectedBeneficiaryCardNo = '';
+let searchDebounceTimer = null;
+window.beneficiaryRegister = beneficiaryRegister;
+
 // Auth ready भएपछि मात्र snapshot listener सुरु गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
     db.collection("surakshyaBhattaRecords").onSnapshot((snapshot) => {
@@ -31,6 +38,9 @@ window.globalDatabase = globalDatabase;
         globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         renderDatabaseTable();
     });
+
+    // सामाजिक सुरक्षा लाभग्राही दर्ता सूची लोड गर्ने
+    loadBeneficiaryRegister();
 }).catch(() => {});
 
 // ── Helpers ─────────────────────────────────────────
@@ -38,6 +48,12 @@ function toNepaliDigit(num) {
     if (num === null || num === undefined) return '';
     const nd = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
     return num.toString().split('').map(d => (d >= '0' && d <= '9') ? nd[d] : d).join('');
+}
+
+function toEnglishDigit(str) {
+    if (!str) return '';
+    const nepToEng = {'०':'0','१':'1','२':'2','३':'3','४':'4','५':'5','६':'6','७':'7','८':'8','९':'9'};
+    return String(str).replace(/[०-९]/g, m => nepToEng[m]);
 }
 
 function getSelectedAY() {
@@ -66,6 +82,431 @@ function adjustSignaturePosition(value) {
     if (docFooter) docFooter.style.marginTop = value + "px";
 }
 
+// ══════════════════════════════════════════════════════
+//  Excel Beneficiary Register Operations (Firestore Backend)
+// ══════════════════════════════════════════════════════
+
+async function loadBeneficiaryRegister() {
+    try {
+        const statusEl = document.getElementById('beneficiaryRegisterStatus');
+        if (statusEl) statusEl.innerText = 'रजिष्टर लोड हुँदैछ...';
+
+        const snapshot = await db.collection("socialSecurityBeneficiaries").get();
+        beneficiaryRegister = [];
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            beneficiaryRegister.push({
+                cardNo: String(data.cardNo || doc.id).trim(),
+                name: String(data.name || '').trim(),
+                accountNo: String(data.accountNo || '').trim(),
+                allowanceType: String(data.allowanceType || '').trim(),
+                fatherName: String(data.fatherName || '').trim(),
+                spouseName: String(data.spouseName || '').trim(),
+                age: String(data.age || '').trim(),
+                address: String(data.address || '').trim(),
+                ward: String(data.ward || '१').trim()
+            });
+        });
+        isBeneficiaryRegisterLoaded = true;
+        window.beneficiaryRegister = beneficiaryRegister;
+        if (statusEl) {
+            statusEl.innerText = `${toNepaliDigit(beneficiaryRegister.length)} सूचीकृत`;
+        }
+    } catch (err) {
+        console.warn("Could not load beneficiary register:", err);
+        const statusEl = document.getElementById('beneficiaryRegisterStatus');
+        if (statusEl) statusEl.innerText = '';
+    }
+}
+
+function onBeneficiarySearchFocus() {
+    if (!isBeneficiaryRegisterLoaded) {
+        loadBeneficiaryRegister();
+    }
+    const query = document.getElementById('inBeneficiarySearch').value;
+    if (query && query.trim()) {
+        renderBeneficiarySearchResults(query);
+    }
+}
+
+function onBeneficiarySearchInput(query) {
+    clearTimeout(searchDebounceTimer);
+    const clearBtn = document.getElementById('btnClearBeneficiarySearch');
+    if (clearBtn) {
+        clearBtn.style.display = query && query.trim() ? 'block' : 'none';
+    }
+    searchDebounceTimer = setTimeout(() => {
+        renderBeneficiarySearchResults(query);
+    }, 120);
+}
+
+function clearBeneficiarySearch() {
+    const input = document.getElementById('inBeneficiarySearch');
+    if (input) input.value = '';
+    const clearBtn = document.getElementById('btnClearBeneficiarySearch');
+    if (clearBtn) clearBtn.style.display = 'none';
+    const dropdown = document.getElementById('beneficiarySearchResults');
+    if (dropdown) {
+        dropdown.innerHTML = '';
+        dropdown.style.display = 'none';
+    }
+}
+
+function renderBeneficiarySearchResults(rawQuery) {
+    const query = (rawQuery || '').trim().toLowerCase();
+    const dropdown = document.getElementById('beneficiarySearchResults');
+    if (!dropdown) return;
+
+    if (!query) {
+        dropdown.innerHTML = '';
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    if (!isBeneficiaryRegisterLoaded && beneficiaryRegister.length === 0) {
+        dropdown.innerHTML = `<div style="padding: 12px; text-align: center; color: #4a5568; font-size: 0.88rem;">⏳ लाभग्राही दर्ता सूची लोड हुँदैछ, कृपया एकछिन प्रतिक्षा गर्नुहोस्...</div>`;
+        dropdown.style.display = 'block';
+        loadBeneficiaryRegister().then(() => renderBeneficiarySearchResults(rawQuery));
+        return;
+    }
+
+    const queryEn = toEnglishDigit(query);
+    const queryNe = toNepaliDigit(query);
+
+    const matches = beneficiaryRegister.filter(item => {
+        const nameLower = item.name.toLowerCase();
+        const cardStr = item.cardNo.toLowerCase();
+        const cardEn = toEnglishDigit(cardStr);
+        const cardNe = toNepaliDigit(cardStr);
+        const accStr = item.accountNo.toLowerCase();
+        const accEn = toEnglishDigit(accStr);
+        const accNe = toNepaliDigit(accStr);
+
+        return nameLower.includes(query) ||
+               cardStr.includes(query) || cardEn.includes(queryEn) || cardNe.includes(queryNe) ||
+               accStr.includes(query) || accEn.includes(queryEn) || accNe.includes(queryNe);
+    });
+
+    if (matches.length === 0) {
+        dropdown.innerHTML = `
+            <div style="padding: 12px 14px; text-align: center; color: #718096; font-size: 0.88rem; line-height: 1.5;">
+                ⚠️ दर्ता सूचीमा कुनै लाभग्राही भेटिएन ।<br>
+                <span style="font-size: 0.82rem; color: #a0aec0;">कृपया तलका बाकसमा आफैँ नाम, बैंक खाता र परिचयपत्र नं. भर्नुहोस् ।</span>
+            </div>
+        `;
+        dropdown.style.display = 'block';
+        return;
+    }
+
+    // Limit to top 40 matches for speed
+    const displayMatches = matches.slice(0, 40);
+    let html = '';
+    displayMatches.forEach(item => {
+        const familyMeta = item.fatherName ? `बाबु: ${item.fatherName}` : (item.spouseName ? `पति/पत्नी: ${item.spouseName}` : '');
+        const ageMeta = item.age ? `उमेर: ${toNepaliDigit(item.age)} वर्ष` : '';
+        const addrMeta = item.address ? `ठेगाना: ${item.address}` : 'गौरादह १';
+        const typeBadge = item.allowanceType ? `<span class="result-type-badge">${item.allowanceType}</span>` : '';
+
+        // Safe card escaping
+        const safeCardNo = item.cardNo.replace(/'/g, "\\'");
+
+        html += `
+            <div class="beneficiary-result-item" onclick="selectBeneficiary('${safeCardNo}')" title="यो लाभग्राही चयन गर्नुहोस्">
+                <div class="result-primary">
+                    <span class="result-name">👤 ${item.name}</span>
+                    ${typeBadge}
+                </div>
+                <div class="result-meta">
+                    <span class="result-meta-item"><span class="result-meta-label">परिचय नं:</span> <strong>${toNepaliDigit(item.cardNo)}</strong></span>
+                    <span class="result-meta-item"><span class="result-meta-label">खाता नं:</span> ${toNepaliDigit(item.accountNo)}</span>
+                    ${familyMeta ? `<span class="result-meta-item">${familyMeta}</span>` : ''}
+                    ${ageMeta ? `<span class="result-meta-item">${ageMeta}</span>` : ''}
+                    <span class="result-meta-item">${addrMeta}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    if (matches.length > displayMatches.length) {
+        html += `<div style="padding: 6px 12px; font-size: 0.78rem; color: #718096; text-align: center; background: #f7fafc; border-top: 1px dashed #e2e8f0;">थप खोज्न नाम वा परिचयपत्र नं. विस्तृत गर्नुहोस् (जम्मा ${toNepaliDigit(matches.length)} भेटिए)</div>`;
+    }
+
+    dropdown.innerHTML = html;
+    dropdown.style.display = 'block';
+}
+
+function selectBeneficiary(cardNo) {
+    const item = beneficiaryRegister.find(b => b.cardNo === cardNo);
+    if (!item) return;
+
+    selectedBeneficiaryCardNo = item.cardNo;
+    window._selectedBeneficiaryCardNo = item.cardNo;
+
+    // Populate EXACTLY the three fields from Excel:
+    // 1. पुरा नाम -> लाभग्राहीको नाम, थर
+    const inName = document.getElementById('inBeneficiaryName');
+    if (inName) inName.value = item.name || '';
+
+    // 2. बैंक खाता नं. -> बैंक खाता नम्बर (string, preserve leading zeros)
+    const inAcc = document.getElementById('inAccountNo');
+    if (inAcc) inAcc.value = String(item.accountNo || '').trim();
+
+    // 3. व्यक्तिगत परिचय नं. -> सामाजिक सुरक्षा परिचयपत्र नं.
+    const inCard = document.getElementById('inCardNo');
+    if (inCard) inCard.value = String(item.cardNo || '').trim();
+
+    // Close search dropdown
+    const dropdown = document.getElementById('beneficiarySearchResults');
+    if (dropdown) dropdown.style.display = 'none';
+
+    // Update search box text
+    const searchInput = document.getElementById('inBeneficiarySearch');
+    if (searchInput) searchInput.value = item.name;
+
+    const clearBtn = document.getElementById('btnClearBeneficiarySearch');
+    if (clearBtn) clearBtn.style.display = 'block';
+
+    // Show selection badge
+    showSelectedBeneficiaryBadge(item);
+
+    // Update preview (preserves guardian and kista)
+    updateDoc();
+}
+
+function showSelectedBeneficiaryBadge(item) {
+    const badge = document.getElementById('selectedBeneficiaryBadge');
+    const nameEl = document.getElementById('selectedBeneficiaryNameText');
+    const metaEl = document.getElementById('selectedBeneficiaryMetaText');
+
+    if (badge && nameEl) {
+        nameEl.innerText = item.name || '';
+        if (metaEl) {
+            metaEl.innerText = `(परिचयपत्र नं: ${toNepaliDigit(item.cardNo)}${item.allowanceType ? ' | ' + item.allowanceType : ''})`;
+        }
+        badge.style.display = 'flex';
+    }
+}
+
+function unlinkSelectedBeneficiary() {
+    selectedBeneficiaryCardNo = '';
+    window._selectedBeneficiaryCardNo = '';
+    const badge = document.getElementById('selectedBeneficiaryBadge');
+    if (badge) badge.style.display = 'none';
+}
+
+// ── In-browser Excel Register Import / Sync Tool ──
+function triggerExcelImport() {
+    const picker = document.getElementById('inExcelFilePicker');
+    if (picker) picker.click();
+}
+
+async function handleExcelFileSelect(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!confirm(`के तपाईं "${file.name}" बाट सामाजिक सुरक्षा लाभग्राही सूची अद्यावधिक गर्न चाहनुहुन्छ?`)) {
+        e.target.value = '';
+        return;
+    }
+
+    try {
+        const text = await file.text();
+        let records = [];
+        if (text.includes('<tr') || text.includes('<TR')) {
+            records = parseHtmlTableBeneficiaries(text, file.name);
+        } else {
+            records = parseCsvBeneficiaries(text, file.name);
+        }
+
+        if (!records || records.length === 0) {
+            alert("फाइलमा कुनै वैध लाभग्राही रेकर्ड भेटिएन । आवश्यक महलहरू (पुरा नाम, बैंक खाता नं., व्यक्तिगत परिचय नं.) जाँच गर्नुहोस् ।");
+            e.target.value = '';
+            return;
+        }
+
+        const btn = document.querySelector('.btn-import-excel');
+        const origText = btn ? btn.innerText : '';
+        if (btn) btn.innerText = "⏳ अद्यावधिक हुँदैछ...";
+
+        // Batch upload in chunks of 400
+        const batchSize = 400;
+        let committedCount = 0;
+        for (let i = 0; i < records.length; i += batchSize) {
+            const batchChunk = records.slice(i, i + batchSize);
+            const batch = db.batch();
+            batchChunk.forEach(item => {
+                const docRef = db.collection("socialSecurityBeneficiaries").doc(item.cardNo);
+                batch.set(docRef, item, { merge: true });
+            });
+            await batch.commit();
+            committedCount += batchChunk.length;
+        }
+
+        if (btn) btn.innerText = origText;
+        alert(`सफलतापूर्वक ${toNepaliDigit(committedCount)} लाभग्राहीको विवरण सुरक्षित/अद्यावधिक गरियो ।`);
+        await loadBeneficiaryRegister();
+    } catch (err) {
+        console.error("Excel import error:", err);
+        alert("एक्सेल आयात गर्दा समस्या भयो! कृपया फाइलको ढाँचा जाँच्नुहोस् ।");
+    } finally {
+        e.target.value = '';
+    }
+}
+
+function parseHtmlTableBeneficiaries(html, sourceName) {
+    const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+    const tdRegex = /<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/gi;
+    const stripTags = str => str.replace(/<[^>]+>/g, '').replace(/&nbsp;/gi, ' ').trim();
+
+    let trMatch;
+    const rows = [];
+    while ((trMatch = trRegex.exec(html)) !== null) {
+        const rowContent = trMatch[1];
+        let tdMatch;
+        const cells = [];
+        while ((tdMatch = tdRegex.exec(rowContent)) !== null) {
+            cells.push(stripTags(tdMatch[1]));
+        }
+        if (cells.length > 0) rows.push(cells);
+    }
+
+    if (rows.length < 2) return [];
+
+    const headers = rows[0];
+    const colMap = {};
+    headers.forEach((h, idx) => { colMap[h] = idx; });
+
+    const reqCols = ['पुरा नाम', 'बैंक खाता नं.', 'व्यक्तिगत परिचय नं.'];
+    for (const req of reqCols) {
+        if (colMap[req] === undefined) {
+            console.error("Required column missing:", req);
+            return [];
+        }
+    }
+
+    const idxName = colMap['पुरा नाम'];
+    const idxAcc = colMap['बैंक खाता नं.'];
+    const idxCard = colMap['व्यक्तिगत परिचय नं.'];
+    const idxType = colMap['सामाजिक सुरक्षाको किसिम'] ?? -1;
+    const idxFather = colMap['बाबुको नाम'] ?? -1;
+    const idxSpouse = colMap['पति/पत्नीको नाम'] ?? -1;
+    const idxAge = colMap['उमेर'] ?? -1;
+    const idxAddr = colMap['ठेगाना'] ?? -1;
+
+    const seenIds = new Set();
+    const records = [];
+
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length <= Math.max(idxName, idxAcc, idxCard)) continue;
+
+        const cardNo = String(row[idxCard] || '').trim();
+        const name = String(row[idxName] || '').trim();
+        const accNo = String(row[idxAcc] || '').trim();
+
+        if (!cardNo || !name || seenIds.has(cardNo)) continue;
+        seenIds.add(cardNo);
+
+        records.push({
+            cardNo: cardNo,
+            name: name,
+            accountNo: accNo,
+            allowanceType: (idxType !== -1 && row[idxType]) ? String(row[idxType]).trim() : '',
+            fatherName: (idxFather !== -1 && row[idxFather]) ? String(row[idxFather]).trim() : '',
+            spouseName: (idxSpouse !== -1 && row[idxSpouse]) ? String(row[idxSpouse]).trim() : '',
+            age: (idxAge !== -1 && row[idxAge]) ? String(row[idxAge]).trim() : '',
+            address: (idxAddr !== -1 && row[idxAddr]) ? String(row[idxAddr]).trim() : '',
+            ward: '१',
+            sourceFile: sourceName,
+            updatedAt: Date.now()
+        });
+    }
+
+    return records;
+}
+
+function parseCsvBeneficiaries(csv, sourceName) {
+    const lines = csv.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length < 2) return [];
+
+    const parseLine = line => {
+        const result = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"' && (i === 0 || line[i - 1] !== '\\')) {
+                inQuotes = !inQuotes;
+            } else if (ch === ',' && !inQuotes) {
+                result.push(cur.trim().replace(/^"|"$/g, ''));
+                cur = '';
+            } else {
+                cur += ch;
+            }
+        }
+        result.push(cur.trim().replace(/^"|"$/g, ''));
+        return result;
+    };
+
+    const headers = parseLine(lines[0]);
+    const colMap = {};
+    headers.forEach((h, idx) => { colMap[h] = idx; });
+
+    const reqCols = ['पुरा नाम', 'बैंक खाता नं.', 'व्यक्तिगत परिचय नं.'];
+    for (const req of reqCols) {
+        if (colMap[req] === undefined) return [];
+    }
+
+    const idxName = colMap['पुरा नाम'];
+    const idxAcc = colMap['बैंक खाता नं.'];
+    const idxCard = colMap['व्यक्तिगत परिचय नं.'];
+    const idxType = colMap['सामाजिक सुरक्षाको किसिम'] ?? -1;
+    const idxFather = colMap['बाबुको नाम'] ?? -1;
+    const idxSpouse = colMap['पति/पत्नीको नाम'] ?? -1;
+    const idxAge = colMap['उमेर'] ?? -1;
+    const idxAddr = colMap['ठेगाना'] ?? -1;
+
+    const seenIds = new Set();
+    const records = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const row = parseLine(lines[i]);
+        if (row.length <= Math.max(idxName, idxAcc, idxCard)) continue;
+
+        const cardNo = String(row[idxCard] || '').trim();
+        const name = String(row[idxName] || '').trim();
+        const accNo = String(row[idxAcc] || '').trim();
+
+        if (!cardNo || !name || seenIds.has(cardNo)) continue;
+        seenIds.add(cardNo);
+
+        records.push({
+            cardNo: cardNo,
+            name: name,
+            accountNo: accNo,
+            allowanceType: (idxType !== -1 && row[idxType]) ? String(row[idxType]).trim() : '',
+            fatherName: (idxFather !== -1 && row[idxFather]) ? String(row[idxFather]).trim() : '',
+            spouseName: (idxSpouse !== -1 && row[idxSpouse]) ? String(row[idxSpouse]).trim() : '',
+            age: (idxAge !== -1 && row[idxAge]) ? String(row[idxAge]).trim() : '',
+            address: (idxAddr !== -1 && row[idxAddr]) ? String(row[idxAddr]).trim() : '',
+            ward: '१',
+            sourceFile: sourceName,
+            updatedAt: Date.now()
+        });
+    }
+
+    return records;
+}
+
+// Close search dropdown on outside click
+document.addEventListener('click', function(e) {
+    const container = document.getElementById('beneficiaryLookupContainer');
+    const dropdown = document.getElementById('beneficiarySearchResults');
+    if (container && dropdown && !container.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
 function resetForm() {
     if (window.NepalSambat && typeof window.NepalSambat.clearCurrentRecord === 'function') {
         window.NepalSambat.clearCurrentRecord();
@@ -74,6 +515,10 @@ function resetForm() {
     document.getElementById('formMainTitle').innerText = '🛡️ सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस';
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'none';
+
+    // Clear beneficiary search state
+    clearBeneficiarySearch();
+    unlinkSelectedBeneficiary();
 
     // Clear beneficiary
     document.getElementById('inBeneficiaryName').value = '';
@@ -425,6 +870,7 @@ async function printAndSaveSystem() {
         accountNo:            accountNo,
         cardNo:               cardNo,
         hasCardNo:            Boolean(cardNo),
+        beneficiaryRefId:     selectedBeneficiaryCardNo || '',
         kista:                kista,
         relation:             relation,
         selRelation:          selRel,
@@ -585,6 +1031,32 @@ async function loadRecordToForm(id) {
     document.getElementById('inCardNo').value = rec.cardNo || '';
     if (document.getElementById('selKista')) {
         document.getElementById('selKista').value = rec.kista || 'प्रथम त्रैमासिक';
+    }
+
+    // Restore beneficiary reference if present, without overwriting saved historical text
+    selectedBeneficiaryCardNo = rec.beneficiaryRefId || '';
+    window._selectedBeneficiaryCardNo = selectedBeneficiaryCardNo;
+    if (selectedBeneficiaryCardNo) {
+        const regItem = beneficiaryRegister.find(b => b.cardNo === selectedBeneficiaryCardNo);
+        if (regItem) {
+            showSelectedBeneficiaryBadge(regItem);
+        } else {
+            showSelectedBeneficiaryBadge({
+                name: rec.beneficiaryName || rec.name || '',
+                cardNo: selectedBeneficiaryCardNo,
+                allowanceType: ''
+            });
+        }
+        const searchInput = document.getElementById('inBeneficiarySearch');
+        if (searchInput) searchInput.value = rec.beneficiaryName || rec.name || '';
+        const clearBtn = document.getElementById('btnClearBeneficiarySearch');
+        if (clearBtn) clearBtn.style.display = 'block';
+    } else {
+        unlinkSelectedBeneficiary();
+        const searchInput = document.getElementById('inBeneficiarySearch');
+        if (searchInput) searchInput.value = '';
+        const clearBtn = document.getElementById('btnClearBeneficiarySearch');
+        if (clearBtn) clearBtn.style.display = 'none';
     }
 
     // Guardian
