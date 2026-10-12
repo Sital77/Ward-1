@@ -8,7 +8,82 @@
     <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
     <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
     <link rel="stylesheet" href="charkilla.css?v=4.0">
+    <link rel="preload" href="assets/utsaah.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="assets/utsaahb.ttf" as="font" type="font/ttf" crossorigin>
     <style>
+        /* ── Scoped Font-Face for चार किल्ला सिफारिस (Uttash / Utsaah) ── */
+        @font-face {
+            font-family: 'Uttash';
+            src: local('Utsaah'), local('Uttash'),
+                 url('assets/utsaah.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Uttash';
+            src: local('Utsaah Bold'), local('Uttash Bold'),
+                 url('assets/utsaahb.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Utsaah';
+            src: local('Utsaah'), local('Uttash'),
+                 url('assets/utsaah.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Utsaah';
+            src: local('Utsaah Bold'), local('Uttash Bold'),
+                 url('assets/utsaahb.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* ── चार किल्ला सिफारिस Main Recommendation Scoped Typography ── */
+        .preview-panel .a4-page .address-to {
+            font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+            font-size: 15pt !important;
+            line-height: 1.5 !important;
+            font-weight: bold !important;
+        }
+
+        .preview-panel .a4-page .subject-container,
+        .preview-panel .a4-page .subject-title {
+            font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+            font-size: 16.5pt !important;
+            font-weight: bold !important;
+            line-height: 1.35 !important;
+        }
+
+        .preview-panel .a4-page .letter-body,
+        .preview-panel .a4-page .letter-body * {
+            font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+        }
+
+        .preview-panel .a4-page .letter-body {
+            font-size: 15pt !important;
+            line-height: 1.8 !important;
+            text-align: justify !important;
+            text-justify: inter-word !important;
+            letter-spacing: 0.01em;
+        }
+
+        .preview-panel .a4-page .tapsil-title {
+            font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+            font-size: 15pt !important;
+            font-weight: bold !important;
+            line-height: 1.4 !important;
+        }
+
         .details-table {
             width: calc(100% - 6px) !important;
             max-width: calc(100% - 6px) !important;
@@ -21,8 +96,15 @@
 
         .details-table th,
         .details-table td {
+            font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+            font-size: 13.5pt !important;
+            line-height: 1.4 !important;
             border: 1px solid #000 !important;
             box-sizing: border-box !important;
+        }
+
+        .details-table th {
+            font-weight: bold !important;
         }
 
         .details-table th:first-child,
@@ -35,10 +117,81 @@
             border-right: 1.5px solid #000 !important;
         }
 
+        .preview-panel .a4-page .landuse-container,
+        .preview-panel .a4-page #lblLandUseStatement,
+        .preview-panel .a4-page .landuse-container * {
+            font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+        }
+
+        .preview-panel .a4-page .landuse-container,
+        .preview-panel .a4-page #lblLandUseStatement {
+            font-size: 15pt !important;
+            line-height: 1.8 !important;
+            text-align: justify !important;
+            text-justify: inter-word !important;
+        }
+
+        .preview-panel .a4-page .signature-block,
+        .preview-panel .a4-page .sig-name,
+        .preview-panel .a4-page .sig-title,
+        .preview-panel .a4-page .signature-block * {
+            font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+        }
+
+        .preview-panel .a4-page .sig-name,
+        .preview-panel .a4-page .sig-title {
+            font-size: 15pt !important;
+            line-height: 1.4 !important;
+        }
+
+        /* Explicit preservation of letterhead & metadata in Mukta */
+        .preview-panel .a4-page .custom-svg-letterhead,
+        .preview-panel .a4-page .custom-svg-letterhead *,
+        .preview-panel .a4-page .svg-lh-meta-left,
+        .preview-panel .a4-page .svg-lh-meta-left *,
+        .preview-panel .a4-page .svg-lh-meta-right,
+        .preview-panel .a4-page .svg-lh-meta-right * {
+            font-family: 'Mukta', sans-serif !important;
+        }
+
         @media print {
             .a4-page {
                 padding: 0 4px !important;
                 box-sizing: border-box !important;
+            }
+
+            .a4-page .address-to {
+                font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+                font-size: 15pt !important;
+                line-height: 1.5 !important;
+                font-weight: bold !important;
+            }
+
+            .a4-page .subject-container,
+            .a4-page .subject-title {
+                font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+                font-size: 16.5pt !important;
+                font-weight: bold !important;
+                line-height: 1.35 !important;
+            }
+
+            .a4-page .letter-body,
+            .a4-page .letter-body * {
+                font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+            }
+
+            .a4-page .letter-body {
+                font-size: 15pt !important;
+                line-height: 1.8 !important;
+                text-align: justify !important;
+                text-justify: inter-word !important;
+            }
+
+            .a4-page .tapsil-title {
+                font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+                font-size: 15pt !important;
+                font-weight: bold !important;
+                line-height: 1.4 !important;
             }
 
             .details-table {
@@ -52,6 +205,18 @@
                 page-break-inside: avoid !important;
             }
 
+            .details-table th,
+            .details-table td,
+            .details-table * {
+                font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+                font-size: 13.5pt !important;
+                line-height: 1.4 !important;
+            }
+
+            .details-table th {
+                font-weight: bold !important;
+            }
+
             .details-table th:first-child,
             .details-table td:first-child {
                 border-left: 1.5px solid #000 !important;
@@ -60,6 +225,42 @@
             .details-table th:last-child,
             .details-table td:last-child {
                 border-right: 1.5px solid #000 !important;
+            }
+
+            .a4-page .landuse-container,
+            .a4-page #lblLandUseStatement,
+            .a4-page .landuse-container * {
+                font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+            }
+
+            .a4-page .landuse-container,
+            .a4-page #lblLandUseStatement {
+                font-size: 15pt !important;
+                line-height: 1.8 !important;
+                text-align: justify !important;
+                text-justify: inter-word !important;
+            }
+
+            .a4-page .signature-block,
+            .a4-page .sig-name,
+            .a4-page .sig-title,
+            .a4-page .signature-block * {
+                font-family: 'Uttash', 'Utsaah', 'Mukta', sans-serif !important;
+            }
+
+            .a4-page .sig-name,
+            .a4-page .sig-title {
+                font-size: 15pt !important;
+                line-height: 1.4 !important;
+            }
+
+            .a4-page .custom-svg-letterhead,
+            .a4-page .custom-svg-letterhead *,
+            .a4-page .svg-lh-meta-left,
+            .a4-page .svg-lh-meta-left *,
+            .a4-page .svg-lh-meta-right,
+            .a4-page .svg-lh-meta-right * {
+                font-family: 'Mukta', sans-serif !important;
             }
         }
     </style>
