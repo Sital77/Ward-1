@@ -46,22 +46,11 @@ function getSelectedAY() {
 }
 
 // ── Custom Field Toggles ─────────────────────────────
-function toggleGuardianCitSection() {
-    const chk = document.getElementById('chkGuardianCit');
-    const sec = document.getElementById('guardianCitSection');
-    if (sec) sec.style.display = chk.checked ? 'block' : 'none';
-}
-
-function toggleCardNoSection() {
-    const chk = document.getElementById('chkCardNo');
-    const sec = document.getElementById('cardNoSection');
-    if (sec) sec.style.display = (chk && chk.checked) ? 'block' : 'none';
-}
-
 function handleRelationChange() {
-    const sel = document.getElementById('selRelation').value;
+    const selEl = document.getElementById('selRelation');
+    const sel = selEl ? selEl.value : '';
     const grp = document.getElementById('customRelationGroup');
-    if (grp) grp.style.display = (sel === 'CUSTOM') ? 'block' : 'none';
+    if (grp) grp.style.display = (sel === 'अन्य' || sel === 'CUSTOM') ? 'block' : 'none';
 }
 
 function toggleCustomSign() {
@@ -89,24 +78,23 @@ function resetForm() {
     // Clear beneficiary
     document.getElementById('inBeneficiaryName').value = '';
     document.getElementById('inAccountNo').value = '';
-    const chkCard = document.getElementById('chkCardNo');
-    if (chkCard) chkCard.checked = false;
     document.getElementById('inCardNo').value = '';
-    toggleCardNoSection();
+    if (document.getElementById('selKista')) {
+        document.getElementById('selKista').value = 'प्रथम त्रैमासिक';
+    }
 
     // Clear guardian
-    document.getElementById('selRelation').value = 'छोरा';
-    document.getElementById('inCustomRelation').value = '';
+    if (document.getElementById('selRelation')) {
+        document.getElementById('selRelation').value = 'छोरा';
+    }
+    if (document.getElementById('inCustomRelation')) {
+        document.getElementById('inCustomRelation').value = '';
+    }
     handleRelationChange();
-    document.getElementById('inGuardianName').value = '';
 
-    // Reset guardian cit
-    const chkCit = document.getElementById('chkGuardianCit');
-    if (chkCit) chkCit.checked = false;
+    document.getElementById('inGuardianName').value = '';
     document.getElementById('inGuardianCitNo').value = '';
     document.getElementById('inGuardianCitDate').value = '';
-    document.getElementById('inGuardianCitDistrict').value = 'झापा';
-    toggleGuardianCitSection();
 
     // Reset signatory & margin
     document.getElementById('inSignAuthority').value = 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
@@ -141,30 +129,38 @@ function updateDoc() {
 
     // Beneficiary
     const beneficiaryName = document.getElementById('inBeneficiaryName').value.trim();
-    const rawAccountNo = document.getElementById('inAccountNo').value.trim();
+    // Preserve leading zeros: treat as string
+    const rawAccountNo = (document.getElementById('inAccountNo').value !== undefined && document.getElementById('inAccountNo').value !== null)
+        ? String(document.getElementById('inAccountNo').value).trim()
+        : '';
     const accountNo = toNepaliDigit(rawAccountNo);
     const rawCardNo = document.getElementById('inCardNo').value.trim();
     const cardNo = toNepaliDigit(rawCardNo);
 
+    // Payment Quarter (भुक्तानी किस्ता)
+    const kistaEl = document.getElementById('selKista');
+    const kista = (kistaEl && kistaEl.value) ? kistaEl.value : 'प्रथम त्रैमासिक';
+
     // Guardian
-    const selRel = document.getElementById('selRelation').value;
+    const selRel = document.getElementById('selRelation') ? document.getElementById('selRelation').value : 'छोरा';
     let relation = selRel;
-    if (selRel === 'CUSTOM') {
+    if (selRel === 'अन्य' || selRel === 'CUSTOM') {
         relation = document.getElementById('inCustomRelation').value.trim() || 'संरक्षक';
     }
     const guardianName = document.getElementById('inGuardianName').value.trim();
 
-    // Guardian Citizenship block
-    const chkCit = document.getElementById('chkGuardianCit').checked;
+    // Guardian Citizenship
     const rawCitNo = document.getElementById('inGuardianCitNo').value.trim();
     const citNo = toNepaliDigit(rawCitNo);
     const rawCitDate = document.getElementById('inGuardianCitDate').value.trim();
     const citDate = toNepaliDigit(rawCitDate);
-    const citDistrict = document.getElementById('inGuardianCitDistrict').value.trim() || 'झापा';
 
     // Update Letterhead
     const lblAY = document.getElementById('lblAY');
     if (lblAY) lblAY.innerText = ay;
+    const lblPatraSankhya = document.getElementById('lblPatraSankhya');
+    if (lblPatraSankhya && !lblAY) lblPatraSankhya.innerText = ay;
+
     const lblChalani = document.getElementById('lblChalani');
     if (lblChalani) lblChalani.innerText = chalani;
     const lblMiti = document.getElementById('lblMiti');
@@ -187,25 +183,23 @@ function updateDoc() {
     const lblAcc = document.getElementById('lblAccountNo');
     if (lblAcc) lblAcc.innerText = accountNo || '.........................';
 
+    // Both occurrences of भुक्तानी किस्ता
+    const lblKista1 = document.getElementById('lblKista1');
+    if (lblKista1) lblKista1.innerText = kista;
+    const lblKista2 = document.getElementById('lblKista2');
+    if (lblKista2) lblKista2.innerText = kista;
+
     const lblRel = document.getElementById('lblRelation');
-    if (lblRel) lblRel.innerText = relation || 'हकवाला';
+    if (lblRel) lblRel.innerText = relation || 'संरक्षक';
 
     const lblGrd = document.getElementById('lblGuardianName');
     if (lblGrd) lblGrd.innerText = guardianName || '..................';
 
-    // Citizenship Clause: (नागरिकता प्र.नं. ..., जारी मिति: ..., जारी जिल्ला: ...)
-    const lblCitBlock = document.getElementById('lblGuardianCitBlock');
-    if (lblCitBlock) {
-        if (chkCit) {
-            let citText = ` (नागरिकता प्र.नं. ${citNo || '..................'}`;
-            if (citDate) citText += `, जारी मिति: ${citDate}`;
-            if (citDistrict) citText += `, जारी जिल्ला: ${citDistrict}`;
-            citText += `) को`;
-            lblCitBlock.innerText = citText;
-        } else {
-            lblCitBlock.innerText = "को";
-        }
-    }
+    const lblCitNo = document.getElementById('lblGuardianCitNo');
+    if (lblCitNo) lblCitNo.innerText = citNo || '..................';
+
+    const lblCitDate = document.getElementById('lblGuardianCitDate');
+    if (lblCitDate) lblCitDate.innerText = citDate || '..................';
 
     // Update Beneficiary Summary Table
     const lblTblBeneficiary = document.getElementById('lblTblBeneficiaryName');
@@ -214,13 +208,16 @@ function updateDoc() {
     const lblTblAcc = document.getElementById('lblTblAccountNo');
     if (lblTblAcc) lblTblAcc.innerText = accountNo || '..................';
 
-    const chkCard = document.getElementById('chkCardNo') ? document.getElementById('chkCardNo').checked : false;
     const rowTblCard = document.getElementById('rowTblCardNo');
-    if (rowTblCard) {
-        rowTblCard.style.display = chkCard ? '' : 'none';
-    }
     const lblTblCard = document.getElementById('lblTblCardNo');
-    if (lblTblCard) lblTblCard.innerText = cardNo || '..................';
+    if (rowTblCard) {
+        if (cardNo) {
+            rowTblCard.style.display = '';
+            if (lblTblCard) lblTblCard.innerText = cardNo;
+        } else {
+            rowTblCard.style.display = 'none';
+        }
+    }
 
     // Signature Block updates
     const signSelect = document.getElementById('inSignAuthority').value;
@@ -387,24 +384,33 @@ async function fetchCurrentNepalSambat() {
 async function printAndSaveSystem() {
     const beneficiaryName = document.getElementById('inBeneficiaryName').value.trim();
     if (!beneficiaryName) {
-        alert("कृपया सामाजिक सुरक्षा लाभग्राहीको नाम अनिवार्य लेख्नुहोस् ।");
+        alert("कृपया सामाजिक सुरक्षा लाभग्राहीको नाम, थर अनिवार्य लेख्नुहोस् ।");
         document.getElementById('inBeneficiaryName').focus();
         return;
     }
 
     const guardianName = document.getElementById('inGuardianName').value.trim();
     if (!guardianName) {
-        alert("कृपया संरक्षक / हकवालाको नाम अनिवार्य लेख्नुहोस् ।");
+        alert("कृपया रकम बुझ्ने संरक्षकको नाम, थर अनिवार्य लेख्नुहोस् ।");
         document.getElementById('inGuardianName').focus();
         return;
     }
 
     const recordId = document.getElementById('editRecordIndex').value;
 
-    const selRel = document.getElementById('selRelation').value;
-    const relation = (selRel === 'CUSTOM')
-        ? (document.getElementById('inCustomRelation').value.trim() || 'संरक्षक')
+    const selRel = document.getElementById('selRelation') ? document.getElementById('selRelation').value : 'छोरा';
+    const customRel = document.getElementById('inCustomRelation') ? document.getElementById('inCustomRelation').value.trim() : '';
+    const relation = (selRel === 'अन्य' || selRel === 'CUSTOM')
+        ? (customRel || 'संरक्षक')
         : selRel;
+
+    const kistaEl = document.getElementById('selKista');
+    const kista = (kistaEl && kistaEl.value) ? kistaEl.value : 'प्रथम त्रैमासिक';
+
+    const accountNo = document.getElementById('inAccountNo').value.trim();
+    const cardNo = document.getElementById('inCardNo').value.trim();
+    const guardianCitNo = document.getElementById('inGuardianCitNo').value.trim();
+    const guardianCitDate = document.getElementById('inGuardianCitDate').value.trim();
 
     const obj = {
         ay:                   getSelectedAY(),
@@ -416,17 +422,17 @@ async function printAndSaveSystem() {
         subject:              document.getElementById('inSubject').value.trim() || 'सिफारिस सम्बन्धमा ।',
         beneficiaryName:      beneficiaryName,
         name:                 beneficiaryName, // standard search field alias
-        accountNo:            document.getElementById('inAccountNo').value.trim() || '',
-        hasCardNo:            document.getElementById('chkCardNo') ? document.getElementById('chkCardNo').checked : false,
-        cardNo:               (document.getElementById('chkCardNo') && document.getElementById('chkCardNo').checked)
-                                ? document.getElementById('inCardNo').value.trim()
-                                : '',
+        accountNo:            accountNo,
+        cardNo:               cardNo,
+        hasCardNo:            Boolean(cardNo),
+        kista:                kista,
         relation:             relation,
+        selRelation:          selRel,
+        customRelation:       customRel,
         guardianName:         guardianName,
-        hasGuardianCit:       document.getElementById('chkGuardianCit').checked,
-        guardianCitNo:        document.getElementById('inGuardianCitNo').value.trim() || '',
-        guardianCitDate:      document.getElementById('inGuardianCitDate').value.trim() || '',
-        guardianCitDistrict:  document.getElementById('inGuardianCitDistrict').value.trim() || '',
+        guardianCitNo:        guardianCitNo,
+        guardianCitDate:      guardianCitDate,
+        hasGuardianCit:       Boolean(guardianCitNo),
         signAuth:             document.getElementById('inSignAuthority').value,
         customSignName:       document.getElementById('inCustomSignName').value.trim(),
         customSignTitle:      document.getElementById('inCustomSignTitle').value.trim(),
@@ -456,6 +462,15 @@ async function printAndSaveSystem() {
         }
         const btnNew = document.getElementById('btnNewForm');
         if (btnNew) btnNew.style.display = 'inline-block';
+
+        if (document.fonts) {
+            try { await document.fonts.ready; } catch (fe) {}
+        }
+        const banner = document.querySelector('.svg-letterhead-banner');
+        if (banner && banner.decode) {
+            try { await banner.decode(); } catch (ie) {}
+        }
+
         window.print();
     } catch (e) {
         console.error(e);
@@ -565,36 +580,43 @@ async function loadRecordToForm(id) {
 
     // Beneficiary
     document.getElementById('inBeneficiaryName').value = rec.beneficiaryName || rec.name || '';
-    document.getElementById('inAccountNo').value = rec.accountNo || '';
-    // Optional Card No
-    const chkCard = document.getElementById('chkCardNo');
-    if (chkCard) {
-        chkCard.checked = !!(rec.hasCardNo || (rec.cardNo && rec.cardNo !== '-'));
-    }
+    // Preserve leading zeros and safe handling
+    document.getElementById('inAccountNo').value = (rec.accountNo !== undefined && rec.accountNo !== null) ? String(rec.accountNo) : '';
     document.getElementById('inCardNo').value = rec.cardNo || '';
-    toggleCardNoSection();
+    if (document.getElementById('selKista')) {
+        document.getElementById('selKista').value = rec.kista || 'प्रथम त्रैमासिक';
+    }
 
     // Guardian
-    const standardRelations = ['छोरा', 'छोरी', 'श्रीमान', 'श्रीमती', 'बुहारी', 'नाति', 'नातिनी', 'भाइ', 'दाइ', 'दिदी', 'बहिनी', 'हकवाला', 'संरक्षक'];
-    const relVal = rec.relation || 'छोरा';
-    if (standardRelations.includes(relVal)) {
-        document.getElementById('selRelation').value = relVal;
-        document.getElementById('inCustomRelation').value = '';
+    const standardRelations = [
+        'छोरा', 'छोरी', 'पति', 'पत्नी', 'बुबा', 'आमा',
+        'दाजु', 'भाइ', 'दिदी', 'बहिनी', 'नाति', 'नातिनी', 'बुहारी', 'ज्वाइँ'
+    ];
+    const selRelEl = document.getElementById('selRelation');
+    const customRelEl = document.getElementById('inCustomRelation');
+
+    let matchedRelation = rec.selRelation || rec.relation || 'छोरा';
+    if (standardRelations.includes(matchedRelation)) {
+        if (selRelEl) selRelEl.value = matchedRelation;
+        if (customRelEl) customRelEl.value = '';
+    } else if (matchedRelation === 'श्रीमान') {
+        if (selRelEl) selRelEl.value = 'पति';
+        if (customRelEl) customRelEl.value = '';
+    } else if (matchedRelation === 'श्रीमती') {
+        if (selRelEl) selRelEl.value = 'पत्नी';
+        if (customRelEl) customRelEl.value = '';
+    } else if (matchedRelation === 'दाइ') {
+        if (selRelEl) selRelEl.value = 'दाजु';
+        if (customRelEl) customRelEl.value = '';
     } else {
-        document.getElementById('selRelation').value = 'CUSTOM';
-        document.getElementById('inCustomRelation').value = relVal;
+        if (selRelEl) selRelEl.value = 'अन्य';
+        if (customRelEl) customRelEl.value = rec.customRelation || rec.relation || '';
     }
     handleRelationChange();
 
     document.getElementById('inGuardianName').value = rec.guardianName || '';
-
-    // Guardian Citizenship
-    const chkCit = document.getElementById('chkGuardianCit');
-    chkCit.checked = !!rec.hasGuardianCit;
     document.getElementById('inGuardianCitNo').value = rec.guardianCitNo || '';
     document.getElementById('inGuardianCitDate').value = rec.guardianCitDate || '';
-    document.getElementById('inGuardianCitDistrict').value = rec.guardianCitDistrict || 'झापा';
-    toggleGuardianCitSection();
 
     // Signature authority
     document.getElementById('inSignAuthority').value = rec.signAuth || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';

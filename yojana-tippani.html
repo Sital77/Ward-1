@@ -388,6 +388,7 @@
             }
         }
     </style>
+    <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
 </head>
 
 <body>
@@ -718,31 +719,22 @@
     <div class="preview-panel">
         <div class="a4-page">
 
-            <!-- ── पुरानै लेटरहेड (Standard Ward 1 Letterhead) ── -->
-            <div class="letterhead-container">
-                <div class="lh-left">
-                    <img class="lh-logo" src="assets/emblem_of_nepal.svg" alt="Nepal Emblem">
-                    <div class="lh-meta">
-                        <div>प.सं. <span id="lblAY">०८३/८४</span></div>
-                        <div>च.नं. <span id="lblChalani">..........</span></div>
-                        <div id="rowDartaNo">दर्ता नं. <span id="lblDartaNo">..........</span></div>
-                    </div>
+                        <!-- ── Official Custom SVG Letterhead ── -->
+            <div class="custom-svg-letterhead">
+                <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड" width="561" height="138" loading="eager" fetchpriority="high" decoding="sync">
+                <div class="svg-lh-meta-left">
+                    <div>प.सं. <span id="lblPatraSankhya"><span id="lblAY">०८३/८४</span></span></div>
+                    <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;">..........</span></div>
+                    <div id="rowDartaNo">दर्ता नं. <span id="lblDartaNo">..........</span></div>
                 </div>
-                <div class="lh-center">
-                    <div class="muni-n">गौरादह नगरपालिका</div>
-                    <div class="wada-title">१ नं. वडा कार्यालय</div>
-                    <div class="loc-t">गौरादह, झापा</div>
-                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
-                    <div class="email-t no-convert english-text no-nepali-digits" style="font-family: Arial, Helvetica, sans-serif !important;">Email: ward1.gauradaha@gmail.com</div>
-                </div>
-                <div class="lh-right">
-                    <div class="miti-block">मिति : <span id="lblMiti">२०८३-०६-२२</span></div>
-                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat">११४६</span></div>
+                <div class="svg-lh-meta-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३-०६-२२</span></div>
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४६</span></div>
                 </div>
             </div>
 
-            <!-- ── रातो धर्सो (Red Divider Line) ── -->
-            <div class="header-red-line"></div>
+            <!-- DOM Sentinel for compatibility -->
+            <div class="header-red-line" style="display: none;"></div>
 
             <!-- ══════════ TIPPANI CONTENT IN KALIMATI FONT ══════════ -->
             <div class="tippani-content">

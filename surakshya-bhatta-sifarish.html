@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ne">
 
 <head>
@@ -8,6 +8,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस - गौरादह नगरपालिका वडा नं. १</title>
+    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
+    <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
     <link rel="stylesheet" href="charkilla.css">
     <style>
         .preview-panel .a4-page,
@@ -82,33 +85,72 @@
             font-weight: 600;
         }
 
-        .optional-toggle {
-            font-size: 0.88rem;
-            color: #2d3748;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 10px 0;
-            user-select: none;
-            padding: 8px 10px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-        }
-
-        .optional-toggle input {
-            cursor: pointer;
-            width: 17px;
-            height: 17px;
-            accent-color: #2b6cb0;
-        }
-
         .beneficiary-summary {
             margin-top: 18px;
             font-size: 13pt;
             line-height: 1.85;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           Approved Official Custom SVG Letterhead
+           ══════════════════════════════════════════════════════════ */
+        .custom-svg-letterhead {
+            position: relative;
+            width: 100%;
+            margin: 0 0 10px 0;
+            padding: 0;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+        }
+
+        .svg-letterhead-banner {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 561 / 138;
+            display: block;
+            margin: 0;
+            padding: 0;
+            border: none;
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .svg-lh-meta-left {
+            position: absolute;
+            left: 0;
+            bottom: 4%;
+            font-size: 11pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            z-index: 2;
+        }
+
+        .svg-lh-meta-right {
+            position: absolute;
+            right: 0;
+            bottom: 4%;
+            text-align: right;
+            font-size: 11pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .svg-lh-meta-right .miti-block,
+        .svg-lh-meta-right .ns-block {
+            font-size: 11pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            white-space: nowrap;
+        }
+
+        .custom-svg-letterhead * {
+            font-style: normal !important;
         }
 
         @media print {
@@ -125,6 +167,50 @@
 
             .modal-overlay {
                 display: none !important;
+            }
+
+            .custom-svg-letterhead {
+                width: 100% !important;
+                margin: 0 0 8px 0 !important;
+                padding: 0 !important;
+                page-break-inside: avoid !important;
+            }
+
+            .svg-letterhead-banner {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 561 / 138 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .svg-lh-meta-left {
+                left: 0 !important;
+                bottom: 4% !important;
+                font-size: 11pt !important;
+                font-weight: 600 !important;
+                line-height: 1.35 !important;
+                color: #000 !important;
+            }
+
+            .svg-lh-meta-right {
+                right: 0 !important;
+                bottom: 4% !important;
+                font-size: 11pt !important;
+                font-weight: 600 !important;
+                line-height: 1.35 !important;
+                color: #000 !important;
+            }
+
+            .svg-lh-meta-right .miti-block,
+            .svg-lh-meta-right .ns-block {
+                font-size: 11pt !important;
+                font-weight: 600 !important;
+                line-height: 1.35 !important;
+                color: #000 !important;
             }
         }
     </style>
@@ -196,51 +282,59 @@
             <div class="section-label">👤 लाभग्राहीको विवरण</div>
 
             <div class="form-group">
-                <label>लाभग्राहीको नाम:</label>
+                <label>लाभग्राहीको नाम, थर:</label>
                 <input type="text" id="inBeneficiaryName" placeholder="उदा: दिलमाया अधिकारी" oninput="updateDoc()">
             </div>
 
             <div class="form-group">
-                <label>बैंक खाता नं.:</label>
+                <label>बैंक खाता नम्बर:</label>
                 <input type="text" id="inAccountNo" placeholder="उदा: ०६०१२००४५६७८९०१२" oninput="updateDoc()">
             </div>
 
-            <!-- Optional Card No Toggle -->
-            <label class="optional-toggle" style="margin-top: 10px;">
-                <input type="checkbox" id="chkCardNo" onchange="toggleCardNoSection(); updateDoc();">
-                <span>सामाजिक सुरक्षा परिचयपत्र नं. राख्नुस (वैकल्पिक)</span>
-            </label>
+            <div class="form-group">
+                <label>सामाजिक सुरक्षा परिचयपत्र नं.:</label>
+                <input type="text" id="inCardNo" placeholder="उदा: ०१-२०८०-०१२३४" oninput="updateDoc()">
+            </div>
 
-            <div id="cardNoSection" style="display: none; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 6px;">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>सामाजिक सुरक्षा परिचयपत्र नं. (वैकल्पिक):</label>
-                    <input type="text" id="inCardNo" placeholder="उदा: ०१-२०८०-०१२३४" oninput="updateDoc()">
-                </div>
+            <div class="form-group">
+                <label>भुक्तानी किस्ता:</label>
+                <select id="selKista" onchange="updateDoc()">
+                    <option value="प्रथम त्रैमासिक" selected>प्रथम त्रैमासिक</option>
+                    <option value="द्वितीय त्रैमासिक">द्वितीय त्रैमासिक</option>
+                    <option value="तृतीय त्रैमासिक">तृतीय त्रैमासिक</option>
+                    <option value="चौथो त्रैमासिक">चौथो त्रैमासिक</option>
+                </select>
             </div>
         </div>
 
         <!-- ══ GUARDIAN DETAILS SECTION ══ -->
         <div class="section-card guardian-section">
-            <div class="section-label">🤝 संरक्षक / हकवालाको विवरण</div>
+            <div class="section-label">🤝 संरक्षकको विवरण</div>
+
+            <div class="form-group">
+                <label>रकम बुझ्ने संरक्षकको नाम, थर:</label>
+                <input type="text" id="inGuardianName" placeholder="उदा: राम कुमार अधिकारी" oninput="updateDoc()">
+            </div>
 
             <div class="row-grid">
                 <div class="form-group">
-                    <label>नाता (सम्बन्ध):</label>
+                    <label>संरक्षकसँगको नाता:</label>
                     <select id="selRelation" onchange="handleRelationChange(); updateDoc();">
                         <option value="छोरा" selected>छोरा</option>
                         <option value="छोरी">छोरी</option>
-                        <option value="श्रीमान">श्रीमान</option>
-                        <option value="श्रीमती">श्रीमती</option>
-                        <option value="बुहारी">बुहारी</option>
-                        <option value="नाति">नाति</option>
-                        <option value="नातिनी">नातिनी</option>
+                        <option value="पति">पति</option>
+                        <option value="पत्नी">पत्नी</option>
+                        <option value="बुबा">बुबा</option>
+                        <option value="आमा">आमा</option>
+                        <option value="दाजु">दाजु</option>
                         <option value="भाइ">भाइ</option>
-                        <option value="दाइ">दाइ</option>
                         <option value="दिदी">दिदी</option>
                         <option value="बहिनी">बहिनी</option>
-                        <option value="हकवाला">हकवाला</option>
-                        <option value="संरक्षक">संरक्षक</option>
-                        <option value="CUSTOM">✍️ अन्य (आफैँ लेख्नुहोस्)</option>
+                        <option value="नाति">नाति</option>
+                        <option value="नातिनी">नातिनी</option>
+                        <option value="बुहारी">बुहारी</option>
+                        <option value="ज्वाइँ">ज्वाइँ</option>
+                        <option value="अन्य">अन्य</option>
                     </select>
                 </div>
                 <div class="form-group" id="customRelationGroup" style="display: none;">
@@ -249,31 +343,14 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>संरक्षक/हकवालाको नाम:</label>
-                <input type="text" id="inGuardianName" placeholder="उदा: राम कुमार अधिकारी" oninput="updateDoc()">
-            </div>
-
-            <!-- Optional Citizenship Toggle -->
-            <label class="optional-toggle">
-                <input type="checkbox" id="chkGuardianCit" onchange="toggleGuardianCitSection(); updateDoc();">
-                <span>नागरिकता विवरण राख्नुस (क्लिक गर्दा मात्र समावेश हुने)</span>
-            </label>
-
-            <div id="guardianCitSection" style="display: none; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 6px;">
+            <div class="row-grid">
                 <div class="form-group">
-                    <label>नागरिकता प्र.नं.:</label>
+                    <label>संरक्षकको नागरिकता प्रमाणपत्र नम्बर:</label>
                     <input type="text" id="inGuardianCitNo" placeholder="उदा: ०४-०१-७५-१२३४५" oninput="updateDoc()">
                 </div>
-                <div class="row-grid">
-                    <div class="form-group">
-                        <label>जारी मिति (वि.सं.):</label>
-                        <input type="text" id="inGuardianCitDate" placeholder="उदा: २०६२/०५/१४" oninput="updateDoc()">
-                    </div>
-                    <div class="form-group">
-                        <label>जारी जिल्ला:</label>
-                        <input type="text" id="inGuardianCitDistrict" value="झापा" placeholder="उदा: झापा" oninput="updateDoc()">
-                    </div>
+                <div class="form-group">
+                    <label>नागरिकता जारी मिति:</label>
+                    <input type="text" id="inGuardianCitDate" placeholder="उदा: २०६२/०५/१४" oninput="updateDoc()">
                 </div>
             </div>
         </div>
@@ -337,30 +414,21 @@
     <div class="preview-panel">
         <div class="a4-page">
 
-            <!-- ── Letterhead ── -->
-            <div class="letterhead-container">
-                <div class="lh-left">
-                    <img class="lh-logo" src="assets/emblem_of_nepal.svg"
-                        alt="Nepal Emblem">
-                    <div class="lh-meta">
-                        <div>प.सं. <span id="lblAY"></span></div>
-                        <div>च.नं. <span id="lblChalani"></span></div>
-                    </div>
+            <!-- ── Official Custom SVG Letterhead ── -->
+            <div class="custom-svg-letterhead">
+                <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड" width="561" height="138" loading="eager" fetchpriority="high" decoding="sync">
+                <div class="svg-lh-meta-left">
+                    <div>प.सं. <span id="lblPatraSankhya"><span id="lblAY">२०८३/०८४</span></span></div>
+                    <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
                 </div>
-                <div class="lh-center">
-                    <div class="muni-n">गौरादह नगरपालिका</div>
-                    <div class="wada-title">१ नं. वडा कार्यालय</div>
-                    <div class="loc-t">गौरादह, झापा</div>
-                    <div class="prov-t">कोशी प्रदेश, नेपाल</div>
-                    <div class="email-t">Email: ward1.gauradaha@gmail.com</div>
-                </div>
-                <div class="lh-right">
-                    <div class="miti-block">मिति : <span id="lblMiti"></span></div>
-                    <div class="ns-block">ने.स. : <span id="lblNepalSamvat"></span></div>
+                <div class="svg-lh-meta-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३/</span></div>
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४६</span></div>
                 </div>
             </div>
 
-            <div class="header-red-line"></div>
+            <!-- DOM Sentinel for compatibility -->
+            <div class="header-red-line" style="display: none;"></div>
 
             <!-- ── Bank Recipient ── -->
             <div style="margin-top:14px; margin-bottom:14px; text-align: left; width: 100%; font-weight:700; font-size:13.5pt; line-height:1.6;">
@@ -374,12 +442,12 @@
             </div>
 
             <!-- ── Body Paragraph ── -->
-            <div class="letter-body-para" id="bodyText" style="text-indent: 50px;">
-                प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं. १ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong>को नाममा तहाँ बैंकमा खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज सामाजिक सुरक्षा लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको सामाजिक सुरक्षा बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज लाभग्राहीको खातामा रहेको सामाजिक सुरक्षा भत्ता बापतको रकम भुक्तानीका लागि निजको <strong id="lblRelation">छोरा</strong> <strong id="lblGuardianName">..................</strong><span id="lblGuardianCitBlock">को</span> दस्तखतबाट समेत रकम झिक्ने/खाता सञ्चालन गर्ने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
+            <div class="letter-body-para" id="bodyText" style="text-indent: 50px; text-align: justify; line-height: 1.85; font-size: 13pt;">
+                प्रस्तुत विषयमा झापा जिल्ला, गौरादह नगरपालिका वडा नं.१ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong> को नाममा तहाँ बैंकमा बचत खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको चालू आर्थिक वर्षको <strong id="lblKista1">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज अशक्त लाभग्राहीको खातामा जम्मा भएको <strong id="lblKista2">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम निजको संरक्षक (नाता: <strong id="lblRelation">छोरा</strong>) <strong id="lblGuardianName">..................</strong> (नागरिकता प्र.नं. <span id="lblGuardianCitNo">..................</span>, जारी मिति: <span id="lblGuardianCitDate">..................</span>) लाई रकम बुझिलिने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>
 
             <!-- ── Beneficiary Details Summary ── -->
-            <div class="beneficiary-summary">
+            <div class="beneficiary-summary" id="beneficiarySummaryBlock">
                 <div style="font-weight: 700; margin-bottom: 4px;">लाभग्राहीको विवरण :</div>
                 <table style="width: auto; min-width: 350px; border-collapse: collapse; font-size: 13pt; margin-left: 10px;">
                     <tr>
@@ -387,7 +455,7 @@
                         <td style="padding: 2px 0;"><strong id="lblTblBeneficiaryName">..................</strong></td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">बैंक खाता नं. :</td>
+                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">बचत खाता नं. :</td>
                         <td style="padding: 2px 0;"><strong id="lblTblAccountNo">..................</strong></td>
                     </tr>
                     <tr id="rowTblCardNo" style="display: none;">

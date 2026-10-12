@@ -439,6 +439,68 @@ select:focus {
     font-family: 'Mukta', sans-serif !important;
 }
 
+/* ══════════════════════════════════════════════════════════
+   Approved Official Custom SVG Letterhead
+   ══════════════════════════════════════════════════════════ */
+.custom-svg-letterhead {
+    position: relative;
+    width: 100%;
+    margin: 0 0 10px 0;
+    padding: 0;
+    box-sizing: border-box;
+    page-break-inside: avoid;
+}
+
+.svg-letterhead-banner {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 561 / 138;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.svg-lh-meta-left {
+    position: absolute;
+    left: 0;
+    bottom: 4%;
+    font-size: 11pt;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #000;
+    z-index: 2;
+}
+
+.svg-lh-meta-right {
+    position: absolute;
+    right: 0;
+    bottom: 4%;
+    text-align: right;
+    font-size: 11pt;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #000;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.svg-lh-meta-right .miti-block,
+.svg-lh-meta-right .ns-block {
+    font-size: 11pt;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #000;
+    white-space: nowrap;
+}
+
+.custom-svg-letterhead * {
+    font-style: normal !important;
+}
+
 .doc-header-wrapper {
     display: flex;
     align-items: center;
@@ -758,6 +820,50 @@ input[type="range"]::-webkit-slider-thumb:hover {
         overflow: visible !important;
         box-sizing: border-box !important;
         page-break-inside: avoid !important;
+    }
+
+    .custom-svg-letterhead {
+        width: 100% !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
+        page-break-inside: avoid !important;
+    }
+
+    .svg-letterhead-banner {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 561 / 138 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .svg-lh-meta-left {
+        left: 0 !important;
+        bottom: 4% !important;
+        font-size: 11pt !important;
+        font-weight: 600 !important;
+        line-height: 1.35 !important;
+        color: #000 !important;
+    }
+
+    .svg-lh-meta-right {
+        right: 0 !important;
+        bottom: 4% !important;
+        font-size: 11pt !important;
+        font-weight: 600 !important;
+        line-height: 1.35 !important;
+        color: #000 !important;
+    }
+
+    .svg-lh-meta-right .miti-block,
+    .svg-lh-meta-right .ns-block {
+        font-size: 11pt !important;
+        font-weight: 600 !important;
+        line-height: 1.35 !important;
+        color: #000 !important;
     }
 
     .details-table {
