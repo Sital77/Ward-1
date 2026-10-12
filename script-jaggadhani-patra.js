@@ -519,6 +519,18 @@ window.printAndSaveSystem = async function () {
             document.getElementById('editRecordIndex').value = docRef.id;
             document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
         }
+
+        // Ensure fonts and letterhead SVG image are ready before Print Preview / PDF
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+        const bannerImg = document.querySelector('.svg-letterhead-banner');
+        if (bannerImg && !bannerImg.complete) {
+            await new Promise((resolve) => {
+                bannerImg.onload = resolve;
+                bannerImg.onerror = resolve;
+            });
+        }
         window.print();
     } catch (e) {
         alert("क्लाउडमा डाटा सुरक्षित गर्दा समस्या भयो! इन्टरनेट कनेक्सन जाँच्नुहोस् ।");

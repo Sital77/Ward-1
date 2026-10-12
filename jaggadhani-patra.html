@@ -7,6 +7,7 @@
     <title>जग्गाधनीपूर्जा रजिष्ट्रेसन - गौरादह नगरपालिका वडा नं. १</title>
     <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
     <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
+    <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
     <link rel="stylesheet" href="charkilla.css">
     <style>
         .signature-block {
@@ -23,12 +24,22 @@
         }
 
         .sig-name {
+            font-size: 13pt;
             font-weight: bold;
+            line-height: 1.35;
             border-top: 1.5px dashed #000;
             padding-top: 6px;
             display: inline-block;
             min-width: 100px;
             text-align: center;
+        }
+
+        .sig-title {
+            font-size: 12.5pt;
+            font-weight: 500;
+            color: #1a202c;
+            text-align: center;
+            line-height: 1.35;
         }
 
         .photo-box {
@@ -40,13 +51,17 @@
             justify-content: center;
             text-align: center;
             font-size: 9.5pt;
+            line-height: 1.35;
             color: #718096;
             background: #f8fafc;
             border-radius: 6px;
+            box-sizing: border-box;
+            flex-shrink: 0;
         }
 
         /* ══════════════════════════════════════════════════════════
-           Scoped Custom SVG Letterhead (जग्गाधनीपूर्जा रजिष्ट्रेसन प्रविष्टि सिफारिसमा मात्र)
+           Scoped Custom SVG Letterhead & Typography
+           (जग्गाधनीपूर्जा रजिष्ट्रेसन प्रविष्टि सिफारिसमा मात्र)
            ══════════════════════════════════════════════════════════ */
         .custom-svg-letterhead {
             position: relative;
@@ -60,6 +75,7 @@
         .svg-letterhead-banner {
             width: 100%;
             height: auto;
+            aspect-ratio: 561 / 138;
             display: block;
             margin: 0;
             padding: 0;
@@ -85,7 +101,7 @@
             right: 0;
             bottom: 4%;
             text-align: right;
-            font-size: 10.5pt;
+            font-size: 11pt;
             font-weight: 600;
             line-height: 1.35;
             color: #000;
@@ -95,7 +111,7 @@
 
         .svg-lh-meta-right .miti-block,
         .svg-lh-meta-right .ns-block {
-            font-size: 10.5pt;
+            font-size: 11pt;
             font-weight: 600;
             line-height: 1.35;
             color: #000;
@@ -104,6 +120,71 @@
 
         .custom-svg-letterhead * {
             font-style: normal !important;
+        }
+
+        /* ── Typography Hierarchy for Land Registration Document ── */
+        .address-to {
+            font-size: 13pt;
+            font-weight: 700;
+            line-height: 1.5;
+            color: #000;
+            margin-top: 8px;
+            margin-bottom: 14px;
+        }
+
+        .subject-container {
+            text-align: center;
+            margin: 14px 0 18px 0;
+        }
+
+        .subject-title {
+            font-size: 14.5pt;
+            font-weight: 700;
+            text-decoration: underline;
+            display: inline-block;
+            line-height: 1.3;
+        }
+
+        .letter-body {
+            text-align: justify;
+            text-justify: inter-word;
+            font-size: 13pt;
+            line-height: 1.8;
+            margin-bottom: 16px;
+            color: #000;
+        }
+
+        .tapasil-container {
+            margin-top: 14px;
+            font-size: 13pt;
+            line-height: 1.8;
+            color: #000;
+        }
+
+        .tapasil-title {
+            font-size: 13pt;
+            font-weight: 700;
+            text-decoration: underline;
+            margin-bottom: 6px;
+        }
+
+        .tapasil-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 13pt;
+            line-height: 1.8;
+        }
+
+        .tapasil-list {
+            flex: 1;
+            font-size: 13pt;
+            line-height: 1.8;
+        }
+
+        .tapasil-list div {
+            font-size: 13pt;
+            line-height: 1.8;
         }
 
         @media print {
@@ -117,6 +198,7 @@
             .svg-letterhead-banner {
                 width: 100% !important;
                 height: auto !important;
+                aspect-ratio: 561 / 138 !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
@@ -127,7 +209,7 @@
             .svg-lh-meta-left {
                 left: 0 !important;
                 bottom: 4% !important;
-                font-size: 10.5pt !important;
+                font-size: 11pt !important;
                 font-weight: 600 !important;
                 line-height: 1.35 !important;
                 color: #000 !important;
@@ -136,10 +218,68 @@
             .svg-lh-meta-right {
                 right: 0 !important;
                 bottom: 4% !important;
-                font-size: 10pt !important;
+                font-size: 11pt !important;
                 font-weight: 600 !important;
                 line-height: 1.35 !important;
                 color: #000 !important;
+            }
+
+            .svg-lh-meta-right .miti-block,
+            .svg-lh-meta-right .ns-block {
+                font-size: 11pt !important;
+                font-weight: 600 !important;
+                line-height: 1.35 !important;
+                color: #000 !important;
+            }
+
+            .address-to {
+                font-size: 13pt !important;
+                line-height: 1.5 !important;
+                margin-top: 6px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .subject-container {
+                margin: 12px 0 16px 0 !important;
+            }
+
+            .subject-title {
+                font-size: 14.5pt !important;
+                line-height: 1.3 !important;
+            }
+
+            .letter-body {
+                font-size: 13pt !important;
+                line-height: 1.8 !important;
+                margin-bottom: 14px !important;
+            }
+
+            .tapasil-container,
+            .tapasil-list,
+            .tapasil-list div {
+                font-size: 13pt !important;
+                line-height: 1.8 !important;
+            }
+
+            .tapasil-title {
+                font-size: 13pt !important;
+            }
+
+            .photo-box {
+                font-size: 9.5pt !important;
+                line-height: 1.35 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .sig-name {
+                font-size: 13pt !important;
+                line-height: 1.35 !important;
+            }
+
+            .sig-title {
+                font-size: 12.5pt !important;
+                line-height: 1.35 !important;
             }
         }
     </style>
@@ -380,7 +520,7 @@
 
             <!-- ── Official Custom SVG Letterhead (जग्गाधनीपूर्जा रजिष्ट्रेसन प्रविष्टि सिफारिसका लागि मात्र) ── -->
             <div class="custom-svg-letterhead">
-                <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड">
+                <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड" width="561" height="138" loading="eager" fetchpriority="high" decoding="sync">
                 <div class="svg-lh-meta-left">
                     <div>प.सं. <span id="lblPatraSankhya">२०८३/०८४</span></div>
                     <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
@@ -397,22 +537,20 @@
             <div class="header-red-line" style="display: none;"></div>
 
             <!-- ── Receiver ── -->
-            <div class="address-to" style="font-weight: bold; font-size: 13.5pt; margin-top: 8px; margin-bottom: 16px; line-height: 1.6;">
+            <div class="address-to">
                 श्री भूमी प्रशासन कार्यालय<br>
                 दमक, झापा l
             </div>
 
             <!-- ── Subject ── -->
-            <div class="subject-container" style="text-align: center; margin: 15px 0 20px 0;">
-                <div class="subject-title"
-                    style="font-size: 15pt; font-weight: bold; text-decoration: underline; display: inline-block;">
+            <div class="subject-container">
+                <div class="subject-title">
                     <span style="color: #e51a23;">विषय:</span> सिफारिस सम्बन्धमा l
                 </div>
             </div>
 
             <!-- ── Default Letter Body ── -->
-            <div id="defaultLetterBody" class="letter-body"
-                style="text-align: justify; text-justify: inter-word; font-size: 13.5pt; line-height: 1.85; margin-bottom: 18px;">
+            <div id="defaultLetterBody" class="letter-body">
                 प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं. <span id="lblWadaBody" class="fill-space"
                     style="min-width:30px;">१</span> मा बसोबास गर्ने <span id="lblApplicantName" class="fill-space"
                     style="font-weight: bold; min-width:200px; padding-right:0;">.......</span><span id="lblCitBlock"
@@ -420,16 +558,15 @@
             </div>
 
             <!-- ── Custom Address Letter Body ── -->
-            <div id="customLetterBody" class="letter-body"
-                style="text-align: justify; text-justify: inter-word; font-size: 13.5pt; line-height: 1.85; margin-bottom: 18px; display: none;">
+            <div id="customLetterBody" class="letter-body" style="display: none;">
                 प्रस्तुत विषयमा <span id="lblCustDistrict" class="fill-space" style="min-width:60px;">.......</span> जिल्ला <span id="lblCustPalika" class="fill-space" style="min-width:120px;">.......</span> वडा नं. <span id="lblCustWada" class="fill-space" style="min-width:30px;">.......</span> मा बसोबास गर्ने <span id="lblApplicantNameCust" class="fill-space" style="font-weight: bold; min-width:200px; padding-right:0;">.......</span><span id="lblCitBlockCust" style="display:none; font-weight:normal; padding-right:0;"></span><span style="padding:0;">ले</span> यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निजको नाममा श्री भुमी प्रशासन कार्यालय दमकबाट मिति: <span id="lblWarisDateCust" class="fill-space" style="font-weight: bold; min-width:70px;">.........</span> गते वारिसनामाबाट र.नं. <span id="lblRegNoCust" class="fill-space" style="font-weight: bold; min-width:50px;">........</span> मा पास भइ आएको झापा जिल्ला गौरादह नगरपालिका वडा नं. १ मा <span id="lblKittaSentenceCust"></span> जग्गाको जग्गाधनी पूर्जा दर्ता प्रमाण पूर्जा लिन बाँकी रहेको हुँदा निम्न अनुसारको तीन पुस्ते विवरण खुलाई फोटो टाँस सहितको जग्गाधनी दर्ता प्रमाण पुर्जा उपलब्ध गराइदिनुहुन सिफारिस साथ अनुरोध छ l
             </div>
 
             <!-- ── Tapasil Section ── -->
-            <div style="margin-top: 16px; font-size: 13pt; line-height: 1.85;">
-                <div style="font-weight: bold; text-decoration: underline; margin-bottom: 6px;"><u>तपसिल:</u></div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="flex: 1;">
+            <div class="tapasil-container">
+                <div class="tapasil-title"><u>तपसिल:</u></div>
+                <div class="tapasil-content">
+                    <div class="tapasil-list">
                         <div>• जग्गाधनीको नाम: <span id="lblTapasilName" style="font-weight: bold;" class="fill-space">.......</span></div>
                         <div>• ठेगाना: <span id="lblTapasilAddress" class="fill-space">झापा जिल्ला गौरादह नगरपालिका वडा नं. १</span></div>
                         <div id="rowTapasilCit" style="display: none;">• <span id="lblTapasilCitLabel">ना.प्र.नं.:</span> <span id="lblTapasilCit" class="fill-space"></span></div>
@@ -449,7 +586,7 @@
                     <div class="sig-space"></div>
                     <div class="sig-title-line">
                         <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
-                        <div class="sig-title" id="lblSigTitle" style="font-size: 13pt;">वडा अध्यक्ष</div>
+                        <div class="sig-title" id="lblSigTitle">वडा अध्यक्ष</div>
                     </div>
                 </div>
             </div>
