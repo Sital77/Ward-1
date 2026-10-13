@@ -746,6 +746,18 @@ function applyQuarterlyUpdate(recordId) {
     document.getElementById('inSigMargin').value = margin;
     adjustSignaturePosition(margin);
 
+    // Restore specimen signature box layout if saved, else fall back to persisted/default
+    if (rec.specimenSigWidth !== undefined || rec.specimenSigHeight !== undefined || rec.specimenSigPosX !== undefined || rec.specimenSigPosY !== undefined) {
+        applySpecimenBoxLayout({
+            width: rec.specimenSigWidth ?? DEFAULT_SPECIMEN_BOX_LAYOUT.width,
+            height: rec.specimenSigHeight ?? DEFAULT_SPECIMEN_BOX_LAYOUT.height,
+            posX: rec.specimenSigPosX ?? DEFAULT_SPECIMEN_BOX_LAYOUT.posX,
+            posY: rec.specimenSigPosY ?? DEFAULT_SPECIMEN_BOX_LAYOUT.posY
+        });
+    } else {
+        loadStoredSpecimenBoxLayout();
+    }
+
     // Fiscal quarter from previous record (editable by user)
     if (document.getElementById('selKista') && rec.kista) {
         document.getElementById('selKista').value = rec.kista;
@@ -1044,6 +1056,8 @@ function resetForm() {
     document.getElementById('inSigMargin').value = '40';
     adjustSignaturePosition(40);
 
+    loadStoredSpecimenBoxLayout();
+
     initializeAutomaticDate();
     updateDoc();
 }
@@ -1318,6 +1332,224 @@ async function fetchCurrentNepalSambat() {
     }
 }
 
+// ══════════════════════════════════════════════════════
+//  Specimen Signature Box Layout Controller (नमुना दस्तखत Box मिलाउने)
+// ══════════════════════════════════════════════════════
+const DEFAULT_SPECIMEN_BOX_LAYOUT = {
+    width: 48,   // in mm
+    height: 13,  // in mm
+    posX: 0,     // in mm
+    posY: 0      // in mm
+};
+
+const SPECIMEN_BOX_LIMITS = {
+    minWidth: 25,
+    maxWidth: 90,
+    minHeight: 8,
+    maxHeight: 45,
+    minPosX: -70,
+    maxPosX: 30,
+    minPosY: -40,
+    maxPosY: 40
+};
+
+const SPECIMEN_BOX_STORAGE_KEY = 'guardian_specimen_box_settings';
+let currentSpecimenBoxLayout = { ...DEFAULT_SPECIMEN_BOX_LAYOUT };
+
+function validateSpecimenDimensions(w, h, x, y) {
+    const numW = parseFloat(w);
+    const numH = parseFloat(h);
+    const numX = parseFloat(x);
+    const numY = parseFloat(y);
+
+    const safeW = isNaN(numW) ? DEFAULT_SPECIMEN_BOX_LAYOUT.width : Math.min(Math.max(Math.round(numW), SPECIMEN_BOX_LIMITS.minWidth), SPECIMEN_BOX_LIMITS.maxWidth);
+    const safeH = isNaN(numH) ? DEFAULT_SPECIMEN_BOX_LAYOUT.height : Math.min(Math.max(Math.round(numH), SPECIMEN_BOX_LIMITS.minHeight), SPECIMEN_BOX_LIMITS.maxHeight);
+    const safeX = isNaN(numX) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posX : Math.min(Math.max(Math.round(numX), SPECIMEN_BOX_LIMITS.minPosX), SPECIMEN_BOX_LIMITS.maxPosX);
+    const safeY = isNaN(numY) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posY : Math.min(Math.max(Math.round(numY), SPECIMEN_BOX_LIMITS.minPosY), SPECIMEN_BOX_LIMITS.maxPosY);
+
+    const isNearBoundary = (safeX <= SPECIMEN_BOX_LIMITS.minPosX + 3 || safeX >= SPECIMEN_BOX_LIMITS.maxPosX - 2 || safeY <= SPECIMEN_BOX_LIMITS.minPosY + 3 || safeY >= SPECIMEN_BOX_LIMITS.maxPosY - 2);
+    const warnEl = document.getElementById('sigBoxBoundaryWarning');
+    if (warnEl) {
+        warnEl.style.display = isNearBoundary ? 'block' : 'none';
+    }
+
+    return { width: safeW, height: safeH, posX: safeX, posY: safeY };
+}
+
+function applySpecimenBoxLayout(layout, skipStorage = false) {
+    if (!layout) layout = DEFAULT_SPECIMEN_BOX_LAYOUT;
+    const validated = validateSpecimenDimensions(layout.width, layout.height, layout.posX, layout.posY);
+    currentSpecimenBoxLayout = { ...validated };
+
+    const card = document.getElementById('specimenSigCard');
+    const box = document.getElementById('specimenSigBox');
+
+    if (card) {
+        card.style.width = `${validated.width}mm`;
+        card.style.left = `${validated.posX}mm`;
+        card.style.top = `${validated.posY}mm`;
+    }
+    if (box) {
+        box.style.height = `${validated.height}mm`;
+    }
+
+    // Sync input controls if present
+    const sliderW = document.getElementById('sliderSigWidth');
+    const numW = document.getElementById('numSigWidth');
+    const badgeW = document.getElementById('badgeSigWidth');
+    if (sliderW) sliderW.value = validated.width;
+    if (numW) numW.value = validated.width;
+    if (badgeW) badgeW.textContent = `${toNepaliDigit(validated.width)} mm`;
+
+    const sliderH = document.getElementById('sliderSigHeight');
+    const numH = document.getElementById('numSigHeight');
+    const badgeH = document.getElementById('badgeSigHeight');
+    if (sliderH) sliderH.value = validated.height;
+    if (numH) numH.value = validated.height;
+    if (badgeH) badgeH.textContent = `${toNepaliDigit(validated.height)} mm`;
+
+    const sliderX = document.getElementById('sliderSigPosX');
+    const numX = document.getElementById('numSigPosX');
+    const badgeX = document.getElementById('badgeSigPosX');
+    if (sliderX) sliderX.value = validated.posX;
+    if (numX) numX.value = validated.posX;
+    if (badgeX) badgeX.textContent = `${toNepaliDigit(validated.posX)} mm`;
+
+    const sliderY = document.getElementById('sliderSigPosY');
+    const numY = document.getElementById('numSigPosY');
+    const badgeY = document.getElementById('badgeSigPosY');
+    if (sliderY) sliderY.value = validated.posY;
+    if (numY) numY.value = validated.posY;
+    if (badgeY) badgeY.textContent = `${toNepaliDigit(validated.posY)} mm`;
+
+    if (!skipStorage) {
+        try {
+            localStorage.setItem(SPECIMEN_BOX_STORAGE_KEY, JSON.stringify(validated));
+        } catch (e) {}
+    }
+}
+
+function onSigBoxLayoutSlider(prop, val) {
+    const layout = { ...currentSpecimenBoxLayout };
+    layout[prop] = parseFloat(val);
+    applySpecimenBoxLayout(layout);
+}
+
+function onSigBoxLayoutInput(prop, val) {
+    let num = parseFloat(val);
+    if (isNaN(num)) return;
+    const layout = { ...currentSpecimenBoxLayout };
+    layout[prop] = num;
+    applySpecimenBoxLayout(layout);
+}
+
+function resetSpecimenBoxLayout() {
+    applySpecimenBoxLayout(DEFAULT_SPECIMEN_BOX_LAYOUT);
+}
+
+function scrollToPreviewSpecimenBox() {
+    const card = document.getElementById('specimenSigCard');
+    if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.remove('highlight-pulse');
+        void card.offsetWidth; // Force CSS repaint
+        card.classList.add('highlight-pulse');
+        setTimeout(() => {
+            card.classList.remove('highlight-pulse');
+        }, 1500);
+    }
+}
+
+function loadStoredSpecimenBoxLayout() {
+    try {
+        const stored = localStorage.getItem(SPECIMEN_BOX_STORAGE_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && typeof parsed.width === 'number') {
+                applySpecimenBoxLayout(parsed, true);
+                return;
+            }
+        }
+    } catch (e) {}
+    applySpecimenBoxLayout(DEFAULT_SPECIMEN_BOX_LAYOUT, true);
+}
+
+function initSpecimenBoxDraggable() {
+    const card = document.getElementById('specimenSigCard');
+    if (!card || card._isDraggableInitialized) return;
+    card._isDraggableInitialized = true;
+
+    let isDragging = false;
+    let startMouseX = 0;
+    let startMouseY = 0;
+    let startPosX_mm = 0;
+    let startPosY_mm = 0;
+    const PX_PER_MM = 3.779527559; // 96 DPI / 25.4 mm
+
+    function onPointerDown(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+
+        isDragging = true;
+        card.classList.add('is-dragging');
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        startMouseX = clientX;
+        startMouseY = clientY;
+        startPosX_mm = currentSpecimenBoxLayout.posX;
+        startPosY_mm = currentSpecimenBoxLayout.posY;
+
+        document.addEventListener('mousemove', onPointerMove, { passive: false });
+        document.addEventListener('mouseup', onPointerUp);
+        document.addEventListener('touchmove', onPointerMove, { passive: false });
+        document.addEventListener('touchend', onPointerUp);
+
+        e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        if (e.cancelable) e.preventDefault();
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const deltaX_px = clientX - startMouseX;
+        const deltaY_px = clientY - startMouseY;
+
+        const deltaX_mm = Math.round(deltaX_px / PX_PER_MM);
+        const deltaY_mm = Math.round(deltaY_px / PX_PER_MM);
+
+        const newX = startPosX_mm + deltaX_mm;
+        const newY = startPosY_mm + deltaY_mm;
+
+        applySpecimenBoxLayout({
+            ...currentSpecimenBoxLayout,
+            posX: newX,
+            posY: newY
+        }, true);
+    }
+
+    function onPointerUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        card.classList.remove('is-dragging');
+
+        document.removeEventListener('mousemove', onPointerMove);
+        document.removeEventListener('mouseup', onPointerUp);
+        document.removeEventListener('touchmove', onPointerMove);
+        document.removeEventListener('touchend', onPointerUp);
+
+        try {
+            localStorage.setItem(SPECIMEN_BOX_STORAGE_KEY, JSON.stringify(currentSpecimenBoxLayout));
+        } catch (e) {}
+    }
+
+    card.addEventListener('mousedown', onPointerDown);
+    card.addEventListener('touchstart', onPointerDown, { passive: false });
+}
+
 // ── Print & Save ──────────────────────────────────────
 async function printAndSaveSystem() {
     const beneficiaryName = document.getElementById('inBeneficiaryName').value.trim();
@@ -1376,6 +1608,10 @@ async function printAndSaveSystem() {
         customSignName:       document.getElementById('inCustomSignName').value.trim(),
         customSignTitle:      document.getElementById('inCustomSignTitle').value.trim(),
         sigMargin:            document.getElementById('inSigMargin').value,
+        specimenSigWidth:     currentSpecimenBoxLayout.width,
+        specimenSigHeight:    currentSpecimenBoxLayout.height,
+        specimenSigPosX:      currentSpecimenBoxLayout.posX,
+        specimenSigPosY:      currentSpecimenBoxLayout.posY,
         createdBy:            localStorage.getItem('sifarish_user') || 'wada1',
         createdWard:          localStorage.getItem('sifarish_ward') || '1',
         hasNepalSambatTithi:  true,
@@ -1707,6 +1943,18 @@ async function loadRecordToForm(id) {
     document.getElementById('inSigMargin').value = margin;
     adjustSignaturePosition(margin);
 
+    // Restore specimen signature box layout if saved, else fall back to persisted/default
+    if (rec.specimenSigWidth !== undefined || rec.specimenSigHeight !== undefined || rec.specimenSigPosX !== undefined || rec.specimenSigPosY !== undefined) {
+        applySpecimenBoxLayout({
+            width: rec.specimenSigWidth ?? DEFAULT_SPECIMEN_BOX_LAYOUT.width,
+            height: rec.specimenSigHeight ?? DEFAULT_SPECIMEN_BOX_LAYOUT.height,
+            posX: rec.specimenSigPosX ?? DEFAULT_SPECIMEN_BOX_LAYOUT.posX,
+            posY: rec.specimenSigPosY ?? DEFAULT_SPECIMEN_BOX_LAYOUT.posY
+        });
+    } else {
+        loadStoredSpecimenBoxLayout();
+    }
+
     updateDoc();
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'inline-block';
@@ -1750,10 +1998,14 @@ async function deleteRecord(id) {
 window.onload = function () {
     initializeAutomaticDate();
     adjustSignaturePosition(40);
+    loadStoredSpecimenBoxLayout();
+    initSpecimenBoxDraggable();
 };
 
 window.addEventListener('templateInjected', function () {
     initializeAutomaticDate();
+    loadStoredSpecimenBoxLayout();
+    initSpecimenBoxDraggable();
 });
 
 // Explicit window exports for module interoperability & testing
@@ -1780,4 +2032,15 @@ window.showDuplicateConfirmationModal = showDuplicateConfirmationModal;
 window.closeDuplicateModal = closeDuplicateModal;
 window.handleDuplicateChoice = handleDuplicateChoice;
 window.applyQuarterlyUpdate = applyQuarterlyUpdate;
+window.applySpecimenBoxLayout = applySpecimenBoxLayout;
+window.onSigBoxLayoutSlider = onSigBoxLayoutSlider;
+window.onSigBoxLayoutInput = onSigBoxLayoutInput;
+window.resetSpecimenBoxLayout = resetSpecimenBoxLayout;
+window.scrollToPreviewSpecimenBox = scrollToPreviewSpecimenBox;
+window.loadStoredSpecimenBoxLayout = loadStoredSpecimenBoxLayout;
+window.initSpecimenBoxDraggable = initSpecimenBoxDraggable;
+window.validateSpecimenDimensions = validateSpecimenDimensions;
+window.DEFAULT_SPECIMEN_BOX_LAYOUT = DEFAULT_SPECIMEN_BOX_LAYOUT;
+window.SPECIMEN_BOX_LIMITS = SPECIMEN_BOX_LIMITS;
+
 

@@ -118,12 +118,26 @@
             border: 1.5px solid #000;
             border-radius: 4px;
             padding: 5px 12px 8px 12px;
-            width: 180px;
+            width: 48mm;
             background: #ffffff;
             text-align: center;
             box-sizing: border-box;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            position: relative;
+            cursor: grab;
+            transition: box-shadow 0.2s ease, outline 0.2s ease;
+        }
+
+        .specimen-signature-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .specimen-signature-card.is-dragging {
+            cursor: grabbing !important;
+            opacity: 0.95;
+            box-shadow: 0 4px 14px rgba(43, 108, 176, 0.35) !important;
+            outline: 2px dashed #3182ce !important;
         }
 
         .specimen-signature-title {
@@ -134,11 +148,24 @@
             padding-bottom: 3px;
             margin-bottom: 4px;
             text-align: center;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .specimen-signature-box {
-            height: 48px;
+            height: 13mm;
             background: #ffffff;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        @keyframes pulseSigBox {
+            0% { outline: 3px solid #3182ce; box-shadow: 0 0 10px rgba(49, 130, 206, 0.5); }
+            50% { outline: 3px solid #63b3ed; box-shadow: 0 0 18px rgba(49, 130, 206, 0.7); }
+            100% { outline: none; box-shadow: none; }
+        }
+        .highlight-pulse {
+            animation: pulseSigBox 1.2s ease !important;
         }
 
         /* ══════════════════════════════════════════════════════════
@@ -476,6 +503,15 @@
                 background: #ffffff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                box-shadow: none !important;
+                outline: none !important;
+                cursor: default !important;
+            }
+
+            .specimen-signature-card.highlight-pulse {
+                animation: none !important;
+                outline: none !important;
+                box-shadow: none !important;
             }
         }
     </style>
@@ -646,6 +682,105 @@
                     <label>नागरिकता जारी मिति:</label>
                     <input type="text" id="inGuardianCitDate" placeholder="उदा: २०६२/०५/१४" oninput="updateDoc()">
                 </div>
+            </div>
+        </div>
+
+        <!-- ══ SPECIMEN SIGNATURE BOX CONTROLS (नमुना दस्तखतको Box मिलाउने) ══ -->
+        <div class="form-group" id="specimenBoxControlsCard"
+            style="margin-top: 10px; background: #f0f7ff; padding: 12px; border: 1.5px solid #bee3f8; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #90cdf4; padding-bottom: 6px;">
+                <label style="color: #2b6cb0; font-weight: 700; margin: 0; font-size: 0.95rem;">
+                    📐 नमुना दस्तखतको Box मिलाउने
+                </label>
+                <div style="display: flex; gap: 6px;">
+                    <button type="button" class="btn-sm" onclick="scrollToPreviewSpecimenBox()"
+                        style="background: #3182ce; color: #fff; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 3px;"
+                        title="Preview मा बक्स हेर्नुहोस् र हाइलाइट गर्नुहोस्">
+                        👁️ Preview मा हेर्ने
+                    </button>
+                    <button type="button" class="btn-sm" onclick="resetSpecimenBoxLayout()"
+                        style="background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; border-radius: 4px; padding: 4px 8px; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 3px;"
+                        title="साविकको साइज र स्थानमा फर्काउनुहोस्">
+                        ↺ पूर्वनिर्धारित अवस्थामा फर्काउने
+                    </button>
+                </div>
+            </div>
+
+            <div style="font-size: 0.78rem; color: #4a5568; margin-bottom: 10px; line-height: 1.4;">
+                💡 <em>टिप: तपाईं Preview मा रहेको "नमुना दस्तखत" बक्सलाई सिधै माउसले तानेर (Drag गरेर) पनि सार्न सक्नुहुन्छ।</em>
+            </div>
+
+            <!-- Controls Grid: 2 columns for Width and Height, 2 columns for PosX and PosY -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+                <!-- Width (चौडाइ) -->
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 0.82rem; font-weight: 600; color: #2d3748;">↔️ चौडाइ (Width):</span>
+                        <span id="badgeSigWidth" style="font-size: 0.8rem; font-weight: 700; color: #2b6cb0; background: #ebf8ff; padding: 1px 6px; border-radius: 4px;">४८ mm</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <input type="range" id="sliderSigWidth" min="25" max="90" value="48" step="1"
+                            oninput="onSigBoxLayoutSlider('width', this.value)" style="flex: 1; cursor: pointer;">
+                        <input type="number" id="numSigWidth" min="25" max="90" value="48" step="1"
+                            oninput="onSigBoxLayoutInput('width', this.value)"
+                            style="width: 52px; padding: 2px 4px; font-size: 0.82rem; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">
+                        <span style="font-size: 0.75rem; color: #718096;">mm</span>
+                    </div>
+                </div>
+
+                <!-- Height (उचाइ) -->
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 0.82rem; font-weight: 600; color: #2d3748;">↕️ उचाइ (Height):</span>
+                        <span id="badgeSigHeight" style="font-size: 0.8rem; font-weight: 700; color: #2b6cb0; background: #ebf8ff; padding: 1px 6px; border-radius: 4px;">१३ mm</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <input type="range" id="sliderSigHeight" min="8" max="45" value="13" step="1"
+                            oninput="onSigBoxLayoutSlider('height', this.value)" style="flex: 1; cursor: pointer;">
+                        <input type="number" id="numSigHeight" min="8" max="45" value="13" step="1"
+                            oninput="onSigBoxLayoutInput('height', this.value)"
+                            style="width: 52px; padding: 2px 4px; font-size: 0.82rem; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">
+                        <span style="font-size: 0.75rem; color: #718096;">mm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <!-- Horizontal Position (दायाँ–बायाँ) -->
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 0.82rem; font-weight: 600; color: #2d3748;">⬌ दायाँ–बायाँ (X):</span>
+                        <span id="badgeSigPosX" style="font-size: 0.8rem; font-weight: 700; color: #2b6cb0; background: #ebf8ff; padding: 1px 6px; border-radius: 4px;">० mm</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <input type="range" id="sliderSigPosX" min="-70" max="30" value="0" step="1"
+                            oninput="onSigBoxLayoutSlider('posX', this.value)" style="flex: 1; cursor: pointer;">
+                        <input type="number" id="numSigPosX" min="-70" max="30" value="0" step="1"
+                            oninput="onSigBoxLayoutInput('posX', this.value)"
+                            style="width: 52px; padding: 2px 4px; font-size: 0.82rem; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">
+                        <span style="font-size: 0.75rem; color: #718096;">mm</span>
+                    </div>
+                </div>
+
+                <!-- Vertical Position (माथि–तल) -->
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 0.82rem; font-weight: 600; color: #2d3748;">⬍ माथि–तल (Y):</span>
+                        <span id="badgeSigPosY" style="font-size: 0.8rem; font-weight: 700; color: #2b6cb0; background: #ebf8ff; padding: 1px 6px; border-radius: 4px;">० mm</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <input type="range" id="sliderSigPosY" min="-40" max="40" value="0" step="1"
+                            oninput="onSigBoxLayoutSlider('posY', this.value)" style="flex: 1; cursor: pointer;">
+                        <input type="number" id="numSigPosY" min="-40" max="40" value="0" step="1"
+                            oninput="onSigBoxLayoutInput('posY', this.value)"
+                            style="width: 52px; padding: 2px 4px; font-size: 0.82rem; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">
+                        <span style="font-size: 0.75rem; color: #718096;">mm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sigBoxBoundaryWarning" style="display: none; margin-top: 6px; font-size: 0.75rem; color: #c53030; background: #fff5f5; border: 1px solid #feb2b2; padding: 4px 8px; border-radius: 4px;">
+                ⚠️ ध्यान दिनुहोस्: बक्स पृष्ठको सुरक्षित सीमाभन्दा बाहिर जान सक्ने हुँदा उपयुक्त मान राख्नुहोस्।
             </div>
         </div>
 
@@ -830,7 +965,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js"></script>
-    <script src="script-surakshya-bhatta-sifarish.js?v=smartupdate3"></script>
+    <script src="script-surakshya-bhatta-sifarish.js?v=specimenbox1"></script>
 </body>
 
 </html>
