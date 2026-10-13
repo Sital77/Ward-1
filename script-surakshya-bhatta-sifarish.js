@@ -19,11 +19,77 @@ let globalDatabase = [];
 window.globalDatabase = globalDatabase;
 
 // ── Social Security Beneficiary Register State (Excel / Firestore) ──
+const BENEFICIARY_CACHE_KEY = 'ss_beneficiaries_registry_v2';
+const BENEFICIARY_CACHE_TIME_KEY = 'ss_beneficiaries_meta_v2';
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours freshness TTL
+
 let beneficiaryRegister = [];
 let isBeneficiaryRegisterLoaded = false;
+let beneficiaryLoadPromise = null;
 let selectedBeneficiaryCardNo = '';
 let searchDebounceTimer = null;
+let beneficiarySearchSequence = 0;
 window.beneficiaryRegister = beneficiaryRegister;
+
+let currentArchivePage = 1;
+const ARCHIVE_PAGE_SIZE = 25;
+let archiveSearchDebounceTimer = null;
+let isSavingInProgress = false;
+
+// ── Nepali Unicode Normalization Helper ──────────────
+function normalizeDevanagari(text) {
+    if (!text) return '';
+    return String(text)
+        .normalize('NFC')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')
+        .trim()
+        .toLowerCase();
+}
+
+function preIndexBeneficiary(item) {
+    const rawName = String(item.name || '').trim();
+    const rawCard = String(item.cardNo || '').trim();
+    const rawAcc = String(item.accountNo || '').trim();
+    const rawFather = String(item.fatherName || '').trim();
+    const rawSpouse = String(item.spouseName || '').trim();
+
+    item._search = {
+        nameNorm: normalizeDevanagari(rawName),
+        cardNorm: rawCard.toLowerCase(),
+        cardEn: toEnglishDigit(rawCard).toLowerCase(),
+        cardNe: toNepaliDigit(rawCard),
+        accNorm: rawAcc.toLowerCase(),
+        accEn: toEnglishDigit(rawAcc).toLowerCase(),
+        accNe: toNepaliDigit(rawAcc),
+        familyNorm: normalizeDevanagari((rawFather ? rawFather + ' ' : '') + rawSpouse)
+    };
+    return item;
+}
+
+function preIndexHistoricalRecord(rec) {
+    const bName = String(rec.beneficiaryName || rec.name || '').trim();
+    const gName = String(rec.guardianName || '').trim();
+    const acc = String(rec.accountNo || '').trim();
+    const card = String(rec.cardNo || '').trim();
+    const chalani = String(rec.chalani || '').trim();
+    const miti = String(rec.miti || '').trim();
+
+    rec._search = {
+        bNameNorm: normalizeDevanagari(bName),
+        gNameNorm: normalizeDevanagari(gName),
+        accClean: acc.toLowerCase(),
+        accEn: toEnglishDigit(acc).toLowerCase(),
+        accNe: toNepaliDigit(acc),
+        cardClean: card.toLowerCase(),
+        cardEn: toEnglishDigit(card).toLowerCase(),
+        cardNe: toNepaliDigit(card),
+        chalaniClean: chalani.toLowerCase(),
+        chalaniEn: toEnglishDigit(chalani).toLowerCase(),
+        chalaniNe: toNepaliDigit(chalani),
+        mitiClean: miti.toLowerCase()
+    };
+    return rec;
+}
 
 // Auth ready भएपछि मात्र snapshot listener सुरु गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
@@ -32,14 +98,20 @@ window.beneficiaryRegister = beneficiaryRegister;
         snapshot.forEach((doc) => {
             const data = doc.data();
             if (!data.isDeleted) {
-                globalDatabase.push({ id: doc.id, ...data });
+                globalDatabase.push(preIndexHistoricalRecord({ id: doc.id, ...data }));
             }
         });
         globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        renderDatabaseTable();
+        updateGuardianSuggestions();
+
+        // Modal खुला छ भने मात्र तालिका रेन्डर गर्ने (पृष्ठभूमिमा अनावश्यक DOM बन्न नदिने)
+        const modal = document.getElementById('abhilekhModal');
+        if (modal && modal.style.display === 'flex') {
+            renderDatabaseTable();
+        }
     });
 
-    // सामाजिक सुरक्षा लाभग्राही दर्ता सूची लोड गर्ने
+    // सामाजिक सुरक्षा लाभग्राही दर्ता सूची लोड गर्ने (क्यासबाट तुरुन्तै)
     loadBeneficiaryRegister();
 }).catch(() => {});
 
@@ -83,40 +155,127 @@ function adjustSignaturePosition(value) {
 }
 
 // ══════════════════════════════════════════════════════
-//  Excel Beneficiary Register Operations (Firestore Backend)
+//  Excel Beneficiary Register Operations (Firestore Backend & Cache)
 // ══════════════════════════════════════════════════════
 
-async function loadBeneficiaryRegister() {
+function hydrateBeneficiariesFromStorage() {
     try {
-        const statusEl = document.getElementById('beneficiaryRegisterStatus');
-        if (statusEl) statusEl.innerText = 'रजिष्टर लोड हुँदैछ...';
+        const cachedRaw = localStorage.getItem(BENEFICIARY_CACHE_KEY);
+        if (!cachedRaw) return false;
+        const cached = JSON.parse(cachedRaw);
+        if (!Array.isArray(cached) || cached.length === 0) return false;
 
-        const snapshot = await db.collection("socialSecurityBeneficiaries").get();
-        beneficiaryRegister = [];
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            beneficiaryRegister.push({
-                cardNo: String(data.cardNo || doc.id).trim(),
-                name: String(data.name || '').trim(),
-                accountNo: String(data.accountNo || '').trim(),
-                allowanceType: String(data.allowanceType || '').trim(),
-                fatherName: String(data.fatherName || '').trim(),
-                spouseName: String(data.spouseName || '').trim(),
-                age: String(data.age || '').trim(),
-                address: String(data.address || '').trim(),
-                ward: String(data.ward || '१').trim()
-            });
-        });
+        beneficiaryRegister = cached.map(preIndexBeneficiary);
         isBeneficiaryRegisterLoaded = true;
         window.beneficiaryRegister = beneficiaryRegister;
-        if (statusEl) {
-            statusEl.innerText = `${toNepaliDigit(beneficiaryRegister.length)} सूचीकृत`;
-        }
-    } catch (err) {
-        console.warn("Could not load beneficiary register:", err);
+
         const statusEl = document.getElementById('beneficiaryRegisterStatus');
-        if (statusEl) statusEl.innerText = '';
+        if (statusEl) {
+            statusEl.innerHTML = `<span style="color:#276749; font-weight:600;">✓ ${toNepaliDigit(beneficiaryRegister.length)} सूचीकृत</span>`;
+        }
+        updateGuardianSuggestions();
+        return true;
+    } catch (e) {
+        console.warn("Storage cache read failed:", e);
+        return false;
     }
+}
+
+function saveBeneficiariesToStorage(records) {
+    try {
+        const cleanList = records.map(r => ({
+            cardNo: r.cardNo,
+            name: r.name,
+            accountNo: r.accountNo,
+            allowanceType: r.allowanceType || '',
+            fatherName: r.fatherName || '',
+            spouseName: r.spouseName || '',
+            age: r.age || '',
+            address: r.address || '',
+            ward: r.ward || '१'
+        }));
+        localStorage.setItem(BENEFICIARY_CACHE_KEY, JSON.stringify(cleanList));
+        localStorage.setItem(BENEFICIARY_CACHE_TIME_KEY, String(Date.now()));
+    } catch (e) {
+        console.warn("Storage cache write failed:", e);
+    }
+}
+
+async function loadBeneficiaryRegister(options = {}) {
+    const forceRefresh = Boolean(options && options.forceRefresh);
+
+    // 1. क्यासबाट तुरुन्तै लोड (0 ms synchronous hydration)
+    if (!forceRefresh && !isBeneficiaryRegisterLoaded) {
+        const hydrated = hydrateBeneficiariesFromStorage();
+        if (hydrated) {
+            const lastSaved = parseInt(localStorage.getItem(BENEFICIARY_CACHE_TIME_KEY) || '0', 10);
+            if (Date.now() - lastSaved < CACHE_TTL_MS) {
+                return beneficiaryRegister;
+            }
+        }
+    }
+
+    // 2. पहिले नै रिक्वेस्ट चलिरहेको भए सोही promise फर्काउने (Duplicate Request Lock)
+    if (beneficiaryLoadPromise) {
+        return beneficiaryLoadPromise;
+    }
+
+    const statusEl = document.getElementById('beneficiaryRegisterStatus');
+    if (statusEl && !isBeneficiaryRegisterLoaded) {
+        statusEl.innerHTML = `<span style="color:#2b6cb0; font-weight:600;">⏳ सूची लोड हुँदैछ...</span>`;
+    }
+
+    beneficiaryLoadPromise = (async () => {
+        try {
+            const snapshot = await db.collection("socialSecurityBeneficiaries").get();
+            const freshList = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.isDeleted) return;
+                const item = {
+                    cardNo: String(data.cardNo || doc.id).trim(),
+                    name: String(data.name || '').trim(),
+                    accountNo: String(data.accountNo || '').trim(),
+                    allowanceType: String(data.allowanceType || '').trim(),
+                    fatherName: String(data.fatherName || '').trim(),
+                    spouseName: String(data.spouseName || '').trim(),
+                    age: String(data.age || '').trim(),
+                    address: String(data.address || '').trim(),
+                    ward: String(data.ward || '१').trim()
+                };
+                if (item.cardNo && item.name) {
+                    freshList.push(preIndexBeneficiary(item));
+                }
+            });
+
+            if (freshList.length > 0) {
+                beneficiaryRegister = freshList;
+                isBeneficiaryRegisterLoaded = true;
+                window.beneficiaryRegister = beneficiaryRegister;
+                saveBeneficiariesToStorage(freshList);
+            }
+
+            if (statusEl) {
+                statusEl.innerHTML = `<span style="color:#276749; font-weight:600;">✓ ${toNepaliDigit(beneficiaryRegister.length)} सूचीकृत</span>`;
+            }
+            updateGuardianSuggestions();
+            return beneficiaryRegister;
+        } catch (err) {
+            console.warn("Could not load beneficiary register:", err);
+            if (statusEl) {
+                if (beneficiaryRegister.length > 0) {
+                    statusEl.innerHTML = `<span style="color:#276749; font-weight:600;">✓ ${toNepaliDigit(beneficiaryRegister.length)} सूचीकृत</span>`;
+                } else {
+                    statusEl.innerHTML = `<span style="color:#e53e3e; font-weight:600;">⚠️ सूची लोड भएन</span> <button onclick="loadBeneficiaryRegister({forceRefresh:true})" style="border:none;background:none;color:#3182ce;cursor:pointer;text-decoration:underline;font-size:0.75rem;">पुनः प्रयास</button>`;
+                }
+            }
+            return beneficiaryRegister;
+        } finally {
+            beneficiaryLoadPromise = null;
+        }
+    })();
+
+    return beneficiaryLoadPromise;
 }
 
 function onBeneficiarySearchFocus() {
@@ -125,7 +284,7 @@ function onBeneficiarySearchFocus() {
     }
     const query = document.getElementById('inBeneficiarySearch').value;
     if (query && query.trim()) {
-        renderBeneficiarySearchResults(query);
+        renderBeneficiarySearchResults(query, ++beneficiarySearchSequence);
     }
 }
 
@@ -135,9 +294,10 @@ function onBeneficiarySearchInput(query) {
     if (clearBtn) {
         clearBtn.style.display = query && query.trim() ? 'block' : 'none';
     }
+    const seq = ++beneficiarySearchSequence;
     searchDebounceTimer = setTimeout(() => {
-        renderBeneficiarySearchResults(query);
-    }, 120);
+        renderBeneficiarySearchResults(query, seq);
+    }, 280); // Sensible 280ms debounce
 }
 
 function clearBeneficiarySearch() {
@@ -152,11 +312,14 @@ function clearBeneficiarySearch() {
     }
 }
 
-function renderBeneficiarySearchResults(rawQuery) {
-    const query = (rawQuery || '').trim().toLowerCase();
+function renderBeneficiarySearchResults(rawQuery, seq) {
+    if (seq !== undefined && seq !== beneficiarySearchSequence) {
+        return; // Stale sequence guard: newer search in progress
+    }
     const dropdown = document.getElementById('beneficiarySearchResults');
     if (!dropdown) return;
 
+    const query = (rawQuery || '').trim();
     if (!query) {
         dropdown.innerHTML = '';
         dropdown.style.display = 'none';
@@ -164,50 +327,54 @@ function renderBeneficiarySearchResults(rawQuery) {
     }
 
     if (!isBeneficiaryRegisterLoaded && beneficiaryRegister.length === 0) {
-        dropdown.innerHTML = `<div style="padding: 12px; text-align: center; color: #4a5568; font-size: 0.88rem;">⏳ लाभग्राही दर्ता सूची लोड हुँदैछ, कृपया एकछिन प्रतिक्षा गर्नुहोस्...</div>`;
+        dropdown.innerHTML = `<div style="padding: 12px; text-align: center; color: #2b6cb0; font-size: 0.88rem;">⏳ लाभग्राही दर्ता सूची लोड हुँदैछ, कृपया एकछिन प्रतिक्षा गर्नुहोस्...</div>`;
         dropdown.style.display = 'block';
-        loadBeneficiaryRegister().then(() => renderBeneficiarySearchResults(rawQuery));
+        loadBeneficiaryRegister().then(() => {
+            if (seq === undefined || seq === beneficiarySearchSequence) {
+                renderBeneficiarySearchResults(rawQuery, seq);
+            }
+        });
         return;
     }
 
-    const queryEn = toEnglishDigit(query);
-    const queryNe = toNepaliDigit(query);
+    const qNorm = normalizeDevanagari(query);
+    const qLower = query.toLowerCase();
+    const qEn = toEnglishDigit(query).toLowerCase();
+    const qNe = toNepaliDigit(query);
 
-    const matches = beneficiaryRegister.filter(item => {
-        const nameLower = item.name.toLowerCase();
-        const cardStr = item.cardNo.toLowerCase();
-        const cardEn = toEnglishDigit(cardStr);
-        const cardNe = toNepaliDigit(cardStr);
-        const accStr = item.accountNo.toLowerCase();
-        const accEn = toEnglishDigit(accStr);
-        const accNe = toNepaliDigit(accStr);
+    const matches = [];
+    for (let i = 0; i < beneficiaryRegister.length; i++) {
+        const item = beneficiaryRegister[i];
+        const s = item._search;
+        if (!s) continue;
 
-        return nameLower.includes(query) ||
-               cardStr.includes(query) || cardEn.includes(queryEn) || cardNe.includes(queryNe) ||
-               accStr.includes(query) || accEn.includes(queryEn) || accNe.includes(queryNe);
-    });
+        if (s.nameNorm.includes(qNorm) ||
+            s.cardNorm.includes(qLower) || s.cardEn.includes(qEn) || s.cardNe.includes(qNe) ||
+            s.accNorm.includes(qLower) || s.accEn.includes(qEn) || s.accNe.includes(qNe) ||
+            s.familyNorm.includes(qNorm)) {
+            matches.push(item);
+        }
+    }
 
     if (matches.length === 0) {
         dropdown.innerHTML = `
-            <div style="padding: 12px 14px; text-align: center; color: #718096; font-size: 0.88rem; line-height: 1.5;">
-                ⚠️ दर्ता सूचीमा कुनै लाभग्राही भेटिएन ।<br>
-                <span style="font-size: 0.82rem; color: #a0aec0;">कृपया तलका बाकसमा आफैँ नाम, बैंक खाता र परिचयपत्र नं. भर्नुहोस् ।</span>
+            <div style="padding: 14px 16px; text-align: center; color: #718096; font-size: 0.88rem; line-height: 1.5;">
+                <div style="font-weight: 700; color: #c53030; margin-bottom: 3px;">कुनै विवरण भेटिएन</div>
+                <span style="font-size: 0.82rem; color: #a0aec0;">दर्ता सूचीमा कुनै लाभग्राही भेटिएन । कृपया तलका बाकसमा आफैँ नाम, बैंक खाता र परिचयपत्र नं. भर्नुहोस् ।</span>
             </div>
         `;
         dropdown.style.display = 'block';
         return;
     }
 
-    // Limit to top 40 matches for speed
-    const displayMatches = matches.slice(0, 40);
+    // Limit to top 30 matches for fastest DOM render
+    const displayMatches = matches.slice(0, 30);
     let html = '';
     displayMatches.forEach(item => {
         const familyMeta = item.fatherName ? `बाबु: ${item.fatherName}` : (item.spouseName ? `पति/पत्नी: ${item.spouseName}` : '');
         const ageMeta = item.age ? `उमेर: ${toNepaliDigit(item.age)} वर्ष` : '';
         const addrMeta = item.address ? `ठेगाना: ${item.address}` : 'गौरादह १';
         const typeBadge = item.allowanceType ? `<span class="result-type-badge">${item.allowanceType}</span>` : '';
-
-        // Safe card escaping
         const safeCardNo = item.cardNo.replace(/'/g, "\\'");
 
         html += `
@@ -228,7 +395,7 @@ function renderBeneficiarySearchResults(rawQuery) {
     });
 
     if (matches.length > displayMatches.length) {
-        html += `<div style="padding: 6px 12px; font-size: 0.78rem; color: #718096; text-align: center; background: #f7fafc; border-top: 1px dashed #e2e8f0;">थप खोज्न नाम वा परिचयपत्र नं. विस्तृत गर्नुहोस् (जम्मा ${toNepaliDigit(matches.length)} भेटिए)</div>`;
+        html += `<div style="padding: 7px 12px; font-size: 0.78rem; color: #4a5568; text-align: center; background: #f7fafc; border-top: 1px dashed #e2e8f0; font-weight:600;">थप खोज्न नाम वा परिचयपत्र नं. विस्तृत गर्नुहोस् (जम्मा ${toNepaliDigit(matches.length)} भेटिए)</div>`;
     }
 
     dropdown.innerHTML = html;
@@ -271,6 +438,12 @@ function selectBeneficiary(cardNo) {
 
     // Update preview (preserves guardian and kista)
     updateDoc();
+
+    // Check previous recommendation for repeat guardian suggestion
+    checkRepeatGuardianSuggestion(item);
+
+    // Check for previous recommendation duplicate / quarterly reuse
+    checkDuplicateBeneficiaryRecommendation(item);
 }
 
 function showSelectedBeneficiaryBadge(item) {
@@ -292,6 +465,327 @@ function unlinkSelectedBeneficiary() {
     window._selectedBeneficiaryCardNo = '';
     const badge = document.getElementById('selectedBeneficiaryBadge');
     if (badge) badge.style.display = 'none';
+    const guardianBox = document.getElementById('guardianQuickSuggestion');
+    if (guardianBox) guardianBox.style.display = 'none';
+}
+
+function checkRepeatGuardianSuggestion(item) {
+    const box = document.getElementById('guardianQuickSuggestion');
+    if (!box) return;
+
+    if (!item || !globalDatabase || globalDatabase.length === 0) {
+        box.style.display = 'none';
+        return;
+    }
+
+    const prev = globalDatabase.find(r =>
+        (item.cardNo && r.cardNo === item.cardNo) ||
+        (item.accountNo && r.accountNo === item.accountNo) ||
+        (item.name && (r.beneficiaryName === item.name || r.name === item.name))
+    );
+
+    if (prev && prev.guardianName && prev.guardianName.trim()) {
+        const gName = prev.guardianName.trim();
+        const rel = prev.relation || prev.selRelation || 'संरक्षक';
+        const citNo = prev.guardianCitNo || '';
+        const citDate = prev.guardianCitDate || '';
+
+        box.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 700;">💡 अघिल्लो सिफारिसको संरक्षक:</span>
+                <span><strong>${gName}</strong> (${rel})</span>
+            </div>
+            <button type="button" onclick="applyPreviousGuardian('${gName.replace(/'/g, "\\'")}', '${rel.replace(/'/g, "\\'")}', '${citNo.replace(/'/g, "\\'")}', '${citDate.replace(/'/g, "\\'")}')"
+                style="background: #276749; color: #fff; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+                विवरण भर्नुहोस् 📋
+            </button>
+        `;
+        box.style.display = 'flex';
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function applyPreviousGuardian(name, rel, citNo, citDate) {
+    if (document.getElementById('inGuardianName')) {
+        document.getElementById('inGuardianName').value = name || '';
+    }
+    const standardRelations = [
+        'छोरा', 'छोरी', 'पति', 'पत्नी', 'बुबा', 'आमा',
+        'दाजु', 'भाइ', 'दिदी', 'बहिनी', 'नाति', 'नातिनी', 'बुहारी', 'ज्वाइँ'
+    ];
+    const selRelEl = document.getElementById('selRelation');
+    const customRelEl = document.getElementById('inCustomRelation');
+    if (standardRelations.includes(rel)) {
+        if (selRelEl) selRelEl.value = rel;
+        if (customRelEl) customRelEl.value = '';
+    } else {
+        if (selRelEl) selRelEl.value = 'अन्य';
+        if (customRelEl) customRelEl.value = rel;
+    }
+    handleRelationChange();
+
+    if (document.getElementById('inGuardianCitNo')) {
+        document.getElementById('inGuardianCitNo').value = citNo || '';
+    }
+    if (document.getElementById('inGuardianCitDate')) {
+        document.getElementById('inGuardianCitDate').value = citDate || '';
+    }
+    const box = document.getElementById('guardianQuickSuggestion');
+    if (box) box.style.display = 'none';
+    updateDoc();
+}
+
+// ══════════════════════════════════════════════════════
+//  Quarterly Recommendation Reuse & Duplicate Detection
+// ══════════════════════════════════════════════════════
+let pendingDuplicateMatches = [];
+let pendingBeneficiaryItem = null;
+
+function findMatchingHistoricalRecords(item) {
+    if (!item || !globalDatabase || globalDatabase.length === 0) return [];
+
+    const cardEn = toEnglishDigit(item.cardNo || '').trim().toLowerCase();
+    const accEn = toEnglishDigit(item.accountNo || '').trim().toLowerCase();
+
+    return globalDatabase.filter(r => {
+        if (r.isDeleted) return false;
+
+        // 1. Stable Beneficiary ID check (cardNo / beneficiaryRefId)
+        const rCardEn = toEnglishDigit(r.cardNo || r.beneficiaryRefId || '').trim().toLowerCase();
+        if (cardEn && rCardEn && cardEn === rCardEn) {
+            return true;
+        }
+
+        // 2. Fallback check on account number (preserves distinction between people of same name)
+        const rAccEn = toEnglishDigit(r.accountNo || '').trim().toLowerCase();
+        if (accEn && rAccEn && accEn === rAccEn) {
+            return true;
+        }
+
+        return false;
+    }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+}
+
+function checkDuplicateBeneficiaryRecommendation(item) {
+    if (!item) return;
+    const matches = findMatchingHistoricalRecords(item);
+    if (!matches || matches.length === 0) {
+        return; // No previous recommendation found
+    }
+
+    pendingDuplicateMatches = matches;
+    pendingBeneficiaryItem = item;
+
+    showDuplicateConfirmationModal(matches, item);
+}
+
+function showDuplicateConfirmationModal(matches, item) {
+    const modal = document.getElementById('duplicateRecordModal');
+    const container = document.getElementById('duplicateRecordsContainer');
+    const msgEl = document.getElementById('duplicateModalMessage');
+    if (!modal || !container) return;
+
+    if (msgEl) {
+        msgEl.innerText = "यस लाभग्राहीको नाममा यसअघि सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस बनाइएको अभिलेख भेटियो। के तपाईं पुरानो सिफारिसलाई अद्यावधिक गर्न चाहनुहुन्छ?";
+    }
+
+    if (matches.length === 1) {
+        const rec = matches[0];
+        container.innerHTML = `
+            <div style="font-size: 0.9rem; line-height: 1.6; color: #2d3748;">
+                <div style="margin-bottom: 8px; font-weight: 700; color: #2b6cb0;">
+                    👤 लाभग्राही: ${rec.beneficiaryName || item.name}
+                    <span style="color: #718096; font-size: 0.82rem; font-weight: normal; margin-left: 6px;">(परिचयपत्र नं: ${toNepaliDigit(rec.cardNo || item.cardNo)})</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #fff; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div><strong>📅 अघिल्लो मिति:</strong> <span style="color: #c53030; font-weight: 700;">${toNepaliDigit(rec.miti || '-')}</span></div>
+                    <div><strong>📄 च.नं.:</strong> ${toNepaliDigit(rec.chalani || '-')}</div>
+                    <div><strong>🤝 अघिल्लो संरक्षक:</strong> ${rec.guardianName || '-'} (${rec.relation || '-'})</div>
+                    <div><strong>💰 अघिल्लो किस्ता:</strong> ${rec.kista || '-'}</div>
+                </div>
+                <div style="margin-top: 8px; font-size: 0.8rem; color: #718096; display: flex; justify-content: space-between;">
+                    <span>अभिलेख संकेत (ID): <code style="background: #edf2f7; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">${rec.id}</code></span>
+                    <span>${rec.timestamp ? formatTimestamp(rec.timestamp) : ''}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        let listHtml = `
+            <div style="font-size: 0.88rem; margin-bottom: 8px; color: #4a5568;">
+                यस लाभग्राहीका जम्मा <strong>${toNepaliDigit(matches.length)}</strong> वटा अघिल्ला सिफारिसहरू भेटिए। कृपया अद्यावधिक गर्न चाहेको सिफारिस छान्नुहोस्:
+            </div>
+        `;
+        matches.forEach((rec, idx) => {
+            const isChecked = idx === 0 ? 'checked' : '';
+            listHtml += `
+                <label style="display: flex; gap: 10px; padding: 8px 10px; background: #fff; border: 1.5px solid ${idx === 0 ? '#3182ce' : '#e2e8f0'}; border-radius: 8px; margin-bottom: 6px; cursor: pointer; align-items: flex-start; transition: border-color 0.15s;">
+                    <input type="radio" name="duplicateRecordChoice" value="${rec.id}" ${isChecked} style="margin-top: 4px;">
+                    <div style="font-size: 0.86rem; line-height: 1.45; flex-grow: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #2b6cb0;">📅 मिति: ${toNepaliDigit(rec.miti || '-')}</strong>
+                            <span style="font-size: 0.8rem; color: #718096;">च.नं: ${toNepaliDigit(rec.chalani || '-')}</span>
+                        </div>
+                        <div style="color: #4a5568; margin-top: 2px;">संरक्षक: <strong>${rec.guardianName || '-'}</strong> (${rec.relation || '-'}) | किस्ता: ${rec.kista || '-'}</div>
+                        <div style="font-size: 0.76rem; color: #a0aec0; margin-top: 2px;">अभिलेख आईडी: ${rec.id}</div>
+                    </div>
+                </label>
+            `;
+        });
+        container.innerHTML = listHtml;
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeDuplicateModal() {
+    const modal = document.getElementById('duplicateRecordModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function handleDuplicateChoice(choice) {
+    closeDuplicateModal();
+
+    if (choice === 'update') {
+        let selectedId = '';
+        if (pendingDuplicateMatches.length === 1) {
+            selectedId = pendingDuplicateMatches[0].id;
+        } else {
+            const checkedRadio = document.querySelector('input[name="duplicateRecordChoice"]:checked');
+            selectedId = checkedRadio ? checkedRadio.value : (pendingDuplicateMatches[0] ? pendingDuplicateMatches[0].id : '');
+        }
+
+        if (selectedId) {
+            applyQuarterlyUpdate(selectedId);
+        }
+    } else {
+        // 'new': Continue with normal new recommendation workflow
+        document.getElementById('editRecordIndex').value = '';
+        const btnNew = document.getElementById('btnNewForm');
+        if (btnNew) btnNew.style.display = 'none';
+        document.getElementById('formMainTitle').innerText = '🛡️ सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस';
+        // Keep populated beneficiary details from registry, ensure authoritative current date
+        initializeAutomaticDate();
+        updateDoc();
+    }
+}
+
+function applyQuarterlyUpdate(recordId) {
+    const rec = globalDatabase.find(r => r.id === recordId);
+    if (!rec) return;
+
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
+
+    // 1. Open or reuse existing recommendation record (preserving ID)
+    document.getElementById('editRecordIndex').value = rec.id;
+    document.getElementById('formMainTitle').innerText = "🔄 अद्यावधिक मोड: " + (rec.beneficiaryName || rec.name || '');
+
+    // 2. Populate form with existing beneficiary details
+    document.getElementById('inBeneficiaryName').value = rec.beneficiaryName || rec.name || '';
+    document.getElementById('inAccountNo').value = (rec.accountNo !== undefined && rec.accountNo !== null) ? String(rec.accountNo) : '';
+    document.getElementById('inCardNo').value = rec.cardNo || '';
+
+    selectedBeneficiaryCardNo = rec.cardNo || rec.beneficiaryRefId || '';
+    window._selectedBeneficiaryCardNo = selectedBeneficiaryCardNo;
+    const searchInput = document.getElementById('inBeneficiarySearch');
+    if (searchInput) searchInput.value = rec.beneficiaryName || rec.name || '';
+    const clearBtn = document.getElementById('btnClearBeneficiarySearch');
+    if (clearBtn) clearBtn.style.display = 'block';
+
+    showSelectedBeneficiaryBadge({
+        name: rec.beneficiaryName || rec.name || '',
+        cardNo: selectedBeneficiaryCardNo,
+        allowanceType: ''
+    });
+
+    // Populate guardian details
+    const standardRelations = [
+        'छोरा', 'छोरी', 'पति', 'पत्नी', 'बुबा', 'आमा',
+        'दाजु', 'भाइ', 'दिदी', 'बहिनी', 'नाति', 'नातिनी', 'बुहारी', 'ज्वाइँ'
+    ];
+    const selRelEl = document.getElementById('selRelation');
+    const customRelEl = document.getElementById('inCustomRelation');
+
+    let matchedRelation = rec.selRelation || rec.relation || 'छोरा';
+    if (standardRelations.includes(matchedRelation)) {
+        if (selRelEl) selRelEl.value = matchedRelation;
+        if (customRelEl) customRelEl.value = '';
+    } else if (matchedRelation === 'श्रीमान') {
+        if (selRelEl) selRelEl.value = 'पति';
+        if (customRelEl) customRelEl.value = '';
+    } else if (matchedRelation === 'श्रीमती') {
+        if (selRelEl) selRelEl.value = 'पत्नी';
+        if (customRelEl) customRelEl.value = '';
+    } else if (matchedRelation === 'दाइ') {
+        if (selRelEl) selRelEl.value = 'दाजु';
+        if (customRelEl) customRelEl.value = '';
+    } else {
+        if (selRelEl) selRelEl.value = 'अन्य';
+        if (customRelEl) customRelEl.value = rec.customRelation || rec.relation || '';
+    }
+    handleRelationChange();
+
+    document.getElementById('inGuardianName').value = rec.guardianName || '';
+    document.getElementById('inGuardianCitNo').value = rec.guardianCitNo || '';
+    document.getElementById('inGuardianCitDate').value = rec.guardianCitDate || '';
+
+    // Bank & Subject
+    document.getElementById('inBankName').value = rec.bankName || 'कृषि विकास बैंक लिमिटेड';
+    document.getElementById('inBankBranch').value = rec.bankBranch || 'गौरादह शाखा, झापा';
+    document.getElementById('inSubject').value = rec.subject || 'सिफारिस सम्बन्धमा ।';
+
+    // Signatory
+    document.getElementById('inSignAuthority').value = rec.signAuth || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
+    document.getElementById('inCustomSignName').value = rec.customSignName || '';
+    document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
+    toggleCustomSign();
+
+    const margin = rec.sigMargin || '40';
+    document.getElementById('inSigMargin').value = margin;
+    adjustSignaturePosition(margin);
+
+    // Fiscal quarter from previous record (editable by user)
+    if (document.getElementById('selKista') && rec.kista) {
+        document.getElementById('selKista').value = rec.kista;
+    }
+
+    // 3. Automatically set recommendation date to CURRENT Nepal date
+    initializeAutomaticDate();
+
+    // Allow updating chalani
+    if (rec.chalani && rec.chalani !== '-') {
+        document.getElementById('inChalani').value = rec.chalani;
+    }
+
+    const btnNew = document.getElementById('btnNewForm');
+    if (btnNew) btnNew.style.display = 'inline-block';
+
+    updateDoc();
+}
+
+function updateGuardianSuggestions() {
+    const datalist = document.getElementById('guardianSuggestionsList');
+    if (!datalist) return;
+    const names = new Set();
+
+    globalDatabase.forEach(r => {
+        if (r.guardianName && r.guardianName.trim()) {
+            names.add(r.guardianName.trim());
+        }
+    });
+
+    beneficiaryRegister.forEach(b => {
+        if (b.fatherName && b.fatherName.trim()) names.add(b.fatherName.trim());
+        if (b.spouseName && b.spouseName.trim()) names.add(b.spouseName.trim());
+    });
+
+    let html = '';
+    names.forEach(n => {
+        html += `<option value="${n}"></option>`;
+    });
+    datalist.innerHTML = html;
 }
 
 // ── In-browser Excel Register Import / Sync Tool ──
@@ -344,7 +838,8 @@ async function handleExcelFileSelect(e) {
 
         if (btn) btn.innerText = origText;
         alert(`सफलतापूर्वक ${toNepaliDigit(committedCount)} लाभग्राहीको विवरण सुरक्षित/अद्यावधिक गरियो ।`);
-        await loadBeneficiaryRegister();
+        try { localStorage.removeItem(BENEFICIARY_CACHE_KEY); } catch (ce) {}
+        await loadBeneficiaryRegister({ forceRefresh: true });
     } catch (err) {
         console.error("Excel import error:", err);
         alert("एक्सेल आयात गर्दा समस्या भयो! कृपया फाइलको ढाँचा जाँच्नुहोस् ।");
@@ -646,23 +1141,21 @@ function updateDoc() {
     const lblCitDate = document.getElementById('lblGuardianCitDate');
     if (lblCitDate) lblCitDate.innerText = citDate || '..................';
 
-    // Update Beneficiary Summary Table
+    // Update Beneficiary Summary Table (तपसिल)
     const lblTblBeneficiary = document.getElementById('lblTblBeneficiaryName');
     if (lblTblBeneficiary) lblTblBeneficiary.innerText = beneficiaryName || '..................';
 
     const lblTblAcc = document.getElementById('lblTblAccountNo');
     if (lblTblAcc) lblTblAcc.innerText = accountNo || '..................';
 
-    const rowTblCard = document.getElementById('rowTblCardNo');
     const lblTblCard = document.getElementById('lblTblCardNo');
-    if (rowTblCard) {
-        if (cardNo) {
-            rowTblCard.style.display = '';
-            if (lblTblCard) lblTblCard.innerText = cardNo;
-        } else {
-            rowTblCard.style.display = 'none';
-        }
-    }
+    if (lblTblCard) lblTblCard.innerText = cardNo || '..................';
+
+    const lblTblGrd = document.getElementById('lblTblGuardianName');
+    if (lblTblGrd) lblTblGrd.innerText = guardianName || '..................';
+
+    const lblTblRel = document.getElementById('lblTblRelation');
+    if (lblTblRel) lblTblRel.innerText = relation || '..................';
 
     // Signature Block updates
     const signSelect = document.getElementById('inSignAuthority').value;
@@ -891,6 +1384,9 @@ async function printAndSaveSystem() {
         timestamp:            Date.now()
     };
 
+    if (isSavingInProgress) return;
+    isSavingInProgress = true;
+
     const btn = document.querySelector('.btn-print');
     const originalText = btn ? btn.innerHTML : '';
     if (btn) {
@@ -899,13 +1395,40 @@ async function printAndSaveSystem() {
     }
 
     try {
+        let savedDocId = recordId;
         if (recordId !== "") {
+            const existingRec = globalDatabase.find(r => r.id === recordId);
+            if (existingRec && existingRec.miti && existingRec.miti !== obj.miti) {
+                const historyEntry = {
+                    miti: existingRec.miti,
+                    kista: existingRec.kista || 'प्रथम त्रैमासिक',
+                    chalani: existingRec.chalani || '-',
+                    timestamp: existingRec.timestamp || Date.now(),
+                    archivedAt: Date.now()
+                };
+                obj.quarterlyHistory = Array.isArray(existingRec.quarterlyHistory)
+                    ? [...existingRec.quarterlyHistory, historyEntry]
+                    : [historyEntry];
+            }
+            obj.lastUpdatedAt = Date.now();
             await db.collection("surakshyaBhattaRecords").doc(recordId).update(obj);
         } else {
             const docRef = await db.collection("surakshyaBhattaRecords").add(obj);
-            document.getElementById('editRecordIndex').value = docRef.id;
+            savedDocId = docRef.id;
+            document.getElementById('editRecordIndex').value = savedDocId;
             document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + beneficiaryName;
         }
+
+        // इन-मेमोरी क्यास तुरुन्तै अपडेट गर्ने (० ms लेग)
+        const memoryRec = preIndexHistoricalRecord({ id: savedDocId, ...obj });
+        const existingIdx = globalDatabase.findIndex(r => r.id === savedDocId);
+        if (existingIdx !== -1) {
+            globalDatabase[existingIdx] = memoryRec;
+        } else {
+            globalDatabase.unshift(memoryRec);
+        }
+        updateGuardianSuggestions();
+
         const btnNew = document.getElementById('btnNewForm');
         if (btnNew) btnNew.style.display = 'inline-block';
 
@@ -924,6 +1447,7 @@ async function printAndSaveSystem() {
             window.print();
         }
     } finally {
+        isSavingInProgress = false;
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = originalText;
@@ -943,45 +1467,105 @@ function formatTimestamp(ts) {
     return toNepaliDigit(`${y}/${m}/${day} - ${hr}:${min}`);
 }
 
-// ── Database Operations ───────────────────────────────
+// ── Database Operations (Paginated & Debounced) ──────
+function onArchiveSearchInput(val) {
+    clearTimeout(archiveSearchDebounceTimer);
+    const clearBtn = document.getElementById('btnClearArchiveSearch');
+    if (clearBtn) {
+        clearBtn.style.display = val && val.trim() ? 'block' : 'none';
+    }
+    archiveSearchDebounceTimer = setTimeout(() => {
+        currentArchivePage = 1;
+        renderDatabaseTable();
+    }, 250);
+}
+
+function clearArchiveSearch() {
+    const field = document.getElementById('searchField');
+    if (field) field.value = '';
+    const clearBtn = document.getElementById('btnClearArchiveSearch');
+    if (clearBtn) clearBtn.style.display = 'none';
+    currentArchivePage = 1;
+    renderDatabaseTable();
+}
+
+function changeArchivePage(newPage) {
+    currentArchivePage = newPage;
+    renderDatabaseTable();
+}
+
 function renderDatabaseTable() {
     const tbody = document.getElementById('dbTableBody');
     if (!tbody) return;
-    tbody.innerHTML = '';
 
-    const query = document.getElementById('searchField').value.trim().toLowerCase();
-    const queryEn = (window.toEnglishDigit || (x => x))(query);
-    const queryNe = (window.toNepaliDigit || (x => x))(query);
-
-    const filtered = globalDatabase.filter(rec => {
-        if (!query) return true;
-        const bName = (rec.beneficiaryName || rec.name || '').toLowerCase();
-        const gName = (rec.guardianName || '').toLowerCase();
-        const acc = (rec.accountNo || '').toLowerCase();
-        const accEn = (window.toEnglishDigit || (x => x))(acc);
-        const accNe = (window.toNepaliDigit || (x => x))(acc);
-        const chalani = (rec.chalani || '').toLowerCase();
-        const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
-        const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
-        const card = (rec.cardNo || '').toLowerCase();
-
-        return bName.includes(query) ||
-               gName.includes(query) ||
-               card.includes(query) ||
-               acc.includes(query) || acc.includes(queryNe) || accEn.includes(queryEn) || accNe.includes(queryNe) ||
-               chalani.includes(query) || chalaniEn.includes(queryEn) || chalaniNe.includes(queryNe);
-    });
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:18px; color:#a0aec0;">कुनै रेकर्ड भेटिएन ।</td></tr>`;
+    const modal = document.getElementById('abhilekhModal');
+    // यदि मोडल बन्द छ भने अनावश्यक DOM अपडेट नगर्ने
+    if (modal && modal.style.display === 'none') {
         return;
     }
 
-    filtered.forEach((rec, index) => {
+    const searchInput = document.getElementById('searchField');
+    const rawQuery = searchInput ? searchInput.value.trim() : '';
+    const qNorm = normalizeDevanagari(rawQuery);
+    const qLower = rawQuery.toLowerCase();
+    const qEn = toEnglishDigit(rawQuery).toLowerCase();
+    const qNe = toNepaliDigit(rawQuery);
+
+    const filtered = globalDatabase.filter(rec => {
+        if (!rawQuery) return true;
+        const s = rec._search;
+        if (!s) return true;
+
+        return s.bNameNorm.includes(qNorm) ||
+               s.gNameNorm.includes(qNorm) ||
+               s.cardClean.includes(qLower) || s.cardEn.includes(qEn) || s.cardNe.includes(qNe) ||
+               s.accClean.includes(qLower) || s.accEn.includes(qEn) || s.accNe.includes(qNe) ||
+               s.chalaniClean.includes(qLower) || s.chalaniEn.includes(qEn) || s.chalaniNe.includes(qNe) ||
+               s.mitiClean.includes(qLower);
+    });
+
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / ARCHIVE_PAGE_SIZE));
+
+    if (currentArchivePage > totalPages) {
+        currentArchivePage = totalPages;
+    }
+    if (currentArchivePage < 1) {
+        currentArchivePage = 1;
+    }
+
+    const startIndex = (currentArchivePage - 1) * ARCHIVE_PAGE_SIZE;
+    const endIndex = Math.min(startIndex + ARCHIVE_PAGE_SIZE, total);
+    const pageRecords = filtered.slice(startIndex, endIndex);
+
+    const summaryEl = document.getElementById('dbTableSummary');
+    if (summaryEl) {
+        if (total === 0) {
+            summaryEl.innerHTML = `<span style="color:#718096; font-size:0.85rem;">कुनै रेकर्ड फेला परेन</span>`;
+        } else {
+            summaryEl.innerHTML = `
+                <span>जम्मा <strong>${toNepaliDigit(total)}</strong> वटा सिफारिस रेकर्डहरू ${rawQuery ? `(खोजी: "${rawQuery}")` : ''}</span>
+                <span>देखाइएको: <strong>${toNepaliDigit(startIndex + 1)}–${toNepaliDigit(endIndex)}</strong></span>
+            `;
+        }
+    }
+
+    tbody.innerHTML = '';
+
+    if (total === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:#718096; font-size:0.95rem;">⚠️ कुनै विवरण भेटिएन ।</td></tr>`;
+        const paginationEl = document.getElementById('dbTablePagination');
+        if (paginationEl) paginationEl.innerHTML = '';
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    pageRecords.forEach((rec, idx) => {
         const row = document.createElement('tr');
         const relationStr = rec.relation ? ` (${rec.relation})` : '';
+        const rowNum = startIndex + idx + 1;
         row.innerHTML = `
-            <td>${toNepaliDigit(index + 1)}</td>
+            <td>${toNepaliDigit(rowNum)}</td>
             <td><b>${rec.beneficiaryName || rec.name || '-'}</b></td>
             <td>${toNepaliDigit(rec.accountNo || '-')}</td>
             <td>${rec.guardianName || '-'}${relationStr}</td>
@@ -993,8 +1577,30 @@ function renderDatabaseTable() {
                 </div>
             </td>
         `;
-        tbody.appendChild(row);
+        fragment.appendChild(row);
     });
+    tbody.appendChild(fragment);
+
+    const paginationEl = document.getElementById('dbTablePagination');
+    if (paginationEl) {
+        if (totalPages <= 1) {
+            paginationEl.innerHTML = `<span style="color:#718096; font-size:0.83rem;">पृष्ठ १ / १ (जम्मा ${toNepaliDigit(total)} रेकर्ड)</span>`;
+        } else {
+            paginationEl.innerHTML = `
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button type="button" onclick="changeArchivePage(1)" ${currentArchivePage === 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : 'style="cursor:pointer;"'} class="btn-action" style="padding:4px 8px; font-size:0.8rem; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px;">⏮️ पहिलो</button>
+                    <button type="button" onclick="changeArchivePage(${currentArchivePage - 1})" ${currentArchivePage === 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : 'style="cursor:pointer;"'} class="btn-action" style="padding:4px 8px; font-size:0.8rem; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px;">◀ अघिल्लो</button>
+                </div>
+                <div style="font-weight:700; color:#2b6cb0; font-size:0.88rem;">
+                    पृष्ठ ${toNepaliDigit(currentArchivePage)} / ${toNepaliDigit(totalPages)} (जम्मा ${toNepaliDigit(total)})
+                </div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button type="button" onclick="changeArchivePage(${currentArchivePage + 1})" ${currentArchivePage === totalPages ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : 'style="cursor:pointer;"'} class="btn-action" style="padding:4px 8px; font-size:0.8rem; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px;">अर्को ▶</button>
+                    <button type="button" onclick="changeArchivePage(${totalPages})" ${currentArchivePage === totalPages ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : 'style="cursor:pointer;"'} class="btn-action" style="padding:4px 8px; font-size:0.8rem; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px;">अन्तिम ⏭️</button>
+                </div>
+            `;
+        }
+    }
 }
 
 async function loadRecordToForm(id) {
@@ -1149,3 +1755,29 @@ window.onload = function () {
 window.addEventListener('templateInjected', function () {
     initializeAutomaticDate();
 });
+
+// Explicit window exports for module interoperability & testing
+window.toggleModal = toggleModal;
+window.renderDatabaseTable = renderDatabaseTable;
+window.onArchiveSearchInput = onArchiveSearchInput;
+window.clearArchiveSearch = clearArchiveSearch;
+window.changeArchivePage = changeArchivePage;
+window.applyPreviousGuardian = applyPreviousGuardian;
+window.updateGuardianSuggestions = updateGuardianSuggestions;
+window.loadBeneficiaryRegister = loadBeneficiaryRegister;
+window.onBeneficiarySearchInput = onBeneficiarySearchInput;
+window.selectBeneficiary = selectBeneficiary;
+window.clearBeneficiarySearch = clearBeneficiarySearch;
+window.loadRecordToForm = loadRecordToForm;
+window.deleteRecord = deleteRecord;
+window.resetForm = resetForm;
+window.updateDoc = updateDoc;
+window.printAndSaveSystem = printAndSaveSystem;
+window.hydrateBeneficiariesFromStorage = hydrateBeneficiariesFromStorage;
+window.checkDuplicateBeneficiaryRecommendation = checkDuplicateBeneficiaryRecommendation;
+window.findMatchingHistoricalRecords = findMatchingHistoricalRecords;
+window.showDuplicateConfirmationModal = showDuplicateConfirmationModal;
+window.closeDuplicateModal = closeDuplicateModal;
+window.handleDuplicateChoice = handleDuplicateChoice;
+window.applyQuarterlyUpdate = applyQuarterlyUpdate;
+

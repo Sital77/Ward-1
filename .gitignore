@@ -23,3 +23,5 @@ private_data/
 *beneficiary*data*.json
 # Local scratch test scripts
 scratch/
+__pycache__/
+*.pyc

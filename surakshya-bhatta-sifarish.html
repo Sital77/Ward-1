@@ -87,9 +87,44 @@
         }
 
         .beneficiary-summary {
-            margin-top: 18px;
+            margin-top: 14px;
+            margin-bottom: 10px;
+            margin-left: auto;
+            margin-right: 0;
+            width: fit-content;
+            min-width: 330px;
+            max-width: 60%;
+            text-align: left;
             font-size: 13pt;
-            line-height: 1.85;
+            line-height: 1.6;
+        }
+
+        .specimen-signature-card {
+            margin-top: 10px;
+            border: 1.5px solid #000;
+            border-radius: 4px;
+            padding: 5px 10px 8px 10px;
+            width: 170px;
+            background: #ffffff;
+            text-align: center;
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .specimen-signature-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #000;
+            border-bottom: 1px dashed #718096;
+            padding-bottom: 3px;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .specimen-signature-box {
+            height: 48px;
+            background: #ffffff;
         }
 
         /* ══════════════════════════════════════════════════════════
@@ -395,6 +430,22 @@
                 line-height: 1.35 !important;
                 color: #000 !important;
             }
+
+            .beneficiary-summary {
+                margin-left: auto !important;
+                margin-right: 0 !important;
+                width: fit-content !important;
+                max-width: 60% !important;
+                text-align: left !important;
+                line-height: 1.5 !important;
+            }
+
+            .specimen-signature-card {
+                border: 1.5px solid #000 !important;
+                background: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 </head>
@@ -596,29 +647,67 @@
         <button class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र सुरक्षित गर्नुस्</button>
     </div>
 
+    <!-- ══════════════ DUPLICATE / REUSE CONFIRMATION MODAL ══════════════ -->
+    <div class="modal-overlay" id="duplicateRecordModal" style="display: none; z-index: 105;">
+        <div class="modal-content" style="max-width: 580px; width: 92%; padding: 24px; border-radius: 14px;">
+            <button type="button" class="modal-close" onclick="closeDuplicateModal()">×</button>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 1.5px solid #edf2f7; padding-bottom: 10px;">
+                <span style="font-size: 1.6rem;">📋</span>
+                <h3 class="modal-title" style="margin: 0; font-size: 1.25rem; color: #2c5282;">पहिले सिफारिस बनाइएको छ</h3>
+            </div>
+            
+            <p style="font-size: 0.98rem; color: #2d3748; line-height: 1.6; margin-bottom: 14px;" id="duplicateModalMessage">
+                यस लाभग्राहीको नाममा यसअघि सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस बनाइएको अभिलेख भेटियो। के तपाईं पुरानो सिफारिसलाई अद्यावधिक गर्न चाहनुहुन्छ?
+            </p>
+
+            <div id="duplicateRecordsContainer" style="background: #f7fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; max-height: 240px; overflow-y: auto;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+                <button type="button" id="btnChooseNewRecord" onclick="handleDuplicateChoice('new')"
+                    style="padding: 9px 16px; background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: all 0.2s;">
+                    होइन, नयाँ सिफारिस बनाउँछु
+                </button>
+                <button type="button" id="btnChooseUpdateRecord" onclick="handleDuplicateChoice('update')"
+                    style="padding: 9px 18px; background: #2b6cb0; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 2px 4px rgba(43, 108, 176, 0.3); transition: all 0.2s;">
+                    हो, अद्यावधिक गर्नुहोस्
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
     <div class="modal-overlay" id="abhilekhModal">
-        <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-content" style="max-width: 920px; width: 95%;">
             <button class="modal-close" onclick="toggleModal(false)">×</button>
             <h3 class="modal-title">🗄️ सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस अभिलेख</h3>
             <div class="search-container">
                 <label>🔍 लाभग्राही, संरक्षकको नाम वा खाता नं. बाट खोज्नुहोस्:</label>
-                <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम वा खाता नं. टाइप गर्नुस्..."
-                    oninput="renderDatabaseTable()">
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम, संरक्षक वा खाता नं. टाइप गर्नुस्..."
+                        oninput="onArchiveSearchInput(this.value)" autocomplete="off" style="width: 100%; padding-right: 32px;">
+                    <button type="button" id="btnClearArchiveSearch" onclick="clearArchiveSearch()" title="खोजी हटाउनुस्"
+                        style="display: none; position: absolute; right: 8px; background: none; border: none; color: #a0aec0; cursor: pointer; font-size: 1.1rem; padding: 2px;">✕</button>
+                </div>
             </div>
-            <table class="db-table">
-                <thead>
-                    <tr>
-                        <th style="width:6%;">क्रम</th>
-                        <th style="width:24%;">लाभग्राहीको नाम</th>
-                        <th style="width:20%;">खाता नं.</th>
-                        <th style="width:24%;">संरक्षकको नाम (नाता)</th>
-                        <th style="width:14%;">मिति</th>
-                        <th style="width:12%;">कार्य</th>
-                    </tr>
-                </thead>
-                <tbody id="dbTableBody"></tbody>
-            </table>
+            <div id="dbTableSummary" style="margin: 8px 0 6px 0; font-size: 0.85rem; color: #4a5568; display: flex; justify-content: space-between; align-items: center; min-height: 20px;"></div>
+            <div style="max-height: 440px; overflow-y: auto; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;">
+                <table class="db-table" style="margin: 0;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: #edf2f7; box-shadow: 0 1px 2px rgba(0,0,0,0.06);">
+                        <tr>
+                            <th style="width:6%;">क्रम</th>
+                            <th style="width:24%;">लाभग्राहीको नाम</th>
+                            <th style="width:20%;">खाता नं.</th>
+                            <th style="width:24%;">संरक्षकको नाम (नाता)</th>
+                            <th style="width:14%;">मिति</th>
+                            <th style="width:12%; text-align: center;">कार्य</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dbTableBody"></tbody>
+                </table>
+            </div>
+            <div id="dbTablePagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 0.88rem; flex-wrap: wrap; gap: 8px;"></div>
         </div>
     </div>
 
@@ -656,26 +745,40 @@
 
             <!-- ── Body Paragraph ── -->
             <div class="letter-body-para" id="bodyText">
-                प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.१ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong>को नाममा तहाँ बैंकमा रहेको खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको चालू आर्थिक वर्षको <strong id="lblKista1">प्रथम त्रैमासिक</strong>को सामाजिक सुरक्षा भत्ता बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज लाभग्राहीको खातामा जम्मा भएको <strong id="lblKista2">प्रथम त्रैमासिक</strong>को सामाजिक सुरक्षा भत्ता बापतको रकम निजको संरक्षक (: <strong id="lblRelation">छोरा</strong>) <strong id="lblGuardianName">..................</strong> (नागरिकता प्र.नं. <span id="lblGuardianCitNo">..................</span>, जारी मिति: <span id="lblGuardianCitDate">..................</span>) लाई रकम बुझिलिने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
+                प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं. १ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong> को नाममा तहाँ बैंकमा रहेको खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको चालू आर्थिक वर्षको <strong id="lblKista1">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज लाभग्राहीको खातामा जम्मा भएको <strong id="lblKista2">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम निजको संरक्षक तपसिलको दस्तखत भएको <strong id="lblRelation">छोरा</strong> <strong id="lblGuardianName">..................</strong> (नागरिकता प्र.नं. <span id="lblGuardianCitNo">..................</span>, जारी मिति: <span id="lblGuardianCitDate">..................</span>) लाई रकम बुझिलिने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>
 
             <!-- ── Beneficiary Details Summary (तपसिल) ── -->
             <div class="beneficiary-summary" id="beneficiarySummaryBlock">
-                <div class="tapsil-title" style="text-align: left; margin: 10px 0 4px 0;">तपसिल :</div>
-                <table style="width: auto; min-width: 350px; border-collapse: collapse; margin-left: 10px;">
+                <div class="tapsil-title" style="text-align: left; margin: 4px 0 6px 0; font-weight: 700; text-decoration: underline;">तपसिल :</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;">
                     <tr>
-                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">लाभग्राहीको नाम, थर :</td>
-                        <td style="padding: 2px 0;"><strong id="lblTblBeneficiaryName">..................</strong></td>
+                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">लाभग्राहीको नाम, थर :</td>
+                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblBeneficiaryName">..................</strong></td>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">बैंक खाता नम्बर :</td>
-                        <td style="padding: 2px 0;"><strong id="lblTblAccountNo">..................</strong></td>
+                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">बैंक खाता नम्बर :</td>
+                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblAccountNo">..................</strong></td>
                     </tr>
-                    <tr id="rowTblCardNo" style="display: none;">
-                        <td style="padding: 2px 14px 2px 0; font-weight: 600; white-space: nowrap;">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
-                        <td style="padding: 2px 0;"><strong id="lblTblCardNo">..................</strong></td>
+                    <tr id="rowTblCardNo">
+                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
+                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblCardNo">..................</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">संरक्षकको नाम, थर :</td>
+                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblGuardianName">..................</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">लाभग्राहीसँगको नाता :</td>
+                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblRelation">..................</strong></td>
                     </tr>
                 </table>
+
+                <!-- Sample Signature Box (नमुना दस्तखत) -->
+                <div class="specimen-signature-card" id="specimenSigCard">
+                    <div class="specimen-signature-title">नमुना दस्तखत</div>
+                    <div class="specimen-signature-box" id="specimenSigBox"></div>
+                </div>
             </div>
 
             <!-- ── Signature ── -->
@@ -695,7 +798,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js"></script>
-    <script src="script-surakshya-bhatta-sifarish.js"></script>
+    <script src="script-surakshya-bhatta-sifarish.js?v=smartupdate2"></script>
 </body>
 
 </html>
