@@ -86,25 +86,39 @@
             font-weight: 600;
         }
 
-        .beneficiary-summary {
+        .tapasil-specimen-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
             margin-top: 14px;
-            margin-bottom: 10px;
-            margin-left: auto;
-            margin-right: 0;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        .beneficiary-summary {
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 0;
+            margin-right: auto;
             width: fit-content;
-            min-width: 330px;
-            max-width: 60%;
             text-align: left;
             font-size: 13pt;
             line-height: 1.6;
         }
 
+        .specimen-signature-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
         .specimen-signature-card {
-            margin-top: 10px;
             border: 1.5px solid #000;
             border-radius: 4px;
-            padding: 5px 10px 8px 10px;
-            width: 170px;
+            padding: 5px 12px 8px 12px;
+            width: 180px;
             background: #ffffff;
             text-align: center;
             box-sizing: border-box;
@@ -431,13 +445,30 @@
                 color: #000 !important;
             }
 
+            .tapasil-specimen-row {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: flex-end !important;
+                width: 100% !important;
+                margin-top: 14px !important;
+                margin-bottom: 12px !important;
+                page-break-inside: avoid !important;
+            }
+
             .beneficiary-summary {
-                margin-left: auto !important;
-                margin-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: auto !important;
                 width: fit-content !important;
-                max-width: 60% !important;
                 text-align: left !important;
                 line-height: 1.5 !important;
+            }
+
+            .specimen-signature-container {
+                display: flex !important;
+                justify-content: flex-end !important;
+                align-items: flex-end !important;
+                margin-left: auto !important;
+                margin-right: 0 !important;
             }
 
             .specimen-signature-card {
@@ -748,36 +779,37 @@
                 प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं. १ बसोबास गर्नुहुने सामाजिक सुरक्षा भत्ता लाभग्राही <strong id="lblBeneficiaryName">..................</strong> को नाममा तहाँ बैंकमा रहेको खाता नं. <strong id="lblAccountNo">.........................</strong> रहेकोमा निज लाभग्राही हाल शारीरिक रूपमा अशक्त/बिरामी भई हिँडडुल गर्न असमर्थ हुनुभएकोले उक्त खातामा जम्मा भएको चालू आर्थिक वर्षको <strong id="lblKista1">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम झिक्नका लागि स्वयं बैंकसम्म उपस्थित हुन नसक्ने अवस्था रहेको हुँदा निज लाभग्राहीको खातामा जम्मा भएको <strong id="lblKista2">प्रथम त्रैमासिक</strong> को सामाजिक सुरक्षा भत्ता बापतको रकम निजको संरक्षक तपसिलको दस्तखत भएको <strong id="lblRelation">छोरा</strong> <strong id="lblGuardianName">..................</strong> (नागरिकता प्र.नं. <span id="lblGuardianCitNo">..................</span>, जारी मिति: <span id="lblGuardianCitDate">..................</span>) लाई रकम बुझिलिने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ ।
             </div>
 
-            <!-- ── Beneficiary Details Summary (तपसिल) ── -->
-            <div class="beneficiary-summary" id="beneficiarySummaryBlock">
-                <div class="tapsil-title" style="text-align: left; margin: 4px 0 6px 0; font-weight: 700; text-decoration: underline;">तपसिल :</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px;">
-                    <tr>
-                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">लाभग्राहीको नाम, थर :</td>
-                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblBeneficiaryName">..................</strong></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">बैंक खाता नम्बर :</td>
-                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblAccountNo">..................</strong></td>
-                    </tr>
-                    <tr id="rowTblCardNo">
-                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
-                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblCardNo">..................</strong></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">संरक्षकको नाम, थर :</td>
-                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblGuardianName">..................</strong></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">लाभग्राहीसँगको नाता :</td>
-                        <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblRelation">..................</strong></td>
-                    </tr>
-                </table>
+            <!-- ── Tapasil and Specimen Signature Row ── -->
+            <div class="tapasil-specimen-row">
+                <!-- ── Beneficiary Details Summary (तपसिल - LEFT) ── -->
+                <div class="beneficiary-summary" id="beneficiarySummaryBlock">
+                    <div class="tapsil-title" style="text-align: left; margin: 4px 0 6px 0; font-weight: 700; text-decoration: underline;">तपसिल :</div>
+                    <table style="width: auto; min-width: 320px; border-collapse: collapse; margin-bottom: 6px;">
+                        <tr>
+                            <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">लाभग्राहीको नाम, थर :</td>
+                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblBeneficiaryName">..................</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">बैंक खाता नम्बर :</td>
+                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblAccountNo">..................</strong></td>
+                        </tr>
+                        <tr id="rowTblCardNo">
+                            <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
+                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblCardNo">..................</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px 10px 2px 0; font-weight: 600; white-space: nowrap; vertical-align: top;">संरक्षकको नाम, थर :</td>
+                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblTblGuardianName">..................</strong></td>
+                        </tr>
+                    </table>
+                </div>
 
-                <!-- Sample Signature Box (नमुना दस्तखत) -->
-                <div class="specimen-signature-card" id="specimenSigCard">
-                    <div class="specimen-signature-title">नमुना दस्तखत</div>
-                    <div class="specimen-signature-box" id="specimenSigBox"></div>
+                <!-- ── Sample Signature Box (नमुना दस्तखत - RIGHT) ── -->
+                <div class="specimen-signature-container">
+                    <div class="specimen-signature-card" id="specimenSigCard">
+                        <div class="specimen-signature-title">नमुना दस्तखत</div>
+                        <div class="specimen-signature-box" id="specimenSigBox"></div>
+                    </div>
                 </div>
             </div>
 
@@ -798,7 +830,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js"></script>
-    <script src="script-surakshya-bhatta-sifarish.js?v=smartupdate2"></script>
+    <script src="script-surakshya-bhatta-sifarish.js?v=smartupdate3"></script>
 </body>
 
 </html>

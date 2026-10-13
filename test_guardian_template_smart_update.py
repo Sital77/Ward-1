@@ -78,9 +78,9 @@ if body_para_match:
     assert_test("लाई रकम बुझिलिने व्यवस्था मिलाइदिनुहुन सिफारिस साथ अनुरोध छ" in body_text,
                 "Formal recommendation closing sentence present")
 
-# ── GROUP 2: RIGHT-ALIGNED TAPASIL & SPECIMEN SIGNATURE BOX ──
-print("\n[GROUP 2] Right-Aligned 'तपसिल' and Specimen Signature Box:")
-tapsil_block_match = re.search(r'<div class="beneficiary-summary"[^>]*id="beneficiarySummaryBlock"[^>]*>([\s\S]*?)</div>\s*<!-- ── Signature', html_content)
+# ── GROUP 2: LEFT-ALIGNED TAPASIL & RIGHT-ALIGNED SPECIMEN SIGNATURE BOX ──
+print("\n[GROUP 2] Left-Aligned 'तपसिल' and Right-Aligned Specimen Signature Box:")
+tapsil_block_match = re.search(r'<div class="beneficiary-summary"[^>]*id="beneficiarySummaryBlock"[^>]*>([\s\S]*?)</div>\s*<!-- ── Sample Signature', html_content)
 assert_test(tapsil_block_match is not None, "Tapasil block #beneficiarySummaryBlock exists")
 
 if tapsil_block_match:
@@ -90,18 +90,22 @@ if tapsil_block_match:
     assert_test('id="lblTblAccountNo"' in tapsil_content, "Bank account row #lblTblAccountNo present")
     assert_test('id="lblTblCardNo"' in tapsil_content, "Social security card row #lblTblCardNo present")
     assert_test('id="lblTblGuardianName"' in tapsil_content, "Guardian name row #lblTblGuardianName present")
-    assert_test('id="lblTblRelation"' in tapsil_content, "Relation row #lblTblRelation present")
-    assert_test('id="specimenSigCard"' in tapsil_content, "Specimen signature card #specimenSigCard present")
-    assert_test("नमुना दस्तखत" in tapsil_content, "Specimen signature label 'नमुना दस्तखत' present")
-    assert_test('id="specimenSigBox"' in tapsil_content, "Specimen signature box #specimenSigBox present")
+    assert_test('id="lblTblRelation"' not in tapsil_content, "Relation row #lblTblRelation is REMOVED from Tapasil")
 
-# CSS right alignment verification
-assert_test(".beneficiary-summary" in html_content and "margin-left: auto" in html_content,
-            "CSS aligns .beneficiary-summary to the right side with margin-left: auto")
+assert_test('id="lblRelation"' in html_content, "Relation field #lblRelation remains functional in body text")
+assert_test('id="specimenSigCard"' in html_content, "Specimen signature card #specimenSigCard present")
+assert_test("नमुना दस्तखत" in html_content, "Specimen signature label 'नमुना दस्तखत' present")
+assert_test('id="specimenSigBox"' in html_content, "Specimen signature box #specimenSigBox present")
+
+# CSS alignment verification: Tapasil is LEFT, Specimen Box alone is RIGHT
+assert_test(".beneficiary-summary" in html_content and "margin-left: 0" in html_content,
+            "CSS aligns .beneficiary-summary to the LEFT with margin-left: 0")
+assert_test(".specimen-signature-container" in html_content and "margin-left: auto" in html_content,
+            "CSS aligns .specimen-signature-container alone to the RIGHT with margin-left: auto")
 assert_test(".specimen-signature-card" in html_content and "border: 1.5px solid #000" in html_content,
             "CSS sets solid bordered box for specimen signature")
-assert_test("@media print" in html_content and ".beneficiary-summary" in html_content,
-            "@media print enforces right-aligned Tapasil during printing")
+assert_test("@media print" in html_content and ".beneficiary-summary" in html_content and "margin-left: 0 !important" in html_content,
+            "@media print enforces LEFT-aligned Tapasil during printing")
 assert_test(".specimen-signature-card" in html_content and "print-color-adjust: exact" in html_content,
             "@media print enforces exact border reproduction on print/PDF")
 

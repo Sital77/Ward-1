@@ -35,6 +35,27 @@ function toNepaliDigit(num) {
     return num.toString().split('').map(digit => nepaliDigits[digit] || digit).join('');
 }
 
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function toggleGharDetailRow(rowId, status) {
+    const block = document.getElementById(rowId);
+    if (!block) return;
+    const wrapper = block.querySelector('.ghar-detail-wrapper');
+    if (wrapper) {
+        wrapper.style.display = (status === 'भएको') ? 'block' : 'none';
+    }
+}
+window.toggleGharDetailRow = toggleGharDetailRow;
+window.escapeHtml = escapeHtml;
+
 // Controls Abhilekh Popup Modal Overlay Visibility
 function toggleModal(show) {
     const modal = document.getElementById('abhilekhModal');
@@ -58,27 +79,35 @@ function addKittaRow(data = null) {
     const rowId = 'kitta_row_' + rowCounter;
     activeRowIds.push(rowId);
 
+    const hasGhar = data && data.ghar === 'भएको';
+    const noGhar = data && data.ghar === 'नभएको';
+    const gharDetail = (data && data.gharDetail) ? data.gharDetail : '';
+
     const container = document.getElementById('kittaRowsContainer');
     const rowHtml = `
         <div class="kitta-row-block" id="${rowId}">
             <div class="row-num-badge">क्रम संख्या: <span class="row-index-display"></span></div>
             <button type="button" class="btn-delete-row" id="del_btn_${rowId}" onclick="removeKittaRow('${rowId}')">हटाउनुस्</button>
             <div class="table-row-input-grid">
-                <input type="text" class="input-sit" placeholder="सिट नं." value="${data ? data.sit : ''}" oninput="updateDoc()">
-                <input type="text" class="input-kitta" placeholder="कि.नं." value="${data ? data.kitta : ''}" oninput="updateDoc()">
-                <input type="text" class="input-area" placeholder="क्षेत्रफल" value="${data ? data.area : ''}" oninput="updateDoc()">
+                <input type="text" class="input-sit" placeholder="सिट नं." value="${data ? escapeHtml(data.sit || '') : ''}" oninput="updateDoc()">
+                <input type="text" class="input-kitta" placeholder="कि.नं." value="${data ? escapeHtml(data.kitta || '') : ''}" oninput="updateDoc()">
+                <input type="text" class="input-area" placeholder="क्षेत्रफल" value="${data ? escapeHtml(data.area || '') : ''}" oninput="updateDoc()">
             </div>
             <div class="form-group" style="margin-bottom: 8px;">
-                <label style="font-size:0.75rem;">घर स्थिति:</label>
+                <label style="font-size:0.82rem; font-weight:600; color:#2d3748; margin-bottom:4px; display:block;">घरको अवस्था :</label>
                 <div class="radio-container">
                     <div class="radio-option">
-                        <input type="radio" id="g_v_${rowCounter}" name="gharStatus_${rowCounter}" value="भएको" ${data && data.ghar === 'भएको' ? 'checked' : ''} onclick="updateDoc()">
+                        <input type="radio" id="g_v_${rowCounter}" name="gharStatus_${rowCounter}" value="भएको" ${hasGhar ? 'checked' : ''} onchange="toggleGharDetailRow('${rowId}', 'भएको'); updateDoc();">
                         <label for="g_v_${rowCounter}" class="radio-label" style="padding:4px; font-size:0.8rem;">भएको</label>
                     </div>
                     <div class="radio-option">
-                        <input type="radio" id="g_nv_${rowCounter}" name="gharStatus_${rowCounter}" value="नभएको" ${data && data.ghar === 'नभएको' ? 'checked' : ''} onclick="updateDoc()">
+                        <input type="radio" id="g_nv_${rowCounter}" name="gharStatus_${rowCounter}" value="नभएको" ${noGhar ? 'checked' : ''} onchange="toggleGharDetailRow('${rowId}', 'नभएको'); updateDoc();">
                         <label for="g_nv_${rowCounter}" class="radio-label" style="padding:4px; font-size:0.8rem;">नभएको</label>
                     </div>
+                </div>
+                <div class="ghar-detail-wrapper" id="ghar_detail_wrapper_${rowId}" style="display: ${hasGhar ? 'block' : 'none'}; margin-top: 6px;">
+                    <label style="font-size:0.75rem; color:#4a5568; display:block; margin-bottom:2px;">घरको विवरण (कोष्ठकभित्र देखिने) :</label>
+                    <input type="text" class="input-ghar-detail" placeholder="उदा: दुई तले पक्की घर" value="${escapeHtml(gharDetail)}" oninput="updateDoc()" style="width:100%; padding:5px 8px; font-size:0.82rem; border:1px solid #cbd5e0; border-radius:4px; box-sizing:border-box;">
                 </div>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
@@ -92,7 +121,7 @@ function addKittaRow(data = null) {
                     <option value="बगाएको" ${data && data.bato === 'बगाएको' ? 'selected' : ''}>बगाएको</option>
                 </select>
             </div>
-            <input type="text" class="input-remarks" placeholder="कैफियत" value="${data ? data.remarks : ''}" oninput="updateDoc()" style="margin-top:6px; padding:6px;">
+            <input type="text" class="input-remarks" placeholder="कैफियत" value="${data ? escapeHtml(data.remarks || '') : ''}" oninput="updateDoc()" style="margin-top:6px; padding:6px;">
         </div>
     `;
     container.insertAdjacentHTML('beforeend', rowHtml);
@@ -251,16 +280,31 @@ function updateDoc() {
             const block = document.getElementById(id);
             if (block) {
                 const checkedRadio = block.querySelector('input[type="radio"]:checked');
+                const gharVal = checkedRadio ? checkedRadio.value : '-';
+                const detailInput = block.querySelector('.input-ghar-detail');
+                const detailVal = (detailInput && gharVal === 'भएको') ? detailInput.value.trim() : '';
+
+                let gharCellContent = '-';
+                if (gharVal === 'भएको') {
+                    if (detailVal) {
+                        gharCellContent = `भएको<div class="ghar-detail-text" style="font-size: 0.85em; line-height: 1.25; margin-top: 2px; font-weight: normal;">(${escapeHtml(detailVal)})</div>`;
+                    } else {
+                        gharCellContent = `भएको`;
+                    }
+                } else if (gharVal === 'नभएको') {
+                    gharCellContent = `नभएको`;
+                }
+
                 const tableRowHtml = `
                     <tr>
                         <td>${toNepaliDigit(index + 1)}</td>
                         <td>${selectedWada}</td>
-                        <td>${block.querySelector('.input-sit').value || '-'}</td>
-                        <td>${block.querySelector('.input-kitta').value || '-'}</td>
-                        <td>${block.querySelector('.input-area').value || '-'}</td>
-                        <td>${checkedRadio ? checkedRadio.value : '-'}</td>
-                        <td>${block.querySelector('.input-bato').value}</td>
-                        <td>${block.querySelector('.input-remarks').value || '-'}</td>
+                        <td>${escapeHtml(block.querySelector('.input-sit').value || '-')}</td>
+                        <td>${escapeHtml(block.querySelector('.input-kitta').value || '-')}</td>
+                        <td>${escapeHtml(block.querySelector('.input-area').value || '-')}</td>
+                        <td>${gharCellContent}</td>
+                        <td>${escapeHtml(block.querySelector('.input-bato').value)}</td>
+                        <td>${escapeHtml(block.querySelector('.input-remarks').value || '-')}</td>
                     </tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', tableRowHtml);
@@ -284,11 +328,16 @@ async function printAndSaveSystem() {
         const block = document.getElementById(id);
         if (block) {
             const checkedRadio = block.querySelector('input[type="radio"]:checked');
+            const gharStatus = checkedRadio ? checkedRadio.value : '-';
+            const detailInput = block.querySelector('.input-ghar-detail');
+            const detailVal = (detailInput && gharStatus === 'भएको') ? detailInput.value.trim() : '';
+
             kittaRecords.push({
                 sit: block.querySelector('.input-sit').value,
                 kitta: block.querySelector('.input-kitta').value,
                 area: block.querySelector('.input-area').value,
-                ghar: checkedRadio ? checkedRadio.value : '-',
+                ghar: gharStatus,
+                gharDetail: detailVal,
                 bato: block.querySelector('.input-bato').value,
                 remarks: block.querySelector('.input-remarks').value
             });
