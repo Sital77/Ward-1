@@ -14,7 +14,7 @@
 
         .letter-body-para {
             font-size: 13pt;
-            line-height: 1.9;
+            line-height: var(--doc-line-height, 1.85);
             text-align: justify;
             text-justify: inter-word;
         }
@@ -771,8 +771,8 @@
             }
 
             let tapasilHtml = `
-                <div class="tapsil-title" style="margin-top: 14px; text-align: left;">तपसिल:</div>
-                <ul class="tapsil-list" style="list-style-type: disc; margin-left: 24px; margin-top: 6px; line-height: 1.7;">
+                <div class="tapsil-title" style="margin-top: 8px; text-align: left;">तपसिल:</div>
+                <ul class="tapsil-list" style="list-style-type: disc; margin-left: 24px; margin-top: 4px; line-height: 1.4;">
                     <li>अध्यक्ष: <span style="font-weight:bold;">${pChair || '....................'}</span></li>
                     <li>सचिव: <span style="font-weight:bold;">${pSec || '....................'}</span></li>
                     <li>कोषाध्यक्ष: <span style="font-weight:bold;">${pTreas || '....................'}</span></li>

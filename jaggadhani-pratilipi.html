@@ -14,7 +14,7 @@
 
         .letter-body-para {
             font-size: 13pt;
-            line-height: 1.9;
+            line-height: var(--doc-line-height, 1.85);
             text-align: justify;
             text-justify: inter-word;
         }
@@ -356,7 +356,7 @@
             </div>
 
             <!-- ── Land/Kitta Table ── -->
-            <div style="margin-top:16px;">
+            <div>
                 <table class="land-table">
                     <thead>
                         <tr>
@@ -380,8 +380,8 @@
             </div>
 
             <!-- ── Details Block ── -->
-            <div class="tapsil-container" style="margin-top: 18px;">
-                <div class="tapsil-title" style="text-align: left; margin: 10px 0 4px 0;"><u>विवरण:</u></div>
+            <div class="tapsil-container">
+                <div class="tapsil-title" style="text-align: left;"><u>विवरण:</u></div>
                 <div class="tapsil-item">• जग्गा धनीको नाम: <span id="lblDetailName" style="font-weight: bold;"></span></div>
                 <div id="divDetailCit" class="tapsil-item" style="display: none;">• ना.प्र.नं.: <span id="lblDetailCitNo"></span>, जारी मिति: <span id="lblDetailCitDate"></span>, <span id="lblDetailCitDistrict"></span></div>
                 <div id="divDetailFather" class="tapsil-item" style="display: none;">• बुवा: <span id="lblDetailFather"></span></div>

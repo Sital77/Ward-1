@@ -14,7 +14,7 @@
     --doc-font-family: 'Mukta', sans-serif;
     --doc-font-size: 13pt;
     --doc-line-height: 1.85;
-    --doc-para-spacing: 16px;
+    --doc-para-spacing: 10px;
     --table-font-size: 13pt;
     --subject-font-size: 14.5pt;
     --sig-font-size: 13pt;
@@ -684,7 +684,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .subject-container {
     text-align: center;
-    margin: 12px 0 18px 0;
+    margin: 6px 0 10px 0;
 }
 
 .subject-title,
@@ -694,7 +694,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     font-weight: bold;
     text-decoration: underline;
     display: inline-block;
-    line-height: 1.35;
+    line-height: 1.3;
 }
 
 .address-to,
@@ -704,9 +704,18 @@ input[type="range"]::-webkit-slider-thumb:hover {
     font-family: var(--doc-font-family, 'Mukta', sans-serif);
     font-size: var(--doc-font-size, 13pt);
     font-weight: bold;
-    margin-top: 10px;
-    margin-bottom: 16px;
-    line-height: 1.5;
+    margin-top: 6px;
+    margin-bottom: 8px;
+    line-height: 1.25;
+}
+
+.address-to > *,
+.bank-receiver > *,
+.receiver-block > *,
+.receiver-address-block > * {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: inherit !important;
 }
 
 .letter-body,
@@ -721,7 +730,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     text-align: justify;
     text-justify: inter-word;
     text-indent: 50px;
-    margin-bottom: var(--doc-para-spacing, 16px);
+    margin-bottom: var(--doc-para-spacing, 10px);
 }
 
 .tapasil-title,
@@ -730,8 +739,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     font-size: var(--doc-font-size, 13pt);
     font-weight: bold;
     text-align: center;
-    margin: 14px 0 8px 0;
-    line-height: 1.4;
+    margin: 8px 0 4px 0;
+    line-height: 1.3;
 }
 
 .tapsil-item,
@@ -740,7 +749,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .beneficiary-summary {
     font-family: var(--doc-font-family, 'Mukta', sans-serif);
     font-size: var(--doc-font-size, 13pt);
-    line-height: 1.6;
+    line-height: 1.4;
 }
 
 .fill-space {
@@ -1175,7 +1184,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
         text-align: justify !important;
         text-justify: inter-word !important;
         text-indent: 50px !important;
-        margin-bottom: var(--doc-para-spacing, 16px) !important;
+        margin-bottom: var(--doc-para-spacing, 10px) !important;
         color: #000 !important;
     }
 
@@ -1189,10 +1198,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--doc-font-size, 13pt) !important;
         font-weight: bold !important;
-        line-height: 1.5 !important;
-        margin-top: 10px !important;
-        margin-bottom: 16px !important;
+        line-height: 1.25 !important;
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
         color: #000 !important;
+    }
+
+    .address-to > *,
+    .bank-receiver > *,
+    .receiver-block > *,
+    .receiver-address-block > * {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: inherit !important;
     }
 
     .subject-title,
@@ -1200,8 +1218,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--subject-font-size, 14.5pt) !important;
         font-weight: bold !important;
-        line-height: 1.35 !important;
+        line-height: 1.3 !important;
         color: #000 !important;
+    }
+
+    .subject-container {
+        margin: 6px 0 10px 0 !important;
     }
 
     .tapasil-title,
@@ -1210,7 +1232,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--doc-font-size, 13pt) !important;
         font-weight: bold !important;
-        line-height: 1.4 !important;
+        line-height: 1.3 !important;
+        margin: 8px 0 4px 0 !important;
         color: #000 !important;
     }
 
@@ -1220,7 +1243,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     .beneficiary-summary {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--doc-font-size, 13pt) !important;
-        line-height: 1.6 !important;
+        line-height: 1.4 !important;
         color: #000 !important;
     }
 
@@ -1231,6 +1254,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
         line-height: var(--doc-line-height, 1.85) !important;
         text-align: justify !important;
         text-justify: inter-word !important;
+        margin-top: 8px !important;
+        margin-bottom: 8px !important;
         color: #000 !important;
     }
 

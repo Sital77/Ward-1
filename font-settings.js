@@ -1179,7 +1179,7 @@
                     --doc-font-family: 'Mukta', sans-serif;
                     --doc-font-size: ${docBase}pt;
                     --doc-line-height: 1.85;
-                    --doc-para-spacing: 16px;
+                    --doc-para-spacing: 10px;
                     --table-font-size: ${tblSize}pt;
                     --subject-font-size: ${subjSize}pt;
                     --sig-font-size: ${sigSize}pt;
@@ -1220,7 +1220,7 @@
                     text-justify: inter-word !important;
                     text-indent: 50px !important;
                     margin-top: 0 !important;
-                    margin-bottom: var(--doc-para-spacing, 16px) !important;
+                    margin-bottom: var(--doc-para-spacing, 10px) !important;
                     word-break: normal !important;
                     overflow-wrap: break-word !important;
                 }
@@ -1238,16 +1238,25 @@
                     font-size: var(--doc-font-size) !important;
                     font-weight: bold !important;
                     color: var(--doc-text-color) !important;
-                    line-height: 1.5 !important;
-                    margin-top: 10px !important;
-                    margin-bottom: 16px !important;
+                    line-height: 1.25 !important;
+                    margin-top: 6px !important;
+                    margin-bottom: 8px !important;
                     font-style: normal !important;
+                }
+
+                .address-to > *,
+                .bank-receiver > *,
+                .receiver-block > *,
+                .receiver-address-block > * {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    line-height: inherit !important;
                 }
                 
                 /* Subject Line & Title */
                 .subject-container {
                     text-align: center !important;
-                    margin: 12px 0 18px 0 !important;
+                    margin: 6px 0 10px 0 !important;
                 }
                 .subject-title,
                 .subject-line,
@@ -1258,7 +1267,7 @@
                     font-size: var(--subject-font-size) !important;
                     font-weight: bold !important;
                     color: var(--doc-text-color) !important;
-                    line-height: 1.35 !important;
+                    line-height: 1.3 !important;
                     font-style: normal !important;
                 }
                 .subject-title,
@@ -1269,9 +1278,10 @@
                 
                 /* तपसिल Headings & Content: Exactly matching document body */
                 .tapasil-container,
-                .tapsil-container {
-                    margin-top: 14px !important;
-                    margin-bottom: 14px !important;
+                .tapsil-container,
+                .tapasheel-container {
+                    margin-top: 8px !important;
+                    margin-bottom: 8px !important;
                 }
 
                 .tapasil-title,
@@ -1284,8 +1294,8 @@
                     font-weight: bold !important;
                     color: var(--doc-text-color) !important;
                     text-align: center !important;
-                    margin: 14px 0 8px 0 !important;
-                    line-height: 1.4 !important;
+                    margin: 8px 0 4px 0 !important;
+                    line-height: 1.3 !important;
                 }
 
                 .tapsil-item,
@@ -1295,8 +1305,14 @@
                     font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--doc-font-size) !important;
                     color: var(--doc-text-color) !important;
-                    line-height: 1.6 !important;
+                    line-height: 1.4 !important;
                     font-style: var(--doc-font-style) !important;
+                }
+
+                .landuse-container,
+                #lblLandUseStatement {
+                    margin-top: 8px !important;
+                    margin-bottom: 8px !important;
                 }
                 
                 /* Data Tables: strictly uniform and harmonious with document text */
@@ -1321,7 +1337,8 @@
                     font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                     font-size: var(--table-font-size) !important;
                     color: var(--doc-text-color) !important;
-                    line-height: 1.35 !important;
+                    line-height: 1.3 !important;
+                    padding: 4px 4px !important;
                     font-style: var(--doc-font-style) !important;
                     word-break: break-word !important;
                     overflow-wrap: break-word !important;

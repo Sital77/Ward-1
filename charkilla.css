@@ -13,7 +13,7 @@
     --doc-font-family: 'Mukta', sans-serif;
     --doc-font-size: 13pt;
     --doc-line-height: 1.85;
-    --doc-para-spacing: 16px;
+    --doc-para-spacing: 10px;
     --table-font-size: 13pt;
     --subject-font-size: 14.5pt;
     --sig-font-size: 13pt;
@@ -463,7 +463,7 @@ select:focus {
     text-justify: inter-word !important;
     text-indent: 50px;
     margin-top: 0;
-    margin-bottom: var(--doc-para-spacing, 16px) !important;
+    margin-bottom: var(--doc-para-spacing, 10px) !important;
     color: #000;
     word-break: normal;
     overflow-wrap: break-word;
@@ -481,17 +481,26 @@ select:focus {
     font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
     font-size: var(--doc-font-size, 13pt) !important;
     font-weight: bold !important;
-    line-height: 1.5 !important;
-    margin-top: 10px !important;
-    margin-bottom: 16px !important;
+    line-height: 1.25 !important;
+    margin-top: 6px !important;
+    margin-bottom: 8px !important;
     color: #000;
     font-style: normal !important;
+}
+
+.address-to > *,
+.bank-receiver > *,
+.receiver-block > *,
+.receiver-address-block > * {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: inherit !important;
 }
 
 /* Subject line and headings */
 .subject-container {
     text-align: center;
-    margin: 12px 0 18px 0 !important;
+    margin: 6px 0 10px 0 !important;
 }
 
 .subject-title,
@@ -502,7 +511,7 @@ select:focus {
     font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
     font-size: var(--subject-font-size, 14.5pt) !important;
     font-weight: bold !important;
-    line-height: 1.35 !important;
+    line-height: 1.3 !important;
     color: #000;
 }
 
@@ -515,9 +524,10 @@ select:focus {
 
 /* तपसिल (Tapasil) headings and field details */
 .tapasil-container,
-.tapsil-container {
-    margin-top: 14px;
-    margin-bottom: 14px;
+.tapsil-container,
+.tapasheel-container {
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 .tapasil-title,
@@ -529,8 +539,8 @@ select:focus {
     font-size: var(--doc-font-size, 13pt) !important;
     font-weight: bold !important;
     text-align: center !important;
-    margin: 14px 0 8px 0 !important;
-    line-height: 1.4 !important;
+    margin: 8px 0 4px 0 !important;
+    line-height: 1.3 !important;
     color: #000;
 }
 
@@ -540,7 +550,7 @@ select:focus {
 .beneficiary-summary {
     font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
     font-size: var(--doc-font-size, 13pt) !important;
-    line-height: 1.6 !important;
+    line-height: 1.4 !important;
     color: #000;
 }
 
@@ -552,8 +562,8 @@ select:focus {
     line-height: var(--doc-line-height, 1.85) !important;
     text-align: justify !important;
     text-justify: inter-word !important;
-    margin-top: 15px !important;
-    margin-bottom: 15px !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
     color: #000;
 }
 
@@ -1044,7 +1054,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
         text-align: justify !important;
         text-justify: inter-word !important;
         text-indent: 50px !important;
-        margin-bottom: var(--doc-para-spacing, 16px) !important;
+        margin-bottom: var(--doc-para-spacing, 10px) !important;
         color: #000 !important;
     }
 
@@ -1059,10 +1069,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--doc-font-size, 13pt) !important;
         font-weight: bold !important;
-        line-height: 1.5 !important;
-        margin-top: 10px !important;
-        margin-bottom: 16px !important;
+        line-height: 1.25 !important;
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
         color: #000 !important;
+    }
+
+    .address-to > *,
+    .bank-receiver > *,
+    .receiver-block > *,
+    .receiver-address-block > * {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: inherit !important;
     }
 
     .subject-title,
@@ -1073,8 +1092,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--subject-font-size, 14.5pt) !important;
         font-weight: bold !important;
-        line-height: 1.35 !important;
+        line-height: 1.3 !important;
         color: #000 !important;
+    }
+
+    .subject-container {
+        margin: 6px 0 10px 0 !important;
+    }
+
+    .tapasil-container,
+    .tapsil-container,
+    .tapasheel-container {
+        margin-top: 8px !important;
+        margin-bottom: 8px !important;
     }
 
     .tapasil-title,
@@ -1085,7 +1115,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--doc-font-size, 13pt) !important;
         font-weight: bold !important;
-        line-height: 1.4 !important;
+        line-height: 1.3 !important;
+        margin: 8px 0 4px 0 !important;
         color: #000 !important;
     }
 
@@ -1095,7 +1126,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     .beneficiary-summary {
         font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
         font-size: var(--doc-font-size, 13pt) !important;
-        line-height: 1.6 !important;
+        line-height: 1.4 !important;
         color: #000 !important;
     }
 
@@ -1106,13 +1137,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
         line-height: var(--doc-line-height, 1.85) !important;
         text-align: justify !important;
         text-justify: inter-word !important;
+        margin-top: 8px !important;
+        margin-bottom: 8px !important;
         color: #000 !important;
     }
 
     .details-table {
         width: calc(100% - 6px) !important;
         max-width: calc(100% - 6px) !important;
-        margin: 8px auto !important;
+        margin: 6px auto !important;
         table-layout: fixed !important;
         border-collapse: collapse !important;
         border: 1.5px solid #000 !important;
@@ -1130,9 +1163,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
     .tapasil-table td,
     .land-table th,
     .land-table td {
-        padding: 5px 4px !important;
+        padding: 4px 4px !important;
         font-size: var(--table-font-size, 13pt) !important;
-        line-height: 1.35 !important;
+        line-height: 1.3 !important;
         border: 1px solid #000 !important;
         box-sizing: border-box !important;
     }

@@ -14,7 +14,7 @@
 
         .letter-body-para {
             font-size: 13pt;
-            line-height: 1.9;
+            line-height: var(--doc-line-height, 1.85);
             text-align: justify;
             text-justify: inter-word;
         }
@@ -58,7 +58,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 11.5pt;
-            margin-top: 10px;
+            margin-top: 6px;
         }
         .land-table th, .land-table td {
             border: 1px solid #000;
@@ -328,8 +328,8 @@
             </div>
 
             <!-- ── House/Land Table ── -->
-            <div style="margin-top:16px;">
-                <div class="tapsil-title" style="text-align: left; margin: 14px 0 6px 0;">
+            <div>
+                <div class="tapsil-title" style="text-align: left;">
                     <u>घर कायम गर्ने जग्गा र घरको विवरण:</u>
                 </div>
                 <table class="land-table">
