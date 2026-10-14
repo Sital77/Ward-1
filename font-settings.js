@@ -53,7 +53,6 @@
         'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' },
         'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
         'surakshya-bhatta-sifarish': { collection: 'surakshyaBhattaRecords', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस' },
-        'arko-bibaha-nagareko': { collection: 'surakshyaBhattaRecords', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस' },
         'yojana-bank-sifarish': { collection: 'yojanaBankRecords', title: 'योजनाको बैंक खाता सिफारिस' },
         'yojana-tippani': { collection: 'yojanaTippaniRecords', title: 'वडा स्तरीय योजना टिप्पणी-आदेश' },
         'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' },
@@ -272,7 +271,7 @@
     else if (path.includes('pariwarik-bibaran.html')) templateId = 'pariwarik-bibaran';
     else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
     else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
-    else if (path.includes('surakshya-bhatta-sifarish.html') || path.includes('arko-bibaha-nagareko.html')) templateId = 'surakshya-bhatta-sifarish';
+    else if (path.includes('surakshya-bhatta-sifarish.html')) templateId = 'surakshya-bhatta-sifarish';
     else if (path.includes('yojana-bank-sifarish.html')) templateId = 'yojana-bank-sifarish';
     else if (path.includes('yojana-tippani.html')) templateId = 'yojana-tippani';
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
@@ -1218,7 +1217,7 @@
                     font-style: var(--doc-font-style) !important;
                     text-align: justify !important;
                     text-justify: inter-word !important;
-                    text-indent: 50px !important;
+                    text-indent: 0 !important;
                     margin-top: 0 !important;
                     margin-bottom: var(--doc-para-spacing, 10px) !important;
                     word-break: normal !important;
@@ -1275,6 +1274,13 @@
                 .tippani-subject {
                     text-decoration: underline !important;
                 }
+
+                .subject-label {
+                    color: #e51a23 !important;
+                    font-weight: bold !important;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
                 
                 /* तपसिल Headings & Content: Exactly matching document body */
                 .tapasil-container,
@@ -1293,7 +1299,7 @@
                     font-size: var(--doc-font-size) !important;
                     font-weight: bold !important;
                     color: var(--doc-text-color) !important;
-                    text-align: center !important;
+                    text-align: left !important;
                     margin: 8px 0 4px 0 !important;
                     line-height: 1.3 !important;
                 }
@@ -1419,13 +1425,54 @@
                 .sifarish-para,
                 .sifarish-para * {
                     font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
-                    font-size: var(--doc-font-size) !important;
-                    line-height: 1.6 !important;
+                    font-size: 7.2pt !important;
+                    line-height: 1.15 !important;
                 }
                 #lblPhotoBox,
                 #lblPhotoBox * {
                     font-size: 7.5pt !important;
                     line-height: 1.2 !important;
+                }
+
+                /* Nabalak Parichayapatra Page 1 & 2 layout preservation */
+                .page-1 #lblReceiverOffice,
+                .page-1 #lblReceiverOffice * {
+                    font-size: 9pt !important;
+                    line-height: 1.25 !important;
+                    font-weight: 600 !important;
+                    margin: 0 !important;
+                }
+                .page-1 .subject-container {
+                    margin: 1px 0 !important;
+                }
+                .page-1 .subject-title,
+                .page-1 .subject-line {
+                    font-size: 9.5pt !important;
+                    line-height: 1.25 !important;
+                    text-decoration: none !important;
+                }
+                .page-1 .sifarish-title {
+                    font-size: 8pt !important;
+                    font-weight: 700 !important;
+                    margin-top: 6px !important;
+                    margin-bottom: 1px !important;
+                    text-align: center !important;
+                }
+                .page-1 .sifarish-table td,
+                .page-1 .sifarish-table td * {
+                    font-size: 8pt !important;
+                    line-height: 1.2 !important;
+                }
+                .page-1 #docFooterSection,
+                .page-1 #docFooterSection * {
+                    font-size: 8pt !important;
+                    font-weight: 600 !important;
+                }
+                .a4-page.page-1 {
+                    padding: 3mm 6mm 3mm 6mm !important;
+                }
+                .a4-page.page-2 {
+                    padding: 5mm 8mm 5mm 8mm !important;
                 }
             `;
         }
@@ -1763,6 +1810,59 @@
         setTimeout(convertCitElementsToNepali, 40);
     });
 
+    // Collapsible Letterhead UI interaction
+    function initCollapsibleLetterhead() {
+        const labels = document.querySelectorAll('.section-label');
+        labels.forEach(label => {
+            if (label.innerText && label.innerText.includes('लेटर हेड विवरण') && !label.dataset.lhInit) {
+                label.dataset.lhInit = 'true';
+                const card = label.closest('.section-card') || label.parentElement;
+                if (!card) return;
+                
+                card.classList.add('lh-collapsible', 'collapsed');
+                label.classList.add('lh-toggle-header');
+                
+                // Collect all subsequent sibling elements into a wrapper body
+                const wrapper = document.createElement('div');
+                wrapper.className = 'lh-collapsible-body';
+                
+                let next = label.nextElementSibling;
+                while (next) {
+                    const toMove = next;
+                    next = next.nextElementSibling;
+                    wrapper.appendChild(toMove);
+                }
+                card.appendChild(wrapper);
+                
+                // Add clean indicator badge
+                const indicator = document.createElement('span');
+                indicator.className = 'lh-toggle-indicator';
+                indicator.innerHTML = 'हेर्नुहोस् ▼';
+                label.innerHTML = '📄 लेटर हेड विवरण ';
+                label.appendChild(indicator);
+                
+                label.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const isCollapsed = card.classList.toggle('collapsed');
+                    indicator.innerHTML = isCollapsed ? 'हेर्नुहोस् ▼' : 'बन्द गर्नुहोस् ▲';
+                });
+            }
+        });
+    }
+
+    // Ensure red subject label consistently across all recommendation headers
+    function ensureRedSubjectLabels() {
+        const subjects = document.querySelectorAll('.subject-line, .subject-title, .tippani-subject');
+        subjects.forEach(el => {
+            if (el.querySelector('.subject-label')) return;
+            const html = el.innerHTML;
+            const replaced = html.replace(/(विषय[:ः]-?|विषय\s*[:ः]-?)/, '<span class="subject-label" style="color: #e51a23;">$1</span>');
+            if (replaced !== html) {
+                el.innerHTML = replaced;
+            }
+        });
+    }
+
     // Run ward localization and signature setup on all lifecycle stages
     window.addEventListener('templateInjected', () => {
         try {
@@ -1771,6 +1871,8 @@
             sanitizeOperatorUI();
             enhanceAbhilekhModal();
             convertCitElementsToNepali();
+            initCollapsibleLetterhead();
+            ensureRedSubjectLabels();
             if (typeof updateDoc === 'function') {
                 try { updateDoc(); } catch(e) {}
             }
@@ -1784,13 +1886,21 @@
             sanitizeOperatorUI();
             enhanceAbhilekhModal();
             convertCitElementsToNepali();
+            initCollapsibleLetterhead();
+            ensureRedSubjectLabels();
         } catch(e) {}
     });
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initFontSettings);
+        document.addEventListener('DOMContentLoaded', () => {
+            initFontSettings();
+            initCollapsibleLetterhead();
+            ensureRedSubjectLabels();
+        });
     } else {
         initFontSettings();
+        initCollapsibleLetterhead();
+        ensureRedSubjectLabels();
     }
 })();
 

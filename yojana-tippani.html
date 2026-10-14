@@ -251,14 +251,14 @@
             line-height: var(--doc-line-height, 1.85);
             text-align: justify;
             text-justify: inter-word;
-            text-indent: 50px;
+            text-indent: 0;
             margin-bottom: var(--doc-para-spacing, 16px);
             color: #000;
         }
 
         /* Tapasil Heading */
         .tapasill-heading {
-            text-align: center;
+            text-align: left !important;
             font-size: var(--doc-font-size, 13pt);
             font-weight: bold;
             margin: 14px 0 8px 0;
@@ -743,7 +743,7 @@
                 <!-- ── Title / Subject (Bold with Generous Gap After) ── -->
                 <div class="tippani-title-block">
                     <div class="tippani-main-title">टिप्पणी-आदेश</div>
-                    <div class="tippani-subject">विषय:अन्तिम भुक्तानी सम्बन्धमा ।</div>
+                    <div class="tippani-subject"><span class="subject-label" style="color: #e51a23;">विषय:</span> अन्तिम भुक्तानी सम्बन्धमा ।</div>
                 </div>
 
                 <!-- ── Addressee ── -->

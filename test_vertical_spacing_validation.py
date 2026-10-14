@@ -70,7 +70,6 @@ templates = [
     "abhilekh-pramanit.html",
     "abibahit-pramanit.html",
     "apangata-sifarish.html",
-    "arko-bibaha-nagareko.html",
     "bank-sifarish.html",
     "bargikaran-sifarish.html",
     "bato-pramanit.html",
@@ -87,7 +86,8 @@ templates = [
     "suchana-tans.html",
     "surakshya-bhatta-sifarish.html",
     "yojana-bank-sifarish.html",
-    "yojana-samjhauta.html"
+    "yojana-samjhauta.html",
+    "yojana-tippani.html"
 ]
 
 all_exist = True
