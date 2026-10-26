@@ -531,7 +531,10 @@
                 });
         }
 
+        let currentFilteredRecords = [];
+
         function renderBinTable(records) {
+            currentFilteredRecords = records || [];
             const tbody = document.getElementById('binTableBody');
             if (!records || records.length === 0) {
                 tbody.innerHTML = `
@@ -576,16 +579,32 @@
                             </span>
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
-                            <button class="btn-restore" onclick="restoreFromBin('${rec.collectionName}', '${rec.originalDocId}', '${escapeHtml(title)}')">
+                            <button class="btn-restore" onclick="handleRestoreByIndex(${index})">
                                 🔄 रिस्टोर
                             </button>
-                            <button class="btn-delete-forever" onclick="deleteForever('${rec.id}', '${rec.collectionName}', '${rec.originalDocId}', '${escapeHtml(title)}')">
+                            <button class="btn-delete-forever" onclick="handleDeleteByIndex(${index})">
                                 ⚠️ स्थायी हटाउनुस्
                             </button>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        async function handleRestoreByIndex(index) {
+            const rec = currentFilteredRecords[index];
+            if (!rec) return;
+            const s = rec.summary || {};
+            const title = s.title || s.name || s.committeeName || s.projectName || 'अज्ञात रेकर्ड';
+            await restoreFromBin(rec.collectionName, rec.originalDocId, title);
+        }
+
+        async function handleDeleteByIndex(index) {
+            const rec = currentFilteredRecords[index];
+            if (!rec) return;
+            const s = rec.summary || {};
+            const title = s.title || s.name || s.committeeName || s.projectName || 'अज्ञात रेकर्ड';
+            await deleteForever(rec.id, rec.collectionName, rec.originalDocId, title);
         }
 
         function filterBinTable() {

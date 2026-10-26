@@ -46,29 +46,34 @@
 
         <input type="hidden" id="editRecordIndex" value="">
 
-        <div class="row-grid">
-            <div class="form-group">
-                <label>पत्र संख्या (प.सं.):</label>
-                <select id="inPatraSankhya" onchange="updateDoc()">
-                    <option value="२०८२/०८३" selected>२०८२/०८३</option>
-                    <option value="२०८३/०८४">२०८३/०८४</option>
-                    <option value="२०८४/०८५">२०८४/०८५</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>चलानी नं :</label>
-                <input type="text" id="inChalani" placeholder="उदा: ११५३" value="" oninput="updateDoc()">
-            </div>
-        </div>
+        <!-- ══ LETTER METADATA (COLLAPSIBLE ACCORDION) ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 पत्रसम्बन्धी विवरण</div>
 
-        <div class="row-grid">
-            <div class="form-group">
-                <label>मिति (वि.सं.):</label>
-                <input type="text" id="inMiti" value="२०८३/" oninput="updateNepalSambatFromMiti(); updateDoc()">
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>पत्र संख्या (प.सं.):</label>
+                    <select id="inPatraSankhya" onchange="updateDoc()">
+                        <option value="२०८२/०८३" selected>२०८२/०८३</option>
+                        <option value="२०८३/०८४">२०८३/०८४</option>
+                        <option value="२०८४/०८५">२०८४/०८५</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>चलानी नं :</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५३" value="" oninput="updateDoc()">
+                </div>
             </div>
-            <div class="form-group">
-                <label>ने.स. :</label>
-                <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" value="२०८३/" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>ने.स. :</label>
+                    <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
+                </div>
             </div>
         </div>
 

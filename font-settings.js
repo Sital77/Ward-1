@@ -1810,45 +1810,147 @@
         setTimeout(convertCitElementsToNepali, 40);
     });
 
-    // Collapsible Letterhead UI interaction
+    // Collapsible Recommendation Metadata Accordion UI interaction
     function initCollapsibleLetterhead() {
+        // 1. Process all explicit section cards with letterhead or metadata labels
         const labels = document.querySelectorAll('.section-label');
         labels.forEach(label => {
-            if (label.innerText && label.innerText.includes('लेटर हेड विवरण') && !label.dataset.lhInit) {
+            const rawText = (label.innerText || label.textContent || '').trim();
+            const isTargetLabel = rawText.includes('पत्रसम्बन्धी विवरण') || 
+                                  rawText.includes('लेटर हेड विवरण') || 
+                                  rawText.includes('पत्र संख्या र मिति विवरण');
+            
+            if (isTargetLabel && !label.dataset.lhInit) {
                 label.dataset.lhInit = 'true';
                 const card = label.closest('.section-card') || label.parentElement;
                 if (!card) return;
                 
                 card.classList.add('lh-collapsible', 'collapsed');
                 label.classList.add('lh-toggle-header');
+                label.setAttribute('role', 'button');
+                label.setAttribute('tabindex', '0');
+                label.setAttribute('aria-expanded', 'false');
+                label.setAttribute('title', 'पत्रसम्बन्धी विवरण हेर्न वा बन्द गर्न क्लिक गर्नुहोस्');
                 
-                // Collect all subsequent sibling elements into a wrapper body
-                const wrapper = document.createElement('div');
-                wrapper.className = 'lh-collapsible-body';
-                
-                let next = label.nextElementSibling;
-                while (next) {
-                    const toMove = next;
-                    next = next.nextElementSibling;
-                    wrapper.appendChild(toMove);
+                // Collect all subsequent sibling elements into a wrapper body if not already wrapped
+                let wrapper = card.querySelector('.lh-collapsible-body');
+                if (!wrapper) {
+                    wrapper = document.createElement('div');
+                    wrapper.className = 'lh-collapsible-body';
+                    
+                    let next = label.nextElementSibling;
+                    while (next) {
+                        const toMove = next;
+                        next = next.nextElementSibling;
+                        wrapper.appendChild(toMove);
+                    }
+                    card.appendChild(wrapper);
                 }
-                card.appendChild(wrapper);
                 
                 // Add clean indicator badge
                 const indicator = document.createElement('span');
                 indicator.className = 'lh-toggle-indicator';
+                indicator.setAttribute('role', 'status');
                 indicator.innerHTML = 'हेर्नुहोस् ▼';
-                label.innerHTML = '📄 लेटर हेड विवरण ';
+                label.innerHTML = '📄 पत्रसम्बन्धी विवरण ';
                 label.appendChild(indicator);
                 
-                label.addEventListener('click', (e) => {
-                    e.preventDefault();
+                const toggleAccordion = (e) => {
+                    if (e) e.preventDefault();
                     const isCollapsed = card.classList.toggle('collapsed');
                     indicator.innerHTML = isCollapsed ? 'हेर्नुहोस् ▼' : 'बन्द गर्नुहोस् ▲';
+                    label.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                };
+
+                label.addEventListener('click', toggleAccordion);
+                label.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleAccordion();
+                    }
                 });
             }
         });
+
+        // 2. Safeguard for templates with raw metadata inputs in .input-panel
+        const panel = document.querySelector('.input-panel');
+        if (panel && !panel.querySelector('.lh-collapsible, .lh-section')) {
+            const firstInput = panel.querySelector('#inPatraSankhya, #ayRadioGroup, #inChalani');
+            if (firstInput) {
+                const firstGroup = firstInput.closest('.form-group, .row-grid') || firstInput.parentElement;
+                if (firstGroup && firstGroup.parentElement === panel) {
+                    // Identify contiguous metadata form groups
+                    const groupsToWrap = [];
+                    let curr = firstGroup;
+                    while (curr && curr.parentElement === panel) {
+                        // Stop if we hit applicant details, table builder, or subject
+                        const text = (curr.innerText || curr.textContent || '').toLowerCase();
+                        const isMetadata = curr.querySelector('#inPatraSankhya, #ayRadioGroup, #inChalani, #inMiti, #inNepalSamvat, #inOffice, #inOfficeAddress, #inReceiver') ||
+                                           text.includes('पत्र संख्या') || text.includes('चलानी') || text.includes('ने.स.') || 
+                                           (text.includes('मिति') && !text.includes('जन्म मिति') && !text.includes('जारी मिति')) ||
+                                           (text.includes('सम्बोधन') || text.includes('कार्यालयको नाम'));
+                        
+                        const isNonMetadata = curr.querySelector('#inName, #inApplicantName, #inApplicant, #inKitta, #kittaRowsContainer, #inWadaNo, #inSubject') ||
+                                              text.includes('जग्गाधनी') || text.includes('निवेदक') || text.includes('नागरिकता') || text.includes('कित्ता') || text.includes('वडा नं (हाल)');
+                        
+                        if (isMetadata && !isNonMetadata) {
+                            groupsToWrap.push(curr);
+                            curr = curr.nextElementSibling;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (groupsToWrap.length > 0) {
+                        const card = document.createElement('div');
+                        card.className = 'section-card lh-section lh-collapsible collapsed';
+                        
+                        const label = document.createElement('div');
+                        label.className = 'section-label lh-toggle-header';
+                        label.setAttribute('role', 'button');
+                        label.setAttribute('tabindex', '0');
+                        label.setAttribute('aria-expanded', 'false');
+                        label.dataset.lhInit = 'true';
+                        label.setAttribute('title', 'पत्रसम्बन्धी विवरण हेर्न वा बन्द गर्न क्लिक गर्नुहोस्');
+                        
+                        const indicator = document.createElement('span');
+                        indicator.className = 'lh-toggle-indicator';
+                        indicator.setAttribute('role', 'status');
+                        indicator.innerHTML = 'हेर्नुहोस् ▼';
+                        label.innerHTML = '📄 पत्रसम्बन्धी विवरण ';
+                        label.appendChild(indicator);
+                        
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'lh-collapsible-body';
+                        
+                        firstGroup.parentNode.insertBefore(card, firstGroup);
+                        card.appendChild(label);
+                        card.appendChild(wrapper);
+                        
+                        groupsToWrap.forEach(g => wrapper.appendChild(g));
+                        
+                        const toggleAccordion = (e) => {
+                            if (e) e.preventDefault();
+                            const isCollapsed = card.classList.toggle('collapsed');
+                            indicator.innerHTML = isCollapsed ? 'हेर्नुहोस् ▼' : 'बन्द गर्नुहोस् ▲';
+                            label.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                        };
+
+                        label.addEventListener('click', toggleAccordion);
+                        label.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                toggleAccordion();
+                            }
+                        });
+                    }
+                }
+            }
+        }
     }
+
+    window.initCollapsibleLetterhead = initCollapsibleLetterhead;
+    window.initCollapsibleMetadata = initCollapsibleLetterhead;
 
     // Ensure red subject label consistently across all recommendation headers
     function ensureRedSubjectLabels() {

@@ -246,35 +246,40 @@
 
         <input type="hidden" id="editRecordIndex" value="">
 
-        <div class="form-group">
-            <label>पत्र संख्या (प.सं.):</label>
-            <select id="inPatraSankhya" onchange="updateDoc()">
-                <option value="२०८२/०८३">२०८२/०८३</option>
-                <option value="२०८३/०८४" selected>२०८३/०८४</option>
-                <option value="२०८४/०८५">२०८४/०८५</option>
-                <option value="२०८५/०८६">२०८५/०८६</option>
-            </select>
-        </div>
+        <!-- ══ LETTER METADATA (COLLAPSIBLE ACCORDION) ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 पत्रसम्बन्धी विवरण</div>
 
-        <div class="form-group">
-            <label>चलानी नं :</label>
-            <input type="text" id="inChalani" placeholder="उदा: ११५१" oninput="updateDoc()">
-        </div>
-
-        <div class="row-grid">
             <div class="form-group">
-                <label>मिति (वि.सं.):</label>
-                <input type="text" id="inMiti" value="२०८३/०२/२७" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                <label>पत्र संख्या (प.सं.):</label>
+                <select id="inPatraSankhya" onchange="updateDoc()">
+                    <option value="२०८२/०८३">२०८२/०८३</option>
+                    <option value="२०८३/०८४" selected>२०८३/०८४</option>
+                    <option value="२०८४/०८५">२०८४/०८५</option>
+                    <option value="२०८५/०८६">२०८५/०८६</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label>ने.स. :</label>
-                <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label>सम्बोधन (श्री ...):</label>
-            <input type="text" id="inOffice" value="श्री यो जोजस सँग सम्बन्धित छ ।" oninput="updateDoc()">
+            <div class="form-group">
+                <label>चलानी नं :</label>
+                <input type="text" id="inChalani" placeholder="उदा: ११५१" oninput="updateDoc()">
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" value="२०८३/०२/२७" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>ने.स. :</label>
+                    <input type="text" id="inNepalSamvat" placeholder="११४६" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>सम्बोधन (श्री ...):</label>
+                <input type="text" id="inOffice" value="श्री यो जोजस सँग सम्बन्धित छ ।" oninput="updateDoc()">
+            </div>
         </div>
 
         <div class="form-group">

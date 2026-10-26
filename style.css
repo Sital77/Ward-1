@@ -1334,9 +1334,34 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* ══════════════════════════════════════════════════════════
-   COLLAPSIBLE LETTERHEAD DETAILS UI
+   COLLAPSIBLE RECOMMENDATION METADATA ACCORDION UI
    ══════════════════════════════════════════════════════════ */
-.lh-section,
+.section-card {
+    border-radius: 10px;
+    padding: 14px 14px 6px 14px;
+    margin-bottom: 18px;
+}
+
+.section-label {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lh-section {
+    background: #f7fafc;
+    border: 1.5px solid #e2e8f0;
+    transition: all 0.25s ease-in-out;
+}
+
+.lh-section .section-label {
+    color: #4a5568;
+}
+
 .section-card.lh-collapsible {
     transition: all 0.25s ease-in-out;
 }
@@ -1358,6 +1383,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .lh-toggle-header:hover {
     color: #2b6cb0;
+}
+
+.lh-toggle-header:focus-visible {
+    outline: 2px solid #3182ce;
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
 .lh-toggle-indicator {
@@ -1391,4 +1422,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
     margin-bottom: 12px !important;
     padding-bottom: 6px !important;
     border-bottom: 1.5px solid #edf2f7 !important;
+}
+
+@media print {
+    .lh-section,
+    .section-card.lh-collapsible,
+    .lh-toggle-header,
+    .lh-toggle-indicator {
+        display: none !important;
+    }
 }

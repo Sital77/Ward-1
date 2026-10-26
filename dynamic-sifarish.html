@@ -317,32 +317,38 @@
 
             // Add standard metadata fields
             const standardFields = `
-                <div class="form-group">
-                    <label>पत्र संख्या (प.सं.):</label>
-                    <select id="inPatraSankhya" onchange="updateDoc()">
-                        <option value="२०८२/०८३">२०८२/०८३</option>
-                        <option value="२०८३/०८४" selected>२०८३/०८४</option>
-                        <option value="२०८४/०८५">२०८४/०८५</option>
-                        <option value="२०८५/०८६">२०८५/०८६</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>चलानी नं (Chalani No):</label>
-                    <input type="text" id="inChalani" placeholder="उदा: ११५१" oninput="updateDoc()">
-                </div>
-                <div class="row-grid">
+                <div class="section-card lh-section">
+                    <div class="section-label">📄 पत्रसम्बन्धी विवरण</div>
                     <div class="form-group">
-                        <label>मिति (मिति):</label>
-                        <input type="text" id="inMiti" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                        <label>पत्र संख्या (प.सं.):</label>
+                        <select id="inPatraSankhya" onchange="updateDoc()">
+                            <option value="२०८२/०८३">२०८२/०८३</option>
+                            <option value="२०८३/०८४" selected>२०८३/०८४</option>
+                            <option value="२०८४/०८५">२०८४/०८५</option>
+                            <option value="२०८५/०८६">२०८५/०८६</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>ने.स. :</label>
-                        <input type="text" id="inNepalSamvat" oninput="updateDoc()">
+                        <label>चलानी नं (Chalani No):</label>
+                        <input type="text" id="inChalani" placeholder="उदा: ११५१" oninput="updateDoc()">
+                    </div>
+                    <div class="row-grid">
+                        <div class="form-group">
+                            <label>मिति (मिति):</label>
+                            <input type="text" id="inMiti" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                        </div>
+                        <div class="form-group">
+                            <label>ने.स. :</label>
+                            <input type="text" id="inNepalSamvat" oninput="updateDoc()">
+                        </div>
                     </div>
                 </div>
-                <hr style="border:0; border-top:1px solid #edf2f7; margin:20px 0;">
+                <hr style="border:0; border-top:1px solid #edf2f7; margin:16px 0;">
             `;
             container.insertAdjacentHTML('beforeend', standardFields);
+            if (typeof initCollapsibleLetterhead === 'function') {
+                initCollapsibleLetterhead();
+            }
 
             // Add dynamic fields
             placeholders.forEach(p => {

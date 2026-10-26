@@ -970,7 +970,13 @@
         currentTags.forEach(tag => {
             const chip = document.createElement('span');
             chip.className = 'tag-chip';
-            chip.innerHTML = `${tag} <span class="tag-chip-remove" onclick="removeTag('${tag}')">×</span>`;
+            const textNode = document.createTextNode(tag + ' ');
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'tag-chip-remove';
+            removeBtn.textContent = '×';
+            removeBtn.onclick = () => removeTag(tag);
+            chip.appendChild(textNode);
+            chip.appendChild(removeBtn);
             container.insertBefore(chip, input);
         });
     }
@@ -1028,7 +1034,8 @@
         document.getElementById('imageFileInput').value = '';
     }
     function uploadImageBlob(blob, filename) {
-        const ref = storage.ref('recommendation_images/' + Date.now() + '_' + filename);
+        const safeName = (filename || 'image.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const ref = storage.ref('recommendation_images/' + Date.now() + '_' + safeName);
         const task = ref.put(blob);
         const progressEl = document.getElementById('uploadProgress');
         const barEl = document.getElementById('uploadProgressBar');

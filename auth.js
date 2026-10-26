@@ -52,14 +52,18 @@ function createSession(isAdmin, rememberMe) {
 
 function isSessionValid() {
     try {
-        if (localStorage.getItem(AUTH_CONFIG.AUTH_KEY) === 'true') {
-            return true;
-        }
         const sessionStr = localStorage.getItem(AUTH_CONFIG.SESSION_KEY);
-        if (!sessionStr) return false;
+        if (!sessionStr) {
+            const hasAuth = localStorage.getItem(AUTH_CONFIG.AUTH_KEY) === 'true';
+            const user = (localStorage.getItem('sifarish_user') || '').trim();
+            return hasAuth && !!user;
+        }
         const session = JSON.parse(sessionStr);
         if (!session.token || !session.expiresAt) return false;
-        if (Date.now() > session.expiresAt) return false;
+        if (Date.now() > session.expiresAt) {
+            clearSession();
+            return false;
+        }
         return true;
     } catch (e) {
         return false;
@@ -69,17 +73,22 @@ function isSessionValid() {
 function isAdminSession() {
     try {
         const user = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
-        if (user === 'wada1' || user === 'wada3') {
+        // Strict role check: Ordinary ward operators cannot be admin
+        if (user === 'wada1' || user === 'wada3' || !user) {
             if (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true') {
                 localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, 'false');
             }
             return false;
         }
-        if (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true') return true;
         const sessionStr = localStorage.getItem(AUTH_CONFIG.SESSION_KEY);
-        if (!sessionStr) return false;
+        if (!sessionStr) {
+            return user === 'admin' && localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true';
+        }
         const session = JSON.parse(sessionStr);
-        return session.isAdmin === true;
+        if (session.expiresAt && Date.now() > session.expiresAt) {
+            return false;
+        }
+        return (user === 'admin' || session.isAdmin === true) && (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true' || session.isAdmin === true);
     } catch (e) {
         return false;
     }

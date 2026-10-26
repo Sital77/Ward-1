@@ -25,3 +25,12 @@ private_data/
 scratch/
 __pycache__/
 *.pyc
+
+# Environment and secret credentials protection
+.env
+.env.*
+*.env
+*serviceAccount*.json
+*firebase-adminsdk*.json
+credentials.json
+secrets.json
