@@ -56,6 +56,59 @@ function toggleGharDetailRow(rowId, status) {
 window.toggleGharDetailRow = toggleGharDetailRow;
 window.escapeHtml = escapeHtml;
 
+function toggleBatoDetailRow(rowId, status) {
+    const block = document.getElementById(rowId);
+    if (!block) return;
+    const wrapper = block.querySelector('.bato-detail-wrapper');
+    const customInput = block.querySelector('.input-bato-custom');
+    const valMsg = block.querySelector('.bato-validation-msg');
+    const hiddenBato = block.querySelector('.input-bato');
+
+    const isCustom = (status === 'आफैँ हाल्नुहोस्' || status === 'CUSTOM');
+    if (wrapper) {
+        wrapper.style.display = isCustom ? 'block' : 'none';
+    }
+    if (valMsg) {
+        valMsg.style.display = 'none';
+    }
+    if (customInput) {
+        customInput.style.borderColor = '#cbd5e0';
+        if (isCustom && !customInput.value.trim()) {
+            setTimeout(() => {
+                try { customInput.focus(); } catch (e) {}
+            }, 50);
+        }
+    }
+    if (hiddenBato) {
+        if (isCustom) {
+            hiddenBato.value = customInput ? customInput.value.trim() : '';
+        } else {
+            hiddenBato.value = status || '';
+        }
+    }
+}
+window.toggleBatoDetailRow = toggleBatoDetailRow;
+
+function handleBatoCustomInput(rowId) {
+    const block = document.getElementById(rowId);
+    if (!block) return;
+    const customInput = block.querySelector('.input-bato-custom');
+    const valMsg = block.querySelector('.bato-validation-msg');
+    const hiddenBato = block.querySelector('.input-bato');
+
+    if (customInput) {
+        const val = customInput.value.trim();
+        if (val) {
+            if (valMsg) valMsg.style.display = 'none';
+            customInput.style.borderColor = '#cbd5e0';
+        }
+        if (hiddenBato) {
+            hiddenBato.value = val;
+        }
+    }
+}
+window.handleBatoCustomInput = handleBatoCustomInput;
+
 // Controls Abhilekh Popup Modal Overlay Visibility
 function toggleModal(show) {
     const modal = document.getElementById('abhilekhModal');
@@ -82,6 +135,39 @@ function addKittaRow(data = null) {
     const hasGhar = data && data.ghar === 'भएको';
     const noGhar = data && data.ghar === 'नभएको';
     const gharDetail = (data && data.gharDetail) ? data.gharDetail : '';
+
+    // Handle Bato (Road) Type & Custom Description
+    let batoOption = (data && data.batoOption) ? data.batoOption : '';
+    let batoCustom = (data && data.batoCustom) ? data.batoCustom : '';
+    let batoVal = (data && data.bato) ? data.bato : '';
+
+    // If batoOption was not explicitly saved (legacy record)
+    if (!batoOption && batoVal && batoVal !== '-') {
+        if (batoVal === 'पक्की बाटो भएको') {
+            batoOption = 'पक्की बाटो भएको';
+        } else if (batoVal === 'ग्राभेल बाटो भएको') {
+            batoOption = 'ग्राभेल बाटो भएको';
+        } else if (batoVal === 'कच्ची बाटो भएको') {
+            batoOption = 'कच्ची बाटो भएको';
+        } else {
+            batoOption = 'आफैँ हाल्नुहोस्';
+            batoCustom = batoVal;
+        }
+    }
+
+    const isPakki = (batoOption === 'पक्की बाटो भएको');
+    const isGravel = (batoOption === 'ग्राभेल बाटो भएको');
+    const isKachhi = (batoOption === 'कच्ची बाटो भएको');
+    const isCustom = (batoOption === 'आफैँ हाल्नुहोस्' || batoOption === 'CUSTOM');
+
+    let effectiveBato = '';
+    if (isCustom) {
+        effectiveBato = batoCustom;
+    } else if (isPakki || isGravel || isKachhi) {
+        effectiveBato = batoOption;
+    } else if (batoVal && batoVal !== '-') {
+        effectiveBato = batoVal;
+    }
 
     const container = document.getElementById('kittaRowsContainer');
     const rowHtml = `
@@ -111,15 +197,31 @@ function addKittaRow(data = null) {
                 </div>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-                <select class="input-bato" onchange="updateDoc()">
-                    <option value="-">-- बाटोको विवरण --</option>
-                    <option value="पक्की बाटो भएको" ${data && data.bato === 'पक्की बाटो भएको' ? 'selected' : ''}>पक्की बाटो भएको</option>
-                    <option value="ग्राभेल बाटो भएको" ${data && data.bato === 'ग्राभेल बाटो भएको' ? 'selected' : ''}>ग्राभेल बाटो भएको</option>
-                    <option value="माटोको बाटो भएको" ${data && data.bato === 'माटोको बाटो भएको' ? 'selected' : ''}>माटोको बाटो भएको</option>
-                    <option value="कच्ची बाटो भएको" ${data && data.bato === 'कच्ची बाटो भएको' ? 'selected' : ''}>कच्ची बाटो भएको</option>
-                    <option value="कुनै पनि प्रकारको बाटोले नभेट्ने" ${data && data.bato === 'कुनै पनि प्रकारको बाटोले नभेट्ने' ? 'selected' : ''}>कुनै पनि प्रकारको बाटोले नभेट्ने</option>
-                    <option value="बगाएको" ${data && data.bato === 'बगाएको' ? 'selected' : ''}>बगाएको</option>
-                </select>
+                <label style="font-size:0.82rem; font-weight:600; color:#2d3748; margin-bottom:4px; display:block;">बाटोको प्रकार / विवरण :</label>
+                <div class="radio-container bato-radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="bato_p_${rowCounter}" name="batoStatus_${rowCounter}" value="पक्की बाटो भएको" ${isPakki ? 'checked' : ''} onchange="toggleBatoDetailRow('${rowId}', 'पक्की बाटो भएको'); updateDoc();">
+                        <label for="bato_p_${rowCounter}" class="radio-label">पक्की बाटो भएको</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="bato_g_${rowCounter}" name="batoStatus_${rowCounter}" value="ग्राभेल बाटो भएको" ${isGravel ? 'checked' : ''} onchange="toggleBatoDetailRow('${rowId}', 'ग्राभेल बाटो भएको'); updateDoc();">
+                        <label for="bato_g_${rowCounter}" class="radio-label">ग्राभेल बाटो भएको</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="bato_k_${rowCounter}" name="batoStatus_${rowCounter}" value="कच्ची बाटो भएको" ${isKachhi ? 'checked' : ''} onchange="toggleBatoDetailRow('${rowId}', 'कच्ची बाटो भएको'); updateDoc();">
+                        <label for="bato_k_${rowCounter}" class="radio-label">कच्ची बाटो भएको</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="bato_c_${rowCounter}" name="batoStatus_${rowCounter}" value="आफैँ हाल्नुहोस्" ${isCustom ? 'checked' : ''} onchange="toggleBatoDetailRow('${rowId}', 'आफैँ हाल्नुहोस्'); updateDoc();">
+                        <label for="bato_c_${rowCounter}" class="radio-label">आफैँ हाल्नुहोस्</label>
+                    </div>
+                </div>
+                <div class="bato-detail-wrapper" id="bato_detail_wrapper_${rowId}" style="display: ${isCustom ? 'block' : 'none'};">
+                    <label>बाटोको विवरण (आफैँ लेख्नुहोस्) :</label>
+                    <input type="text" class="input-bato-custom" placeholder="उदा: ढलान गरिएको बाटो भएको" value="${escapeHtml(batoCustom)}" oninput="handleBatoCustomInput('${rowId}'); updateDoc();">
+                    <div class="bato-validation-msg" id="bato_val_msg_${rowId}">⚠️ कृपया बाटोको विवरण अनिवार्य लेख्नुहोस् ।</div>
+                </div>
+                <input type="hidden" class="input-bato" value="${escapeHtml(effectiveBato)}">
             </div>
             <input type="text" class="input-remarks" placeholder="कैफियत" value="${data ? escapeHtml(data.remarks || '') : ''}" oninput="updateDoc()" style="margin-top:6px; padding:6px;">
         </div>
@@ -279,7 +381,7 @@ function updateDoc() {
         activeRowIds.forEach((id, index) => {
             const block = document.getElementById(id);
             if (block) {
-                const checkedRadio = block.querySelector('input[type="radio"]:checked');
+                const checkedRadio = block.querySelector('input[type="radio"][name^="gharStatus_"]:checked');
                 const gharVal = checkedRadio ? checkedRadio.value : '-';
                 const detailInput = block.querySelector('.input-ghar-detail');
                 const detailVal = (detailInput && gharVal === 'भएको') ? detailInput.value.trim() : '';
@@ -295,16 +397,34 @@ function updateDoc() {
                     gharCellContent = `नभएको`;
                 }
 
+                // Road (बाटोको प्रकार) extraction
+                let batoCellContent = '-';
+                const checkedBatoRadio = block.querySelector('input[type="radio"][name^="batoStatus_"]:checked');
+                const customBatoInput = block.querySelector('.input-bato-custom');
+                const hiddenBato = block.querySelector('.input-bato');
+
+                if (checkedBatoRadio) {
+                    const choice = checkedBatoRadio.value;
+                    if (choice === 'आफैँ हाल्नुहोस्' || choice === 'CUSTOM') {
+                        const customVal = customBatoInput ? customBatoInput.value.trim() : '';
+                        batoCellContent = customVal ? escapeHtml(customVal) : '-';
+                    } else {
+                        batoCellContent = escapeHtml(choice);
+                    }
+                } else if (hiddenBato && hiddenBato.value && hiddenBato.value !== '-') {
+                    batoCellContent = escapeHtml(hiddenBato.value);
+                }
+
                 const tableRowHtml = `
                     <tr>
                         <td>${toNepaliDigit(index + 1)}</td>
                         <td>${selectedWada}</td>
-                        <td>${escapeHtml(block.querySelector('.input-sit').value || '-')}</td>
-                        <td>${escapeHtml(block.querySelector('.input-kitta').value || '-')}</td>
-                        <td>${escapeHtml(block.querySelector('.input-area').value || '-')}</td>
+                        <td>${escapeHtml(block.querySelector('.input-sit')?.value || '-')}</td>
+                        <td>${escapeHtml(block.querySelector('.input-kitta')?.value || '-')}</td>
+                        <td>${escapeHtml(block.querySelector('.input-area')?.value || '-')}</td>
                         <td>${gharCellContent}</td>
-                        <td>${escapeHtml(block.querySelector('.input-bato').value)}</td>
-                        <td>${escapeHtml(block.querySelector('.input-remarks').value || '-')}</td>
+                        <td>${batoCellContent}</td>
+                        <td>${escapeHtml(block.querySelector('.input-remarks')?.value || '-')}</td>
                     </tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', tableRowHtml);
@@ -318,6 +438,33 @@ async function printAndSaveSystem() {
     const name = document.getElementById('inName').value.trim();
     if (!name) { alert("कृपया जग्गाधनीको नाम अनिवार्य लेख्नुहोस् ।"); return; }
 
+    // Validation for custom road description when Option 4 is selected
+    for (let i = 0; i < activeRowIds.length; i++) {
+        const id = activeRowIds[i];
+        const block = document.getElementById(id);
+        if (!block) continue;
+
+        const checkedBatoRadio = block.querySelector('input[type="radio"][name^="batoStatus_"]:checked');
+        if (checkedBatoRadio && (checkedBatoRadio.value === 'आफैँ हाल्नुहोस्' || checkedBatoRadio.value === 'CUSTOM')) {
+            const customInput = block.querySelector('.input-bato-custom');
+            const customVal = customInput ? customInput.value.trim() : '';
+            if (!customVal) {
+                const wrapper = block.querySelector('.bato-detail-wrapper');
+                if (wrapper) wrapper.style.display = 'block';
+                const valMsg = block.querySelector('.bato-validation-msg');
+                if (valMsg) valMsg.style.display = 'block';
+                if (customInput) {
+                    customInput.style.borderColor = '#e53e3e';
+                    customInput.focus();
+                }
+                const kittaVal = block.querySelector('.input-kitta')?.value?.trim();
+                const kittaSuffix = kittaVal ? ` (कि.नं. ${toNepaliDigit(kittaVal)})` : (activeRowIds.length > 1 ? ` (क्रम ${toNepaliDigit(i + 1)})` : '');
+                alert(`कृपया बाटोको विवरण अनिवार्य लेख्नुहोस्${kittaSuffix} ।`);
+                return;
+            }
+        }
+    }
+
     const chalani = document.getElementById('inChalani').value.trim() || '-';
     const patra = document.getElementById('inPatraSankhya').value;
     const wada = document.getElementById('inWadaNo').value;
@@ -327,10 +474,29 @@ async function printAndSaveSystem() {
     activeRowIds.forEach(id => {
         const block = document.getElementById(id);
         if (block) {
-            const checkedRadio = block.querySelector('input[type="radio"]:checked');
+            const checkedRadio = block.querySelector('input[type="radio"][name^="gharStatus_"]:checked');
             const gharStatus = checkedRadio ? checkedRadio.value : '-';
             const detailInput = block.querySelector('.input-ghar-detail');
             const detailVal = (detailInput && gharStatus === 'भएको') ? detailInput.value.trim() : '';
+
+            const checkedBatoRadio = block.querySelector('input[type="radio"][name^="batoStatus_"]:checked');
+            const customBatoInput = block.querySelector('.input-bato-custom');
+            const customBatoVal = customBatoInput ? customBatoInput.value.trim() : '';
+            const hiddenBato = block.querySelector('.input-bato');
+
+            let finalBato = '-';
+            let batoOptionVal = '';
+            if (checkedBatoRadio) {
+                batoOptionVal = checkedBatoRadio.value;
+                if (batoOptionVal === 'आफैँ हाल्नुहोस्' || batoOptionVal === 'CUSTOM') {
+                    batoOptionVal = 'आफैँ हाल्नुहोस्';
+                    finalBato = customBatoVal || '-';
+                } else {
+                    finalBato = batoOptionVal;
+                }
+            } else if (hiddenBato && hiddenBato.value && hiddenBato.value !== '-') {
+                finalBato = hiddenBato.value;
+            }
 
             kittaRecords.push({
                 sit: block.querySelector('.input-sit').value,
@@ -338,7 +504,9 @@ async function printAndSaveSystem() {
                 area: block.querySelector('.input-area').value,
                 ghar: gharStatus,
                 gharDetail: detailVal,
-                bato: block.querySelector('.input-bato').value,
+                bato: finalBato,
+                batoOption: batoOptionVal,
+                batoCustom: customBatoVal,
                 remarks: block.querySelector('.input-remarks').value
             });
         }
@@ -471,10 +639,10 @@ function editFromDB(id) {
     document.getElementById('inSabikWada').value = rec.sabikWada;
     document.getElementById('inName').value = rec.name;
     document.getElementById('inSignAuthority').value = rec.signAuth;
+    document.getElementById('inCustomSignName').value = rec.customSignName || '';
+    document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
     if (rec.signAuth === 'CUSTOM') {
         document.getElementById('customSignBox').style.display = 'grid';
-        document.getElementById('inCustomSignName').value = rec.customSignName || '';
-        document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
     } else {
         document.getElementById('customSignBox').style.display = 'none';
     }
@@ -488,10 +656,33 @@ function editFromDB(id) {
 
     document.getElementById('kittaRowsContainer').innerHTML = '';
     activeRowIds = [];
-    rec.kittas.forEach(kData => { addKittaRow(kData); });
+    if (Array.isArray(rec.kittas) && rec.kittas.length > 0) {
+        rec.kittas.forEach(kData => { addKittaRow(kData); });
+    } else if (rec.kittas) {
+        rec.kittas.forEach(kData => { addKittaRow(kData); });
+    } else {
+        addKittaRow(rec);
+    }
     updateDoc();
     toggleModal(false);
 }
+
+function resetForm() {
+    document.getElementById('editRecordIndex').value = '';
+    document.getElementById('formMainTitle').innerText = '📝 सिफारिस प्रविष्टि';
+    document.getElementById('inChalani').value = '';
+    document.getElementById('inName').value = '';
+    document.getElementById('inCustomSignName').value = '';
+    document.getElementById('inCustomSignTitle').value = '';
+    setSelectedLandUseZone('NONE');
+
+    document.getElementById('kittaRowsContainer').innerHTML = '';
+    activeRowIds = [];
+    addKittaRow();
+    initializeAutomaticDate();
+    updateDoc();
+}
+window.resetForm = resetForm;
 
 // Deletes the Record Entry Permanently
 async function deleteFromDB(id) {
@@ -680,5 +871,8 @@ window.addEventListener('templateInjected', function() {
     initializeAutomaticDate();
     if (typeof window.toggleLandUseSection === 'function') {
         window.toggleLandUseSection();
+    }
+    if (typeof updateDoc === 'function') {
+        updateDoc();
     }
 });

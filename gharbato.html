@@ -74,7 +74,10 @@
     <div class="input-panel">
         <div class="header-action-container">
             <h2 class="panel-title" id="formMainTitle">📝 सिफारिस प्रविष्टि</h2>
-            <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-new" id="btnNewForm" onclick="resetForm()" style="background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; padding: 7px 12px; font-size: 0.88rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s;">➕ नयाँ</button>
+                <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+            </div>
         </div>
 
         <input type="hidden" id="editRecordIndex" value="">
