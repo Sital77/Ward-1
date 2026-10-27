@@ -262,6 +262,79 @@ check("Payment period uses plain neutral background",
 check("Overly colorful #c05621 removed from payment period section",
       "#c05621" not in test_html)
 
+# ── GROUP 11: Signature Sliders, Bank Spacing, Subject Typography & Specimen Box ──
+print("\n[TEST GROUP 11] Signature Sliders, Bank Spacing, Subject Typography & Specimen Box:")
+
+# 1. Signature Sliders UI & Logic
+check("Section header 'हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्' is present in HTML",
+      "हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्" in test_html)
+check("Secretary position slider (sliderSecPosY) exists in HTML",
+      'id="sliderSecPosY"' in test_html)
+check("Chairperson position slider (sliderChairPosY) exists in HTML",
+      'id="sliderChairPosY"' in test_html)
+check("Secretary slider has label 'वडा सचिवको हस्ताक्षर स्थान (माथि/तल)'",
+      "वडा सचिवको हस्ताक्षर स्थान (माथि/तल)" in test_html)
+check("Chairperson slider has label 'वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल)'",
+      "वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल)" in test_html)
+check("Badge displays badgeSecPosY and badgeChairPosY exist with mm unit",
+      'id="badgeSecPosY"' in test_html and 'id="badgeChairPosY"' in test_html and "0 mm" in test_html)
+check("Reset controls exist for both individual officers and all",
+      "resetSecPosition" in test_html and "resetChairPosition" in test_html and "resetOfficerPositions" in test_html)
+check("JavaScript defines onSecPosYChange and onChairPosYChange",
+      "function onSecPosYChange" in test_js and "function onChairPosYChange" in test_js)
+check("JavaScript defines reset functions for officer positions",
+      "function resetOfficerPositions" in test_js and "function resetSecPosition" in test_js and "function resetChairPosition" in test_js)
+check("CSS applies independent transforms using CSS variables to secretary and chairperson",
+      "#p1SecSignatureBlock" in test_html and "--sec-sig-offset-y" in test_html and
+      "#p1ChairSignatureBlock" in test_html and "--chair-sig-offset-y" in test_html)
+check("Print CSS includes independent transform rules for both officers",
+      "@media print" in test_html and
+      "transform: translateY(var(--sec-sig-offset-y" in test_html and
+      "transform: translateY(var(--chair-sig-offset-y" in test_html)
+check("secretaryPosY and chairpersonPosY are saved with recommendation record",
+      "secretaryPosY:" in test_js and "chairpersonPosY:" in test_js)
+check("secretaryPosY and chairpersonPosY are restored when editing a record",
+      "rec.secretaryPosY" in test_js and "rec.chairpersonPosY" in test_js)
+check("resetForm resets officer slider positions to default",
+      "resetOfficerPositions()" in test_js)
+
+# 2. Bank Recipient Spacing
+check("Bank recipient has dedicated bank-name-line and bank-branch-line",
+      "bank-name-line" in test_html and "bank-branch-line" in test_html)
+check("Bank recipient has gap after bank name before branch line",
+      ".p1-bank-recipient .bank-name-line" in test_html and "margin-bottom: 6px" in test_html)
+check("Bank recipient block has 2-3 spacing units (24px) margin-bottom before subject",
+      ".p1-bank-recipient" in test_html and "margin-bottom: 24px" in test_html)
+
+# 3. Subject Typography & Font Weight Decoupling
+check("Subject label 'विषय:' is bold (font-weight: 700)",
+      ".p1-subject-wrapper .subject-label" in test_html and "font-weight: 700" in test_html)
+check("Subject line text has regular font-weight (font-weight: 400)",
+      ".p1-subject-wrapper .subject-line" in test_html and "font-weight: 400" in test_html and
+      ".p1-subject-wrapper #lblSubject" in test_html)
+check("Subject line has no underline or bottom border",
+      "text-decoration: none !important" in test_html and "border-bottom: none !important" in test_html)
+check("Subject wrapper has consistent gap below subject before body",
+      ".p1-subject-wrapper" in test_html and "margin: 14px 0 18px 0" in test_html)
+
+# 4. Tapasil and Specimen Signature Box Layout
+check("Tapasil and Specimen Signature are arranged in a side-by-side flex row",
+      ".tapasil-specimen-row" in test_html and "display: flex" in test_html and
+      "justify-content: space-between" in test_html and "align-items: flex-start" in test_html)
+check("Tapasil heading remains left-aligned",
+      ".p1-tapasil-title" in test_html and "text-align: left" in test_html)
+check("Specimen signature card is on the right side of tapasil",
+      "specimen-signature-container" in test_html and "specimen-signature-card" in test_html and
+      "align-items: flex-end" in test_html)
+check("Specimen signature box is clearly labelled 'नमुना दस्तखत'",
+      "specimen-signature-title" in test_html and "नमुना दस्तखत" in test_html)
+check("Specimen signature card has bordered rectangle and dedicated signing space",
+      ".specimen-signature-card" in test_html and "border: 1.5px solid #000000" in test_html and
+      ".specimen-signature-box" in test_html and "height: 18mm" in test_html)
+check("Specimen signature row preserves all recipient detail labels on left",
+      "lblP1TblBeneficiaryName" in test_html and "lblP1TblCardNo" in test_html and
+      "lblP1TblAccountNo" in test_html and "lblP1TblGuardianName" in test_html)
+
 print("\n" + "=" * 80)
 print(f"TEST RESULTS: {passed} PASSED, {failed} FAILED")
 print("=" * 80)

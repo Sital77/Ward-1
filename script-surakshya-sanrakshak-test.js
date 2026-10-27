@@ -532,6 +532,54 @@ function toggleCustomSign() {
     }
 }
 
+// ── Officer Signature Vertical Position Controls ──
+function onSecPosYChange(val) {
+    const v = parseInt(val, 10) || 0;
+    const badge = document.getElementById('badgeSecPosY');
+    if (badge) badge.textContent = `${v} mm`;
+    const slider = document.getElementById('sliderSecPosY');
+    if (slider && slider.value !== String(v)) slider.value = v;
+
+    const block = document.getElementById('p1SecSignatureBlock');
+    if (block) {
+        block.style.setProperty('--sec-sig-offset-y', `${v}mm`);
+        block.style.transform = `translateY(${v}mm)`;
+    }
+    document.documentElement.style.setProperty('--sec-sig-offset-y', `${v}mm`);
+    const page1 = document.getElementById('page1');
+    if (page1) page1.style.setProperty('--sec-sig-offset-y', `${v}mm`);
+}
+
+function onChairPosYChange(val) {
+    const v = parseInt(val, 10) || 0;
+    const badge = document.getElementById('badgeChairPosY');
+    if (badge) badge.textContent = `${v} mm`;
+    const slider = document.getElementById('sliderChairPosY');
+    if (slider && slider.value !== String(v)) slider.value = v;
+
+    const block = document.getElementById('p1ChairSignatureBlock');
+    if (block) {
+        block.style.setProperty('--chair-sig-offset-y', `${v}mm`);
+        block.style.transform = `translateY(${v}mm)`;
+    }
+    document.documentElement.style.setProperty('--chair-sig-offset-y', `${v}mm`);
+    const page1 = document.getElementById('page1');
+    if (page1) page1.style.setProperty('--chair-sig-offset-y', `${v}mm`);
+}
+
+function resetSecPosition() {
+    onSecPosYChange(0);
+}
+
+function resetChairPosition() {
+    onChairPosYChange(0);
+}
+
+function resetOfficerPositions() {
+    resetSecPosition();
+    resetChairPosition();
+}
+
 // ── Print & Save Workflow (Normalized Single Record) ──
 async function printAndSaveSystem() {
     const beneficiaryName = document.getElementById('inBeneficiaryName').value.trim();
@@ -606,6 +654,8 @@ async function printAndSaveSystem() {
             guardianCitDistrict:  document.getElementById('inGuardianCitDistrict').value.trim() || 'झापा',
             guardianNid:          document.getElementById('inGuardianNid').value.trim(),
             showSecretary:        document.getElementById('chkShowSecretary') ? document.getElementById('chkShowSecretary').checked : true,
+            secretaryPosY:        parseInt(document.getElementById('sliderSecPosY') ? document.getElementById('sliderSecPosY').value : 0, 10) || 0,
+            chairpersonPosY:      parseInt(document.getElementById('sliderChairPosY') ? document.getElementById('sliderChairPosY').value : 0, 10) || 0,
             secretarySelect:      document.getElementById('inSecretarySelect').value,
             customSecretaryName:  document.getElementById('inCustomSecretaryName').value.trim(),
             customSecretaryTitle: document.getElementById('inCustomSecretaryTitle').value.trim(),
@@ -696,6 +746,7 @@ function resetForm() {
     const chkSec = document.getElementById('chkShowSecretary');
     if (chkSec) chkSec.checked = true;
     toggleSecretaryVisibility();
+    resetOfficerPositions();
 
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'none';
@@ -887,6 +938,11 @@ function loadRecordForEdit(id) {
         }
         toggleCustomSign();
     }
+
+    const secPosY = (rec.secretaryPosY !== undefined && rec.secretaryPosY !== null) ? rec.secretaryPosY : 0;
+    onSecPosYChange(secPosY);
+    const chairPosY = (rec.chairpersonPosY !== undefined && rec.chairpersonPosY !== null) ? rec.chairpersonPosY : 0;
+    onChairPosYChange(chairPosY);
 
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'inline-block';
@@ -1146,6 +1202,7 @@ window.addEventListener('DOMContentLoaded', () => {
     populateFiscalYearDropdown();
     initDefaultDate();
     toggleSecretaryVisibility();
+    resetOfficerPositions();
     switchPreviewPage(1);
     updateDoc();
 });

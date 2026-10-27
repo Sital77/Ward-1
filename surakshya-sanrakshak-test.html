@@ -102,27 +102,50 @@
 
         /* Page 1 Bank Recommendation Typography & Spacing */
         .p1-bank-recipient {
-            margin-top: 8px;
-            margin-bottom: 14px;
-            line-height: 1.45;
+            margin-top: 10px !important;
+            margin-bottom: 24px !important;
             font-size: var(--doc-font-size, 13pt);
             color: #000000;
         }
 
+        .p1-bank-recipient .bank-name-line {
+            margin-bottom: 6px !important;
+            line-height: 1.45;
+        }
+
+        .p1-bank-recipient .bank-branch-line {
+            line-height: 1.45;
+        }
+
         .p1-subject-wrapper {
-            margin: 12px 0 16px 0;
+            margin: 14px 0 18px 0;
             text-align: center;
+            text-decoration: none !important;
+            border-bottom: none !important;
         }
 
         .p1-subject-wrapper .subject-line {
             font-size: var(--subject-font-size, 14.5pt);
-            font-weight: 700;
+            font-weight: 400 !important;
             line-height: 1.4;
+            text-decoration: none !important;
+            border-bottom: none !important;
         }
 
         .p1-subject-wrapper .subject-label {
-            color: #e51a23;
-            margin-right: 4px;
+            font-weight: 700 !important;
+            color: #e51a23 !important;
+            margin-right: 6px;
+            text-decoration: none !important;
+            border-bottom: none !important;
+        }
+
+        .p1-subject-wrapper #lblSubject {
+            font-weight: 400 !important;
+            font-size: var(--subject-font-size, 14.5pt);
+            color: #000000 !important;
+            text-decoration: none !important;
+            border-bottom: none !important;
         }
 
         .p1-body-para {
@@ -134,9 +157,26 @@
             color: #000000;
         }
 
+        /* Tapasil and Specimen Signature Row */
+        .tapasil-specimen-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 10px;
+            margin-bottom: 12px;
+            width: 100%;
+            gap: 16px;
+        }
+
+        .tapasil-specimen-row .beneficiary-summary {
+            flex: 1 1 auto;
+            text-align: left;
+            margin: 0;
+        }
+
         .p1-tapasil-title {
             text-align: left;
-            margin: 8px 0 6px 0;
+            margin: 0 0 6px 0;
             font-weight: 700;
             text-decoration: underline;
             font-size: var(--doc-font-size, 13pt);
@@ -146,33 +186,74 @@
         .p1-tapasil-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 0;
             font-size: var(--table-font-size, 13pt);
             color: #000000;
         }
 
         .p1-tapasil-table td {
-            padding: 3px 0;
+            padding: 2.5px 0;
             vertical-align: top;
             font-size: var(--table-font-size, 13pt);
-            line-height: 1.5;
+            line-height: 1.45;
         }
 
         .p1-tapasil-table td.col-label {
-            width: 32%;
+            width: 44%;
             font-weight: 600;
-            padding-right: 12px;
+            padding-right: 8px;
+            white-space: nowrap;
         }
 
         .p1-tapasil-table td.col-val {
-            width: 68%;
+            width: 56%;
+        }
+
+        /* Sample Signature Box (नमुना दस्तखत - Right Column) */
+        .specimen-signature-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            flex: 0 0 auto;
+            margin-top: 2px;
+        }
+
+        .specimen-signature-card {
+            border: 1.5px solid #000000;
+            border-radius: 4px;
+            padding: 6px 12px 8px 12px;
+            width: 48mm;
+            background: #ffffff;
+            text-align: center;
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .specimen-signature-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #000000;
+            border-bottom: 1px dashed #718096;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+            text-align: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .specimen-signature-box {
+            height: 18mm;
+            background: #ffffff;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .p1-signatures-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-top: 26px;
+            margin-top: 24px;
             padding-bottom: 6px;
             width: 100%;
         }
@@ -180,6 +261,16 @@
         .p1-sig-block {
             text-align: center;
             min-width: 190px;
+            position: relative;
+            transition: transform 0.1s ease;
+        }
+
+        #p1SecSignatureBlock {
+            transform: translateY(var(--sec-sig-offset-y, 0mm));
+        }
+
+        #p1ChairSignatureBlock {
+            transform: translateY(var(--chair-sig-offset-y, 0mm));
         }
 
         .p1-sig-space {
@@ -369,6 +460,39 @@
 
             body.hide-p1-secretary #p1ChairSignatureBlock {
                 margin-left: auto !important;
+            }
+
+            /* Vertical Position Slider Print Rules */
+            #p1SecSignatureBlock {
+                transform: translateY(var(--sec-sig-offset-y, 0mm)) !important;
+            }
+            #p1ChairSignatureBlock {
+                transform: translateY(var(--chair-sig-offset-y, 0mm)) !important;
+            }
+            /* Page 1 Bank Recipient Print Rules */
+            .p1-bank-recipient {
+                margin-top: 10px !important;
+                margin-bottom: 24px !important;
+            }
+            .p1-bank-recipient .bank-name-line {
+                margin-bottom: 6px !important;
+            }
+
+            /* Subject Typography Print Rules */
+            .p1-subject-wrapper,
+            .p1-subject-wrapper .subject-line,
+            .p1-subject-wrapper .subject-line * {
+                text-decoration: none !important;
+                border-bottom: none !important;
+            }
+            .p1-subject-wrapper .subject-label {
+                font-weight: 700 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .p1-subject-wrapper #lblSubject {
+                font-weight: 400 !important;
+                text-decoration: none !important;
             }
 
             /* Single-page print filtering */
@@ -671,7 +795,7 @@
             </div>
 
             <!-- Chairperson Configuration (Right Signature on Page 1 & Page 3) -->
-            <div class="form-group" style="background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
+            <div class="form-group" style="background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px; margin-bottom: 12px;">
                 <label style="color: #c53030; font-weight: 700;">वडा अध्यक्ष (दायाँ हस्ताक्षर):</label>
                 <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
                     <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
@@ -685,6 +809,38 @@
                 <div id="customSignBox" style="display:none; margin-top:8px; gap:8px;" class="row-grid">
                     <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
                     <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- ── Vertical Position Adjustment Section (हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्) ── -->
+            <div class="sig-position-adjust-container" style="background: #ffffff; border: 1.5px solid #cbd5e0; border-radius: 8px; padding: 12px; margin-top: 8px;">
+                <div style="font-weight: 700; color: #2d3748; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📐 हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्</span>
+                    <button type="button" onclick="resetOfficerPositions()" style="background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 3px 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: #4a5568;" title="दुवै स्थान रिसेट गर्नुस्">↺ सबै रिसेट</button>
+                </div>
+
+                <!-- Secretary Vertical Slider -->
+                <div style="margin-bottom: 10px; background: #f7fafc; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label for="sliderSecPosY" style="font-size: 0.84rem; font-weight: 600; color: #2b6cb0; cursor: pointer;">वडा सचिवको हस्ताक्षर स्थान (माथि/तल):</label>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="badgeSecPosY" style="font-size: 0.82rem; font-weight: 700; color: #2b6cb0; background: #ebf8ff; padding: 2px 6px; border-radius: 4px; border: 1px solid #bee3f8; min-width: 45px; text-align: center;">0 mm</span>
+                            <button type="button" onclick="resetSecPosition()" style="background: none; border: none; color: #718096; cursor: pointer; font-size: 0.8rem; font-weight: 700;" title="सचिवको स्थान रिसेट">↺</button>
+                        </div>
+                    </div>
+                    <input type="range" id="sliderSecPosY" min="-30" max="50" value="0" step="1" oninput="onSecPosYChange(this.value)" style="width: 100%; cursor: pointer;">
+                </div>
+
+                <!-- Chairperson Vertical Slider -->
+                <div style="background: #fff5f5; padding: 8px 10px; border-radius: 6px; border: 1px solid #fed7d7;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label for="sliderChairPosY" style="font-size: 0.84rem; font-weight: 600; color: #c53030; cursor: pointer;">वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल):</label>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="badgeChairPosY" style="font-size: 0.82rem; font-weight: 700; color: #c53030; background: #fff5f5; padding: 2px 6px; border-radius: 4px; border: 1px solid #feb2b2; min-width: 45px; text-align: center;">0 mm</span>
+                            <button type="button" onclick="resetChairPosition()" style="background: none; border: none; color: #718096; cursor: pointer; font-size: 0.8rem; font-weight: 700;" title="अध्यक्षको स्थान रिसेट">↺</button>
+                        </div>
+                    </div>
+                    <input type="range" id="sliderChairPosY" min="-30" max="50" value="0" step="1" oninput="onChairPosYChange(this.value)" style="width: 100%; cursor: pointer;">
                 </div>
             </div>
         </div>
@@ -792,13 +948,11 @@
                     </div>
                 </div>
 
-                <!-- DOM Sentinel for compatibility -->
-                <div class="header-red-line" style="display: none;"></div>
 
                 <!-- Bank Recipient -->
-                <div class="bank-receiver p1-bank-recipient">
-                    श्री <span id="lblBankName">कृषि विकास बैंक लिमिटेड</span><br>
-                    <span id="lblBankBranch">शाखा कार्यालय, गौरादह, झापा</span> ।
+                <div class="p1-bank-recipient">
+                    <div class="bank-name-line">श्री <span id="lblBankName">कृषि विकास बैंक लिमिटेड</span></div>
+                    <div class="bank-branch-line"><span id="lblBankBranch">शाखा कार्यालय, गौरादह, झापा</span> ।</div>
                 </div>
 
                 <!-- Subject -->
@@ -814,33 +968,44 @@
                     प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. १ मा स्थायी बसोबास गर्ने <strong id="lblP1GuardianName">..................</strong> ले आफ्नो <strong id="lblP1Relation">छोरा</strong> <strong id="lblP1BeneficiaryName">..................</strong> सामाजिक सुरक्षा भत्ता प्राप्त गर्ने लाभग्राही भएको र <span id="lblP1Condition">वृद्ध तथा अशक्त भई हिँडडुल गर्न असमर्थ</span> का कारण बैंकमा उपस्थित भई सामाजिक सुरक्षा भत्ताबापत खातामा जम्मा भएको रकम निकाल्न कठिनाइ हुने भनी दिएको निवेदन सम्बन्धमा आवश्यक विवरण तथा कागजात जाँच गर्दा निजको रेखदेख तथा हेरचाह <strong id="lblP1GuardianName2">..................</strong> ले गर्दै आएको देखिएकोले, यस वडा कार्यालयबाट जारी गरिएको अनुसूची–२ (संरक्षक सिफारिस नं. <strong id="lblP1RecNo">१००</strong>) मा उल्लेखित विवरणअनुसार निज लाभग्राहीको खातामा आ.व. <span id="lblP1AY">२०८३/०८४</span> को <strong id="lblP1Quarter">प्रथम त्रैमासिक</strong> बापत जम्मा भएको सामाजिक सुरक्षा भत्ताको रकम नियमानुसार निजको संरक्षकलाई उपलब्ध गराइदिनुहुन सिफारिस गरिन्छ ।
                 </div>
 
-                <!-- Tapasil Summary Block -->
-                <div class="beneficiary-summary" style="margin-top: 8px; margin-bottom: 12px; width: 100%;">
-                    <div class="tapsil-title p1-tapasil-title">
-                        तपसिल :
+                <!-- Tapasil and Specimen Signature Row (तपसिल बायाँ, नमुना दस्तखत दायाँ) -->
+                <div class="tapasil-specimen-row">
+                    <!-- Left: Beneficiary Details Summary (तपसिल) -->
+                    <div class="beneficiary-summary" id="beneficiarySummaryBlock">
+                        <div class="tapsil-title p1-tapasil-title">
+                            तपसिल :
+                        </div>
+                        <table class="p1-tapasil-table">
+                            <tr>
+                                <td class="col-label">लाभग्राहीको नाम, थर :</td>
+                                <td class="col-val"><strong id="lblP1TblBeneficiaryName">..................</strong></td>
+                            </tr>
+                            <tr id="rowP1TblBeneficiaryCit">
+                                <td class="col-label">ना.प्र.नं. :</td>
+                                <td class="col-val"><span id="lblP1TblBeneficiaryCit">-</span></td>
+                            </tr>
+                            <tr>
+                                <td class="col-label">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
+                                <td class="col-val"><strong id="lblP1TblCardNo">..................</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="col-label">बैङ्क खाता नं. :</td>
+                                <td class="col-val"><strong id="lblP1TblAccountNo">..................</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="col-label">संरक्षकको नाम, थर :</td>
+                                <td class="col-val"><strong id="lblP1TblGuardianName">..................</strong></td>
+                            </tr>
+                        </table>
                     </div>
-                    <table class="p1-tapasil-table">
-                        <tr>
-                            <td class="col-label">लाभग्राहीको नाम, थर :</td>
-                            <td class="col-val"><strong id="lblP1TblBeneficiaryName">..................</strong></td>
-                        </tr>
-                        <tr id="rowP1TblBeneficiaryCit">
-                            <td class="col-label">ना.प्र.नं. :</td>
-                            <td class="col-val"><span id="lblP1TblBeneficiaryCit">-</span></td>
-                        </tr>
-                        <tr>
-                            <td class="col-label">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
-                            <td class="col-val"><strong id="lblP1TblCardNo">..................</strong></td>
-                        </tr>
-                        <tr>
-                            <td class="col-label">बैङ्क खाता नं. :</td>
-                            <td class="col-val"><strong id="lblP1TblAccountNo">..................</strong></td>
-                        </tr>
-                        <tr>
-                            <td class="col-label">संरक्षकको नाम, थर :</td>
-                            <td class="col-val"><strong id="lblP1TblGuardianName">..................</strong></td>
-                        </tr>
-                    </table>
+
+                    <!-- Right: Sample Signature Box (नमुना दस्तखत) -->
+                    <div class="specimen-signature-container">
+                        <div class="specimen-signature-card" id="specimenSigCard">
+                            <div class="specimen-signature-title">नमुना दस्तखत</div>
+                            <div class="specimen-signature-box" id="specimenSigBox"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

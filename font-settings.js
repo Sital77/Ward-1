@@ -293,8 +293,8 @@
         setTimeout(resolve, 3500); // 3.5s fallback timeout
     });
 
-    // yojana-bank-sifarish, bank-sifarish, surakshya-bhatta-sifarish, and yojana-tippani have their own complete JS logic - skip template loading entirely
-    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish' || templateId === 'yojana-tippani');
+    // yojana-bank-sifarish, bank-sifarish, surakshya-bhatta-sifarish, surakshya-sanrakshak-test, and yojana-tippani have their own complete JS logic - skip template loading entirely
+    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish' || templateId === 'surakshya-sanrakshak-test' || templateId === 'yojana-tippani');
 
     if (templateId && !isDynamic && !skipTemplateLoad) {
         // Intercept window.onload assigner
