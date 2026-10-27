@@ -53,6 +53,7 @@
         'apangata-sifarish': { collection: 'apangataRecords', title: 'अपाङ्गता परिचयपत्र सिफारिस' },
         'abhilekh-pramanit': { collection: 'abhilekhRecords', title: 'अभिलेख प्रमाणित' },
         'surakshya-bhatta-sifarish': { collection: 'surakshyaBhattaRecords', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस' },
+        'surakshya-sanrakshak-test': { collection: 'surakshyaSanrakshakTestRecords', title: 'संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट' },
         'yojana-bank-sifarish': { collection: 'yojanaBankRecords', title: 'योजनाको बैंक खाता सिफारिस' },
         'yojana-tippani': { collection: 'yojanaTippaniRecords', title: 'वडा स्तरीय योजना टिप्पणी-आदेश' },
         'bank-sifarish': { collection: 'bankRecords', title: 'सामाजिक सुरक्षा बैंक सिफारिस' },
@@ -272,6 +273,7 @@
     else if (path.includes('suchana-tans.html')) templateId = 'suchana-tans';
     else if (path.includes('abhilekh-pramanit.html')) templateId = 'abhilekh-pramanit';
     else if (path.includes('surakshya-bhatta-sifarish.html')) templateId = 'surakshya-bhatta-sifarish';
+    else if (path.includes('surakshya-sanrakshak-test.html')) templateId = 'surakshya-sanrakshak-test';
     else if (path.includes('yojana-bank-sifarish.html')) templateId = 'yojana-bank-sifarish';
     else if (path.includes('yojana-tippani.html')) templateId = 'yojana-tippani';
     else if (path.includes('bank-sifarish.html')) templateId = 'bank-sifarish';
@@ -791,6 +793,7 @@
                 'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
                 'abhilekh-pramanit': 'अभिलेख प्रमाणित',
                 'surakshya-bhatta-sifarish': 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस',
+                'surakshya-sanrakshak-test': 'संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट',
                 'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
                 'yojana-samjhauta': 'योजना सम्झौता सिफारिस',
                 'yojana-tippani': 'वडा स्तरीय योजना टिप्पणी-आदेश',
@@ -814,6 +817,7 @@
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
                 'surakshya-bhatta-sifarish': 'व्यक्तिगत प्रमाणित',
+                'surakshya-sanrakshak-test': 'व्यक्तिगत प्रमाणित',
                 'yojana-bank-sifarish': 'कार्यालय/प्रशासन',
                 'yojana-samjhauta': 'कार्यालय/प्रशासन',
                 'yojana-tippani': 'कार्यालय/प्रशासन',

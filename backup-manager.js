@@ -40,6 +40,7 @@
         'abibahitRecords',
         'apangataRecords',
         'surakshyaBhattaRecords',
+        'surakshyaSanrakshakTestRecords',
         'arkoBibahaRecords',
         'bankRecords'
     ];

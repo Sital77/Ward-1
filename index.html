@@ -2101,6 +2101,7 @@
             'apangata-sifarish': 'अपाङ्गता परिचयपत्र सिफारिस',
             'abhilekh-pramanit': 'अभिलेख प्रमाणित',
             'surakshya-bhatta-sifarish': 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस',
+            'surakshya-sanrakshak-test': 'संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट',
             'bank-sifarish': 'सामाजिक सुरक्षा बैंक सिफारिस',
             'yojana-bank-sifarish': 'योजनाको बैंक खाता सिफारिस',
             'yojana-samjhauta': 'योजना सम्झौता सिफारिस',
@@ -2124,6 +2125,7 @@
                 'apangata-sifarish': 'व्यक्तिगत प्रमाणित',
                 'abhilekh-pramanit': 'व्यक्तिगत प्रमाणित',
                 'surakshya-bhatta-sifarish': 'व्यक्तिगत प्रमाणित',
+                'surakshya-sanrakshak-test': 'व्यक्तिगत प्रमाणित',
                 'bank-sifarish': 'व्यक्तिगत प्रमाणित',
                 'aamdani-pramanit': 'व्यक्तिगत प्रमाणित',
                 'bargikaran-sifarish': 'जग्गा सम्बन्धि',
@@ -2182,7 +2184,7 @@
             'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran',
             'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit',
             'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit',
-            'surakshya-bhatta-sifarish', 'bank-sifarish', 'yojana-bank-sifarish',
+            'surakshya-bhatta-sifarish', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish',
             'yojana-samjhauta', 'nabalak-parichayapatra'
         ];
 
@@ -2191,6 +2193,15 @@
             snapshot.forEach(doc => {
                 existingIds.push(doc.id);
                 const data = doc.data();
+
+                // Clean up broken/obsolete marriage templates from Firestore
+                const isObsoleteMarriageDoc = (doc.id && doc.id.includes('bibaha') && doc.id.includes('nagareko')) ||
+                    (doc.id && doc.id.startsWith('bihe-')) || (data.title && (data.title.includes('बिहे नगरेको') || data.title.includes('विवाह नगरेको')));
+                if (isObsoleteMarriageDoc) {
+                    db.collection('sifarish_templates').doc(doc.id).delete().catch(() => {});
+                    return;
+                }
+
                 // Auto-correct any legacy English titles in Firestore
                 if (nepaliTitleMap[doc.id] && data.title !== nepaliTitleMap[doc.id]) {
                     db.collection('sifarish_templates').doc(doc.id).update({
@@ -2236,6 +2247,7 @@
             'apangata-sifarish': '♿',
             'abhilekh-pramanit': '🗄️',
             'surakshya-bhatta-sifarish': '🛡️',
+            'surakshya-sanrakshak-test': '🛡️',
             'bank-sifarish': '🏦',
             'nabalak-parichayapatra': '👶',
             'jaggadhani-pratilipi': '📜',
@@ -2255,6 +2267,7 @@
             'apangata-sifarish': '#fbd38d',
             'abhilekh-pramanit': '#b2f5ea',
             'surakshya-bhatta-sifarish': '#bee3f8',
+            'surakshya-sanrakshak-test': '#319795',
             'bank-sifarish': '#cbd5e0',
             'nabalak-parichayapatra': '#feb2b2',
             'jaggadhani-pratilipi': '#fbd38d',
@@ -2286,6 +2299,7 @@
             { id: 'apangata-sifarish', title: 'अपाङ्गता परिचयपत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'abhilekh-pramanit', title: 'अभिलेख प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'surakshya-bhatta-sifarish', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'surakshya-sanrakshak-test', title: 'संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'bank-sifarish', title: 'सामाजिक सुरक्षा बैंक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'nabalak-parichayapatra', title: 'नाबालक परिचय पत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'jaggadhani-pratilipi', title: 'धनीपूर्जा प्रतिलिपि सिफारिस', category: 'जग्गा सम्बन्धि', status: 'Active' },
@@ -2311,10 +2325,15 @@
                 else mergedMap.set(item.id, item);
             });
 
-            let templates = Array.from(mergedMap.values()).filter(t => t.status === 'Active' || t.status === 'Published' || !t.status);
+            // Filter active templates and safely exclude broken obsolete modules
+            let templates = Array.from(mergedMap.values()).filter(t => {
+                if (t.id && (t.id.startsWith('bihe-') || (t.id.includes('bibaha') && t.id.includes('nagareko')))) return false;
+                if (t.title && (t.title.includes('बिहे नगरेको') || t.title.includes('विवाह नगरेको'))) return false;
+                return t.status === 'Active' || t.status === 'Published' || !t.status;
+            });
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -2331,9 +2350,9 @@
                     const displayName = nepaliTitleMap[t.id] || (t.title && !/^[a-zA-Z0-9_\-\s]+$/.test(t.title) ? t.title : (nepaliTitleMap[t.id] || t.title));
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
                     let targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
-                    if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta' || t.id === 'yojana-tippani') {
+                    if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta' || t.id === 'yojana-tippani' || t.id === 'surakshya-sanrakshak-test') {
                         targetUrl += "?v=" + new Date().getTime();
                     }
 
