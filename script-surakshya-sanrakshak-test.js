@@ -428,6 +428,8 @@ function updateDoc() {
     setTxt('lblP3ChairName', chairName);
     setTxt('lblP3ChairTitle', `(${chairTitle})`);
     setTxt('lblP3ValidityAY', fiscalYear);
+
+    toggleSecretaryVisibility();
 }
 
 // ── Preview Tab Switching ──
@@ -488,6 +490,27 @@ function handleRelationChange() {
     const box = document.getElementById('customRelationGroup');
     if (box) {
         box.style.display = (sel === 'अन्य') ? 'block' : 'none';
+    }
+}
+
+// ── Ward Secretary Signature Toggle (वडा सचिवको हस्ताक्षर देखाउने/लुकाउने) ──
+function toggleSecretaryVisibility() {
+    const chk = document.getElementById('chkShowSecretary');
+    const show = chk ? chk.checked : true;
+    const p1SecBlock = document.getElementById('p1SecSignatureBlock');
+    const p1ChairBlock = document.getElementById('p1ChairSignatureBlock');
+    const secConfigGroup = document.getElementById('secretaryConfigGroup');
+
+    if (show) {
+        document.body.classList.remove('hide-p1-secretary');
+        if (p1SecBlock) p1SecBlock.style.display = 'block';
+        if (p1ChairBlock) p1ChairBlock.style.marginLeft = '';
+        if (secConfigGroup) secConfigGroup.style.opacity = '1';
+    } else {
+        document.body.classList.add('hide-p1-secretary');
+        if (p1SecBlock) p1SecBlock.style.display = 'none';
+        if (p1ChairBlock) p1ChairBlock.style.marginLeft = 'auto';
+        if (secConfigGroup) secConfigGroup.style.opacity = '0.6';
     }
 }
 
@@ -582,6 +605,7 @@ async function printAndSaveSystem() {
             guardianCitNo:        document.getElementById('inGuardianCitNo').value.trim(),
             guardianCitDistrict:  document.getElementById('inGuardianCitDistrict').value.trim() || 'झापा',
             guardianNid:          document.getElementById('inGuardianNid').value.trim(),
+            showSecretary:        document.getElementById('chkShowSecretary') ? document.getElementById('chkShowSecretary').checked : true,
             secretarySelect:      document.getElementById('inSecretarySelect').value,
             customSecretaryName:  document.getElementById('inCustomSecretaryName').value.trim(),
             customSecretaryTitle: document.getElementById('inCustomSecretaryTitle').value.trim(),
@@ -668,6 +692,10 @@ function resetForm() {
     handleRelationChange();
 
     document.getElementById('badgeRecNoDisplay').innerText = 'स्वतः उत्पन्न हुने (१०० बाट सुरु)';
+
+    const chkSec = document.getElementById('chkShowSecretary');
+    if (chkSec) chkSec.checked = true;
+    toggleSecretaryVisibility();
 
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'none';
@@ -835,6 +863,12 @@ function loadRecordForEdit(id) {
         }
         handleRelationChange();
     }
+
+    const chkSec = document.getElementById('chkShowSecretary');
+    if (chkSec) {
+        chkSec.checked = rec.showSecretary !== false;
+    }
+    toggleSecretaryVisibility();
 
     if (rec.secretarySelect) {
         setVal('inSecretarySelect', rec.secretarySelect);
@@ -1111,6 +1145,7 @@ document.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
     populateFiscalYearDropdown();
     initDefaultDate();
+    toggleSecretaryVisibility();
     switchPreviewPage(1);
     updateDoc();
 });

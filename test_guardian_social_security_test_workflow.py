@@ -188,6 +188,80 @@ check("CSS enforces page-break-after: always for printing exactly 3 pages",
 check("Print-all and single-page print workflows supported",
       "printSingleCurrentPage" in test_js and "printAndSaveSystem" in test_js)
 
+# ── GROUP 10: Refinements, Typography, Spacing & Secretary Toggle ──
+print("\n[TEST GROUP 10] Layout Refinements, Typography & Secretary Toggle Validation:")
+
+# 1. Secretary toggle checkbox in input panel
+check("Secretary toggle checkbox (chkShowSecretary) exists in HTML",
+      "chkShowSecretary" in test_html)
+check("Label 'वडा सचिवको हस्ताक्षर देखाउने' is present in HTML",
+      "वडा सचिवको हस्ताक्षर देखाउने" in test_html)
+check("Secretary toggle defaults to ON (checked)",
+      'id="chkShowSecretary" checked' in test_html or 'checked' in re.search(r'<input[^>]*id="chkShowSecretary"[^>]*>', test_html).group(0))
+
+# 2. Secretary toggle CSS & JavaScript
+check("JavaScript defines toggleSecretaryVisibility()",
+      "toggleSecretaryVisibility" in test_js)
+check("CSS contains rule to hide secretary signature block",
+      "body.hide-p1-secretary #p1SecSignatureBlock" in test_html)
+check("CSS ensures chairperson remains right-aligned when secretary signature is hidden",
+      "body.hide-p1-secretary #p1ChairSignatureBlock" in test_html and "margin-left: auto" in test_html)
+check("showSecretary preference is saved with recommendation record",
+      "showSecretary:" in test_js or "showSecretary :" in test_js)
+check("Saved showSecretary preference is restored when reopening record",
+      "rec.showSecretary" in test_js)
+
+# 3. Removal of checklist from editor panel
+check("Editor panel removes 'संलग्न कागजातहरूको चेकलिस्ट'",
+      "संलग्न कागजातहरूको चेकलिस्ट" not in test_html and "संलग्न कागजातहरू (चेकलिस्ट)" not in test_html)
+check("Editor panel removes unused chkDoc1 checkbox",
+      "chkDoc1" not in test_html)
+
+# 4. Retention of document list on Page 2 (Applicant's application)
+page2_section = test_html[test_html.find('id="page2"'):test_html.find('id="page3"')]
+check("Printed Page 2 (निवेदन) retains its intended supporting-document list",
+      "संलग्न कागजातहरू :" in page2_section)
+check("Page 2 document list items preserved",
+      "निवेदक (संरक्षक) को नागरिकताको प्रतिलिपि" in page2_section)
+
+# 5. Page 2 Applicant Signature
+check("Page 2 has applicant signature label",
+      "निवेदक (संरक्षक) को दस्तखत" in page2_section)
+check("Page 2 applicant signature label is placed ABOVE the signature line",
+      page2_section.find("निवेदक (संरक्षक) को दस्तखत") < page2_section.find("border-top: 1.5px dashed"))
+
+# 6. Page 3 Schedule 2 enlarged thumbprint and stamp boxes
+page3_section = test_html[test_html.find('id="page3"'):]
+check("Schedule 2 has dedicated blank boxes for signing and stamping",
+      "guardian-sig-box" in page3_section or "schedule2-blank-box" in page3_section)
+check("Schedule 2 signature/stamp areas are enlarged (85px height)",
+      "85px" in page3_section)
+check("Guardian signature area has NO printed placeholder text inside",
+      "(हस्ताक्षर / औंठाछापको लागि खाली स्थान)" not in page3_section)
+check("Ward office stamp area has NO printed placeholder text inside",
+      "(कार्यालयको छापका लागि खाली स्थान)" not in page3_section)
+
+# 7. Page 1 Typography & Spacing
+page1_section = test_html[test_html.find('id="page1"'):test_html.find('id="page2"')]
+check("Page 1 bank recipient uses standardized spacing class",
+      "p1-bank-recipient" in page1_section)
+check("Page 1 subject uses standardized spacing wrapper",
+      "p1-subject-wrapper" in page1_section)
+check("Template integrates --doc-font-size token",
+      "--doc-font-size" in test_html)
+check("Template integrates --subject-font-size token",
+      "--subject-font-size" in test_html)
+check("Template integrates --table-font-size token",
+      "--table-font-size" in test_html)
+check("Template integrates --sig-font-size token",
+      "--sig-font-size" in test_html)
+
+# 8. Plain neutral payment period styling
+check("Payment period uses plain neutral background",
+      ".period-section" in test_html and "background: #ffffff" in test_html)
+check("Overly colorful #c05621 removed from payment period section",
+      "#c05621" not in test_html)
+
 print("\n" + "=" * 80)
 print(f"TEST RESULTS: {passed} PASSED, {failed} FAILED")
 print("=" * 80)

@@ -87,17 +87,132 @@
         }
 
         .period-section {
-            background: rgba(221, 107, 32, 0.06);
-            border: 1.5px dashed rgba(221, 107, 32, 0.35);
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
         }
 
         .period-section .section-label {
-            color: #c05621;
+            color: #2d3748;
         }
 
         .period-section label {
-            color: #9c4221;
+            color: #4a5568;
             font-weight: 600;
+        }
+
+        /* Page 1 Bank Recommendation Typography & Spacing */
+        .p1-bank-recipient {
+            margin-top: 8px;
+            margin-bottom: 14px;
+            line-height: 1.45;
+            font-size: var(--doc-font-size, 13pt);
+            color: #000000;
+        }
+
+        .p1-subject-wrapper {
+            margin: 12px 0 16px 0;
+            text-align: center;
+        }
+
+        .p1-subject-wrapper .subject-line {
+            font-size: var(--subject-font-size, 14.5pt);
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .p1-subject-wrapper .subject-label {
+            color: #e51a23;
+            margin-right: 4px;
+        }
+
+        .p1-body-para {
+            font-size: var(--doc-font-size, 13pt);
+            line-height: var(--doc-line-height, 1.85);
+            text-align: justify;
+            text-justify: inter-word;
+            margin-bottom: 14px;
+            color: #000000;
+        }
+
+        .p1-tapasil-title {
+            text-align: left;
+            margin: 8px 0 6px 0;
+            font-weight: 700;
+            text-decoration: underline;
+            font-size: var(--doc-font-size, 13pt);
+            color: #000000;
+        }
+
+        .p1-tapasil-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            font-size: var(--table-font-size, 13pt);
+            color: #000000;
+        }
+
+        .p1-tapasil-table td {
+            padding: 3px 0;
+            vertical-align: top;
+            font-size: var(--table-font-size, 13pt);
+            line-height: 1.5;
+        }
+
+        .p1-tapasil-table td.col-label {
+            width: 32%;
+            font-weight: 600;
+            padding-right: 12px;
+        }
+
+        .p1-tapasil-table td.col-val {
+            width: 68%;
+        }
+
+        .p1-signatures-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 26px;
+            padding-bottom: 6px;
+            width: 100%;
+        }
+
+        .p1-sig-block {
+            text-align: center;
+            min-width: 190px;
+        }
+
+        .p1-sig-space {
+            height: 40px;
+        }
+
+        .p1-sig-line {
+            border-top: 1.5px dashed #000000;
+            width: 180px;
+            margin: 0 auto 4px auto;
+        }
+
+        .p1-sig-name {
+            font-weight: 700;
+            font-size: var(--sig-font-size, 13pt);
+            color: #000000;
+            line-height: 1.3;
+        }
+
+        .p1-sig-title {
+            font-size: 11.5pt;
+            font-weight: 600;
+            color: #2d3748;
+            line-height: 1.3;
+        }
+
+        /* Toggle Secretary Signature Display */
+        body.hide-p1-secretary #p1SecSignatureBlock {
+            display: none !important;
+        }
+
+        body.hide-p1-secretary #p1ChairSignatureBlock {
+            margin-left: auto !important;
         }
 
         /* Preview Tab Navigation Bar */
@@ -247,6 +362,15 @@
                 break-after: auto !important;
             }
 
+            /* Secretary Toggle Print Rules */
+            body.hide-p1-secretary #p1SecSignatureBlock {
+                display: none !important;
+            }
+
+            body.hide-p1-secretary #p1ChairSignatureBlock {
+                margin-left: auto !important;
+            }
+
             /* Single-page print filtering */
             body.print-p1-only .a4-page:not(#page1) {
                 display: none !important;
@@ -355,7 +479,7 @@
                 </div>
                 <div class="form-group">
                     <label>भुक्तानी किस्ता (एकल त्रैमासिक मात्र):</label>
-                    <select id="selQuarter" onchange="updateDoc()" style="font-weight: 700; color: #c05621;">
+                    <select id="selQuarter" onchange="updateDoc()" style="font-weight: 600;">
                         <option value="प्रथम त्रैमासिक" selected>प्रथम त्रैमासिक</option>
                         <option value="द्वितीय त्रैमासिक">द्वितीय त्रैमासिक</option>
                         <option value="तृतीय त्रैमासिक">तृतीय त्रैमासिक</option>
@@ -363,8 +487,8 @@
                     </select>
                 </div>
             </div>
-            <div style="font-size: 0.78rem; color: #7b341e; margin-top: -4px;">
-                ⚠️ <em>नियम: सिफारिसमा केवल एउटा मात्र त्रैमासिक उल्लेख हुनुपर्छ। तिनै पृष्ठहरूमा सोही त्रैमासिक स्वतः प्रतिविम्बित हुन्छ।</em>
+            <div style="font-size: 0.8rem; color: #718096; margin-top: -2px;">
+                ℹ️ <em>नियम: सिफारिसमा केवल एउटा मात्र त्रैमासिक लागू हुन्छ। तिनै पृष्ठहरूमा सोही त्रैमासिक स्वतः प्रतिविम्बित हुन्छ।</em>
             </div>
         </div>
 
@@ -527,7 +651,13 @@
             <div class="section-label">🖋️ हस्ताक्षर अधिकारीहरू (वडा सचिव र वडा अध्यक्ष)</div>
 
             <!-- Secretary Configuration (Left Signature on Page 1) -->
-            <div class="form-group" style="background: #edf2f7; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+            <div class="form-group" id="secretaryConfigGroup" style="background: #edf2f7; padding: 10px; border-radius: 6px; margin-bottom: 10px; transition: opacity 0.2s;">
+                <div style="margin-bottom: 8px;">
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; color: #2b6cb0;">
+                        <input type="checkbox" id="chkShowSecretary" checked onchange="toggleSecretaryVisibility(); updateDoc();" style="width: 17px; height: 17px; cursor: pointer;">
+                        <span>वडा सचिवको हस्ताक्षर देखाउने</span>
+                    </label>
+                </div>
                 <label style="color: #2b6cb0; font-weight: 700;">वडा सचिव (बायाँ हस्ताक्षर):</label>
                 <select id="inSecretarySelect" onchange="handleSecretaryChange(); updateDoc();">
                     <option value="अनिता अधिकारी|वडा सचिव" selected>अनिता अधिकारी (वडा सचिव)</option>
@@ -556,17 +686,6 @@
                     <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
                     <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
                 </div>
-            </div>
-        </div>
-
-        <!-- ══ SUPPORTING DOCUMENTS CHECKLIST ══ -->
-        <div class="section-card lh-section">
-            <div class="section-label">📎 संलग्न कागजातहरू (चेकलिस्ट)</div>
-            <div style="font-size: 0.88rem; line-height: 1.7; color: #2d3748;">
-                <div><input type="checkbox" id="chkDoc1" checked disabled> <label for="chkDoc1">१. निवेदक (संरक्षक) को नागरिकताको प्रतिलिपि – १ प्रति</label></div>
-                <div><input type="checkbox" id="chkDoc2" checked disabled> <label for="chkDoc2">२. लाभग्राहीको नागरिकताको प्रतिलिपि – १ प्रति</label></div>
-                <div><input type="checkbox" id="chkDoc3" checked disabled> <label for="chkDoc3">३. सामाजिक सुरक्षा परिचयपत्रको प्रतिलिपि – १ प्रति</label></div>
-                <div><input type="checkbox" id="chkDoc4" checked disabled> <label for="chkDoc4">४. लाभग्राही अशक्त/हिँडडुल गर्न नसक्ने पुष्टि हुने कागजात/तस्बिर</label></div>
             </div>
         </div>
 
@@ -677,68 +796,69 @@
                 <div class="header-red-line" style="display: none;"></div>
 
                 <!-- Bank Recipient -->
-                <div class="bank-receiver" style="margin-top: 10px; margin-bottom: 6px; line-height: 1.5; font-size: 13pt;">
+                <div class="bank-receiver p1-bank-recipient">
                     श्री <span id="lblBankName">कृषि विकास बैंक लिमिटेड</span><br>
                     <span id="lblBankBranch">शाखा कार्यालय, गौरादह, झापा</span> ।
                 </div>
 
                 <!-- Subject -->
-                <div class="subject-container" style="margin: 6px 0 10px 0; text-align: center;">
-                    <div class="subject-line" style="font-size: 14pt; font-weight: 700;">
-                        <span class="subject-label" style="color: #e51a23;">विषय:</span>
+                <div class="subject-container p1-subject-wrapper">
+                    <div class="subject-line">
+                        <span class="subject-label">विषय:</span>
                         <span id="lblSubject">सामाजिक सुरक्षा भत्ताको रकम संरक्षकलाई उपलब्ध गराइदिने बारे ।</span>
                     </div>
                 </div>
 
                 <!-- Body Paragraph (Bank Recommendation) -->
-                <div class="letter-body-para" id="p1BodyText" style="margin-bottom: 12px;">
+                <div class="letter-body-para p1-body-para" id="p1BodyText">
                     प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. १ मा स्थायी बसोबास गर्ने <strong id="lblP1GuardianName">..................</strong> ले आफ्नो <strong id="lblP1Relation">छोरा</strong> <strong id="lblP1BeneficiaryName">..................</strong> सामाजिक सुरक्षा भत्ता प्राप्त गर्ने लाभग्राही भएको र <span id="lblP1Condition">वृद्ध तथा अशक्त भई हिँडडुल गर्न असमर्थ</span> का कारण बैंकमा उपस्थित भई सामाजिक सुरक्षा भत्ताबापत खातामा जम्मा भएको रकम निकाल्न कठिनाइ हुने भनी दिएको निवेदन सम्बन्धमा आवश्यक विवरण तथा कागजात जाँच गर्दा निजको रेखदेख तथा हेरचाह <strong id="lblP1GuardianName2">..................</strong> ले गर्दै आएको देखिएकोले, यस वडा कार्यालयबाट जारी गरिएको अनुसूची–२ (संरक्षक सिफारिस नं. <strong id="lblP1RecNo">१००</strong>) मा उल्लेखित विवरणअनुसार निज लाभग्राहीको खातामा आ.व. <span id="lblP1AY">२०८३/०८४</span> को <strong id="lblP1Quarter">प्रथम त्रैमासिक</strong> बापत जम्मा भएको सामाजिक सुरक्षा भत्ताको रकम नियमानुसार निजको संरक्षकलाई उपलब्ध गराइदिनुहुन सिफारिस गरिन्छ ।
                 </div>
 
                 <!-- Tapasil Summary Block -->
                 <div class="beneficiary-summary" style="margin-top: 8px; margin-bottom: 12px; width: 100%;">
-                    <div class="tapsil-title"
-                        style="text-align: left; margin: 4px 0 6px 0; font-weight: 700; text-decoration: underline; font-size: 13pt;">
+                    <div class="tapsil-title p1-tapasil-title">
                         तपसिल :
                     </div>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 12.5pt;">
+                    <table class="p1-tapasil-table">
                         <tr>
-                            <td style="padding: 2px 12px 2px 0; font-weight: 600; width: 34%; vertical-align: top;">लाभग्राहीको नाम, थर :</td>
-                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblP1TblBeneficiaryName">..................</strong></td>
+                            <td class="col-label">लाभग्राहीको नाम, थर :</td>
+                            <td class="col-val"><strong id="lblP1TblBeneficiaryName">..................</strong></td>
                         </tr>
                         <tr id="rowP1TblBeneficiaryCit">
-                            <td style="padding: 2px 12px 2px 0; font-weight: 600; vertical-align: top;">ना.प्र.नं. :</td>
-                            <td style="padding: 2px 0; vertical-align: top;"><span id="lblP1TblBeneficiaryCit">-</span></td>
+                            <td class="col-label">ना.प्र.नं. :</td>
+                            <td class="col-val"><span id="lblP1TblBeneficiaryCit">-</span></td>
                         </tr>
                         <tr>
-                            <td style="padding: 2px 12px 2px 0; font-weight: 600; vertical-align: top;">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
-                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblP1TblCardNo">..................</strong></td>
+                            <td class="col-label">सामाजिक सुरक्षा परिचयपत्र नं. :</td>
+                            <td class="col-val"><strong id="lblP1TblCardNo">..................</strong></td>
                         </tr>
                         <tr>
-                            <td style="padding: 2px 12px 2px 0; font-weight: 600; vertical-align: top;">बैङ्क खाता नं. :</td>
-                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblP1TblAccountNo">..................</strong></td>
+                            <td class="col-label">बैङ्क खाता नं. :</td>
+                            <td class="col-val"><strong id="lblP1TblAccountNo">..................</strong></td>
                         </tr>
                         <tr>
-                            <td style="padding: 2px 12px 2px 0; font-weight: 600; vertical-align: top;">संरक्षकको नाम, थर :</td>
-                            <td style="padding: 2px 0; vertical-align: top;"><strong id="lblP1TblGuardianName">..................</strong></td>
+                            <td class="col-label">संरक्षकको नाम, थर :</td>
+                            <td class="col-val"><strong id="lblP1TblGuardianName">..................</strong></td>
                         </tr>
                     </table>
                 </div>
             </div>
 
             <!-- Page 1 Footer: Signatures (Secretary LEFT, Chairperson RIGHT) -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 24px; padding-bottom: 8px; width: 100%;">
+            <div class="p1-signatures-row" id="p1SignaturesRow">
                 <!-- Left: Ward Secretary -->
-                <div style="text-align: center; min-width: 190px;">
-                    <div style="height: 38px;"></div>
-                    <div style="border-top: 1.5px dashed #000; padding-top: 4px; font-weight: 700; font-size: 13pt;" id="lblP1SecName">अनिता अधिकारी</div>
-                    <div style="font-size: 12pt; font-weight: 600; color: #2d3748;" id="lblP1SecTitle">वडा सचिव</div>
+                <div class="p1-sig-block" id="p1SecSignatureBlock">
+                    <div class="p1-sig-space"></div>
+                    <div class="p1-sig-line"></div>
+                    <div class="p1-sig-name" id="lblP1SecName">अनिता अधिकारी</div>
+                    <div class="p1-sig-title" id="lblP1SecTitle">वडा सचिव</div>
                 </div>
                 <!-- Right: Ward Chairperson -->
-                <div style="text-align: center; min-width: 190px;">
-                    <div style="height: 38px;"></div>
-                    <div style="border-top: 1.5px dashed #000; padding-top: 4px; font-weight: 700; font-size: 13pt;" id="lblP1ChairName">नगेन्द्र भण्डारी</div>
-                    <div style="font-size: 12pt; font-weight: 600; color: #2d3748;" id="lblP1ChairTitle">वडा अध्यक्ष</div>
+                <div class="p1-sig-block" id="p1ChairSignatureBlock" style="margin-left: auto;">
+                    <div class="p1-sig-space"></div>
+                    <div class="p1-sig-line"></div>
+                    <div class="p1-sig-name" id="lblP1ChairName">नगेन्द्र भण्डारी</div>
+                    <div class="p1-sig-title" id="lblP1ChairTitle">वडा अध्यक्ष</div>
                 </div>
             </div>
         </div>
@@ -808,10 +928,10 @@
             </div>
 
             <!-- Page 2 Footer: Applicant Physical Signature Space -->
-            <div style="display: flex; justify-content: flex-end; margin-top: 18px; padding-bottom: 12px; width: 100%;">
-                <div style="text-align: center; min-width: 220px;">
-                    <div style="font-weight: 600; font-size: 12pt; margin-bottom: 30px;">निवेदक (संरक्षक) को दस्तखत :</div>
-                    <div style="border-top: 1.5px dashed #000; width: 180px; margin: 0 auto;"></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 22px; padding-bottom: 12px; width: 100%;">
+                <div style="text-align: center; min-width: 210px;">
+                    <div style="font-weight: 700; font-size: 12.5pt; color: #000000; margin-bottom: 40px;">निवेदक (संरक्षक) को दस्तखत :</div>
+                    <div style="border-top: 1.5px dashed #000000; width: 180px; margin: 0 auto;"></div>
                 </div>
             </div>
         </div>
@@ -870,9 +990,9 @@
                                 <div><strong>नागरिकता प्रमाणपत्र नं.ः-</strong> <span id="lblP3GuardianCitNo">..................</span></div>
                                 <div><strong>नागरिकता जारी जिल्लाः-</strong> <span id="lblP3GuardianCitDistrict">झापा</span></div>
                                 <div style="margin-top: 14px; padding-top: 8px; border-top: 1px dashed #718096;">
-                                    <div style="font-weight: 600; margin-bottom: 4px;">संरक्षकको सही छापः-</div>
-                                    <div style="width: 100%; height: 50px; border: 1px dashed #4a5568; display: flex; align-items: center; justify-content: center; color: #718096; font-size: 10pt; background: #fafafa;">
-                                        (हस्ताक्षर / औंठाछापको लागि खाली स्थान)
+                                    <div style="font-weight: 700; margin-bottom: 6px; font-size: 12pt;">संरक्षकको सही छापः-</div>
+                                    <div class="schedule2-blank-box guardian-sig-box"
+                                        style="width: 100%; min-height: 85px; height: 85px; border: 1.5px dashed #4a5568; background: #ffffff; box-sizing: border-box;">
                                     </div>
                                 </div>
                             </td>
@@ -890,13 +1010,13 @@
                                         <span id="lblP3ChairTitle" style="font-size: 11pt; color: #4a5568;">(वडा अध्यक्ष)</span>
                                     </div>
                                     <div style="margin-top: 10px;">
-                                        <strong>हस्ताक्षरः</strong>
-                                        <div style="height: 35px; border-bottom: 1.5px dashed #000; width: 85%; margin-top: 4px;"></div>
+                                        <div style="font-weight: 700; font-size: 12pt;">हस्ताक्षरः</div>
+                                        <div style="height: 38px; border-bottom: 1.5px dashed #000000; width: 85%; margin-top: 4px;"></div>
                                     </div>
                                     <div style="margin-top: 14px; padding-top: 6px; border-top: 1px dashed #718096;">
-                                        <div style="font-weight: 600; margin-bottom: 4px;">वडा कार्यालयको छापः-</div>
-                                        <div style="width: 100%; height: 50px; border: 1px dashed #4a5568; display: flex; align-items: center; justify-content: center; color: #718096; font-size: 10pt; background: #fafafa;">
-                                            (कार्यालयको छापका लागि खाली स्थान)
+                                        <div style="font-weight: 700; margin-bottom: 6px; font-size: 12pt;">वडा कार्यालयको छापः-</div>
+                                        <div class="schedule2-blank-box office-stamp-box"
+                                            style="width: 100%; min-height: 85px; height: 85px; border: 1.5px dashed #4a5568; background: #ffffff; box-sizing: border-box;">
                                         </div>
                                     </div>
                                 </div>
