@@ -327,9 +327,101 @@ check("resetForm resets specimen box layout to default",
 check("Reset button exists in UI for specimen signature box",
       "resetSpecimenBoxLayout()" in test_html and "पूर्वनिर्धारित स्थानमा फर्काउनुहोस्" in test_html)
 
+# ── GROUP 12: Ward Chairperson Signature Controls & Resizable Specimen Box ──
+print("\n[TEST GROUP 12] Ward Chairperson Signature Controls & Resizable Specimen Box:")
+
+# 1. Signature Appearance Controls
+check("Signature line style selector (selChairSigLineStyle) exists in HTML",
+      'id="selChairSigLineStyle"' in test_html)
+check("Signature line style selector supports dashed, dotted, solid, and none",
+      'value="dashed"' in test_html and 'value="dotted"' in test_html and
+      'value="solid"' in test_html and 'value="none"' in test_html)
+check("Signature line width slider (sliderChairSigLineWidth) and numeric input exist",
+      'id="sliderChairSigLineWidth"' in test_html and 'id="numChairSigLineWidth"' in test_html)
+check("Officer name font size slider (sliderChairSigFontSize) and numeric input exist",
+      'id="sliderChairSigFontSize"' in test_html and 'id="numChairSigFontSize"' in test_html)
+check("Reset button for Chairperson signature settings exists in UI",
+      "resetChairSignatureSettings()" in test_html)
+check("CSS uses dedicated --officer-name-gap of approximately 6-7px (6.5px)",
+      "--officer-name-gap" in test_html and "6.5px" in test_html)
+check("JavaScript defines applyChairSigSettings, onChairSigLineStyleChange, onChairSigLineWidthChange, onChairSigFontSizeChange",
+      "function applyChairSigSettings" in test_js and
+      "function onChairSigLineStyleChange" in test_js and
+      "function onChairSigLineWidthChange" in test_js and
+      "function onChairSigFontSizeChange" in test_js)
+check("Chairperson signature settings are stored and restored in localStorage",
+      "CHAIR_SIG_STORAGE_KEY" in test_js and "loadStoredChairSigSettings" in test_js)
+check("Chairperson signature settings persist with record on save",
+      "chairSigLineStyle:" in test_js and "chairSigLineWidth:" in test_js and "chairSigFontSize:" in test_js)
+check("Chairperson signature settings are restored when record is reopened",
+      "rec.chairSigLineStyle" in test_js and "rec.chairSigLineWidth" in test_js and "rec.chairSigFontSize" in test_js)
+check("resetForm resets chairperson signature settings to defaults",
+      "resetChairSignatureSettings()" in test_js)
+
+# 2. Resizable Specimen Box Controls
+check("Specimen box width slider (sliderSigWidth) and numeric input exist",
+      'id="sliderSigWidth"' in test_html and 'id="numSigWidth"' in test_html)
+check("Specimen box height slider (sliderSigHeight) and numeric input exist",
+      'id="sliderSigHeight"' in test_html and 'id="numSigHeight"' in test_html)
+check("Specimen box horizontal pos slider (sliderSigPosX) and numeric input exist",
+      'id="sliderSigPosX"' in test_html and 'id="numSigPosX"' in test_html)
+check("Specimen box vertical pos slider (sliderSigPosY) and numeric input exist",
+      'id="sliderSigPosY"' in test_html and 'id="numSigPosY"' in test_html)
+check("Specimen box badge indicators exist for width, height, posX, posY",
+      'id="badgeSigWidth"' in test_html and 'id="badgeSigHeight"' in test_html and
+      'id="badgeSigPosX"' in test_html and 'id="badgeSigPosY"' in test_html)
+check("JavaScript defines onSigBoxLayoutSlider and onSigBoxLayoutInput handlers",
+      "function onSigBoxLayoutSlider" in test_js and "function onSigBoxLayoutInput" in test_js)
+check("validateSpecimenDimensions supports flexible width, height, posX, and posY",
+      "minWidth" in test_js and "maxWidth" in test_js and "minHeight" in test_js and "maxHeight" in test_js)
+check("applySpecimenBoxLayout dynamically sets width on card and height on box",
+      "card.style.width" in test_js and "box.style.height" in test_js)
+check("specimenSigWidth and specimenSigHeight persist with recommendation record",
+      "specimenSigWidth:" in test_js and "specimenSigHeight:" in test_js)
+check("specimenSigWidth and specimenSigHeight are restored when record is reopened",
+      "rec.specimenSigWidth" in test_js and "rec.specimenSigHeight" in test_js)
+
+# ── GROUP 13: UI/UX Refinement: Responsive Dash, Horizontal Position & Beneficiary List ──
+print("\n[TEST GROUP 13] Refined UI/UX, Responsive Signature Dash & Beneficiary List:")
+
+# 1. Responsive Signature Dash Line
+check("Signature block wraps line and officer name in responsive .p1-sig-inner container",
+      ".p1-sig-inner" in test_html and 'id="p1SigLine"' in test_html)
+check("Signature dash line has 100% responsive width inside fit-content container",
+      ".p1-sig-line" in test_html and "width: 100%" in test_html)
+check("JavaScript defines adjustChairSignatureLine to dynamically adapt line to officer name width",
+      "function adjustChairSignatureLine" in test_js and "nameEl.offsetWidth" in test_js)
+check("updateDoc invokes adjustChairSignatureLine when officer changes",
+      "adjustChairSignatureLine();" in test_js)
+
+# 2. Horizontal Signature Positioning
+check("Compact horizontal signature position slider (sliderChairPosX) exists in HTML",
+      'id="sliderChairPosX"' in test_html and 'id="badgeChairPosX"' in test_html)
+check("JavaScript defines onChairPosXChange handler",
+      "function onChairPosXChange" in test_js)
+check("chairpersonPosX is persisted with recommendation record",
+      "chairpersonPosX:" in test_js)
+check("chairpersonPosX is restored when record is reopened",
+      "rec.chairpersonPosX" in test_js)
+check("Transform applies directly to signature block as one cohesive unit",
+      "translate(${posX}mm, ${posY}mm)" in test_js or "translate(" in test_html)
+
+# 3. Clean Beneficiary List & Loading State
+check("preIndexBeneficiaryItem indexes name, cardNo, accountNo, and allowanceType",
+      "function preIndexBeneficiaryItem" in test_js and "nameNorm:" in test_js)
+check("Beneficiary search separates person name and registration number cleanly",
+      "दर्ता नं:" in test_js and "word-break: break-word" in test_js)
+check("Beneficiary search shows loading state when data is pending",
+      "दर्ता सूची लोड हुँदैछ" in test_js)
+check("Beneficiary search provides clear empty state message",
+      "कुनै लाभग्राही फेला परेन" in test_js)
+check("Section cards use clean, restrained styling without high-saturation backgrounds",
+      "rgba(43, 108, 176, 0.06)" not in test_html and "rgba(56, 161, 105, 0.06)" not in test_html)
+
 print("\n" + "=" * 80)
 print(f"TEST RESULTS: {passed} PASSED, {failed} FAILED")
 print("=" * 80)
 
 if failed > 0:
     sys.exit(1)
+

@@ -342,6 +342,7 @@ function updateDoc() {
     // Signatures Page 1 (Chairperson on RIGHT)
     setTxt('lblP1ChairName', chairName);
     setTxt('lblP1ChairTitle', chairTitle);
+    adjustChairSignatureLine();
 
     // ──────────────────────────────────────────
     // 2. UPDATE PAGE 2 (Applicant's Request)
@@ -481,78 +482,268 @@ function toggleCustomSign() {
     }
 }
 
-// ── Chairperson Signature Vertical Position Controls ──
-function onChairPosYChange(val) {
-    const v = parseInt(val, 10) || 0;
-    const badge = document.getElementById('badgeChairPosY');
-    if (badge) badge.textContent = `${v} mm`;
-    const slider = document.getElementById('sliderChairPosY');
-    if (slider && slider.value !== String(v)) slider.value = v;
+// ══════════════════════════════════════════════════════
+//  Chairperson Signature Appearance & Position Controller
+// ══════════════════════════════════════════════════════
+const DEFAULT_CHAIR_SIG_SETTINGS = {
+    lineStyle: 'dashed', // 'dashed' | 'dotted' | 'solid' | 'none'
+    lineWidth: 180,      // in px (100 - 250)
+    fontSize: 13,        // in pt (10 - 18)
+    posX: 0,             // in mm (-60 - 40)
+    posY: 0              // in mm (-70 - 25)
+};
 
+const CHAIR_SIG_STORAGE_KEY = 'guardian_test_chair_sig_settings';
+let currentChairSigSettings = { ...DEFAULT_CHAIR_SIG_SETTINGS };
+
+function adjustChairSignatureLine() {
+    const nameEl = document.getElementById('lblP1ChairName');
+    const lineEl = document.getElementById('p1SigLine');
+    if (nameEl && lineEl) {
+        const measuredWidth = nameEl.offsetWidth;
+        if (measuredWidth > 0) {
+            lineEl.style.width = `${Math.max(measuredWidth, 100)}px`;
+        }
+    }
+}
+
+function applyChairSigSettings(settings, skipStorage = false) {
+    if (!settings) settings = DEFAULT_CHAIR_SIG_SETTINGS;
+    const style = ['dashed', 'dotted', 'solid', 'none'].includes(settings.lineStyle) ? settings.lineStyle : DEFAULT_CHAIR_SIG_SETTINGS.lineStyle;
+    const width = Math.min(Math.max(parseInt(settings.lineWidth, 10) || DEFAULT_CHAIR_SIG_SETTINGS.lineWidth, 100), 250);
+    const fontSize = Math.min(Math.max(parseFloat(settings.fontSize) || DEFAULT_CHAIR_SIG_SETTINGS.fontSize, 10), 18);
+    const posX = Math.min(Math.max(parseInt(settings.posX, 10) || 0, -60), 40);
+    const posY = Math.min(Math.max(parseInt(settings.posY, 10) || 0, -70), 25);
+
+    currentChairSigSettings = { lineStyle: style, lineWidth: width, fontSize: fontSize, posX: posX, posY: posY };
+
+    // Apply CSS variables to root and page1
+    const root = document.documentElement;
+    if (root) {
+        root.style.setProperty('--chair-sig-line-style', style);
+        root.style.setProperty('--chair-sig-line-width', `${width}px`);
+        root.style.setProperty('--chair-sig-font-size', `${fontSize}pt`);
+        root.style.setProperty('--chair-sig-offset-x', `${posX}mm`);
+        root.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
+        root.style.setProperty('--officer-name-gap', '6.5px');
+    }
+
+    const page1 = document.getElementById('page1');
+    if (page1) {
+        page1.style.setProperty('--chair-sig-line-style', style);
+        page1.style.setProperty('--chair-sig-line-width', `${width}px`);
+        page1.style.setProperty('--chair-sig-font-size', `${fontSize}pt`);
+        page1.style.setProperty('--chair-sig-offset-x', `${posX}mm`);
+        page1.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
+        page1.style.setProperty('--officer-name-gap', '6.5px');
+    }
+
+    // Apply position transform solely to signature block as ONE cohesive unit
     const block = document.getElementById('p1ChairSignatureBlock');
     if (block) {
-        block.style.setProperty('--chair-sig-offset-y', `${v}mm`);
-        block.style.transform = `translateY(${v}mm)`;
+        block.style.setProperty('--chair-sig-offset-x', `${posX}mm`);
+        block.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
+        block.style.transform = `translate(${posX}mm, ${posY}mm)`;
     }
-    const page1 = document.getElementById('page1');
-    if (page1) page1.style.setProperty('--chair-sig-offset-y', `${v}mm`);
+
+    // Adapt signature line automatically
+    adjustChairSignatureLine();
+
+    // Synchronize UI Form Controls
+    const sliderX = document.getElementById('sliderChairPosX');
+    if (sliderX && sliderX.value !== String(posX)) sliderX.value = posX;
+    const badgeX = document.getElementById('badgeChairPosX');
+    if (badgeX) badgeX.textContent = `${posX} mm`;
+
+    const sliderPos = document.getElementById('sliderChairPosY');
+    if (sliderPos && sliderPos.value !== String(posY)) sliderPos.value = posY;
+    const badgePos = document.getElementById('badgeChairPosY');
+    if (badgePos) badgePos.textContent = `${posY} mm`;
+
+    const selStyle = document.getElementById('selChairSigLineStyle');
+    if (selStyle && selStyle.value !== style) selStyle.value = style;
+
+    const sliderWidth = document.getElementById('sliderChairSigLineWidth');
+    if (sliderWidth && sliderWidth.value !== String(width)) sliderWidth.value = width;
+    const numWidth = document.getElementById('numChairSigLineWidth');
+    if (numWidth && numWidth.value !== String(width)) numWidth.value = width;
+    const badgeWidth = document.getElementById('badgeChairSigLineWidth');
+    if (badgeWidth) badgeWidth.textContent = `${width} px`;
+
+    const sliderFont = document.getElementById('sliderChairSigFontSize');
+    if (sliderFont && sliderFont.value !== String(fontSize)) sliderFont.value = fontSize;
+    const numFont = document.getElementById('numChairSigFontSize');
+    if (numFont && numFont.value !== String(fontSize)) numFont.value = fontSize;
+    const badgeFont = document.getElementById('badgeChairSigFontSize');
+    if (badgeFont) badgeFont.textContent = `${fontSize} pt`;
+
+    if (!skipStorage) {
+        try {
+            localStorage.setItem(CHAIR_SIG_STORAGE_KEY, JSON.stringify(currentChairSigSettings));
+        } catch (e) {}
+    }
+}
+
+function onChairPosXChange(val) {
+    const v = parseInt(val, 10) || 0;
+    applyChairSigSettings({ ...currentChairSigSettings, posX: v });
+}
+
+function onChairSigLineStyleChange(style) {
+    applyChairSigSettings({ ...currentChairSigSettings, lineStyle: style });
+}
+
+function onChairSigLineWidthChange(width) {
+    const val = parseInt(width, 10);
+    if (isNaN(val)) return;
+    applyChairSigSettings({ ...currentChairSigSettings, lineWidth: val });
+}
+
+function onChairSigFontSizeChange(size) {
+    const val = parseFloat(size);
+    if (isNaN(val)) return;
+    applyChairSigSettings({ ...currentChairSigSettings, fontSize: val });
+}
+
+function onChairPosYChange(val) {
+    const v = parseInt(val, 10) || 0;
+    applyChairSigSettings({ ...currentChairSigSettings, posY: v });
 }
 
 function resetChairPosition() {
-    onChairPosYChange(0);
+    applyChairSigSettings({ ...currentChairSigSettings, posX: 0, posY: 0 });
+}
+
+function resetChairSignatureSettings() {
+    applyChairSigSettings(DEFAULT_CHAIR_SIG_SETTINGS);
+}
+
+function loadStoredChairSigSettings() {
+    try {
+        const stored = localStorage.getItem(CHAIR_SIG_STORAGE_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed) {
+                applyChairSigSettings(parsed, true);
+                return;
+            }
+        }
+    } catch (e) {}
+    applyChairSigSettings(DEFAULT_CHAIR_SIG_SETTINGS, true);
 }
 
 // ══════════════════════════════════════════════════════
-//  Specimen Signature Box Controller (नमुना दस्तखत बक्स Drag & Position)
+//  Specimen Signature Box Controller (नमुना दस्तखत बक्स)
 // ══════════════════════════════════════════════════════
 const DEFAULT_SPECIMEN_BOX_LAYOUT = {
-    width: 48,   // in mm
-    height: 18,  // in mm
-    posX: 0,     // in mm
-    posY: 0      // in mm
+    width: 48,   // in mm (30 - 80)
+    height: 18,  // in mm (10 - 35)
+    posX: 0,     // in mm (-90 - 40)
+    posY: 0      // in mm (-60 - 60)
 };
 
 const SPECIMEN_BOX_LIMITS = {
+    minWidth: 30,
+    maxWidth: 80,
+    minHeight: 10,
+    maxHeight: 35,
     minPosX: -90,
     maxPosX: 40,
     minPosY: -60,
-    maxPosY: 80
+    maxPosY: 60
 };
 
 const SPECIMEN_BOX_STORAGE_KEY = 'guardian_test_specimen_box_settings';
 let currentSpecimenBoxLayout = { ...DEFAULT_SPECIMEN_BOX_LAYOUT };
 
-function validateSpecimenDimensions(posX, posY) {
-    const numX = parseFloat(posX);
-    const numY = parseFloat(posY);
+function validateSpecimenDimensions(w, h, x, y) {
+    let width = DEFAULT_SPECIMEN_BOX_LAYOUT.width;
+    let height = DEFAULT_SPECIMEN_BOX_LAYOUT.height;
+    let posX = DEFAULT_SPECIMEN_BOX_LAYOUT.posX;
+    let posY = DEFAULT_SPECIMEN_BOX_LAYOUT.posY;
 
-    const safeX = isNaN(numX) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posX : Math.min(Math.max(Math.round(numX), SPECIMEN_BOX_LIMITS.minPosX), SPECIMEN_BOX_LIMITS.maxPosX);
-    const safeY = isNaN(numY) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posY : Math.min(Math.max(Math.round(numY), SPECIMEN_BOX_LIMITS.minPosY), SPECIMEN_BOX_LIMITS.maxPosY);
+    if (typeof w === 'object' && w !== null) {
+        if (w.width !== undefined) width = parseFloat(w.width);
+        if (w.height !== undefined) height = parseFloat(w.height);
+        if (w.posX !== undefined) posX = parseFloat(w.posX);
+        if (w.posY !== undefined) posY = parseFloat(w.posY);
+    } else {
+        if (w !== undefined) width = parseFloat(w);
+        if (h !== undefined) height = parseFloat(h);
+        if (x !== undefined) posX = parseFloat(x);
+        if (y !== undefined) posY = parseFloat(y);
+    }
 
-    return { width: DEFAULT_SPECIMEN_BOX_LAYOUT.width, height: DEFAULT_SPECIMEN_BOX_LAYOUT.height, posX: safeX, posY: safeY };
+    const safeWidth = isNaN(width) ? DEFAULT_SPECIMEN_BOX_LAYOUT.width : Math.min(Math.max(Math.round(width), SPECIMEN_BOX_LIMITS.minWidth), SPECIMEN_BOX_LIMITS.maxWidth);
+    const safeHeight = isNaN(height) ? DEFAULT_SPECIMEN_BOX_LAYOUT.height : Math.min(Math.max(Math.round(height), SPECIMEN_BOX_LIMITS.minHeight), SPECIMEN_BOX_LIMITS.maxHeight);
+    const safeX = isNaN(posX) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posX : Math.min(Math.max(Math.round(posX), SPECIMEN_BOX_LIMITS.minPosX), SPECIMEN_BOX_LIMITS.maxPosX);
+    const safeY = isNaN(posY) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posY : Math.min(Math.max(Math.round(posY), SPECIMEN_BOX_LIMITS.minPosY), SPECIMEN_BOX_LIMITS.maxPosY);
+
+    return { width: safeWidth, height: safeHeight, posX: safeX, posY: safeY };
 }
 
 function applySpecimenBoxLayout(layout, skipStorage = false) {
     if (!layout) layout = DEFAULT_SPECIMEN_BOX_LAYOUT;
-    const validated = validateSpecimenDimensions(layout.posX, layout.posY);
+    const validated = validateSpecimenDimensions(layout);
     currentSpecimenBoxLayout = { ...validated };
 
     const card = document.getElementById('specimenSigCard');
     if (card) {
         card.style.left = `${validated.posX}mm`;
         card.style.top = `${validated.posY}mm`;
+        card.style.width = `${validated.width}mm`;
     }
 
-    const badgeX = document.getElementById('badgeSigPosX');
-    if (badgeX) badgeX.textContent = `${validated.posX} mm`;
-    const badgeY = document.getElementById('badgeSigPosY');
-    if (badgeY) badgeY.textContent = `${validated.posY} mm`;
+    const box = document.getElementById('specimenSigBox');
+    if (box) {
+        box.style.height = `${validated.height}mm`;
+    }
+
+    // Sync input controls and badges
+    const setElemVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && el.value !== String(val)) el.value = val;
+    };
+    const setElemText = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+    };
+
+    setElemVal('sliderSigWidth', validated.width);
+    setElemVal('numSigWidth', validated.width);
+    setElemText('badgeSigWidth', `${validated.width} mm`);
+
+    setElemVal('sliderSigHeight', validated.height);
+    setElemVal('numSigHeight', validated.height);
+    setElemText('badgeSigHeight', `${validated.height} mm`);
+
+    setElemVal('sliderSigPosX', validated.posX);
+    setElemVal('numSigPosX', validated.posX);
+    setElemText('badgeSigPosX', `${validated.posX} mm`);
+
+    setElemVal('sliderSigPosY', validated.posY);
+    setElemVal('numSigPosY', validated.posY);
+    setElemText('badgeSigPosY', `${validated.posY} mm`);
 
     if (!skipStorage) {
         try {
             localStorage.setItem(SPECIMEN_BOX_STORAGE_KEY, JSON.stringify(validated));
         } catch (e) {}
     }
+}
+
+function onSigBoxLayoutSlider(prop, val) {
+    const num = parseFloat(val);
+    if (isNaN(num)) return;
+    const updated = { ...currentSpecimenBoxLayout, [prop]: num };
+    applySpecimenBoxLayout(updated);
+}
+
+function onSigBoxLayoutInput(prop, val) {
+    const num = parseFloat(val);
+    if (isNaN(num)) return;
+    const updated = { ...currentSpecimenBoxLayout, [prop]: num };
+    applySpecimenBoxLayout(updated);
 }
 
 function resetSpecimenBoxLayout() {
@@ -564,7 +755,7 @@ function loadStoredSpecimenBoxLayout() {
         const stored = localStorage.getItem(SPECIMEN_BOX_STORAGE_KEY);
         if (stored) {
             const parsed = JSON.parse(stored);
-            if (parsed && typeof parsed.posX === 'number' && typeof parsed.posY === 'number') {
+            if (parsed) {
                 applySpecimenBoxLayout(parsed, true);
                 return;
             }
@@ -722,7 +913,11 @@ async function printAndSaveSystem() {
             guardianCitNo:        document.getElementById('inGuardianCitNo').value.trim(),
             guardianCitDistrict:  document.getElementById('inGuardianCitDistrict').value.trim() || 'झापा',
             guardianNid:          document.getElementById('inGuardianNid').value.trim(),
-            chairpersonPosY:      parseInt(document.getElementById('sliderChairPosY') ? document.getElementById('sliderChairPosY').value : 0, 10) || 0,
+            chairpersonPosX:      currentChairSigSettings.posX || 0,
+            chairpersonPosY:      currentChairSigSettings.posY,
+            chairSigLineStyle:    currentChairSigSettings.lineStyle,
+            chairSigLineWidth:    currentChairSigSettings.lineWidth,
+            chairSigFontSize:     currentChairSigSettings.fontSize,
             specimenSigPosX:      currentSpecimenBoxLayout.posX,
             specimenSigPosY:      currentSpecimenBoxLayout.posY,
             specimenSigWidth:     currentSpecimenBoxLayout.width,
@@ -812,6 +1007,7 @@ function resetForm() {
     document.getElementById('badgeRecNoDisplay').innerText = 'स्वतः उत्पन्न हुने (१०० बाट सुरु)';
 
     resetChairPosition();
+    resetChairSignatureSettings();
     resetSpecimenBoxLayout();
 
     const btnNew = document.getElementById('btnNewForm');
@@ -990,8 +1186,14 @@ function loadRecordForEdit(id) {
         toggleCustomSign();
     }
 
-    const chairPosY = (rec.chairpersonPosY !== undefined && rec.chairpersonPosY !== null) ? rec.chairpersonPosY : 0;
-    onChairPosYChange(chairPosY);
+    const chairSettings = {
+        lineStyle: rec.chairSigLineStyle || DEFAULT_CHAIR_SIG_SETTINGS.lineStyle,
+        lineWidth: rec.chairSigLineWidth || DEFAULT_CHAIR_SIG_SETTINGS.lineWidth,
+        fontSize: rec.chairSigFontSize || DEFAULT_CHAIR_SIG_SETTINGS.fontSize,
+        posX: (rec.chairpersonPosX !== undefined && rec.chairpersonPosX !== null) ? rec.chairpersonPosX : 0,
+        posY: (rec.chairpersonPosY !== undefined && rec.chairpersonPosY !== null) ? rec.chairpersonPosY : 0
+    };
+    applyChairSigSettings(chairSettings);
 
     const savedLayout = {
         width: rec.specimenSigWidth || DEFAULT_SPECIMEN_BOX_LAYOUT.width,
@@ -1045,8 +1247,40 @@ async function softDeleteRecord(id, encName) {
 }
 
 // ── Beneficiary Registry Lookup (Excel / Firestore) ──
+function preIndexBeneficiaryItem(item) {
+    const rawName = String(item.name || '').trim();
+    const rawCard = String(item.cardNo || '').trim();
+    const rawAcc = String(item.accountNo || '').trim();
+    const rawType = String(item.allowanceType || item.category || '').trim();
+    const rawFather = String(item.fatherName || '').trim();
+    const rawSpouse = String(item.spouseName || '').trim();
+
+    item.name = rawName;
+    item.cardNo = rawCard;
+    item.accountNo = rawAcc;
+    item.allowanceType = rawType;
+    item.fatherName = rawFather;
+    item.spouseName = rawSpouse;
+
+    item._search = {
+        nameNorm: normalizeDevanagari(rawName),
+        cardNorm: rawCard.toLowerCase(),
+        cardEn: toEnglishDigit(rawCard).toLowerCase(),
+        cardNe: toNepaliDigit(rawCard),
+        accNorm: rawAcc.toLowerCase(),
+        accEn: toEnglishDigit(rawAcc).toLowerCase(),
+        accNe: toNepaliDigit(rawAcc)
+    };
+    return item;
+}
+
 function loadBeneficiaryRegister() {
     if (beneficiaryLoadPromise) return beneficiaryLoadPromise;
+
+    const statusEl = document.getElementById('beneficiaryRegisterStatus');
+    if (statusEl && !isBeneficiaryRegisterLoaded) {
+        statusEl.innerHTML = `<span style="color: #718096; font-size: 0.78rem;">⏳ लोड हुँदैछ...</span>`;
+    }
 
     beneficiaryLoadPromise = (async () => {
         try {
@@ -1058,21 +1292,7 @@ function loadBeneficiaryRegister() {
                 try {
                     const parsed = JSON.parse(cached);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        beneficiaryRegister = parsed.map(item => {
-                            const rawName = String(item.name || '').trim();
-                            const rawCard = String(item.cardNo || '').trim();
-                            const rawAcc = String(item.accountNo || '').trim();
-                            item._search = {
-                                nameNorm: normalizeDevanagari(rawName),
-                                cardNorm: rawCard.toLowerCase(),
-                                cardEn: toEnglishDigit(rawCard).toLowerCase(),
-                                cardNe: toNepaliDigit(rawCard),
-                                accNorm: rawAcc.toLowerCase(),
-                                accEn: toEnglishDigit(rawAcc).toLowerCase(),
-                                accNe: toNepaliDigit(rawAcc)
-                            };
-                            return item;
-                        });
+                        beneficiaryRegister = parsed.map(item => preIndexBeneficiaryItem(item));
                         isBeneficiaryRegisterLoaded = true;
                         updateBeneficiaryStatusBadge();
                         return beneficiaryRegister;
@@ -1082,27 +1302,18 @@ function loadBeneficiaryRegister() {
 
             const snap = await db.collection("socialSecurityBeneficiaries").limit(2000).get();
             const loaded = [];
+            const seenCards = new Set();
             snap.forEach(doc => {
                 const d = doc.data();
-                loaded.push({ id: doc.id, ...d });
+                const cardNo = String(d.cardNo || doc.id).trim();
+                if (!d.isDeleted && cardNo && !seenCards.has(cardNo)) {
+                    seenCards.add(cardNo);
+                    loaded.push({ id: doc.id, ...d, cardNo: cardNo });
+                }
             });
 
             if (loaded.length > 0) {
-                beneficiaryRegister = loaded.map(item => {
-                    const rawName = String(item.name || '').trim();
-                    const rawCard = String(item.cardNo || '').trim();
-                    const rawAcc = String(item.accountNo || '').trim();
-                    item._search = {
-                        nameNorm: normalizeDevanagari(rawName),
-                        cardNorm: rawCard.toLowerCase(),
-                        cardEn: toEnglishDigit(rawCard).toLowerCase(),
-                        cardNe: toNepaliDigit(rawCard),
-                        accNorm: rawAcc.toLowerCase(),
-                        accEn: toEnglishDigit(rawAcc).toLowerCase(),
-                        accNe: toNepaliDigit(rawAcc)
-                    };
-                    return item;
-                });
+                beneficiaryRegister = loaded.map(item => preIndexBeneficiaryItem(item));
                 try {
                     localStorage.setItem(BENEFICIARY_CACHE_KEY, JSON.stringify(loaded));
                     localStorage.setItem(BENEFICIARY_CACHE_TIME_KEY, String(Date.now()));
@@ -1114,7 +1325,10 @@ function loadBeneficiaryRegister() {
         } catch(e) {
             console.warn("Beneficiary list fetch skipped:", e);
             isBeneficiaryRegisterLoaded = true;
+            updateBeneficiaryStatusBadge();
             return [];
+        } finally {
+            beneficiaryLoadPromise = null;
         }
     })();
     return beneficiaryLoadPromise;
@@ -1122,8 +1336,13 @@ function loadBeneficiaryRegister() {
 
 function updateBeneficiaryStatusBadge() {
     const el = document.getElementById('beneficiaryRegisterStatus');
-    if (el && beneficiaryRegister.length > 0) {
-        el.innerText = `(${toNepaliDigit(beneficiaryRegister.length)} जना दर्ता सूचीमा)`;
+    if (!el) return;
+    if (beneficiaryRegister.length > 0) {
+        el.innerHTML = `<span style="color: #4a5568; font-size: 0.78rem;">(${toNepaliDigit(beneficiaryRegister.length)} जना दर्ता सूचीमा)</span>`;
+    } else if (isBeneficiaryRegisterLoaded) {
+        el.innerHTML = `<span style="color: #718096; font-size: 0.78rem;">(० जना दर्ता सूचीमा)</span>`;
+    } else {
+        el.innerHTML = `<span style="color: #718096; font-size: 0.78rem;">⏳ लोड हुँदैछ...</span>`;
     }
 }
 
@@ -1132,17 +1351,23 @@ function onBeneficiarySearchInput(q) {
     const clearBtn = document.getElementById('btnClearBeneficiarySearch');
     if (clearBtn) clearBtn.style.display = q && q.trim() ? 'block' : 'none';
 
+    const seq = ++beneficiarySearchSequence;
     searchDebounceTimer = setTimeout(() => {
-        executeBeneficiarySearch(q);
+        executeBeneficiarySearch(q, seq);
     }, 180);
 }
 
 function onBeneficiarySearchFocus() {
+    if (!isBeneficiaryRegisterLoaded) {
+        loadBeneficiaryRegister();
+    }
     const val = document.getElementById('inBeneficiarySearch')?.value || '';
-    if (val.trim()) executeBeneficiarySearch(val);
+    if (val.trim()) executeBeneficiarySearch(val, ++beneficiarySearchSequence);
 }
 
-function executeBeneficiarySearch(rawQ) {
+function executeBeneficiarySearch(rawQ, seq) {
+    if (seq !== undefined && seq !== beneficiarySearchSequence) return;
+
     const dropdown = document.getElementById('beneficiarySearchResults');
     if (!dropdown) return;
 
@@ -1150,6 +1375,17 @@ function executeBeneficiarySearch(rawQ) {
     if (!q) {
         dropdown.style.display = 'none';
         dropdown.innerHTML = '';
+        return;
+    }
+
+    if (!isBeneficiaryRegisterLoaded && beneficiaryRegister.length === 0) {
+        dropdown.innerHTML = `<div style="padding: 10px 14px; text-align: center; color: #718096; font-size: 0.85rem;">⏳ दर्ता सूची लोड हुँदैछ, कृपया एकछिन प्रतिक्षा गर्नुहोस्...</div>`;
+        dropdown.style.display = 'block';
+        loadBeneficiaryRegister().then(() => {
+            if (seq === undefined || seq === beneficiarySearchSequence) {
+                executeBeneficiarySearch(rawQ, seq);
+            }
+        });
         return;
     }
 
@@ -1164,10 +1400,10 @@ function executeBeneficiarySearch(rawQ) {
                (s.cardEn && s.cardEn.includes(qEn)) ||
                (s.accNorm && s.accNorm.includes(qClean)) ||
                (s.accEn && s.accEn.includes(qEn));
-    }).slice(0, 10);
+    }).slice(0, 15);
 
     if (matches.length === 0) {
-        dropdown.innerHTML = `<div style="padding: 10px; color: #718096; font-size: 0.85rem;">कुनै लाभग्राही फेला परेन ।</div>`;
+        dropdown.innerHTML = `<div style="padding: 12px 14px; text-align: center; color: #718096; font-size: 0.85rem;">कुनै लाभग्राही फेला परेन ।</div>`;
         dropdown.style.display = 'block';
         return;
     }
@@ -1176,15 +1412,23 @@ function executeBeneficiarySearch(rawQ) {
     matches.forEach(item => {
         const div = document.createElement('div');
         div.className = 'beneficiary-result-item';
-        div.style.cssText = 'padding: 8px 12px; border-bottom: 1px solid #edf2f7; cursor: pointer; transition: background 0.15s;';
-        div.onmouseenter = () => div.style.background = '#ebf8ff';
+        div.style.cssText = 'padding: 8px 12px; border-bottom: 1px solid #edf2f7; cursor: pointer; transition: background 0.15s; background: #ffffff;';
+        div.onmouseenter = () => div.style.background = '#f7fafc';
         div.onmouseleave = () => div.style.background = '#ffffff';
         div.onclick = () => selectBeneficiaryItem(item);
 
+        const cardText = item.cardNo ? `दर्ता नं: ${toNepaliDigit(item.cardNo)}` : '-';
+        const accText = item.accountNo ? `खाता नं: ${item.accountNo}` : '';
+        const typeText = item.allowanceType ? `प्रकार: ${item.allowanceType}` : '';
+
         div.innerHTML = `
-            <div style="font-weight: 700; color: #2d3748;">${item.name || '-'}</div>
-            <div style="font-size: 0.78rem; color: #718096;">
-                परिचयपत्र: <strong>${toNepaliDigit(item.cardNo || '-')}</strong> | खाता नं: <strong>${item.accountNo || '-'}</strong>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                <span style="font-weight: 600; font-size: 0.9rem; color: #2d3748; overflow-wrap: anywhere; word-break: break-word;">${item.name || '-'}</span>
+                <span style="font-size: 0.78rem; color: #4a5568; white-space: nowrap; font-variant-numeric: tabular-nums; background: #f7fafc; padding: 2px 7px; border: 1px solid #e2e8f0; border-radius: 4px;">${cardText}</span>
+            </div>
+            <div style="font-size: 0.78rem; color: #718096; margin-top: 3px; display: flex; flex-wrap: wrap; gap: 10px;">
+                ${accText ? `<span><span style="font-family: monospace; color: #4a5568;">${accText}</span></span>` : ''}
+                ${typeText ? `<span>${typeText}</span>` : ''}
             </div>
         `;
         dropdown.appendChild(div);
@@ -1258,7 +1502,7 @@ document.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
     populateFiscalYearDropdown();
     initDefaultDate();
-    resetChairPosition();
+    loadStoredChairSigSettings();
     loadStoredSpecimenBoxLayout();
     initSpecimenBoxDraggable();
     switchPreviewPage(1);
