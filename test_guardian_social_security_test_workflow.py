@@ -114,9 +114,8 @@ check("Page 1 is addressed to Agricultural Development Bank Gauradaha",
       "कृषि विकास बैंक लिमिटेड" in p1_content and "शाखा कार्यालय, गौरादह, झापा" in p1_content)
 check("Page 1 contains no Prime Commercial Bank", "प्राईम" not in p1_content and "Prime" not in p1_content)
 check("Page 1 contains no Ward No. 4 references", "वडा नं. ४" not in p1_content and "वडा नं. ०४" not in p1_content)
-check("Page 1 has Secretary signature on LEFT and Chairperson on RIGHT",
-      "lblP1SecName" in p1_content and "lblP1ChairName" in p1_content and
-      p1_content.find("lblP1SecName") < p1_content.find("lblP1ChairName"))
+check("Page 1 has Chairperson signature on RIGHT and NO Secretary signature block",
+      "lblP1ChairName" in p1_content and "lblP1SecName" not in p1_content and "p1SecSignatureBlock" not in p1_content)
 
 # Page 2: Applicant's request (सेवाग्राहीले दिने निवेदन)
 p2_content = test_html[p2_pos:p3_pos]
@@ -170,10 +169,10 @@ check("Nepal Sambat calculates from nepal-sambat-tithi.js",
 check("Saved date is preserved when loading record for edit",
       "setVal('inMiti', rec.miti" in test_js)
 
-# ── GROUP 8: Ward Secretary Default & Chairperson Config ──
-print("\n[TEST GROUP 8] Ward Secretary Default & Chairperson Config:")
-check("Ward Secretary defaults to 'अनिता अधिकारी'",
-      "अनिता अधिकारी" in test_html and "वडा सचिव" in test_html)
+# ── GROUP 8: Signatory Configuration (Ward Chairperson Only) ──
+print("\n[TEST GROUP 8] Ward Chairperson Configuration & Secretary Removal:")
+check("Ward Secretary is completely removed from signatory config",
+      "inSecretarySelect" not in test_html and "chkShowSecretary" not in test_html and "अनिता अधिकारी" not in test_html)
 check("Ward Chairperson uses existing Ward 1 configuration",
       "inSignAuthority" in test_html and "नगेन्द्र भण्डारी" in test_html)
 check("Acting chairpersons supported in Ward 1 options",
@@ -188,49 +187,65 @@ check("CSS enforces page-break-after: always for printing exactly 3 pages",
 check("Print-all and single-page print workflows supported",
       "printSingleCurrentPage" in test_js and "printAndSaveSystem" in test_js)
 
-# ── GROUP 10: Refinements, Typography, Spacing & Secretary Toggle ──
-print("\n[TEST GROUP 10] Layout Refinements, Typography & Secretary Toggle Validation:")
+# ── GROUP 10: Refinements, Typography, Spacing & Duplicate Removal ──
+print("\n[TEST GROUP 10] Layout Refinements, Typography & Duplicate Removal:")
 
-# 1. Secretary toggle checkbox in input panel
-check("Secretary toggle checkbox (chkShowSecretary) exists in HTML",
-      "chkShowSecretary" in test_html)
-check("Label 'वडा सचिवको हस्ताक्षर देखाउने' is present in HTML",
-      "वडा सचिवको हस्ताक्षर देखाउने" in test_html)
-check("Secretary toggle defaults to ON (checked)",
-      'id="chkShowSecretary" checked' in test_html or 'checked' in re.search(r'<input[^>]*id="chkShowSecretary"[^>]*>', test_html).group(0))
+# 1. Removal of duplicate bank fields from form panel
+check("Separate duplicate bank name input field (inBankName) is removed from UI",
+      'id="inBankName"' not in test_html)
+check("Separate duplicate bank branch input field (inBankBranch) is removed from UI",
+      'id="inBankBranch"' not in test_html)
 
-# 2. Secretary toggle CSS & JavaScript
-check("JavaScript defines toggleSecretaryVisibility()",
-      "toggleSecretaryVisibility" in test_js)
-check("CSS contains rule to hide secretary signature block",
-      "body.hide-p1-secretary #p1SecSignatureBlock" in test_html)
-check("CSS ensures chairperson remains right-aligned when secretary signature is hidden",
-      "body.hide-p1-secretary #p1ChairSignatureBlock" in test_html and "margin-left: auto" in test_html)
-check("showSecretary preference is saved with recommendation record",
-      "showSecretary:" in test_js or "showSecretary :" in test_js)
-check("Saved showSecretary preference is restored when reopening record",
-      "rec.showSecretary" in test_js)
+# 2. Bank Heading printed on Page 1
+page1_section = test_html[test_html.find('id="page1"'):test_html.find('id="page2"')]
+check("Bank heading line 1 has 'श्री कृषि विकास बैंक लिमिटेड' and is bold",
+      "<strong>श्री कृषि विकास बैंक लिमिटेड</strong>" in page1_section)
+check("Bank heading line 2 has 'शाखा कार्यालय, गौरादह, झापा' and is bold",
+      "<strong>शाखा कार्यालय, गौरादह, झापा</strong>" in page1_section)
+check("Page 1 bank recipient uses standardized spacing class",
+      "p1-bank-recipient" in page1_section)
+check("Bank recipient has gap after bank name before branch line",
+      ".p1-bank-recipient .bank-name-line" in test_html and "margin-bottom: 4px" in test_html)
+check("Bank recipient block has 2-3 spacing units (24px) margin-bottom before subject",
+      ".p1-bank-recipient" in test_html and "margin-bottom: 24px" in test_html)
 
-# 3. Removal of checklist from editor panel
+# 3. Subject Typography & Shared Base Font Size
+check("Subject label 'विषय:' is bold (font-weight: 700)",
+      ".p1-subject-wrapper .subject-label" in test_html and "font-weight: 700" in test_html)
+check("Subject label 'विषय:' is red (#e51a23)",
+      "color: #e51a23" in test_html)
+check("Subject line text has regular font-weight (font-weight: 400)",
+      ".p1-subject-wrapper .subject-line" in test_html and "font-weight: 400" in test_html and
+      ".p1-subject-wrapper #lblSubject" in test_html)
+check("Subject label and subject text share exact same font-size (--doc-font-size, 13pt)",
+      ".p1-subject-wrapper .subject-label" in test_html and
+      ".p1-subject-wrapper #lblSubject" in test_html and
+      "font-size: var(--doc-font-size, 13pt)" in test_html)
+check("Subject line has no underline or bottom border",
+      "text-decoration: none !important" in test_html and "border-bottom: none !important" in test_html)
+check("Subject wrapper has consistent gap below subject before body",
+      ".p1-subject-wrapper" in test_html and "margin: 14px 0 18px 0" in test_html)
+
+# 4. Removal of checklist from editor panel
 check("Editor panel removes 'संलग्न कागजातहरूको चेकलिस्ट'",
       "संलग्न कागजातहरूको चेकलिस्ट" not in test_html and "संलग्न कागजातहरू (चेकलिस्ट)" not in test_html)
 check("Editor panel removes unused chkDoc1 checkbox",
       "chkDoc1" not in test_html)
 
-# 4. Retention of document list on Page 2 (Applicant's application)
+# 5. Retention of document list on Page 2 (Applicant's application)
 page2_section = test_html[test_html.find('id="page2"'):test_html.find('id="page3"')]
 check("Printed Page 2 (निवेदन) retains its intended supporting-document list",
       "संलग्न कागजातहरू :" in page2_section)
 check("Page 2 document list items preserved",
       "निवेदक (संरक्षक) को नागरिकताको प्रतिलिपि" in page2_section)
 
-# 5. Page 2 Applicant Signature
+# 6. Page 2 Applicant Signature
 check("Page 2 has applicant signature label",
       "निवेदक (संरक्षक) को दस्तखत" in page2_section)
 check("Page 2 applicant signature label is placed ABOVE the signature line",
       page2_section.find("निवेदक (संरक्षक) को दस्तखत") < page2_section.find("border-top: 1.5px dashed"))
 
-# 6. Page 3 Schedule 2 enlarged thumbprint and stamp boxes
+# 7. Page 3 Schedule 2 enlarged thumbprint and stamp boxes
 page3_section = test_html[test_html.find('id="page3"'):]
 check("Schedule 2 has dedicated blank boxes for signing and stamping",
       "guardian-sig-box" in page3_section or "schedule2-blank-box" in page3_section)
@@ -241,83 +256,44 @@ check("Guardian signature area has NO printed placeholder text inside",
 check("Ward office stamp area has NO printed placeholder text inside",
       "(कार्यालयको छापका लागि खाली स्थान)" not in page3_section)
 
-# 7. Page 1 Typography & Spacing
-page1_section = test_html[test_html.find('id="page1"'):test_html.find('id="page2"')]
-check("Page 1 bank recipient uses standardized spacing class",
-      "p1-bank-recipient" in page1_section)
-check("Page 1 subject uses standardized spacing wrapper",
-      "p1-subject-wrapper" in page1_section)
-check("Template integrates --doc-font-size token",
-      "--doc-font-size" in test_html)
-check("Template integrates --subject-font-size token",
-      "--subject-font-size" in test_html)
-check("Template integrates --table-font-size token",
-      "--table-font-size" in test_html)
-check("Template integrates --sig-font-size token",
-      "--sig-font-size" in test_html)
-
 # 8. Plain neutral payment period styling
 check("Payment period uses plain neutral background",
       ".period-section" in test_html and "background: #ffffff" in test_html)
 check("Overly colorful #c05621 removed from payment period section",
       "#c05621" not in test_html)
 
-# ── GROUP 11: Signature Sliders, Bank Spacing, Subject Typography & Specimen Box ──
-print("\n[TEST GROUP 11] Signature Sliders, Bank Spacing, Subject Typography & Specimen Box:")
+# ── GROUP 11: Chairperson Slider & Draggable Specimen Box ──
+print("\n[TEST GROUP 11] Chairperson Slider & Draggable Specimen Box:")
 
-# 1. Signature Sliders UI & Logic
-check("Section header 'हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्' is present in HTML",
-      "हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्" in test_html)
-check("Secretary position slider (sliderSecPosY) exists in HTML",
-      'id="sliderSecPosY"' in test_html)
+# 1. Chairperson Vertical Slider
+check("Secretary position slider (sliderSecPosY) is completely removed",
+      'id="sliderSecPosY"' not in test_html and "badgeSecPosY" not in test_html)
 check("Chairperson position slider (sliderChairPosY) exists in HTML",
       'id="sliderChairPosY"' in test_html)
-check("Secretary slider has label 'वडा सचिवको हस्ताक्षर स्थान (माथि/तल)'",
-      "वडा सचिवको हस्ताक्षर स्थान (माथि/तल)" in test_html)
 check("Chairperson slider has label 'वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल)'",
       "वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल)" in test_html)
-check("Badge displays badgeSecPosY and badgeChairPosY exist with mm unit",
-      'id="badgeSecPosY"' in test_html and 'id="badgeChairPosY"' in test_html and "0 mm" in test_html)
-check("Reset controls exist for both individual officers and all",
-      "resetSecPosition" in test_html and "resetChairPosition" in test_html and "resetOfficerPositions" in test_html)
-check("JavaScript defines onSecPosYChange and onChairPosYChange",
-      "function onSecPosYChange" in test_js and "function onChairPosYChange" in test_js)
-check("JavaScript defines reset functions for officer positions",
-      "function resetOfficerPositions" in test_js and "function resetSecPosition" in test_js and "function resetChairPosition" in test_js)
-check("CSS applies independent transforms using CSS variables to secretary and chairperson",
-      "#p1SecSignatureBlock" in test_html and "--sec-sig-offset-y" in test_html and
-      "#p1ChairSignatureBlock" in test_html and "--chair-sig-offset-y" in test_html)
-check("Print CSS includes independent transform rules for both officers",
-      "@media print" in test_html and
-      "transform: translateY(var(--sec-sig-offset-y" in test_html and
-      "transform: translateY(var(--chair-sig-offset-y" in test_html)
-check("secretaryPosY and chairpersonPosY are saved with recommendation record",
-      "secretaryPosY:" in test_js and "chairpersonPosY:" in test_js)
-check("secretaryPosY and chairpersonPosY are restored when editing a record",
-      "rec.secretaryPosY" in test_js and "rec.chairpersonPosY" in test_js)
-check("resetForm resets officer slider positions to default",
-      "resetOfficerPositions()" in test_js)
+check("Badge displays badgeChairPosY exists with mm unit",
+      'id="badgeChairPosY"' in test_html and "0 mm" in test_html)
+check("Reset option 'पूर्वनिर्धारित स्थानमा फर्काउनुहोस्' exists for Chairperson",
+      "resetChairPosition" in test_html and "पूर्वनिर्धारित स्थानमा फर्काउनुहोस्" in test_html)
+check("Chairperson slider allows meaningful upward movement (min <= -50)",
+      re.search(r'id="sliderChairPosY"[^>]*min="(-\d+)"', test_html) and
+      int(re.search(r'id="sliderChairPosY"[^>]*min="(-\d+)"', test_html).group(1)) <= -50)
+check("Chairperson slider allows controlled downward movement (max >= 20)",
+      re.search(r'id="sliderChairPosY"[^>]*max="(\d+)"', test_html) and
+      int(re.search(r'id="sliderChairPosY"[^>]*max="(\d+)"', test_html).group(1)) >= 20)
+check("JavaScript defines onChairPosYChange and resetChairPosition",
+      "function onChairPosYChange" in test_js and "function resetChairPosition" in test_js)
+check("chairpersonPosY is saved with recommendation record",
+      "chairpersonPosY:" in test_js)
+check("chairpersonPosY is restored when editing a record",
+      "rec.chairpersonPosY" in test_js)
+check("resetForm resets chairperson slider to default",
+      "resetChairPosition()" in test_js)
+check("Print CSS includes transform rule for chairperson",
+      "@media print" in test_html and "transform: translateY(var(--chair-sig-offset-y" in test_html)
 
-# 2. Bank Recipient Spacing
-check("Bank recipient has dedicated bank-name-line and bank-branch-line",
-      "bank-name-line" in test_html and "bank-branch-line" in test_html)
-check("Bank recipient has gap after bank name before branch line",
-      ".p1-bank-recipient .bank-name-line" in test_html and "margin-bottom: 6px" in test_html)
-check("Bank recipient block has 2-3 spacing units (24px) margin-bottom before subject",
-      ".p1-bank-recipient" in test_html and "margin-bottom: 24px" in test_html)
-
-# 3. Subject Typography & Font Weight Decoupling
-check("Subject label 'विषय:' is bold (font-weight: 700)",
-      ".p1-subject-wrapper .subject-label" in test_html and "font-weight: 700" in test_html)
-check("Subject line text has regular font-weight (font-weight: 400)",
-      ".p1-subject-wrapper .subject-line" in test_html and "font-weight: 400" in test_html and
-      ".p1-subject-wrapper #lblSubject" in test_html)
-check("Subject line has no underline or bottom border",
-      "text-decoration: none !important" in test_html and "border-bottom: none !important" in test_html)
-check("Subject wrapper has consistent gap below subject before body",
-      ".p1-subject-wrapper" in test_html and "margin: 14px 0 18px 0" in test_html)
-
-# 4. Tapasil and Specimen Signature Box Layout
+# 2. Draggable Specimen Signature Box
 check("Tapasil and Specimen Signature are arranged in a side-by-side flex row",
       ".tapasil-specimen-row" in test_html and "display: flex" in test_html and
       "justify-content: space-between" in test_html and "align-items: flex-start" in test_html)
@@ -331,9 +307,25 @@ check("Specimen signature box is clearly labelled 'नमुना दस्त�
 check("Specimen signature card has bordered rectangle and dedicated signing space",
       ".specimen-signature-card" in test_html and "border: 1.5px solid #000000" in test_html and
       ".specimen-signature-box" in test_html and "height: 18mm" in test_html)
+check("Specimen signature card is styled with grab cursor and position relative",
+      ".specimen-signature-card" in test_html and "cursor: grab" in test_html and "position: relative" in test_html)
 check("Specimen signature row preserves all recipient detail labels on left",
       "lblP1TblBeneficiaryName" in test_html and "lblP1TblCardNo" in test_html and
       "lblP1TblAccountNo" in test_html and "lblP1TblGuardianName" in test_html)
+check("JavaScript defines applySpecimenBoxLayout and resetSpecimenBoxLayout",
+      "function applySpecimenBoxLayout" in test_js and "function resetSpecimenBoxLayout" in test_js)
+check("JavaScript defines initSpecimenBoxDraggable for mouse and touch drag",
+      "function initSpecimenBoxDraggable" in test_js and "mousedown" in test_js and "touchstart" in test_js)
+check("Draggable handler supports horizontal (X) and vertical (Y) movement",
+      "deltaX_mm" in test_js and "deltaY_mm" in test_js)
+check("specimenSigPosX and specimenSigPosY are saved with recommendation record",
+      "specimenSigPosX:" in test_js and "specimenSigPosY:" in test_js)
+check("specimenSigPosX and specimenSigPosY are restored when editing a record",
+      "rec.specimenSigPosX" in test_js and "rec.specimenSigPosY" in test_js)
+check("resetForm resets specimen box layout to default",
+      "resetSpecimenBoxLayout()" in test_js)
+check("Reset button exists in UI for specimen signature box",
+      "resetSpecimenBoxLayout()" in test_html and "पूर्वनिर्धारित स्थानमा फर्काउनुहोस्" in test_html)
 
 print("\n" + "=" * 80)
 print(f"TEST RESULTS: {passed} PASSED, {failed} FAILED")

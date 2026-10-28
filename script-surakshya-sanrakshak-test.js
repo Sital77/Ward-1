@@ -285,23 +285,6 @@ function updateDoc() {
     const guardianCitDistrict = getVal('inGuardianCitDistrict', 'झापा');
     const guardianNid = getVal('inGuardianNid', '');
 
-    // Signatures
-    // Secretary (Page 1 Left)
-    const secSelect = getVal('inSecretarySelect', 'अनिता अधिकारी|वडा सचिव');
-    let secName = 'अनिता अधिकारी';
-    let secTitle = 'वडा सचिव';
-    if (secSelect === 'CUSTOM') {
-        secName = getVal('inCustomSecretaryName', '..................');
-        secTitle = getVal('inCustomSecretaryTitle', 'वडा सचिव');
-    } else if (secSelect === 'BLANK') {
-        secName = '';
-        secTitle = 'वडा सचिव';
-    } else if (secSelect.includes('|')) {
-        const parts = secSelect.split('|');
-        secName = parts[0] || 'अनिता अधिकारी';
-        secTitle = parts[1] || 'वडा सचिव';
-    }
-
     // Chairperson (Page 1 Right, and Page 3)
     const signAuth = getVal('inSignAuthority', 'नगेन्द्र भण्डारी|वडा अध्यक्ष');
     let chairName = 'नगेन्द्र भण्डारी';
@@ -356,9 +339,7 @@ function updateDoc() {
         }
     }
 
-    // Signatures Page 1 (Secretary LEFT, Chairperson RIGHT)
-    setTxt('lblP1SecName', secName);
-    setTxt('lblP1SecTitle', secTitle);
+    // Signatures Page 1 (Chairperson on RIGHT)
     setTxt('lblP1ChairName', chairName);
     setTxt('lblP1ChairTitle', chairTitle);
 
@@ -428,8 +409,6 @@ function updateDoc() {
     setTxt('lblP3ChairName', chairName);
     setTxt('lblP3ChairTitle', `(${chairTitle})`);
     setTxt('lblP3ValidityAY', fiscalYear);
-
-    toggleSecretaryVisibility();
 }
 
 // ── Preview Tab Switching ──
@@ -493,36 +472,6 @@ function handleRelationChange() {
     }
 }
 
-// ── Ward Secretary Signature Toggle (वडा सचिवको हस्ताक्षर देखाउने/लुकाउने) ──
-function toggleSecretaryVisibility() {
-    const chk = document.getElementById('chkShowSecretary');
-    const show = chk ? chk.checked : true;
-    const p1SecBlock = document.getElementById('p1SecSignatureBlock');
-    const p1ChairBlock = document.getElementById('p1ChairSignatureBlock');
-    const secConfigGroup = document.getElementById('secretaryConfigGroup');
-
-    if (show) {
-        document.body.classList.remove('hide-p1-secretary');
-        if (p1SecBlock) p1SecBlock.style.display = 'block';
-        if (p1ChairBlock) p1ChairBlock.style.marginLeft = '';
-        if (secConfigGroup) secConfigGroup.style.opacity = '1';
-    } else {
-        document.body.classList.add('hide-p1-secretary');
-        if (p1SecBlock) p1SecBlock.style.display = 'none';
-        if (p1ChairBlock) p1ChairBlock.style.marginLeft = 'auto';
-        if (secConfigGroup) secConfigGroup.style.opacity = '0.6';
-    }
-}
-
-// ── Secretary Dropdown ──
-function handleSecretaryChange() {
-    const sel = document.getElementById('inSecretarySelect').value;
-    const box = document.getElementById('customSecretaryBox');
-    if (box) {
-        box.style.display = (sel === 'CUSTOM') ? 'grid' : 'none';
-    }
-}
-
 // ── Chairperson Dropdown ──
 function toggleCustomSign() {
     const val = document.getElementById('inSignAuthority').value;
@@ -532,24 +481,7 @@ function toggleCustomSign() {
     }
 }
 
-// ── Officer Signature Vertical Position Controls ──
-function onSecPosYChange(val) {
-    const v = parseInt(val, 10) || 0;
-    const badge = document.getElementById('badgeSecPosY');
-    if (badge) badge.textContent = `${v} mm`;
-    const slider = document.getElementById('sliderSecPosY');
-    if (slider && slider.value !== String(v)) slider.value = v;
-
-    const block = document.getElementById('p1SecSignatureBlock');
-    if (block) {
-        block.style.setProperty('--sec-sig-offset-y', `${v}mm`);
-        block.style.transform = `translateY(${v}mm)`;
-    }
-    document.documentElement.style.setProperty('--sec-sig-offset-y', `${v}mm`);
-    const page1 = document.getElementById('page1');
-    if (page1) page1.style.setProperty('--sec-sig-offset-y', `${v}mm`);
-}
-
+// ── Chairperson Signature Vertical Position Controls ──
 function onChairPosYChange(val) {
     const v = parseInt(val, 10) || 0;
     const badge = document.getElementById('badgeChairPosY');
@@ -562,22 +494,159 @@ function onChairPosYChange(val) {
         block.style.setProperty('--chair-sig-offset-y', `${v}mm`);
         block.style.transform = `translateY(${v}mm)`;
     }
-    document.documentElement.style.setProperty('--chair-sig-offset-y', `${v}mm`);
     const page1 = document.getElementById('page1');
     if (page1) page1.style.setProperty('--chair-sig-offset-y', `${v}mm`);
-}
-
-function resetSecPosition() {
-    onSecPosYChange(0);
 }
 
 function resetChairPosition() {
     onChairPosYChange(0);
 }
 
-function resetOfficerPositions() {
-    resetSecPosition();
-    resetChairPosition();
+// ══════════════════════════════════════════════════════
+//  Specimen Signature Box Controller (नमुना दस्तखत बक्स Drag & Position)
+// ══════════════════════════════════════════════════════
+const DEFAULT_SPECIMEN_BOX_LAYOUT = {
+    width: 48,   // in mm
+    height: 18,  // in mm
+    posX: 0,     // in mm
+    posY: 0      // in mm
+};
+
+const SPECIMEN_BOX_LIMITS = {
+    minPosX: -90,
+    maxPosX: 40,
+    minPosY: -60,
+    maxPosY: 80
+};
+
+const SPECIMEN_BOX_STORAGE_KEY = 'guardian_test_specimen_box_settings';
+let currentSpecimenBoxLayout = { ...DEFAULT_SPECIMEN_BOX_LAYOUT };
+
+function validateSpecimenDimensions(posX, posY) {
+    const numX = parseFloat(posX);
+    const numY = parseFloat(posY);
+
+    const safeX = isNaN(numX) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posX : Math.min(Math.max(Math.round(numX), SPECIMEN_BOX_LIMITS.minPosX), SPECIMEN_BOX_LIMITS.maxPosX);
+    const safeY = isNaN(numY) ? DEFAULT_SPECIMEN_BOX_LAYOUT.posY : Math.min(Math.max(Math.round(numY), SPECIMEN_BOX_LIMITS.minPosY), SPECIMEN_BOX_LIMITS.maxPosY);
+
+    return { width: DEFAULT_SPECIMEN_BOX_LAYOUT.width, height: DEFAULT_SPECIMEN_BOX_LAYOUT.height, posX: safeX, posY: safeY };
+}
+
+function applySpecimenBoxLayout(layout, skipStorage = false) {
+    if (!layout) layout = DEFAULT_SPECIMEN_BOX_LAYOUT;
+    const validated = validateSpecimenDimensions(layout.posX, layout.posY);
+    currentSpecimenBoxLayout = { ...validated };
+
+    const card = document.getElementById('specimenSigCard');
+    if (card) {
+        card.style.left = `${validated.posX}mm`;
+        card.style.top = `${validated.posY}mm`;
+    }
+
+    const badgeX = document.getElementById('badgeSigPosX');
+    if (badgeX) badgeX.textContent = `${validated.posX} mm`;
+    const badgeY = document.getElementById('badgeSigPosY');
+    if (badgeY) badgeY.textContent = `${validated.posY} mm`;
+
+    if (!skipStorage) {
+        try {
+            localStorage.setItem(SPECIMEN_BOX_STORAGE_KEY, JSON.stringify(validated));
+        } catch (e) {}
+    }
+}
+
+function resetSpecimenBoxLayout() {
+    applySpecimenBoxLayout(DEFAULT_SPECIMEN_BOX_LAYOUT);
+}
+
+function loadStoredSpecimenBoxLayout() {
+    try {
+        const stored = localStorage.getItem(SPECIMEN_BOX_STORAGE_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && typeof parsed.posX === 'number' && typeof parsed.posY === 'number') {
+                applySpecimenBoxLayout(parsed, true);
+                return;
+            }
+        }
+    } catch (e) {}
+    applySpecimenBoxLayout(DEFAULT_SPECIMEN_BOX_LAYOUT, true);
+}
+
+function initSpecimenBoxDraggable() {
+    const card = document.getElementById('specimenSigCard');
+    if (!card || card._isDraggableInitialized) return;
+    card._isDraggableInitialized = true;
+
+    let isDragging = false;
+    let startMouseX = 0;
+    let startMouseY = 0;
+    let startPosX_mm = 0;
+    let startPosY_mm = 0;
+    const PX_PER_MM = 3.779527559; // 96 DPI / 25.4 mm
+
+    function onPointerDown(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+
+        isDragging = true;
+        card.classList.add('is-dragging');
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        startMouseX = clientX;
+        startMouseY = clientY;
+        startPosX_mm = currentSpecimenBoxLayout.posX;
+        startPosY_mm = currentSpecimenBoxLayout.posY;
+
+        document.addEventListener('mousemove', onPointerMove, { passive: false });
+        document.addEventListener('mouseup', onPointerUp);
+        document.addEventListener('touchmove', onPointerMove, { passive: false });
+        document.addEventListener('touchend', onPointerUp);
+
+        e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        if (e.cancelable) e.preventDefault();
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const deltaX_px = clientX - startMouseX;
+        const deltaY_px = clientY - startMouseY;
+
+        const deltaX_mm = Math.round(deltaX_px / PX_PER_MM);
+        const deltaY_mm = Math.round(deltaY_px / PX_PER_MM);
+
+        const newX = startPosX_mm + deltaX_mm;
+        const newY = startPosY_mm + deltaY_mm;
+
+        applySpecimenBoxLayout({
+            ...currentSpecimenBoxLayout,
+            posX: newX,
+            posY: newY
+        }, true);
+    }
+
+    function onPointerUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        card.classList.remove('is-dragging');
+
+        document.removeEventListener('mousemove', onPointerMove);
+        document.removeEventListener('mouseup', onPointerUp);
+        document.removeEventListener('touchmove', onPointerMove);
+        document.removeEventListener('touchend', onPointerUp);
+
+        try {
+            localStorage.setItem(SPECIMEN_BOX_STORAGE_KEY, JSON.stringify(currentSpecimenBoxLayout));
+        } catch (e) {}
+    }
+
+    card.addEventListener('mousedown', onPointerDown);
+    card.addEventListener('touchstart', onPointerDown, { passive: false });
 }
 
 // ── Print & Save Workflow (Normalized Single Record) ──
@@ -653,12 +722,11 @@ async function printAndSaveSystem() {
             guardianCitNo:        document.getElementById('inGuardianCitNo').value.trim(),
             guardianCitDistrict:  document.getElementById('inGuardianCitDistrict').value.trim() || 'झापा',
             guardianNid:          document.getElementById('inGuardianNid').value.trim(),
-            showSecretary:        document.getElementById('chkShowSecretary') ? document.getElementById('chkShowSecretary').checked : true,
-            secretaryPosY:        parseInt(document.getElementById('sliderSecPosY') ? document.getElementById('sliderSecPosY').value : 0, 10) || 0,
             chairpersonPosY:      parseInt(document.getElementById('sliderChairPosY') ? document.getElementById('sliderChairPosY').value : 0, 10) || 0,
-            secretarySelect:      document.getElementById('inSecretarySelect').value,
-            customSecretaryName:  document.getElementById('inCustomSecretaryName').value.trim(),
-            customSecretaryTitle: document.getElementById('inCustomSecretaryTitle').value.trim(),
+            specimenSigPosX:      currentSpecimenBoxLayout.posX,
+            specimenSigPosY:      currentSpecimenBoxLayout.posY,
+            specimenSigWidth:     currentSpecimenBoxLayout.width,
+            specimenSigHeight:    currentSpecimenBoxLayout.height,
             signAuth:             document.getElementById('inSignAuthority').value,
             customSignName:       document.getElementById('inCustomSignName').value.trim(),
             customSignTitle:      document.getElementById('inCustomSignTitle').value.trim(),
@@ -743,10 +811,8 @@ function resetForm() {
 
     document.getElementById('badgeRecNoDisplay').innerText = 'स्वतः उत्पन्न हुने (१०० बाट सुरु)';
 
-    const chkSec = document.getElementById('chkShowSecretary');
-    if (chkSec) chkSec.checked = true;
-    toggleSecretaryVisibility();
-    resetOfficerPositions();
+    resetChairPosition();
+    resetSpecimenBoxLayout();
 
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'none';
@@ -915,21 +981,6 @@ function loadRecordForEdit(id) {
         handleRelationChange();
     }
 
-    const chkSec = document.getElementById('chkShowSecretary');
-    if (chkSec) {
-        chkSec.checked = rec.showSecretary !== false;
-    }
-    toggleSecretaryVisibility();
-
-    if (rec.secretarySelect) {
-        setVal('inSecretarySelect', rec.secretarySelect);
-        if (rec.secretarySelect === 'CUSTOM') {
-            setVal('inCustomSecretaryName', rec.customSecretaryName || '');
-            setVal('inCustomSecretaryTitle', rec.customSecretaryTitle || 'वडा सचिव');
-        }
-        handleSecretaryChange();
-    }
-
     if (rec.signAuth) {
         setVal('inSignAuthority', rec.signAuth);
         if (rec.signAuth === 'CUSTOM') {
@@ -939,10 +990,16 @@ function loadRecordForEdit(id) {
         toggleCustomSign();
     }
 
-    const secPosY = (rec.secretaryPosY !== undefined && rec.secretaryPosY !== null) ? rec.secretaryPosY : 0;
-    onSecPosYChange(secPosY);
     const chairPosY = (rec.chairpersonPosY !== undefined && rec.chairpersonPosY !== null) ? rec.chairpersonPosY : 0;
     onChairPosYChange(chairPosY);
+
+    const savedLayout = {
+        width: rec.specimenSigWidth || DEFAULT_SPECIMEN_BOX_LAYOUT.width,
+        height: rec.specimenSigHeight || DEFAULT_SPECIMEN_BOX_LAYOUT.height,
+        posX: (rec.specimenSigPosX !== undefined && rec.specimenSigPosX !== null) ? rec.specimenSigPosX : 0,
+        posY: (rec.specimenSigPosY !== undefined && rec.specimenSigPosY !== null) ? rec.specimenSigPosY : 0
+    };
+    applySpecimenBoxLayout(savedLayout);
 
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'inline-block';
@@ -1201,8 +1258,9 @@ document.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
     populateFiscalYearDropdown();
     initDefaultDate();
-    toggleSecretaryVisibility();
-    resetOfficerPositions();
+    resetChairPosition();
+    loadStoredSpecimenBoxLayout();
+    initSpecimenBoxDraggable();
     switchPreviewPage(1);
     updateDoc();
 });

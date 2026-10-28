@@ -109,11 +109,15 @@
         }
 
         .p1-bank-recipient .bank-name-line {
-            margin-bottom: 6px !important;
+            font-weight: 700 !important;
+            font-size: var(--doc-font-size, 13pt);
+            margin-bottom: 4px !important;
             line-height: 1.45;
         }
 
         .p1-bank-recipient .bank-branch-line {
+            font-weight: 700 !important;
+            font-size: var(--doc-font-size, 13pt);
             line-height: 1.45;
         }
 
@@ -125,7 +129,7 @@
         }
 
         .p1-subject-wrapper .subject-line {
-            font-size: var(--subject-font-size, 14.5pt);
+            font-size: var(--doc-font-size, 13pt);
             font-weight: 400 !important;
             line-height: 1.4;
             text-decoration: none !important;
@@ -136,13 +140,14 @@
             font-weight: 700 !important;
             color: #e51a23 !important;
             margin-right: 6px;
+            font-size: var(--doc-font-size, 13pt);
             text-decoration: none !important;
             border-bottom: none !important;
         }
 
         .p1-subject-wrapper #lblSubject {
             font-weight: 400 !important;
-            font-size: var(--subject-font-size, 14.5pt);
+            font-size: var(--doc-font-size, 13pt);
             color: #000000 !important;
             text-decoration: none !important;
             border-bottom: none !important;
@@ -216,6 +221,7 @@
             align-items: flex-end;
             flex: 0 0 auto;
             margin-top: 2px;
+            position: relative;
         }
 
         .specimen-signature-card {
@@ -228,6 +234,23 @@
             box-sizing: border-box;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            position: relative;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            transition: box-shadow 0.2s ease, outline 0.2s ease;
+        }
+
+        .specimen-signature-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .specimen-signature-card.is-dragging {
+            cursor: grabbing !important;
+            opacity: 0.95;
+            box-shadow: 0 4px 14px rgba(43, 108, 176, 0.35) !important;
+            outline: 2px dashed #3182ce !important;
         }
 
         .specimen-signature-title {
@@ -251,7 +274,7 @@
 
         .p1-signatures-row {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: flex-end;
             margin-top: 24px;
             padding-bottom: 6px;
@@ -262,15 +285,12 @@
             text-align: center;
             min-width: 190px;
             position: relative;
-            transition: transform 0.1s ease;
-        }
-
-        #p1SecSignatureBlock {
-            transform: translateY(var(--sec-sig-offset-y, 0mm));
+            transition: transform 0.05s linear;
         }
 
         #p1ChairSignatureBlock {
             transform: translateY(var(--chair-sig-offset-y, 0mm));
+            margin-left: auto;
         }
 
         .p1-sig-space {
@@ -295,15 +315,6 @@
             font-weight: 600;
             color: #2d3748;
             line-height: 1.3;
-        }
-
-        /* Toggle Secretary Signature Display */
-        body.hide-p1-secretary #p1SecSignatureBlock {
-            display: none !important;
-        }
-
-        body.hide-p1-secretary #p1ChairSignatureBlock {
-            margin-left: auto !important;
         }
 
         /* Preview Tab Navigation Bar */
@@ -453,29 +464,31 @@
                 break-after: auto !important;
             }
 
-            /* Secretary Toggle Print Rules */
-            body.hide-p1-secretary #p1SecSignatureBlock {
-                display: none !important;
-            }
-
-            body.hide-p1-secretary #p1ChairSignatureBlock {
+            /* Vertical Position Slider Print Rules */
+            #p1ChairSignatureBlock {
+                transform: translateY(var(--chair-sig-offset-y, 0mm)) !important;
                 margin-left: auto !important;
             }
 
-            /* Vertical Position Slider Print Rules */
-            #p1SecSignatureBlock {
-                transform: translateY(var(--sec-sig-offset-y, 0mm)) !important;
+            /* Specimen Signature Box Print Rules */
+            #specimenSigCard {
+                border: 1.5px solid #000000 !important;
+                background: #ffffff !important;
             }
-            #p1ChairSignatureBlock {
-                transform: translateY(var(--chair-sig-offset-y, 0mm)) !important;
-            }
+
             /* Page 1 Bank Recipient Print Rules */
             .p1-bank-recipient {
                 margin-top: 10px !important;
                 margin-bottom: 24px !important;
             }
             .p1-bank-recipient .bank-name-line {
-                margin-bottom: 6px !important;
+                font-weight: 700 !important;
+                font-size: var(--doc-font-size, 13pt) !important;
+                margin-bottom: 4px !important;
+            }
+            .p1-bank-recipient .bank-branch-line {
+                font-weight: 700 !important;
+                font-size: var(--doc-font-size, 13pt) !important;
             }
 
             /* Subject Typography Print Rules */
@@ -484,14 +497,18 @@
             .p1-subject-wrapper .subject-line * {
                 text-decoration: none !important;
                 border-bottom: none !important;
+                font-size: var(--doc-font-size, 13pt) !important;
             }
             .p1-subject-wrapper .subject-label {
                 font-weight: 700 !important;
+                color: #e51a23 !important;
+                font-size: var(--doc-font-size, 13pt) !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
             .p1-subject-wrapper #lblSubject {
                 font-weight: 400 !important;
+                font-size: var(--doc-font-size, 13pt) !important;
                 text-decoration: none !important;
             }
 
@@ -691,17 +708,6 @@
                 <input type="text" id="inAccountNo" placeholder="उदा: ०६०१२००४५६७८९०१२" oninput="updateDoc()">
             </div>
 
-            <div class="row-grid">
-                <div class="form-group">
-                    <label>बैंकको नाम (स्थिर):</label>
-                    <input type="text" id="inBankName" value="कृषि विकास बैंक लिमिटेड" readonly
-                        style="background: #edf2f7; cursor: not-allowed;">
-                </div>
-                <div class="form-group">
-                    <label>शाखा कार्यालय (स्थिर):</label>
-                    <input type="text" id="inBankBranch" value="गौरादह शाखा, झापा" readonly
-                        style="background: #edf2f7; cursor: not-allowed;">
-                </div>
             </div>
         </div>
 
@@ -770,33 +776,13 @@
             </div>
         </div>
 
-        <!-- ══ SIGNATORY CONFIGURATION (SECRETARY & CHAIRPERSON) ══ -->
+        <!-- ══ SIGNATORY CONFIGURATION (CHAIRPERSON) ══ -->
         <div class="section-card lh-section">
-            <div class="section-label">🖋️ हस्ताक्षर अधिकारीहरू (वडा सचिव र वडा अध्यक्ष)</div>
-
-            <!-- Secretary Configuration (Left Signature on Page 1) -->
-            <div class="form-group" id="secretaryConfigGroup" style="background: #edf2f7; padding: 10px; border-radius: 6px; margin-bottom: 10px; transition: opacity 0.2s;">
-                <div style="margin-bottom: 8px;">
-                    <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; color: #2b6cb0;">
-                        <input type="checkbox" id="chkShowSecretary" checked onchange="toggleSecretaryVisibility(); updateDoc();" style="width: 17px; height: 17px; cursor: pointer;">
-                        <span>वडा सचिवको हस्ताक्षर देखाउने</span>
-                    </label>
-                </div>
-                <label style="color: #2b6cb0; font-weight: 700;">वडा सचिव (बायाँ हस्ताक्षर):</label>
-                <select id="inSecretarySelect" onchange="handleSecretaryChange(); updateDoc();">
-                    <option value="अनिता अधिकारी|वडा सचिव" selected>अनिता अधिकारी (वडा सचिव)</option>
-                    <option value="CUSTOM">✍️ अन्य नाम लेख्नुहोस् (Custom)</option>
-                    <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
-                </select>
-                <div id="customSecretaryBox" style="display: none; margin-top: 8px;" class="row-grid">
-                    <input type="text" id="inCustomSecretaryName" placeholder="सचिवको नाम" oninput="updateDoc()">
-                    <input type="text" id="inCustomSecretaryTitle" value="वडा सचिव" placeholder="पद" oninput="updateDoc()">
-                </div>
-            </div>
+            <div class="section-label">🖋️ हस्ताक्षर अधिकारी (वडा अध्यक्ष)</div>
 
             <!-- Chairperson Configuration (Right Signature on Page 1 & Page 3) -->
             <div class="form-group" style="background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px; margin-bottom: 12px;">
-                <label style="color: #c53030; font-weight: 700;">वडा अध्यक्ष (दायाँ हस्ताक्षर):</label>
+                <label style="color: #c53030; font-weight: 700;">वडा अध्यक्ष (हस्ताक्षर अधिकारी):</label>
                 <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
                     <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
                     <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
@@ -812,35 +798,47 @@
                 </div>
             </div>
 
-            <!-- ── Vertical Position Adjustment Section (हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्) ── -->
+            <!-- ── Vertical Position Adjustment Section ── -->
             <div class="sig-position-adjust-container" style="background: #ffffff; border: 1.5px solid #cbd5e0; border-radius: 8px; padding: 12px; margin-top: 8px;">
                 <div style="font-weight: 700; color: #2d3748; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📐 हस्ताक्षर अधिकारीहरूको स्थान मिलाउनुहोस्</span>
-                    <button type="button" onclick="resetOfficerPositions()" style="background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 3px 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: #4a5568;" title="दुवै स्थान रिसेट गर्नुस्">↺ सबै रिसेट</button>
-                </div>
-
-                <!-- Secretary Vertical Slider -->
-                <div style="margin-bottom: 10px; background: #f7fafc; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <label for="sliderSecPosY" style="font-size: 0.84rem; font-weight: 600; color: #2b6cb0; cursor: pointer;">वडा सचिवको हस्ताक्षर स्थान (माथि/तल):</label>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <span id="badgeSecPosY" style="font-size: 0.82rem; font-weight: 700; color: #2b6cb0; background: #ebf8ff; padding: 2px 6px; border-radius: 4px; border: 1px solid #bee3f8; min-width: 45px; text-align: center;">0 mm</span>
-                            <button type="button" onclick="resetSecPosition()" style="background: none; border: none; color: #718096; cursor: pointer; font-size: 0.8rem; font-weight: 700;" title="सचिवको स्थान रिसेट">↺</button>
-                        </div>
-                    </div>
-                    <input type="range" id="sliderSecPosY" min="-30" max="50" value="0" step="1" oninput="onSecPosYChange(this.value)" style="width: 100%; cursor: pointer;">
+                    <span>📐 वडा अध्यक्षको हस्ताक्षर स्थान मिलाउनुहोस्</span>
+                    <button type="button" onclick="resetChairPosition()" style="background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 4px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: #4a5568;" title="पूर्वनिर्धारित स्थानमा फर्काउनुहोस्">↺ पूर्वनिर्धारित स्थानमा फर्काउनुहोस्</button>
                 </div>
 
                 <!-- Chairperson Vertical Slider -->
-                <div style="background: #fff5f5; padding: 8px 10px; border-radius: 6px; border: 1px solid #fed7d7;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <label for="sliderChairPosY" style="font-size: 0.84rem; font-weight: 600; color: #c53030; cursor: pointer;">वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल):</label>
+                <div style="background: #fff5f5; padding: 10px 12px; border-radius: 6px; border: 1px solid #fed7d7;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label for="sliderChairPosY" style="font-size: 0.86rem; font-weight: 700; color: #c53030; cursor: pointer;">वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल):</label>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <span id="badgeChairPosY" style="font-size: 0.82rem; font-weight: 700; color: #c53030; background: #fff5f5; padding: 2px 6px; border-radius: 4px; border: 1px solid #feb2b2; min-width: 45px; text-align: center;">0 mm</span>
-                            <button type="button" onclick="resetChairPosition()" style="background: none; border: none; color: #718096; cursor: pointer; font-size: 0.8rem; font-weight: 700;" title="अध्यक्षको स्थान रिसेट">↺</button>
+                            <span id="badgeChairPosY" style="font-size: 0.85rem; font-weight: 700; color: #c53030; background: #fff5f5; padding: 2px 8px; border-radius: 4px; border: 1px solid #feb2b2; min-width: 55px; text-align: center;">0 mm</span>
+                            <button type="button" onclick="resetChairPosition()" style="background: none; border: none; color: #718096; cursor: pointer; font-size: 0.85rem; font-weight: 700;" title="पूर्वनिर्धारित स्थानमा फर्काउनुहोस्">↺</button>
                         </div>
                     </div>
-                    <input type="range" id="sliderChairPosY" min="-30" max="50" value="0" step="1" oninput="onChairPosYChange(this.value)" style="width: 100%; cursor: pointer;">
+                    <input type="range" id="sliderChairPosY" min="-70" max="25" value="0" step="1" oninput="onChairPosYChange(this.value)" style="width: 100%; cursor: pointer;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #718096; margin-top: 4px;">
+                        <span>⬆️ माथि (-70 mm)</span>
+                        <span>पूर्वनिर्धारित (0 mm)</span>
+                        <span>⬇️ तल (+25 mm)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Specimen Signature Box Drag & Position Controls ── -->
+            <div style="background: #f7fafc; border: 1.5px solid #cbd5e0; border-radius: 8px; padding: 10px 12px; margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: 700; color: #2d3748; font-size: 0.88rem;">🖐️ नमुना दस्तखत बक्स स्थान</span>
+                    <button type="button" onclick="resetSpecimenBoxLayout()"
+                        style="background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 3px 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: #4a5568;"
+                        title="साविकको स्थानमा फर्काउनुहोस्">
+                        ↺ पूर्वनिर्धारित स्थानमा फर्काउनुहोस्
+                    </button>
+                </div>
+                <div style="font-size: 0.8rem; color: #4a5568; line-height: 1.4;">
+                    💡 <em>Preview मा रहेको "नमुना दस्तखत" बक्सलाई माउसले तानेर (Drag गरेर) दायाँ/बायाँ वा माथि/तल सार्न सक्नुहुन्छ।</em>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 6px; font-size: 0.8rem; color: #718096;">
+                    <span>दायाँ/बायाँ (X): <strong id="badgeSigPosX" style="color: #2b6cb0;">0 mm</strong></span>
+                    <span>माथि/तल (Y): <strong id="badgeSigPosY" style="color: #2b6cb0;">0 mm</strong></span>
                 </div>
             </div>
         </div>
@@ -951,8 +949,8 @@
 
                 <!-- Bank Recipient -->
                 <div class="p1-bank-recipient">
-                    <div class="bank-name-line">श्री <span id="lblBankName">कृषि विकास बैंक लिमिटेड</span></div>
-                    <div class="bank-branch-line"><span id="lblBankBranch">शाखा कार्यालय, गौरादह, झापा</span> ।</div>
+                    <div class="bank-name-line"><strong>श्री कृषि विकास बैंक लिमिटेड</strong></div>
+                    <div class="bank-branch-line"><strong>शाखा कार्यालय, गौरादह, झापा</strong></div>
                 </div>
 
                 <!-- Subject -->
@@ -1009,17 +1007,10 @@
                 </div>
             </div>
 
-            <!-- Page 1 Footer: Signatures (Secretary LEFT, Chairperson RIGHT) -->
+            <!-- Page 1 Footer: Signatures (Ward Chairperson on RIGHT) -->
             <div class="p1-signatures-row" id="p1SignaturesRow">
-                <!-- Left: Ward Secretary -->
-                <div class="p1-sig-block" id="p1SecSignatureBlock">
-                    <div class="p1-sig-space"></div>
-                    <div class="p1-sig-line"></div>
-                    <div class="p1-sig-name" id="lblP1SecName">अनिता अधिकारी</div>
-                    <div class="p1-sig-title" id="lblP1SecTitle">वडा सचिव</div>
-                </div>
                 <!-- Right: Ward Chairperson -->
-                <div class="p1-sig-block" id="p1ChairSignatureBlock" style="margin-left: auto;">
+                <div class="p1-sig-block" id="p1ChairSignatureBlock">
                     <div class="p1-sig-space"></div>
                     <div class="p1-sig-line"></div>
                     <div class="p1-sig-name" id="lblP1ChairName">नगेन्द्र भण्डारी</div>
