@@ -306,7 +306,7 @@ check("Specimen signature box is clearly labelled 'नमुना दस्त�
       "specimen-signature-title" in test_html and "नमुना दस्तखत" in test_html)
 check("Specimen signature card has bordered rectangle and dedicated signing space",
       ".specimen-signature-card" in test_html and "border: 1.5px solid #000000" in test_html and
-      ".specimen-signature-box" in test_html and "height: 18mm" in test_html)
+      ".specimen-signature-box" in test_html and "height: 23mm" in test_html)
 check("Specimen signature card is styled with grab cursor and position relative",
       ".specimen-signature-card" in test_html and "cursor: grab" in test_html and "position: relative" in test_html)
 check("Specimen signature row preserves all recipient detail labels on left",
@@ -394,17 +394,15 @@ check("JavaScript defines adjustChairSignatureLine to dynamically adapt line to 
 check("updateDoc invokes adjustChairSignatureLine when officer changes",
       "adjustChairSignatureLine();" in test_js)
 
-# 2. Horizontal Signature Positioning
-check("Compact horizontal signature position slider (sliderChairPosX) exists in HTML",
-      'id="sliderChairPosX"' in test_html and 'id="badgeChairPosX"' in test_html)
-check("JavaScript defines onChairPosXChange handler",
+# 2. Horizontal Signature Positioning (Removed as per Part 8)
+check("Horizontal signature position slider (sliderChairPosX) is completely removed from UI",
+      'id="sliderChairPosX"' not in test_html and 'id="badgeChairPosX"' not in test_html)
+check("Label 'हस्ताक्षर स्थान दायाँ/बायाँ' is completely absent leaving no empty gap",
+      "हस्ताक्षर स्थान दायाँ/बायाँ" not in test_html)
+check("JavaScript maintains safe onChairPosXChange stub for backward compatibility",
       "function onChairPosXChange" in test_js)
-check("chairpersonPosX is persisted with recommendation record",
-      "chairpersonPosX:" in test_js)
-check("chairpersonPosX is restored when record is reopened",
-      "rec.chairpersonPosX" in test_js)
-check("Transform applies directly to signature block as one cohesive unit",
-      "translate(${posX}mm, ${posY}mm)" in test_js or "translate(" in test_html)
+check("Vertical transform applies directly to signature block",
+      "translateY(${posY}mm)" in test_js or "translateY(var(--chair-sig-offset-y" in test_html)
 
 # 3. Clean Beneficiary List & Loading State
 check("preIndexBeneficiaryItem indexes name, cardNo, accountNo, and allowanceType",
@@ -417,6 +415,81 @@ check("Beneficiary search provides clear empty state message",
       "कुनै लाभग्राही फेला परेन" in test_js)
 check("Section cards use clean, restrained styling without high-saturation backgrounds",
       "rgba(43, 108, 176, 0.06)" not in test_html and "rgba(56, 161, 105, 0.06)" not in test_html)
+
+# ── GROUP 14: Master Prompt Functional & Document-Generation Verification ──
+print("\n[TEST GROUP 14] Master Prompt Functional & Document-Generation Updates:")
+
+# Part 1: Main Bank Recommendation Text
+check("Page 1 main text has updated base wording with all placeholders",
+      "प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. १ मा स्थायी बसोबास गर्ने" in test_html and
+      "lblP1ApplicantName" in test_html and "lblP1ApplicantRelation" in test_html and
+      "lblP1BeneficiaryName" in test_html and "lblP1GuardianRelation" in test_html and
+      "lblP1GuardianName" in test_html and "lblP1RecNo" in test_html and
+      "lblP1AY" in test_html and "lblP1Quarter" in test_html)
+check("Main text uses proper sequence: निवेदकको नाम -> निवेदकको नाता -> लाभग्राहीको नाम",
+      test_html.find("lblP1ApplicantName") < test_html.find("lblP1ApplicantRelation") and
+      test_html.find("lblP1ApplicantRelation") < test_html.find("lblP1BeneficiaryName") and
+      test_html.find("lblP1BeneficiaryName") < test_html.find("lblP1GuardianRelation"))
+check("Page 1 body paragraph ends with tapasil and guardian recommendation",
+      "तपसिलमा सहीछाप भएको निजको संरक्षकलाई उपलब्ध गराइदिनुहुन सिफारिस गरिन्छ" in test_html)
+
+# Part 2: Dedicated Box for “निवेदकको नाता”
+check("Dedicated field inApplicantName exists in form panel",
+      'id="inApplicantName"' in test_html)
+check("Dedicated dropdown selApplicantRelation exists with label 'निवेदकको नाता (लाभग्राहीसँग):'",
+      'id="selApplicantRelation"' in test_html and "निवेदकको नाता (लाभग्राहीसँग):" in test_html)
+check("selApplicantRelation supports common relations (छोरा, छोरी, नाति, नातिनी, बुहारी, ज्वाइँ, श्रीमान्, श्रीमती, अन्य)",
+      'value="छोरा"' in test_html and 'value="नाति"' in test_html and 'value="बुहारी"' in test_html and 'value="श्रीमान्"' in test_html)
+check("customApplicantRelationGroup exists for 'अन्य' custom relation",
+      'id="customApplicantRelationGroup"' in test_html and 'id="inCustomApplicantRelation"' in test_html)
+check("applicantName and applicantRelation persist with record in Firestore",
+      "applicantName:" in test_js and "applicantRelation:" in test_js and
+      "selApplicantRelation:" in test_js and "customApplicantRelation:" in test_js)
+check("loadRecordForEdit restores applicantName and applicantRelation with safe fallback",
+      "rec.applicantName" in test_js and "rec.applicantRelation" in test_js)
+
+# Part 3: Excel Beneficiary Data Extraction
+check("Beneficiary category dropdown selBenefitCategory supports DoNIDCR categories",
+      "अन्य जेष्ठ नागरिक भत्ता" in test_html and "जेष्ठ नागरिक भत्ता (दलित)" in test_html and
+      "जेष्ठ नागरिक एकल महिला" in test_html and "पूर्ण अपाङ्गता भत्ता" in test_html)
+check("selectBeneficiaryItem dynamically binds allowance category from Excel record",
+      "selBenefitCategory" in test_js and "allowanceType" in test_js)
+check("parseHtmlTableBeneficiaries parses name, cardNo, accountNo, allowanceType, citNo, etc.",
+      "parseHtmlTableBeneficiaries" in test_js and "सामाजिक सुरक्षाको किसिम" in test_js)
+
+# Part 6: Anusuchi-2 Document Structure
+check("Page 3 heading contains exact reference (दफा ३ को उपदफा (७) र दफा ७ को उपदफा (४) सँग सम्बन्धित)",
+      "दफा ३ को उपदफा (७) र दफा ७ को उपदफा (४) सँग सम्बन्धित" in test_html)
+check("Page 3 has exact recommendation number and date header",
+      "संरक्षक सिफारिस नं. :" in test_html and "सिफारिस मिति :" in test_html)
+check("Page 3 has updated beneficiary intro wording matching Section 6.2",
+      "यस गौरादह नगरपालिका, वडा नं. १ मा स्थायी बसोबास गर्ने लाभग्राही परिचयपत्र नं." in test_html and
+      "श्री/श्रीमती" in test_html and "भएको हुनाले निजलाई निम्न व्यहोराको संरक्षक/माथवर/स्याहारसुसार गर्ने व्यक्ति आवश्यक पर्ने हुनाले" in test_html)
+check("Page 3 guardian table has all required columns and stamp boxes",
+      "lblP3GuardianName" in test_html and "lblP3GuardianAddress" in test_html and
+      "lblP3Relation" in test_html and "lblP3GuardianPhone" in test_html and
+      "lblP3GuardianNid" in test_html and "lblP3GuardianCitNo" in test_html and
+      "lblP3GuardianCitDistrict" in test_html)
+check("Page 3 office table has Gauradaha Ward 1, Ward Chairperson name and stamp",
+      "lblP3ChairName" in test_html and "lblP3ChairTitle" in test_html and
+      "गौरादह नगरपालिका, वडा नं. १ को कार्यालय" in test_html)
+
+# Part 7: Sample Signature Box Default Dimensions (68 mm x 23 mm)
+check("DEFAULT_SPECIMEN_BOX_LAYOUT default width is exactly 68 mm",
+      "width: 68" in test_js)
+check("DEFAULT_SPECIMEN_BOX_LAYOUT default height is exactly 23 mm",
+      "height: 23" in test_js)
+check("HTML specimen signature card CSS has width 68mm",
+      "width: 68mm" in test_html)
+check("HTML specimen signature box CSS has height 23mm",
+      "height: 23mm" in test_html)
+check("HTML width input default value is 68",
+      'id="numSigWidth"' in test_html and 'value="68"' in test_html)
+check("HTML height input default value is 23",
+      'id="numSigHeight"' in test_html and 'value="23"' in test_html)
+check("loadRecordForEdit preserves custom dimensions or safely defaults to 68x23",
+      "rec.specimenSigWidth || DEFAULT_SPECIMEN_BOX_LAYOUT.width" in test_js and
+      "rec.specimenSigHeight || DEFAULT_SPECIMEN_BOX_LAYOUT.height" in test_js)
 
 print("\n" + "=" * 80)
 print(f"TEST RESULTS: {passed} PASSED, {failed} FAILED")

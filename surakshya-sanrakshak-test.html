@@ -229,7 +229,7 @@
             border: 1.5px solid #000000;
             border-radius: 4px;
             padding: 6px 12px 8px 12px;
-            width: 48mm;
+            width: 68mm;
             background: #ffffff;
             text-align: center;
             box-sizing: border-box;
@@ -267,7 +267,7 @@
         }
 
         .specimen-signature-box {
-            height: 18mm;
+            height: 23mm;
             background: #ffffff;
             user-select: none;
             -webkit-user-select: none;
@@ -278,7 +278,6 @@
             --chair-sig-line-style: dashed;
             --chair-sig-line-width: 180px;
             --chair-sig-font-size: 13pt;
-            --chair-sig-offset-x: 0mm;
             --chair-sig-offset-y: 0mm;
         }
 
@@ -302,7 +301,7 @@
         }
 
         #p1ChairSignatureBlock {
-            transform: translate(var(--chair-sig-offset-x, 0mm), var(--chair-sig-offset-y, 0mm));
+            transform: translateY(var(--chair-sig-offset-y, 0mm));
             margin-left: auto;
         }
 
@@ -583,7 +582,7 @@
 
             /* Vertical Position & Signature Styling Print Rules */
             #p1ChairSignatureBlock {
-                transform: translateY(var(--chair-sig-offset-y, 0mm)) translate(var(--chair-sig-offset-x, 0mm), 0mm) !important;
+                transform: translateY(var(--chair-sig-offset-y, 0mm)) !important;
                 margin-left: auto !important;
             }
             .p1-sig-inner {
@@ -834,6 +833,12 @@
                 <label>सामाजिक सुरक्षा भत्ता प्राप्त गर्ने वर्ग / किसिम:</label>
                 <select id="selBenefitCategory" onchange="updateDoc()">
                     <option value="जेष्ठ नागरिक" selected>जेष्ठ नागरिक (६८ वर्ष माथिका)</option>
+                    <option value="अन्य जेष्ठ नागरिक भत्ता">अन्य जेष्ठ नागरिक भत्ता</option>
+                    <option value="जेष्ठ नागरिक भत्ता (दलित)">जेष्ठ नागरिक भत्ता (दलित)</option>
+                    <option value="जेष्ठ नागरिक एकल महिला">जेष्ठ नागरिक एकल महिला</option>
+                    <option value="विधवा">विधवा</option>
+                    <option value="पूर्ण अपाङ्गता भत्ता">पूर्ण अपाङ्गता भत्ता</option>
+                    <option value="अति अशक्त अपाङ्गता भत्ता">अति अशक्त अपाङ्गता भत्ता</option>
                     <option value="जेष्ठ नागरिक (दलित)">जेष्ठ नागरिक (दलित - ६० वर्ष माथिका)</option>
                     <option value="जेष्ठ नागरिक (एकल महिला/विधवा)">जेष्ठ नागरिक (एकल महिला/विधवा)</option>
                     <option value="पूर्ण अपाङ्गता (क वर्ग - रातो कार्ड)">पूर्ण अपाङ्गता (क वर्ग - रातो कार्ड)</option>
@@ -857,21 +862,28 @@
             </div>
         </div>
 
-        <!-- ══ GUARDIAN DETAILS SECTION ══ -->
+        <!-- ══ APPLICANT & GUARDIAN DETAILS SECTION ══ -->
         <div class="section-card guardian-section">
-            <div class="section-label">🤝 निवेदक तथा संरक्षकको विवरण</div>
-
-            <div class="form-group">
-                <label>रकम बुझ्ने संरक्षक/निवेदकको पूरा नाम, थर:</label>
-                <input type="text" id="inGuardianName" placeholder="उदा: राम कुमार अधिकारी" oninput="updateDoc()">
-            </div>
+            <div class="section-label">✍️ निवेदकको विवरण</div>
 
             <div class="row-grid">
                 <div class="form-group">
-                    <label>लाभग्राहीसँगको नाता:</label>
-                    <select id="selRelation" onchange="handleRelationChange(); updateDoc();">
+                    <label>निवेदकको पूरा नाम, थर:</label>
+                    <input type="text" id="inApplicantName" placeholder="उदा: राम कुमार अधिकारी" oninput="onApplicantNameInput()">
+                </div>
+                <div class="form-group">
+                    <label>निवेदकको नाता (लाभग्राहीसँग):</label>
+                    <select id="selApplicantRelation" onchange="handleApplicantRelationChange(); updateDoc();">
                         <option value="छोरा" selected>छोरा</option>
                         <option value="छोरी">छोरी</option>
+                        <option value="नाति">नाति</option>
+                        <option value="नातिनी">नातिनी</option>
+                        <option value="पनाति">पनाति</option>
+                        <option value="पनातिनी">पनातिनी</option>
+                        <option value="बुहारी">बुहारी</option>
+                        <option value="ज्वाइँ">ज्वाइँ</option>
+                        <option value="श्रीमान्">श्रीमान्</option>
+                        <option value="श्रीमती">श्रीमती</option>
                         <option value="पति">पति</option>
                         <option value="पत्नी">पत्नी</option>
                         <option value="बुबा">बुबा</option>
@@ -880,17 +892,52 @@
                         <option value="भाइ">भाइ</option>
                         <option value="दिदी">दिदी</option>
                         <option value="बहिनी">बहिनी</option>
+                        <option value="अन्य">अन्य</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" id="customApplicantRelationGroup" style="display: none; margin-top: -6px; margin-bottom: 8px;">
+                <label>नाता खुलाउनुहोस् (निवेदक):</label>
+                <input type="text" id="inCustomApplicantRelation" placeholder="नाता लेख्नुहोस्" oninput="updateDoc()">
+            </div>
+
+            <div class="section-label" style="margin-top: 10px; border-top: 1px dashed #cbd5e0; padding-top: 10px;">
+                🤝 रकम बुझ्ने संरक्षकको विवरण
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>संरक्षकको पूरा नाम, थर:</label>
+                    <input type="text" id="inGuardianName" placeholder="उदा: राम कुमार अधिकारी" oninput="onGuardianNameInput()">
+                </div>
+                <div class="form-group">
+                    <label>लाभग्राहीसँग संरक्षकको नाता:</label>
+                    <select id="selRelation" onchange="handleRelationChange(); updateDoc();">
+                        <option value="छोरा" selected>छोरा</option>
+                        <option value="छोरी">छोरी</option>
+                        <option value="पति">पति</option>
+                        <option value="पत्नी">पत्नी</option>
+                        <option value="श्रीमान्">श्रीमान्</option>
+                        <option value="श्रीमती">श्रीमती</option>
+                        <option value="बुबा">बुबा</option>
+                        <option value="आमा">आमा</option>
+                        <option value="दाजु">दाजु</option>
+                        <option value="भाइ">भाइ</option>
+                        <option value="दिदी">दिदी</option>
+                        <option value="बहिनी">बहिनी</option>
                         <option value="नाति">नाति</option>
                         <option value="नातिनी">नातिनी</option>
+                        <option value="पनाति">पनाति</option>
+                        <option value="पनातिनी">पनातिनी</option>
                         <option value="बुहारी">बुहारी</option>
                         <option value="ज्वाइँ">ज्वाइँ</option>
                         <option value="अन्य">अन्य</option>
                     </select>
                 </div>
-                <div class="form-group" id="customRelationGroup" style="display: none;">
-                    <label>नाता खुलाउनुहोस्:</label>
-                    <input type="text" id="inCustomRelation" placeholder="नाता लेख्नुहोस्" oninput="updateDoc()">
-                </div>
+            </div>
+            <div class="form-group" id="customRelationGroup" style="display: none; margin-top: -6px; margin-bottom: 8px;">
+                <label>नाता खुलाउनुहोस् (संरक्षक):</label>
+                <input type="text" id="inCustomRelation" placeholder="नाता लेख्नुहोस्" oninput="updateDoc()">
             </div>
 
             <div class="form-group">
@@ -947,20 +994,11 @@
             <!-- ── Ward Chairperson Signature Settings & Position ── -->
             <div class="sig-position-adjust-container" style="background: #f7fafc; border: 1px solid #cbd5e0; border-radius: 6px; padding: 10px 12px; margin-top: 8px;">
                 <div style="font-weight: 700; color: #2d3748; font-size: 0.86rem; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>हस्ताक्षर स्थान मिलाउनुहोस्</span>
+                    <span>वडा अध्यक्षको हस्ताक्षर स्थान</span>
                     <button type="button" onclick="resetChairPosition(); resetChairSignatureSettings();" style="background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 2px 8px; font-size: 0.76rem; font-weight: 600; cursor: pointer; color: #4a5568;" title="पूर्वनिर्धारित स्थानमा फर्काउनुहोस्">↺ पूर्वनिर्धारित स्थानमा फर्काउनुहोस्</button>
                 </div>
 
-                <!-- 1. Horizontal Position (हस्ताक्षर स्थान दायाँ/बायाँ) -->
-                <div style="margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                        <label for="sliderChairPosX" style="font-size: 0.8rem; font-weight: 600; color: #4a5568;">हस्ताक्षर स्थान दायाँ/बायाँ (Horizontal):</label>
-                        <span id="badgeChairPosX" style="font-size: 0.78rem; font-weight: 700; color: #2b6cb0;">0 mm</span>
-                    </div>
-                    <input type="range" id="sliderChairPosX" min="-60" max="40" value="0" step="1" oninput="onChairPosXChange(this.value)" style="width: 100%; cursor: pointer;">
-                </div>
-
-                <!-- 2. Vertical Position (हस्ताक्षर स्थान माथि/तल - Discreet & Clean) -->
+                <!-- Vertical Position (हस्ताक्षर स्थान माथि/तल - Discreet & Clean) -->
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
                         <label for="sliderChairPosY" style="font-size: 0.8rem; font-weight: 600; color: #4a5568;">वडा अध्यक्षको हस्ताक्षर स्थान (माथि/तल):</label>
@@ -1005,13 +1043,13 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center;">
                         <label for="numSigWidth" style="font-size: 0.78rem; font-weight: 600; color: #4a5568; margin: 0;">चौडाइ (Width):</label>
-                        <input type="number" id="numSigWidth" min="30" max="80" value="48" step="1"
+                        <input type="number" id="numSigWidth" min="30" max="85" value="68" step="1"
                             oninput="onSigBoxLayoutInput('width', this.value)"
                             style="width: 48px; padding: 2px 4px; font-size: 0.8rem; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">
                     </div>
                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center;">
                         <label for="numSigHeight" style="font-size: 0.78rem; font-weight: 600; color: #4a5568; margin: 0;">उचाइ (Height):</label>
-                        <input type="number" id="numSigHeight" min="10" max="35" value="18" step="1"
+                        <input type="number" id="numSigHeight" min="10" max="40" value="23" step="1"
                             oninput="onSigBoxLayoutInput('height', this.value)"
                             style="width: 48px; padding: 2px 4px; font-size: 0.8rem; border: 1px solid #cbd5e0; border-radius: 4px; text-align: center;">
                     </div>
@@ -1019,10 +1057,10 @@
 
                 <!-- Hidden elements for full backward compatibility & programmatic drag updates -->
                 <div style="display: none;">
-                    <input type="range" id="sliderSigWidth" min="30" max="80" value="48" step="1" oninput="onSigBoxLayoutSlider('width', this.value)">
-                    <span id="badgeSigWidth">48 mm</span>
-                    <input type="range" id="sliderSigHeight" min="10" max="35" value="18" step="1" oninput="onSigBoxLayoutSlider('height', this.value)">
-                    <span id="badgeSigHeight">18 mm</span>
+                    <input type="range" id="sliderSigWidth" min="30" max="85" value="68" step="1" oninput="onSigBoxLayoutSlider('width', this.value)">
+                    <span id="badgeSigWidth">68 mm</span>
+                    <input type="range" id="sliderSigHeight" min="10" max="40" value="23" step="1" oninput="onSigBoxLayoutSlider('height', this.value)">
+                    <span id="badgeSigHeight">23 mm</span>
                     <input type="range" id="sliderSigPosX" min="-90" max="40" value="0" step="1" oninput="onSigBoxLayoutSlider('posX', this.value)">
                     <input type="number" id="numSigPosX" min="-90" max="40" value="0" step="1" oninput="onSigBoxLayoutInput('posX', this.value)">
                     <span id="badgeSigPosX">0 mm</span>
@@ -1153,7 +1191,7 @@
 
                 <!-- Body Paragraph (Bank Recommendation) -->
                 <div class="letter-body-para p1-body-para" id="p1BodyText">
-                    प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. १ मा स्थायी बसोबास गर्ने <strong id="lblP1GuardianName">..................</strong> ले आफ्नो <strong id="lblP1Relation">छोरा</strong> <strong id="lblP1BeneficiaryName">..................</strong> सामाजिक सुरक्षा भत्ता प्राप्त गर्ने लाभग्राही भएको र <span id="lblP1Condition">वृद्ध तथा अशक्त भई हिँडडुल गर्न असमर्थ</span> का कारण बैंकमा उपस्थित भई सामाजिक सुरक्षा भत्ताबापत खातामा जम्मा भएको रकम निकाल्न कठिनाइ हुने भनी दिएको निवेदन सम्बन्धमा आवश्यक विवरण तथा कागजात जाँच गर्दा निजको रेखदेख तथा हेरचाह <strong id="lblP1GuardianName2">..................</strong> ले गर्दै आएको देखिएकोले, यस वडा कार्यालयबाट जारी गरिएको अनुसूची–२ (संरक्षक सिफारिस नं. <strong id="lblP1RecNo">१००</strong>) मा उल्लेखित विवरणअनुसार निज लाभग्राहीको खातामा आ.व. <span id="lblP1AY">२०८३/०८४</span> को <strong id="lblP1Quarter">प्रथम त्रैमासिक</strong> बापत जम्मा भएको सामाजिक सुरक्षा भत्ताको रकम नियमानुसार निजको संरक्षकलाई उपलब्ध गराइदिनुहुन सिफारिस गरिन्छ ।
+                    प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. १ मा स्थायी बसोबास गर्ने <strong id="lblP1ApplicantName">..................</strong> ले आफ्नो <strong id="lblP1ApplicantRelation">छोरा</strong>, <strong id="lblP1BeneficiaryName">..................</strong>, सामाजिक सुरक्षा भत्ता प्राप्त गर्ने लाभग्राही रहनुभएको र वृद्ध तथा अशक्त भई हिँडडुल गर्न असमर्थ भएका कारण स्वयम् बैंकमा उपस्थित भई सामाजिक सुरक्षा भत्ताबापत खातामा जम्मा भएको रकम निकाल्न कठिनाइ हुने भनी दिनुभएको निवेदन सम्बन्धमा आवश्यक विवरण तथा कागजात जाँच गर्दा निज लाभग्राहीको रेखदेख तथा हेरचाह <strong id="lblP1GuardianRelation">छोरा</strong> <strong id="lblP1GuardianName">..................</strong> ले गर्दै आएको देखिएकोले, यस वडा कार्यालयबाट जारी गरिएको अनुसूची–२ (संरक्षक सिफारिस नं. <strong id="lblP1RecNo">१००</strong>) मा उल्लेखित विवरणअनुसार निज लाभग्राहीको खातामा आ.व. <span id="lblP1AY">२०८३/०८४</span> को <strong id="lblP1Quarter">प्रथम त्रैमासिक</strong> बापत जम्मा भएको सामाजिक सुरक्षा भत्ताको रकम नियमानुसार तपसिलमा सहीछाप भएको निजको संरक्षकलाई उपलब्ध गराइदिनुहुन सिफारिस गरिन्छ ।
                 </div>
 
                 <!-- Tapasil and Specimen Signature Row (तपसिल बायाँ, नमुना दस्तखत दायाँ) -->
@@ -1238,7 +1276,7 @@
                 <!-- Salutation & Body -->
                 <div style="font-size: 13pt; font-weight: 700; margin-bottom: 4px;">महोदय,</div>
                 <div class="letter-body-para" style="font-size: 12.5pt; line-height: 1.8; text-align: justify; margin-bottom: 12px;">
-                    प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. १ मा स्थायी बसोबास गर्ने म निवेदक <strong id="lblP2GuardianName">..................</strong> (नागरिकता नं. <span id="lblP2GuardianCitNo">..................</span>, जारी जिल्ला: <span id="lblP2GuardianCitDistrict">झापा</span>) को <strong id="lblP2Relation">छोरा</strong> नाता पर्ने श्री <strong id="lblP2BeneficiaryName">..................</strong> <span id="lblP2Condition">वृद्ध तथा अशक्त भई हिँडडुल गर्न नसक्ने र बैङ्कसम्म उपस्थित हुन नसक्ने</span> भएकाले निज लाभग्राहीको कृषि विकास बैंक लिमिटेड, शाखा कार्यालय गौरादहमा रहेको सामाजिक सुरक्षा भत्ता खातामा जम्मा भएको रकम निकाल्न कठिनाइ भएको र निजको सम्पूर्ण रेखदेख तथा हेरचाह म निवेदकले नै गर्दै आएको हुँदा निजको मन्जुरी अनुसार नै, निज लाभग्राहीको खातामा आ.व. <span id="lblP2AY">२०८३/०८४</span> को <strong id="lblP2Quarter">प्रथम त्रैमासिक</strong> बापत जम्मा भएको सामाजिक सुरक्षा भत्ताको रकम मलाई संरक्षक किटान गरी म मार्फत निकाल्न पाउने गरी सम्बन्धित कृषि विकास बैंक लिमिटेड, गौरादह शाखाको नाममा नियमानुसारको सिफारिस पत्र उपलब्ध गराई पाउन यो निवेदन पेश गरेको छु ।
+                    प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. १ मा स्थायी बसोबास गर्ने म निवेदक <strong id="lblP2ApplicantName"><span id="lblP2GuardianName">..................</span></strong> (नागरिकता नं. <span id="lblP2ApplicantCitNo"><span id="lblP2GuardianCitNo">..................</span></span>, जारी जिल्ला: <span id="lblP2ApplicantCitDistrict"><span id="lblP2GuardianCitDistrict">झापा</span></span>) को <strong id="lblP2ApplicantRelation"><span id="lblP2Relation">छोरा</span></strong> नाता पर्ने श्री <strong id="lblP2BeneficiaryName">..................</strong> <span id="lblP2Condition">वृद्ध तथा अशक्त भई हिँडडुल गर्न नसक्ने र बैङ्कसम्म उपस्थित हुन नसक्ने</span> भएकाले निज लाभग्राहीको कृषि विकास बैंक लिमिटेड, शाखा कार्यालय गौरादहमा रहेको सामाजिक सुरक्षा भत्ता खातामा जम्मा भएको रकम निकाल्न कठिनाइ भएको र निजको सम्पूर्ण रेखदेख तथा हेरचाह म निवेदकले नै गर्दै आएको हुँदा निजको मन्जुरी अनुसार नै, निज लाभग्राहीको खातामा आ.व. <span id="lblP2AY">२०८३/०८४</span> को <strong id="lblP2Quarter">प्रथम त्रैमासिक</strong> बापत जम्मा भएको सामाजिक सुरक्षा भत्ताको रकम मलाई संरक्षक किटान गरी म मार्फत निकाल्न पाउने गरी सम्बन्धित कृषि विकास बैंक लिमिटेड, गौरादह शाखाको नाममा नियमानुसारको सिफारिस पत्र उपलब्ध गराई पाउन यो निवेदन पेश गरेको छु ।
                 </div>
 
                 <!-- Two-Column Details Block -->
@@ -1311,7 +1349,7 @@
 
                 <!-- Statement Body -->
                 <div class="letter-body-para" style="font-size: 12.5pt; line-height: 1.85; text-align: justify; margin-bottom: 14px;">
-                    यस गौरादह नगरपालिका, वडा नं. १ स्थायी बसोबास गर्ने लाभग्राही परिचय पत्र नं. <strong id="lblP3CardNo">..................</strong> / <span id="lblP3Category">जेष्ठ नागरिक</span> किसिमको सामाजिक सुरक्षा भत्ता प्राप्त गर्ने श्री <strong id="lblP3BeneficiaryName">..................</strong> <span id="lblP3Condition">उमेर ९० वर्ष माथिको / अशक्त / बालबालिका</span> वर्गको लाभग्राही भएको हुनाले निजलाई निम्न व्यहोराको संरक्षक/माथवर/स्याहारसुसार गर्ने व्यक्ति आवश्यक पर्ने हुनाले सोही व्यहोरा सिफारिस साथ अनुरोध छ ।
+                    यस गौरादह नगरपालिका, वडा नं. १ मा स्थायी बसोबास गर्ने लाभग्राही परिचयपत्र नं. <strong id="lblP3CardNo">..................</strong> को सामाजिक सुरक्षा भत्ता प्राप्त गर्ने श्री/श्रीमती <strong id="lblP3BeneficiaryName">..................</strong> <span id="lblP3Category">जेष्ठ नागरिक</span> भएको हुनाले निजलाई निम्न व्यहोराको संरक्षक/माथवर/स्याहारसुसार गर्ने व्यक्ति आवश्यक पर्ने हुनाले सोही व्यहोरा सिफारिससाथ अनुरोध छ ।
                 </div>
 
                 <!-- Schedule 2 Official 2-Column Box Table -->

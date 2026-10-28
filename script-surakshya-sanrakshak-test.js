@@ -149,7 +149,17 @@ function initDefaultDate() {
             const d = toNepaliDigit(String(curDate.day).padStart(2, '0'));
             mitiInput.value = `${y}/${m}/${d}`;
         } else {
-            mitiInput.value = '२०८३/०२/१८';
+            const converter = window["@sbmdkl/nepali-date-converter"];
+            if (converter && typeof converter.adToBs === 'function') {
+                const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kathmandu" }));
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const bs = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+                mitiInput.value = toNepaliDigit(typeof bs === 'string' ? bs.replace(/-/g, '/') : `${bs.year}/${String(bs.month).padStart(2, '0')}/${String(bs.day).padStart(2, '0')}`);
+            } else {
+                mitiInput.value = '२०८३/०२/१८';
+            }
         }
     } catch (e) {
         mitiInput.value = '२०८३/०२/१८';
@@ -274,8 +284,14 @@ function updateDoc() {
     const condition = getVal('inConditionDetail', 'वृद्ध तथा अशक्त भई हिँडडुल गर्न असमर्थ');
     const benefitCategory = getVal('selBenefitCategory', 'जेष्ठ नागरिक');
 
-    // Guardian Details
+    // Applicant Details
     const guardianName = getVal('inGuardianName', '..................');
+    const applicantName = getVal('inApplicantName', guardianName);
+    const selAppRel = getVal('selApplicantRelation', 'छोरा');
+    const customAppRel = getVal('inCustomApplicantRelation', '');
+    const applicantRelation = (selAppRel === 'अन्य' || selAppRel === 'CUSTOM') ? (customAppRel || 'छोरा') : selAppRel;
+
+    // Guardian Details
     const selRel = getVal('selRelation', 'छोरा');
     const customRel = getVal('inCustomRelation', '');
     const relation = (selRel === 'अन्य' || selRel === 'CUSTOM') ? (customRel || 'संरक्षक') : selRel;
@@ -314,6 +330,9 @@ function updateDoc() {
     setTxt('lblBankBranch', 'शाखा कार्यालय, गौरादह, झापा');
     setTxt('lblSubject', 'सामाजिक सुरक्षा भत्ताको रकम संरक्षकलाई उपलब्ध गराइदिने बारे ।');
 
+    setTxt('lblP1ApplicantName', applicantName);
+    setTxt('lblP1ApplicantRelation', applicantRelation);
+    setTxt('lblP1GuardianRelation', relation);
     setTxt('lblP1GuardianName', guardianName);
     setTxt('lblP1GuardianName2', guardianName);
     setTxt('lblP1Relation', relation);
@@ -348,10 +367,12 @@ function updateDoc() {
     // 2. UPDATE PAGE 2 (Applicant's Request)
     // ──────────────────────────────────────────
     setTxt('lblP2Miti', miti);
-    setTxt('lblP2GuardianName', guardianName);
+    setTxt('lblP2ApplicantName', applicantName);
+    setTxt('lblP2ApplicantRelation', applicantRelation);
+    setTxt('lblP2GuardianName', applicantName);
     setTxt('lblP2GuardianCitNo', guardianCitNo);
     setTxt('lblP2GuardianCitDistrict', guardianCitDistrict);
-    setTxt('lblP2Relation', relation);
+    setTxt('lblP2Relation', applicantRelation);
     setTxt('lblP2BeneficiaryName', beneficiaryName);
     setTxt('lblP2Condition', condition);
     setTxt('lblP2AY', fiscalYear);
@@ -464,7 +485,32 @@ function printSingleCurrentPage() {
     }, 1000);
 }
 
-// ── Relations Dropdown ──
+// ── Applicant & Guardian Input Handlers ──
+function onApplicantNameInput() {
+    const el = document.getElementById('inApplicantName');
+    if (el) el._autoSynced = false;
+    updateDoc();
+}
+
+function onGuardianNameInput() {
+    const gName = document.getElementById('inGuardianName')?.value || '';
+    const appInput = document.getElementById('inApplicantName');
+    if (appInput && (appInput._autoSynced !== false || !appInput.value)) {
+        appInput.value = gName;
+        appInput._autoSynced = true;
+    }
+    updateDoc();
+}
+
+function handleApplicantRelationChange() {
+    const sel = document.getElementById('selApplicantRelation')?.value;
+    const box = document.getElementById('customApplicantRelationGroup');
+    if (box) {
+        box.style.display = (sel === 'अन्य') ? 'block' : 'none';
+    }
+}
+
+// ── Relations Dropdown (Guardian) ──
 function handleRelationChange() {
     const sel = document.getElementById('selRelation').value;
     const box = document.getElementById('customRelationGroup');
@@ -489,7 +535,7 @@ const DEFAULT_CHAIR_SIG_SETTINGS = {
     lineStyle: 'dashed', // 'dashed' | 'dotted' | 'solid' | 'none'
     lineWidth: 180,      // in px (100 - 250)
     fontSize: 13,        // in pt (10 - 18)
-    posX: 0,             // in mm (-60 - 40)
+    posX: 0,             // 0 mm fixed
     posY: 0              // in mm (-70 - 25)
 };
 
@@ -512,10 +558,9 @@ function applyChairSigSettings(settings, skipStorage = false) {
     const style = ['dashed', 'dotted', 'solid', 'none'].includes(settings.lineStyle) ? settings.lineStyle : DEFAULT_CHAIR_SIG_SETTINGS.lineStyle;
     const width = Math.min(Math.max(parseInt(settings.lineWidth, 10) || DEFAULT_CHAIR_SIG_SETTINGS.lineWidth, 100), 250);
     const fontSize = Math.min(Math.max(parseFloat(settings.fontSize) || DEFAULT_CHAIR_SIG_SETTINGS.fontSize, 10), 18);
-    const posX = Math.min(Math.max(parseInt(settings.posX, 10) || 0, -60), 40);
     const posY = Math.min(Math.max(parseInt(settings.posY, 10) || 0, -70), 25);
 
-    currentChairSigSettings = { lineStyle: style, lineWidth: width, fontSize: fontSize, posX: posX, posY: posY };
+    currentChairSigSettings = { lineStyle: style, lineWidth: width, fontSize: fontSize, posX: 0, posY: posY };
 
     // Apply CSS variables to root and page1
     const root = document.documentElement;
@@ -523,7 +568,6 @@ function applyChairSigSettings(settings, skipStorage = false) {
         root.style.setProperty('--chair-sig-line-style', style);
         root.style.setProperty('--chair-sig-line-width', `${width}px`);
         root.style.setProperty('--chair-sig-font-size', `${fontSize}pt`);
-        root.style.setProperty('--chair-sig-offset-x', `${posX}mm`);
         root.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
         root.style.setProperty('--officer-name-gap', '6.5px');
     }
@@ -533,28 +577,21 @@ function applyChairSigSettings(settings, skipStorage = false) {
         page1.style.setProperty('--chair-sig-line-style', style);
         page1.style.setProperty('--chair-sig-line-width', `${width}px`);
         page1.style.setProperty('--chair-sig-font-size', `${fontSize}pt`);
-        page1.style.setProperty('--chair-sig-offset-x', `${posX}mm`);
         page1.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
         page1.style.setProperty('--officer-name-gap', '6.5px');
     }
 
-    // Apply position transform solely to signature block as ONE cohesive unit
+    // Apply vertical position transform solely to signature block
     const block = document.getElementById('p1ChairSignatureBlock');
     if (block) {
-        block.style.setProperty('--chair-sig-offset-x', `${posX}mm`);
         block.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
-        block.style.transform = `translate(${posX}mm, ${posY}mm)`;
+        block.style.transform = `translateY(${posY}mm)`;
     }
 
     // Adapt signature line automatically
     adjustChairSignatureLine();
 
     // Synchronize UI Form Controls
-    const sliderX = document.getElementById('sliderChairPosX');
-    if (sliderX && sliderX.value !== String(posX)) sliderX.value = posX;
-    const badgeX = document.getElementById('badgeChairPosX');
-    if (badgeX) badgeX.textContent = `${posX} mm`;
-
     const sliderPos = document.getElementById('sliderChairPosY');
     if (sliderPos && sliderPos.value !== String(posY)) sliderPos.value = posY;
     const badgePos = document.getElementById('badgeChairPosY');
@@ -585,8 +622,7 @@ function applyChairSigSettings(settings, skipStorage = false) {
 }
 
 function onChairPosXChange(val) {
-    const v = parseInt(val, 10) || 0;
-    applyChairSigSettings({ ...currentChairSigSettings, posX: v });
+    // Deprecated horizontal control handler retained as safe stub
 }
 
 function onChairSigLineStyleChange(style) {
@@ -636,17 +672,17 @@ function loadStoredChairSigSettings() {
 //  Specimen Signature Box Controller (नमुना दस्तखत बक्स)
 // ══════════════════════════════════════════════════════
 const DEFAULT_SPECIMEN_BOX_LAYOUT = {
-    width: 48,   // in mm (30 - 80)
-    height: 18,  // in mm (10 - 35)
+    width: 68,   // in mm (30 - 85)
+    height: 23,  // in mm (10 - 40)
     posX: 0,     // in mm (-90 - 40)
     posY: 0      // in mm (-60 - 60)
 };
 
 const SPECIMEN_BOX_LIMITS = {
     minWidth: 30,
-    maxWidth: 80,
+    maxWidth: 85,
     minHeight: 10,
-    maxHeight: 35,
+    maxHeight: 40,
     minPosX: -90,
     maxPosX: 40,
     minPosY: -60,
@@ -756,6 +792,11 @@ function loadStoredSpecimenBoxLayout() {
         if (stored) {
             const parsed = JSON.parse(stored);
             if (parsed) {
+                // If stored has old default 48x18, upgrade cleanly to 68x23
+                if (parsed.width === 48 && parsed.height === 18) {
+                    parsed.width = 68;
+                    parsed.height = 23;
+                }
                 applySpecimenBoxLayout(parsed, true);
                 return;
             }
@@ -886,6 +927,11 @@ async function printAndSaveSystem() {
             recNumber = await allocateNextSeqNumber();
         }
 
+        const applicantName = (document.getElementById('inApplicantName')?.value.trim()) || guardianName;
+        const selAppRel = document.getElementById('selApplicantRelation') ? document.getElementById('selApplicantRelation').value : 'छोरा';
+        const customAppRel = document.getElementById('inCustomApplicantRelation') ? document.getElementById('inCustomApplicantRelation').value.trim() : '';
+        const applicantRelation = (selAppRel === 'अन्य' || selAppRel === 'CUSTOM') ? (customAppRel || 'छोरा') : selAppRel;
+
         const obj = {
             recommendationNo:     recNumber,
             ay:                   document.getElementById('inPatraSankhya').value.trim() || '२०८३/०८४',
@@ -897,6 +943,10 @@ async function printAndSaveSystem() {
             bankName:             'कृषि विकास बैंक लिमिटेड',
             bankBranch:           'गौरादह शाखा, झापा',
             subject:              'सामाजिक सुरक्षा भत्ताको रकम संरक्षकलाई उपलब्ध गराइदिने बारे ।',
+            applicantName:        applicantName,
+            applicantRelation:    applicantRelation,
+            selApplicantRelation: selAppRel,
+            customApplicantRelation: customAppRel,
             beneficiaryName:      beneficiaryName,
             name:                 beneficiaryName,
             beneficiaryCitNo:     document.getElementById('inBeneficiaryCitNo').value.trim(),
@@ -913,7 +963,7 @@ async function printAndSaveSystem() {
             guardianCitNo:        document.getElementById('inGuardianCitNo').value.trim(),
             guardianCitDistrict:  document.getElementById('inGuardianCitDistrict').value.trim() || 'झापा',
             guardianNid:          document.getElementById('inGuardianNid').value.trim(),
-            chairpersonPosX:      currentChairSigSettings.posX || 0,
+            chairpersonPosX:      0,
             chairpersonPosY:      currentChairSigSettings.posY,
             chairSigLineStyle:    currentChairSigSettings.lineStyle,
             chairSigLineWidth:    currentChairSigSettings.lineWidth,
@@ -989,6 +1039,17 @@ function resetForm() {
     document.getElementById('editRecordIndex').value = '';
     document.getElementById('formMainTitle').innerText = '🛡️ संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट';
 
+    const inAppName = document.getElementById('inApplicantName');
+    if (inAppName) {
+        inAppName.value = '';
+        inAppName._autoSynced = true;
+    }
+    const selAppRel = document.getElementById('selApplicantRelation');
+    if (selAppRel) selAppRel.value = 'छोरा';
+    const inCustomAppRel = document.getElementById('inCustomApplicantRelation');
+    if (inCustomAppRel) inCustomAppRel.value = '';
+    handleApplicantRelationChange();
+
     document.getElementById('inBeneficiaryName').value = '';
     document.getElementById('inBeneficiaryCitNo').value = '';
     document.getElementById('inCardNo').value = '';
@@ -1013,6 +1074,7 @@ function resetForm() {
     const btnNew = document.getElementById('btnNewForm');
     if (btnNew) btnNew.style.display = 'none';
 
+    unlinkSelectedBeneficiary();
     initDefaultDate();
     switchPreviewPage(1);
     updateDoc();
@@ -1158,9 +1220,55 @@ function loadRecordForEdit(id) {
     setVal('inBeneficiaryName', rec.beneficiaryName || '');
     setVal('inBeneficiaryCitNo', rec.beneficiaryCitNo || '');
     setVal('inCardNo', rec.cardNo || '');
-    setVal('selBenefitCategory', rec.benefitCategory || 'जेष्ठ नागरिक');
+    if (rec.benefitCategory) {
+        const selCat = document.getElementById('selBenefitCategory');
+        if (selCat) {
+            let found = false;
+            for (let opt of selCat.options) {
+                if (opt.value === rec.benefitCategory) {
+                    selCat.value = rec.benefitCategory;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                const opt = document.createElement('option');
+                opt.value = rec.benefitCategory;
+                opt.textContent = rec.benefitCategory;
+                selCat.appendChild(opt);
+                selCat.value = rec.benefitCategory;
+            }
+        }
+    }
     setVal('inConditionDetail', rec.conditionDetail || 'वृद्ध तथा अशक्त भई हिँडडुल गर्न असमर्थ');
     setVal('inAccountNo', rec.accountNo || '');
+
+    setVal('inApplicantName', rec.applicantName || rec.guardianName || '');
+    if (rec.selApplicantRelation) {
+        setVal('selApplicantRelation', rec.selApplicantRelation);
+        if (rec.selApplicantRelation === 'अन्य') {
+            setVal('inCustomApplicantRelation', rec.customApplicantRelation || '');
+        }
+    } else if (rec.applicantRelation) {
+        const selApp = document.getElementById('selApplicantRelation');
+        let matched = false;
+        if (selApp) {
+            for (let opt of selApp.options) {
+                if (opt.value === rec.applicantRelation) {
+                    selApp.value = rec.applicantRelation;
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        if (!matched) {
+            setVal('selApplicantRelation', 'अन्य');
+            setVal('inCustomApplicantRelation', rec.applicantRelation);
+        }
+    } else {
+        setVal('selApplicantRelation', rec.selRelation || 'छोरा');
+    }
+    handleApplicantRelationChange();
 
     setVal('inGuardianName', rec.guardianName || '');
     setVal('inGuardianAddress', rec.guardianAddress || 'गौरादह नगरपालिका वडा नं. १, झापा');
@@ -1190,7 +1298,7 @@ function loadRecordForEdit(id) {
         lineStyle: rec.chairSigLineStyle || DEFAULT_CHAIR_SIG_SETTINGS.lineStyle,
         lineWidth: rec.chairSigLineWidth || DEFAULT_CHAIR_SIG_SETTINGS.lineWidth,
         fontSize: rec.chairSigFontSize || DEFAULT_CHAIR_SIG_SETTINGS.fontSize,
-        posX: (rec.chairpersonPosX !== undefined && rec.chairpersonPosX !== null) ? rec.chairpersonPosX : 0,
+        posX: 0,
         posY: (rec.chairpersonPosY !== undefined && rec.chairpersonPosY !== null) ? rec.chairpersonPosY : 0
     };
     applyChairSigSettings(chairSettings);
@@ -1441,7 +1549,31 @@ function selectBeneficiaryItem(item) {
     document.getElementById('inBeneficiaryName').value = item.name || '';
     if (item.cardNo) document.getElementById('inCardNo').value = item.cardNo;
     if (item.accountNo) document.getElementById('inAccountNo').value = item.accountNo;
-    if (item.category) document.getElementById('selBenefitCategory').value = item.category;
+    if (item.citNo || item.citizenshipNo) {
+        document.getElementById('inBeneficiaryCitNo').value = item.citNo || item.citizenshipNo;
+    }
+
+    const cat = item.allowanceType || item.category || '';
+    if (cat) {
+        const selCat = document.getElementById('selBenefitCategory');
+        if (selCat) {
+            let found = false;
+            for (let opt of selCat.options) {
+                if (opt.value === cat) {
+                    selCat.value = cat;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                selCat.appendChild(opt);
+                selCat.value = cat;
+            }
+        }
+    }
 
     selectedBeneficiaryCardNo = item.cardNo || '';
 
@@ -1449,7 +1581,7 @@ function selectBeneficiaryItem(item) {
     if (badge) {
         badge.style.display = 'flex';
         document.getElementById('selectedBeneficiaryNameText').innerText = item.name || '';
-        document.getElementById('selectedBeneficiaryMetaText').innerText = `(परिचयपत्र: ${toNepaliDigit(item.cardNo || '-')})`;
+        document.getElementById('selectedBeneficiaryMetaText').innerText = `(परिचयपत्र: ${toNepaliDigit(item.cardNo || '-')}${cat ? `, वर्ग: ${cat}` : ''})`;
     }
 
     const dropdown = document.getElementById('beneficiarySearchResults');
@@ -1481,11 +1613,101 @@ function triggerExcelImport() {
     if (picker) picker.click();
 }
 
+function parseHtmlTableBeneficiaries(html, sourceName) {
+    const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+    const tdRegex = /<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/gi;
+    const stripTags = str => str.replace(/<[^>]+>/g, '').replace(/&nbsp;/gi, ' ').trim();
+
+    let trMatch;
+    const rows = [];
+    while ((trMatch = trRegex.exec(html)) !== null) {
+        const rowContent = trMatch[1];
+        let tdMatch;
+        const cells = [];
+        while ((tdMatch = tdRegex.exec(rowContent)) !== null) {
+            cells.push(stripTags(tdMatch[1]));
+        }
+        if (cells.length > 0) rows.push(cells);
+    }
+
+    if (rows.length < 2) return [];
+
+    const headers = rows[0];
+    const colMap = {};
+    headers.forEach((h, idx) => { colMap[h] = idx; });
+
+    const idxName = colMap['पुरा नाम'];
+    const idxAcc = colMap['बैंक खाता नं.'];
+    const idxCard = colMap['व्यक्तिगत परिचय नं.'];
+    const idxType = colMap['सामाजिक सुरक्षाको किसिम'] ?? -1;
+    const idxCit = colMap['नागरिकता नं'] ?? -1;
+    const idxFather = colMap['बाबुको नाम'] ?? -1;
+    const idxSpouse = colMap['पति/पत्नीको नाम'] ?? -1;
+    const idxAge = colMap['उमेर'] ?? -1;
+    const idxAddr = colMap['ठेगाना'] ?? -1;
+
+    if (idxName === undefined || idxAcc === undefined || idxCard === undefined) {
+        return [];
+    }
+
+    const seenIds = new Set();
+    const records = [];
+
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length <= Math.max(idxName, idxAcc, idxCard)) continue;
+
+        const name = (row[idxName] || '').trim();
+        const cardNo = (row[idxCard] || '').trim();
+        const accountNo = (row[idxAcc] || '').trim();
+
+        if (!name || !cardNo) continue;
+        if (seenIds.has(cardNo)) continue;
+        seenIds.add(cardNo);
+
+        const rec = {
+            name: name,
+            cardNo: cardNo,
+            accountNo: accountNo,
+            allowanceType: idxType >= 0 ? (row[idxType] || '').trim() : '',
+            citNo: idxCit >= 0 ? (row[idxCit] || '').trim() : '',
+            fatherName: idxFather >= 0 ? (row[idxFather] || '').trim() : '',
+            spouseName: idxSpouse >= 0 ? (row[idxSpouse] || '').trim() : '',
+            age: idxAge >= 0 ? (row[idxAge] || '').trim() : '',
+            address: idxAddr >= 0 ? (row[idxAddr] || '').trim() : ''
+        };
+        records.push(rec);
+    }
+    return records;
+}
+
 function handleExcelFileSelect(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
-    alert("एक्सेल फाइल प्राप्त भयो। पृष्ठभूमिमा प्रशोधन हुँदैछ...");
-    // Reset file picker
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const content = e.target.result;
+            const records = parseHtmlTableBeneficiaries(content, file.name);
+            if (records.length > 0) {
+                beneficiaryRegister = records.map(r => preIndexBeneficiaryItem(r));
+                isBeneficiaryRegisterLoaded = true;
+                try {
+                    localStorage.setItem(BENEFICIARY_CACHE_KEY, JSON.stringify(records));
+                    localStorage.setItem(BENEFICIARY_CACHE_TIME_KEY, String(Date.now()));
+                } catch(e) {}
+                updateBeneficiaryStatusBadge();
+                alert(`सफलतापूर्वक ${toNepaliDigit(records.length)} जना लाभग्राहीहरूको विवरण एक्सेलबाट लोड गरियो ।`);
+            } else {
+                alert("एक्सेल फाइलबाट लाभग्राही रेकर्ड फेला परेन। कृपया DoNIDCR ढाँचाको सही फाइल छनोट गर्नुहोस्।");
+            }
+        } catch(err) {
+            console.error("Excel parse error:", err);
+            alert("फाइल पढ्न सकिएन: " + err.message);
+        }
+    };
+    reader.readAsText(file, 'utf-8');
     event.target.value = '';
 }
 
