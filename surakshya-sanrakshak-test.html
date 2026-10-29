@@ -739,9 +739,25 @@
                     <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
-                    <label>मिति (वि.सं.):</label>
-                    <input type="text" id="inMiti" placeholder="२०८३/०२/१८"
-                        oninput="updateNepalSambatFromMiti(); updateDoc()">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="margin-bottom: 0;">मिति (वि.सं.):</label>
+                        <button type="button" id="btnSetTodayDate" onclick="handleSetTodayDateClick()"
+                            title="आजको मिति कायम गर्ने"
+                            style="background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; color: #2b6cb0; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; transition: background 0.15s;"
+                            onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#edf2f7'">
+                            📅 आजको मिति
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <input type="text" id="inMiti" placeholder="उदा: २०८३/०७/१२" style="flex: 1;"
+                            oninput="updateNepalSambatFromMiti(); updateDoc()">
+                        <button type="button" id="btnSetTodayDateIcon" onclick="handleSetTodayDateClick()"
+                            title="आजको मिति कायम गर्ने"
+                            style="padding: 7px 10px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer; font-size: 0.95rem; line-height: 1;"
+                            aria-label="आजको मिति कायम गर्ने">
+                            🔄
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -811,17 +827,46 @@
                         style="background: none; border: none; color: #c53030; cursor: pointer; font-size: 0.8rem; font-weight: 700;"
                         title="चयन हटाउनुहोस्">हटाउनुस् ✕</button>
                 </div>
+
+                <!-- ⚠️ Existing Record Alert Notice -->
+                <div id="existingRecordNotice" style="display: none; margin-top: 10px; padding: 12px 14px; background: #fffaf0; border: 1.5px solid #dd6b20; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                        <span style="font-size: 1.3rem; line-height: 1; flex-shrink: 0;">⚠️</span>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; color: #9c4221; font-size: 0.92rem; margin-bottom: 6px;">
+                                यो लाभग्राहीको संरक्षक सिफारिस यसअघि नै बनाइएको अभिलेखमा भेटियो।
+                            </div>
+                            <div id="existingRecordMeta" style="font-size: 0.82rem; color: #4a5568; line-height: 1.5; margin-bottom: 8px; background: #fff; padding: 7px 10px; border-radius: 4px; border: 1px solid #feebc8;">
+                                <!-- dynamically populated with beneficiary, cardNo, recommendationNo, miti, guardian -->
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" id="btnViewOldRecord" onclick="handleViewOldRecordClick()"
+                                    style="background: #2b6cb0; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;"
+                                    title="पुरानो सिफारिस हेर्न यहाँ थिच्नुहोस्">
+                                    👁️ पुरानो सिफारिस हेर्न यहाँ थिच्नुहोस्
+                                </button>
+                                <button type="button" id="btnCreateNewRecord" onclick="handleCreateNewRecordClick()"
+                                    style="background: #2f855a; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;"
+                                    title="नयाँ सिफारिस बनाउनुहोस्">
+                                    ➕ नयाँ सिफारिस बनाउनुहोस्
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
                 <label>लाभग्राहीको पूरा नाम, थर:</label>
-                <input type="text" id="inBeneficiaryName" placeholder="उदा: दिलमाया अधिकारी" oninput="updateDoc()">
+                <input type="text" id="inBeneficiaryName" placeholder="उदा: दिलमाया अधिकारी"
+                    oninput="updateDoc()" onblur="checkExistingBeneficiaryRecommendation()">
             </div>
 
             <div class="row-grid">
                 <div class="form-group">
                     <label>सामाजिक सुरक्षा परिचयपत्र नं.:</label>
-                    <input type="text" id="inCardNo" placeholder="उदा: ०१-२०८०-०१२३४" oninput="updateDoc()">
+                    <input type="text" id="inCardNo" placeholder="उदा: ०१-२०८०-०१२३४"
+                        oninput="updateDoc()" onblur="checkExistingBeneficiaryRecommendation()">
                 </div>
                 <div class="form-group">
                     <label>नागरिकता प्रमाणपत्र नं. (उपलब्ध भए):</label>
@@ -1258,7 +1303,7 @@
             <div>
                 <!-- Top Right Date -->
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                    <div style="font-size: 12.5pt; font-weight: 600;">मिति : <span id="lblP2Miti">२०८३/०२/१८</span></div>
+                    <div style="font-size: 12.5pt; font-weight: 600;">मिति : <span id="lblP2Miti"></span></div>
                 </div>
 
                 <!-- Recipient Office -->
@@ -1343,7 +1388,7 @@
                         <strong>संरक्षक सिफारिस नं. :</strong> <strong id="lblP3RecNo" style="font-size: 13.5pt; color: #000;">१००</strong>
                     </div>
                     <div>
-                        <strong>सिफारिस मिति :</strong> <span id="lblP3Miti">२०८३/०२/१८</span>
+                        <strong>सिफारिस मिति :</strong> <span id="lblP3Miti"></span>
                     </div>
                 </div>
 
@@ -1423,7 +1468,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
+    <script>
+        if (typeof window['@sbmdkl/nepali-date-converter'] === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"><\/script>');
+        }
+    </script>
+    <script src="nepal-sambat-data.js"></script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js"></script>
     <script src="script-surakshya-sanrakshak-test.js?v=test1"></script>

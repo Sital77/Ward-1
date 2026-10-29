@@ -135,40 +135,142 @@ function populateFiscalYearDropdown() {
     selPatra.value = `२०८३/०८४`;
 }
 
+// ── Accurate Asia/Kathmandu Date and Nepal Bikram Sambat Engine ──
+function getTodayKathmanduDate() {
+    try {
+        const dtf = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Kathmandu',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        const parts = dtf.format(new Date()).split('-').map(Number);
+        return {
+            year: parts[0],
+            month: parts[1],
+            day: parts[2],
+            adKey: `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`
+        };
+    } catch (e) {
+        const now = new Date();
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const nepDate = new Date(utc + (345 * 60000));
+        const y = nepDate.getFullYear();
+        const m = nepDate.getMonth() + 1;
+        const d = nepDate.getDate();
+        return {
+            year: y,
+            month: m,
+            day: d,
+            adKey: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+        };
+    }
+}
+
+function getTodayNepalBsDate() {
+    const ktm = getTodayKathmanduDate();
+
+    // 1. Check NepaliFunctions library if available
+    if (typeof NepaliFunctions !== 'undefined' && NepaliFunctions.GetCurrentBsDate) {
+        try {
+            const curDate = NepaliFunctions.GetCurrentBsDate();
+            if (curDate && curDate.year) {
+                const y = toNepaliDigit(curDate.year);
+                const m = toNepaliDigit(String(curDate.month).padStart(2, '0'));
+                const d = toNepaliDigit(String(curDate.day).padStart(2, '0'));
+                return `${y}/${m}/${d}`;
+            }
+        } catch (e) {}
+    }
+
+    // 2. Check local or CDN @sbmdkl/nepali-date-converter
+    const converter = window["@sbmdkl/nepali-date-converter"];
+    if (converter && typeof converter.adToBs === 'function') {
+        try {
+            const bs = converter.adToBs(ktm.adKey);
+            if (typeof bs === 'string') {
+                return toNepaliDigit(bs.replace(/-/g, '/'));
+            } else if (bs && (bs.year || bs.bsYear)) {
+                const y = bs.year || bs.bsYear;
+                const m = String(bs.month || bs.bsMonth).padStart(2, '0');
+                const d = String(bs.day || bs.bsDay).padStart(2, '0');
+                return toNepaliDigit(`${y}/${m}/${d}`);
+            }
+        } catch (e) {}
+    }
+
+    // 3. Check verified calendar dataset in window.NEPAL_SAMBAT_DATA or nepal-sambat-tithi.js
+    const dataset = (typeof window.NEPAL_SAMBAT_DATA !== 'undefined' && window.NEPAL_SAMBAT_DATA)
+        ? window.NEPAL_SAMBAT_DATA
+        : (typeof NS_CALENDAR_DATA !== 'undefined' ? NS_CALENDAR_DATA : null);
+    if (dataset) {
+        const adKeys = Object.keys(dataset).filter(k => k.startsWith('202')).sort();
+        const bsKeys = Object.keys(dataset).filter(k => k.startsWith('208')).sort();
+        const idx = adKeys.indexOf(ktm.adKey);
+        if (idx !== -1 && idx < bsKeys.length) {
+            return toNepaliDigit(bsKeys[idx].replace(/-/g, '/'));
+        }
+    }
+
+    // 4. Mathematical BS calculation (Asia/Kathmandu timezone exact offset)
+    const adYear = ktm.year;
+    const adMonth = ktm.month;
+    const adDay = ktm.day;
+    let bsY = adYear + 57;
+    let bsM = 1;
+    if (adMonth === 1) { bsM = adDay >= 15 ? 10 : 9; bsY = adYear + 56; }
+    else if (adMonth === 2) { bsM = adDay >= 13 ? 11 : 10; bsY = adYear + 56; }
+    else if (adMonth === 3) { bsM = adDay >= 14 ? 12 : 11; bsY = adYear + 56; }
+    else if (adMonth === 4) { if (adDay >= 14) { bsM = 1; bsY = adYear + 57; } else { bsM = 12; bsY = adYear + 56; } }
+    else if (adMonth === 5) { bsM = adDay >= 15 ? 2 : 1; }
+    else if (adMonth === 6) { bsM = adDay >= 15 ? 3 : 2; }
+    else if (adMonth === 7) { bsM = adDay >= 16 ? 4 : 3; }
+    else if (adMonth === 8) { bsM = adDay >= 17 ? 5 : 4; }
+    else if (adMonth === 9) { bsM = adDay >= 17 ? 6 : 5; }
+    else if (adMonth === 10) { bsM = adDay >= 18 ? 7 : 6; }
+    else if (adMonth === 11) { bsM = adDay >= 17 ? 8 : 7; }
+    else if (adMonth === 12) { bsM = adDay >= 16 ? 9 : 8; }
+    let bsD = adDay >= 16 ? adDay - 15 : adDay + 16;
+    if (bsD > 32) bsD = 30;
+    return toNepaliDigit(`${bsY}/${String(bsM).padStart(2, '0')}/${String(bsD).padStart(2, '0')}`);
+}
+
 // ── Date and Nepal Sambat Automatic Initialization ──
 function initDefaultDate() {
     const mitiInput = document.getElementById('inMiti');
     if (!mitiInput) return;
-    if (mitiInput.value && mitiInput.value.trim() !== '') return;
 
-    try {
-        if (typeof NepaliFunctions !== 'undefined' && NepaliFunctions.GetCurrentBsDate) {
-            const curDate = NepaliFunctions.GetCurrentBsDate();
-            const y = toNepaliDigit(curDate.year);
-            const m = toNepaliDigit(String(curDate.month).padStart(2, '0'));
-            const d = toNepaliDigit(String(curDate.day).padStart(2, '0'));
-            mitiInput.value = `${y}/${m}/${d}`;
-        } else {
-            const converter = window["@sbmdkl/nepali-date-converter"];
-            if (converter && typeof converter.adToBs === 'function') {
-                const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kathmandu" }));
-                const yyyy = now.getFullYear();
-                const mm = String(now.getMonth() + 1).padStart(2, '0');
-                const dd = String(now.getDate()).padStart(2, '0');
-                const bs = converter.adToBs(`${yyyy}-${mm}-${dd}`);
-                mitiInput.value = toNepaliDigit(typeof bs === 'string' ? bs.replace(/-/g, '/') : `${bs.year}/${String(bs.month).padStart(2, '0')}/${String(bs.day).padStart(2, '0')}`);
-            } else {
-                mitiInput.value = '२०८३/०२/१८';
-            }
-        }
-    } catch (e) {
-        mitiInput.value = '२०८३/०२/१८';
+    // Preserving saved dates: If a saved record is loaded, NEVER overwrite its date!
+    const editRecId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value : '';
+    if (editRecId && mitiInput.value && mitiInput.value.trim() !== '') {
+        updateNepalSambatFromMiti();
+        return;
+    }
+
+    // Populate current date in Nepal for new recommendation
+    if (!mitiInput.value || mitiInput.value.trim() === '') {
+        mitiInput.value = getTodayNepalBsDate();
     }
     updateNepalSambatFromMiti();
 }
 
+function handleSetTodayDateClick() {
+    const isEditing = Boolean(document.getElementById('editRecordIndex') && document.getElementById('editRecordIndex').value);
+    if (isEditing) {
+        const confirmed = window.confirm("यस अभिलेखको सिफारिस मिति आजको मितिमा परिवर्तन गर्ने हो? यो परिवर्तन सुरक्षित गरेपछि पुरानो मिति प्रतिस्थापन हुनेछ।");
+        if (!confirmed) return;
+    }
+    const todayMiti = getTodayNepalBsDate();
+    const inMiti = document.getElementById('inMiti');
+    if (inMiti) {
+        inMiti.value = todayMiti;
+        updateNepalSambatFromMiti();
+        updateDoc();
+    }
+}
+
 function updateNepalSambatFromMiti() {
-    const mitiVal = document.getElementById('inMiti').value.trim();
+    const mitiVal = document.getElementById('inMiti') ? document.getElementById('inMiti').value.trim() : '';
     const nsInput = document.getElementById('inNepalSamvat');
     if (!mitiVal) {
         if (nsInput) nsInput.value = '';
@@ -176,6 +278,14 @@ function updateNepalSambatFromMiti() {
     }
 
     try {
+        if (window.NepalSambat && typeof window.NepalSambat.getNepalSambatTithi === 'function') {
+            const result = window.NepalSambat.getNepalSambatTithi(mitiVal);
+            if (result && result.year) {
+                const nsFormatted = `${result.year} ${result.formatted || result.tithi || ''}`.replace(/\s+/g, ' ').trim();
+                if (nsInput) nsInput.value = nsFormatted;
+                return;
+            }
+        }
         if (typeof window.getOfficialNepalSambatTithi === 'function') {
             const result = window.getOfficialNepalSambatTithi(mitiVal);
             if (result && result.year) {
@@ -257,7 +367,7 @@ function updateDoc() {
 
     const patraSankhya = getVal('inPatraSankhya', '२०८३/०८४');
     const chalani = getVal('inChalani', '');
-    const miti = getVal('inMiti', '२०८३/०२/१८');
+    const miti = getVal('inMiti', '') || getTodayNepalBsDate();
     const ns = getVal('inNepalSamvat', '११४६');
     const fiscalYear = getVal('selFiscalYear', patraSankhya);
     const quarter = getVal('selQuarter', 'प्रथम त्रैमासिक');
@@ -1038,6 +1148,13 @@ async function printAndSaveSystem() {
 function resetForm() {
     document.getElementById('editRecordIndex').value = '';
     document.getElementById('formMainTitle').innerText = '🛡️ संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट';
+    if (window.NepalSambat && typeof window.NepalSambat.clearCurrentRecord === 'function') {
+        window.NepalSambat.clearCurrentRecord();
+    }
+
+    const noticeEl = document.getElementById('existingRecordNotice');
+    if (noticeEl) noticeEl.style.display = 'none';
+    currentMatchedOldRecord = null;
 
     const inAppName = document.getElementById('inApplicantName');
     if (inAppName) {
@@ -1059,6 +1176,8 @@ function resetForm() {
     document.getElementById('inGuardianCitNo').value = '';
     document.getElementById('inGuardianNid').value = '';
     document.getElementById('inChalani').value = '';
+    const inMiti = document.getElementById('inMiti');
+    if (inMiti) inMiti.value = '';
     document.getElementById('inConditionDetail').value = 'वृद्ध तथा अशक्त भई हिँडडुल गर्न असमर्थ';
     document.getElementById('selBenefitCategory').value = 'जेष्ठ नागरिक';
     document.getElementById('selQuarter').value = 'प्रथम त्रैमासिक';
@@ -1202,8 +1321,15 @@ function loadRecordForEdit(id) {
     const rec = globalDatabase.find(r => r.id === id);
     if (!rec) return;
 
+    const noticeEl = document.getElementById('existingRecordNotice');
+    if (noticeEl) noticeEl.style.display = 'none';
+    currentMatchedOldRecord = null;
+
     document.getElementById('editRecordIndex').value = rec.id;
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + (rec.beneficiaryName || '');
+    if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+        window.NepalSambat.setCurrentRecord(rec);
+    }
 
     const setVal = (elemId, val) => {
         const el = document.getElementById(elemId);
@@ -1544,6 +1670,131 @@ function executeBeneficiarySearch(rawQ, seq) {
     dropdown.style.display = 'block';
 }
 
+// ── Previously Created Guardian Recommendation Detection & Quick Actions ──
+let currentMatchedOldRecord = null;
+
+function findExistingGuardianRecommendation(identifier, name) {
+    if (!globalDatabase || !Array.isArray(globalDatabase)) return null;
+    const cleanId = identifier ? toEnglishDigit(String(identifier)).replace(/[^0-9a-zA-Z]/g, '').trim() : '';
+    const cleanName = name ? String(name).trim() : '';
+
+    // 1. Primary check: unique beneficiary identification/card number
+    if (cleanId) {
+        const found = globalDatabase.find(r => {
+            if (r.isDeleted) return false;
+            const rCard = r.cardNo ? toEnglishDigit(String(r.cardNo)).replace(/[^0-9a-zA-Z]/g, '').trim() : '';
+            return rCard && rCard === cleanId;
+        });
+        if (found) return found;
+    }
+
+    // 2. Secondary fallback: normalized beneficiary name (only when valid identifier unavailable)
+    if (cleanName && cleanName.length >= 3) {
+        const normName = cleanName.toLowerCase().replace(/\s+/g, ' ');
+        const found = globalDatabase.find(r => {
+            if (r.isDeleted) return false;
+            const rName = (r.beneficiaryName || r.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            return rName && rName === normName;
+        });
+        if (found) return found;
+    }
+
+    return null;
+}
+
+function checkExistingBeneficiaryRecommendation(item) {
+    const noticeEl = document.getElementById('existingRecordNotice');
+    if (!noticeEl) return null;
+
+    if (!item) {
+        const inCard = document.getElementById('inCardNo') ? document.getElementById('inCardNo').value.trim() : '';
+        const inName = document.getElementById('inBeneficiaryName') ? document.getElementById('inBeneficiaryName').value.trim() : '';
+        if (!inCard && !inName) {
+            noticeEl.style.display = 'none';
+            currentMatchedOldRecord = null;
+            return null;
+        }
+        item = { cardNo: inCard, name: inName };
+    }
+
+    const cardNo = item.cardNo || (document.getElementById('inCardNo') ? document.getElementById('inCardNo').value : '');
+    const name = item.name || item.beneficiaryName || (document.getElementById('inBeneficiaryName') ? document.getElementById('inBeneficiaryName').value : '');
+
+    const curEditId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value : '';
+
+    const match = findExistingGuardianRecommendation(cardNo, name);
+    if (match && match.id !== curEditId) {
+        currentMatchedOldRecord = match;
+        const metaEl = document.getElementById('existingRecordMeta');
+        if (metaEl) {
+            const bName = match.beneficiaryName || match.name || '-';
+            const cNo = match.cardNo ? toNepaliDigit(match.cardNo) : '-';
+            const recNo = match.recommendationNo ? `नं. ${toNepaliDigit(match.recommendationNo)}` : '-';
+            const miti = match.miti ? toNepaliDigit(match.miti) : '-';
+            const gName = match.guardianName || '-';
+
+            metaEl.innerHTML = `
+                <div style="margin-bottom: 2px;">
+                    <strong>लाभग्राही:</strong> ${bName} &nbsp;|&nbsp; 
+                    <strong>परिचयपत्र नं:</strong> ${cNo}
+                </div>
+                <div>
+                    <strong>सिफारिस नं:</strong> ${recNo} &nbsp;|&nbsp; 
+                    <strong>सिफारिस मिति:</strong> ${miti} &nbsp;|&nbsp; 
+                    <strong>संरक्षक:</strong> ${gName}
+                </div>
+            `;
+        }
+        noticeEl.style.display = 'block';
+        return match;
+    } else {
+        noticeEl.style.display = 'none';
+        currentMatchedOldRecord = null;
+        return null;
+    }
+}
+
+function handleViewOldRecordClick() {
+    if (!currentMatchedOldRecord) return;
+    const recId = currentMatchedOldRecord.id;
+    const noticeEl = document.getElementById('existingRecordNotice');
+    if (noticeEl) noticeEl.style.display = 'none';
+
+    // Option A: View/edit previously created recommendation (preserves saved date & number)
+    loadRecordForEdit(recId);
+    switchPreviewPage(1);
+}
+
+function handleCreateNewRecordClick() {
+    const noticeEl = document.getElementById('existingRecordNotice');
+    if (noticeEl) noticeEl.style.display = 'none';
+
+    // Option B: Create a brand new recommendation for this beneficiary
+    document.getElementById('editRecordIndex').value = '';
+    if (window.NepalSambat && typeof window.NepalSambat.clearCurrentRecord === 'function') {
+        window.NepalSambat.clearCurrentRecord();
+    }
+
+    document.getElementById('formMainTitle').innerText = '🛡️ संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट';
+
+    // Assign current Nepal date
+    const todayMiti = getTodayNepalBsDate();
+    const inMiti = document.getElementById('inMiti');
+    if (inMiti) inMiti.value = todayMiti;
+    updateNepalSambatFromMiti();
+
+    // Clear chalani number
+    const inChalani = document.getElementById('inChalani');
+    if (inChalani) inChalani.value = '';
+
+    // Next provisional recommendation number indicator
+    const badgeRecNo = document.getElementById('badgeRecNoDisplay');
+    if (badgeRecNo) badgeRecNo.innerText = 'स्वतः उत्पन्न हुने (१०० बाट सुरु)';
+
+    updateDoc();
+    switchPreviewPage(1);
+}
+
 function selectBeneficiaryItem(item) {
     if (!item) return;
     document.getElementById('inBeneficiaryName').value = item.name || '';
@@ -1588,6 +1839,9 @@ function selectBeneficiaryItem(item) {
     if (dropdown) dropdown.style.display = 'none';
 
     updateDoc();
+
+    // Check whether a guardian recommendation has already been created for this beneficiary
+    checkExistingBeneficiaryRecommendation(item);
 }
 
 function clearBeneficiarySearch() {
@@ -1600,12 +1854,18 @@ function clearBeneficiarySearch() {
     if (dropdown) dropdown.style.display = 'none';
     const clearBtn = document.getElementById('btnClearBeneficiarySearch');
     if (clearBtn) clearBtn.style.display = 'none';
+    const noticeEl = document.getElementById('existingRecordNotice');
+    if (noticeEl) noticeEl.style.display = 'none';
+    currentMatchedOldRecord = null;
 }
 
 function unlinkSelectedBeneficiary() {
     selectedBeneficiaryCardNo = '';
     const badge = document.getElementById('selectedBeneficiaryBadge');
     if (badge) badge.style.display = 'none';
+    const noticeEl = document.getElementById('existingRecordNotice');
+    if (noticeEl) noticeEl.style.display = 'none';
+    currentMatchedOldRecord = null;
 }
 
 function triggerExcelImport() {
