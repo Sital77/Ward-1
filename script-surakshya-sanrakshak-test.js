@@ -596,19 +596,51 @@ function printSingleCurrentPage() {
 }
 
 // ── Applicant & Guardian Input Handlers ──
+let isGuardianLinkedToApplicant = true;
+
+function updateSyncApplicantBtnVisibility() {
+    const btn = document.getElementById('btnSyncApplicantToGuardian');
+    if (!btn) return;
+    const appVal = (document.getElementById('inApplicantName')?.value || '').trim();
+    const gVal = (document.getElementById('inGuardianName')?.value || '').trim();
+    if (!isGuardianLinkedToApplicant && appVal && appVal !== gVal) {
+        btn.style.display = 'inline-flex';
+    } else {
+        btn.style.display = 'none';
+    }
+}
+
 function onApplicantNameInput() {
-    const el = document.getElementById('inApplicantName');
-    if (el) el._autoSynced = false;
+    const appInput = document.getElementById('inApplicantName');
+    const appName = appInput ? appInput.value : '';
+    if (isGuardianLinkedToApplicant) {
+        const gInput = document.getElementById('inGuardianName');
+        if (gInput) {
+            gInput.value = appName;
+        }
+    }
+    updateSyncApplicantBtnVisibility();
     updateDoc();
 }
 
 function onGuardianNameInput() {
-    const gName = document.getElementById('inGuardianName')?.value || '';
-    const appInput = document.getElementById('inApplicantName');
-    if (appInput && (appInput._autoSynced !== false || !appInput.value)) {
-        appInput.value = gName;
-        appInput._autoSynced = true;
+    const appVal = (document.getElementById('inApplicantName')?.value || '').trim();
+    const gVal = (document.getElementById('inGuardianName')?.value || '').trim();
+    if (appVal !== gVal) {
+        isGuardianLinkedToApplicant = false;
     }
+    updateSyncApplicantBtnVisibility();
+    updateDoc();
+}
+
+function syncGuardianToApplicant() {
+    isGuardianLinkedToApplicant = true;
+    const appVal = document.getElementById('inApplicantName')?.value || '';
+    const gInput = document.getElementById('inGuardianName');
+    if (gInput) {
+        gInput.value = appVal;
+    }
+    updateSyncApplicantBtnVisibility();
     updateDoc();
 }
 
@@ -677,7 +709,7 @@ function applyChairSigSettings(settings, skipStorage = false) {
     if (root) {
         root.style.setProperty('--chair-sig-line-style', style);
         root.style.setProperty('--chair-sig-line-width', `${width}px`);
-        root.style.setProperty('--chair-sig-font-size', `${fontSize}pt`);
+        root.style.setProperty('--chair-sig-font-size', `var(--sig-font-size, var(--doc-font-size, 13pt))`);
         root.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
         root.style.setProperty('--officer-name-gap', '6.5px');
     }
@@ -686,7 +718,7 @@ function applyChairSigSettings(settings, skipStorage = false) {
     if (page1) {
         page1.style.setProperty('--chair-sig-line-style', style);
         page1.style.setProperty('--chair-sig-line-width', `${width}px`);
-        page1.style.setProperty('--chair-sig-font-size', `${fontSize}pt`);
+        page1.style.setProperty('--chair-sig-font-size', `var(--sig-font-size, var(--doc-font-size, 13pt))`);
         page1.style.setProperty('--chair-sig-offset-y', `${posY}mm`);
         page1.style.setProperty('--officer-name-gap', '6.5px');
     }
@@ -1161,6 +1193,8 @@ function resetForm() {
         inAppName.value = '';
         inAppName._autoSynced = true;
     }
+    isGuardianLinkedToApplicant = true;
+    updateSyncApplicantBtnVisibility();
     const selAppRel = document.getElementById('selApplicantRelation');
     if (selAppRel) selAppRel.value = 'छोरा';
     const inCustomAppRel = document.getElementById('inCustomApplicantRelation');
@@ -1397,6 +1431,14 @@ function loadRecordForEdit(id) {
     handleApplicantRelationChange();
 
     setVal('inGuardianName', rec.guardianName || '');
+    const appNameSaved = (rec.applicantName || rec.guardianName || '').trim();
+    const gNameSaved = (rec.guardianName || '').trim();
+    if (appNameSaved && gNameSaved && appNameSaved !== gNameSaved) {
+        isGuardianLinkedToApplicant = false;
+    } else {
+        isGuardianLinkedToApplicant = true;
+    }
+    updateSyncApplicantBtnVisibility();
     setVal('inGuardianAddress', rec.guardianAddress || 'गौरादह नगरपालिका वडा नं. १, झापा');
     setVal('inGuardianPhone', rec.guardianPhone || '');
     setVal('inGuardianCitNo', rec.guardianCitNo || '');
@@ -1771,6 +1813,8 @@ function handleCreateNewRecordClick() {
 
     // Option B: Create a brand new recommendation for this beneficiary
     document.getElementById('editRecordIndex').value = '';
+    isGuardianLinkedToApplicant = true;
+    updateSyncApplicantBtnVisibility();
     if (window.NepalSambat && typeof window.NepalSambat.clearCurrentRecord === 'function') {
         window.NepalSambat.clearCurrentRecord();
     }

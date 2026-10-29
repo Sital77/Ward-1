@@ -300,6 +300,7 @@
         <div class="header-action-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h2 class="panel-title" id="formMainTitle" style="font-size: 1.25rem;">🗺️ जग्गा वर्गीकरण सिफारिस</h2>
             <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn-import-header" onclick="resetFormForNew()" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff;" title="नयाँ खाली सिफारिस सुरु गर्नुहोस्">➕ नयाँ</button>
                 <button type="button" class="btn-import-header" onclick="openImportModal()" title="चारकिल्ला वा बाटो प्रमाणितबाट डाटा तान्नुहोस्">📥 डाटा तान्नुस्</button>
                 <button type="button" class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
             </div>
@@ -439,11 +440,19 @@
             <input type="hidden" id="inDecisionDate" value="२०७९/१०/२६">
 
             <div class="form-group" style="margin-bottom: 0;">
-                <label>व्यहोरामा देखिने मुख्य वर्गीकरण क्षेत्र:</label>
-                <select id="inMainZoneDisplay" onchange="updateDoc()" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;">
-                    <option value="व्यवसायिक शहरी क्षेत्र" selected>व्यवसायिक शहरी क्षेत्र</option>
-                    <option value="आवासीय क्षेत्र">आवासीय क्षेत्र</option>
+                <label style="font-weight: 700; color: #166534;">मुख्य वर्गीकरण क्षेत्र (Single Source of Truth):</label>
+                <select id="inMainZoneDisplay" onchange="onMainZoneChange(this.value); updateDoc();" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff;">
+                    <option value="" disabled selected>-- वर्गीकरण क्षेत्र छनौट गर्नुहोस् --</option>
                     <option value="कृषि क्षेत्र">कृषि क्षेत्र</option>
+                    <option value="आवासीय क्षेत्र">आवासीय क्षेत्र</option>
+                    <option value="व्यावसायिक शहरी क्षेत्र">व्यावसायिक शहरी क्षेत्र</option>
+                    <option value="औद्योगिक क्षेत्र">औद्योगिक क्षेत्र</option>
+                    <option value="वन क्षेत्र">वन क्षेत्र</option>
+                    <option value="सार्वजनिक उपयोग क्षेत्र">सार्वजनिक उपयोग क्षेत्र</option>
+                    <option value="नदी, खोला तथा सिमसार क्षेत्र">नदी, खोला तथा सिमसार क्षेत्र</option>
+                    <option value="खानी तथा खनिज क्षेत्र">खानी तथा खनिज क्षेत्र</option>
+                    <option value="पुरातात्विक तथा ऐतिहासिक महत्वको क्षेत्र">पुरातात्विक तथा ऐतिहासिक महत्वको क्षेत्र</option>
+                    <option value="अन्य क्षेत्र">अन्य क्षेत्र</option>
                 </select>
             </div>
         </div>
@@ -522,9 +531,14 @@
     <div class="modal-overlay" id="abhilekhModal">
         <div class="modal-content" style="max-width: 900px; width: 95%;">
             <button class="modal-close" onclick="toggleModal(false)">×</button>
-            <h3 class="modal-title">🗄️ जग्गा वर्गीकरण सिफारिस अभिलेख</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; padding-right: 40px;">
+                <h3 class="modal-title" style="margin: 0; border: none; padding: 0;">🗄️ जग्गा वर्गीकरण सिफारिस अभिलेख</h3>
+                <span id="syncStatusBadge" style="font-size: 0.8rem; padding: 3px 10px; border-radius: 12px; background: #dcfce7; color: #166534; font-weight: 600; border: 1px solid #bbf7d0;">
+                    🟢 क्लाउड सिङ्क सक्रिय
+                </span>
+            </div>
             <div class="search-container" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <input type="text" id="searchField" placeholder="🔍 नाम वा कित्ता नं. बाट खोज्नुहोस्..." oninput="renderDatabaseTable()" style="flex: 1;">
+                <input type="text" id="searchField" placeholder="🔍 नाम वा कित्ता नं. बाट खोज्नुहोस्..." oninput="onSearchInputDebounced()" style="flex: 1;">
                 <button type="button" class="btn-abhilekh" onclick="exportRecordsToCSV()" style="white-space: nowrap;">📥 CSV Export</button>
             </div>
             <table class="db-table">
@@ -601,7 +615,7 @@
                             <td>गौरादह वडा नं. १</td>
                             <td></td>
                             <td></td>
-                            <td>व्यावसायिक शहरी क्षेत्र</td>
+                            <td>-</td>
                         </tr>
                     </tbody>
                 </table>
@@ -609,7 +623,7 @@
 
             <!-- Paragraph 2 (Decision / Act Clause) -->
             <div class="letter-body-para" id="lblParagraph2">
-                उक्त माथि उल्लेखित कित्ता नम्बरको <span id="lblLandPlural1">जग्गा</span> <span id="lblActClause" style="font-weight: 600;">भू-उपयोग ऐन २०७६ को दफा २०</span> र गौरादह नगरपालिकाको मिति: <span id="lblDecisionDate" style="font-weight: 600;">२०७९/१०/२६</span> को निर्णय अनुसार उक्त <span id="lblLandPlural2">जग्गा</span> <span id="lblMainZoneSpan" style="font-weight: bold; text-decoration: underline;">व्यवसायिक शहरी क्षेत्र</span> भित्र पर्न व्यहोरा अनुरोध छ ।
+                उक्त माथि उल्लेखित कित्ता नम्बरको <span id="lblLandPlural1">जग्गा</span> <span id="lblActClause" style="font-weight: 600;">भू-उपयोग ऐन २०७६ को दफा २०</span> र गौरादह नगरपालिकाको मिति: <span id="lblDecisionDate" style="font-weight: 600;">२०७९/१०/२६</span> को निर्णय अनुसार उक्त <span id="lblLandPlural2">जग्गा</span> <span id="lblMainZoneSpan" style="font-weight: bold; text-decoration: underline;">....................</span> भित्र पर्न व्यहोरा अनुरोध छ ।
             </div>
 
             <!-- Signature Section -->
@@ -632,7 +646,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js"></script>
     <script src="script-bargikaran-sifarish.js"></script>

@@ -326,21 +326,27 @@
             display: block;
         }
 
-        .p1-sig-name {
+        .p1-sig-name,
+        #lblP1ChairName {
+            font-family: var(--doc-font-family, 'Mukta', sans-serif);
             font-weight: 700;
-            font-size: var(--chair-sig-font-size, 13pt);
+            font-size: var(--sig-font-size, var(--doc-font-size, 13pt));
             color: #000000;
-            line-height: 1.3;
+            line-height: 1.4;
             text-align: center;
             white-space: nowrap;
             margin-bottom: 2px;
+            border-top: none !important;
+            padding-top: 0 !important;
         }
 
-        .p1-sig-title {
-            font-size: calc(var(--chair-sig-font-size, 13pt) - 1.5pt);
+        .p1-sig-title,
+        #lblP1ChairTitle {
+            font-family: var(--doc-font-family, 'Mukta', sans-serif);
+            font-size: var(--sig-font-size, var(--doc-font-size, 13pt));
             font-weight: 600;
             color: #2d3748;
-            line-height: 1.3;
+            line-height: 1.4;
             text-align: center;
         }
 
@@ -600,19 +606,25 @@
                 margin: 0 auto var(--officer-name-gap, 6.5px) auto !important;
                 display: block !important;
             }
-            .p1-sig-name {
+            .p1-sig-name,
+            #lblP1ChairName {
+                font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
                 font-weight: 700 !important;
-                font-size: var(--chair-sig-font-size, 13pt) !important;
+                font-size: var(--sig-font-size, var(--doc-font-size, 13pt)) !important;
                 color: #000000 !important;
-                line-height: 1.3 !important;
+                line-height: 1.4 !important;
                 white-space: nowrap !important;
                 margin-bottom: 2px !important;
+                border-top: none !important;
+                padding-top: 0 !important;
             }
-            .p1-sig-title {
-                font-size: calc(var(--chair-sig-font-size, 13pt) - 1.5pt) !important;
+            .p1-sig-title,
+            #lblP1ChairTitle {
+                font-family: var(--doc-font-family, 'Mukta', sans-serif) !important;
+                font-size: var(--sig-font-size, var(--doc-font-size, 13pt)) !important;
                 font-weight: 600 !important;
                 color: #2d3748 !important;
-                line-height: 1.3 !important;
+                line-height: 1.4 !important;
                 text-align: center !important;
             }
 
@@ -952,7 +964,15 @@
 
             <div class="row-grid">
                 <div class="form-group">
-                    <label>संरक्षकको पूरा नाम, थर:</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="margin-bottom: 0;">संरक्षकको पूरा नाम, थर:</label>
+                        <button type="button" id="btnSyncApplicantToGuardian" onclick="syncGuardianToApplicant()"
+                            title="निवेदककै नाम राख्ने"
+                            style="display: none; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; color: #2b6cb0; font-weight: 600; transition: all 0.15s;"
+                            onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#edf2f7'">
+                            🔄 निवेदककै नाम राख्ने
+                        </button>
+                    </div>
                     <input type="text" id="inGuardianName" placeholder="उदा: राम कुमार अधिकारी" oninput="onGuardianNameInput()">
                 </div>
                 <div class="form-group">
@@ -1283,13 +1303,13 @@
             <!-- Page 1 Footer: Signatures (Ward Chairperson on RIGHT) -->
             <div class="p1-signatures-row" id="p1SignaturesRow">
                 <!-- Right: Ward Chairperson -->
-                <div class="p1-sig-block" id="p1ChairSignatureBlock">
+                <div class="p1-sig-block signature-block" id="p1ChairSignatureBlock">
                     <div class="p1-sig-space"></div>
                     <div class="p1-sig-inner">
                         <div class="p1-sig-line" id="p1SigLine"></div>
-                        <div class="p1-sig-name" id="lblP1ChairName">नगेन्द्र भण्डारी</div>
+                        <div class="p1-sig-name sig-name" id="lblP1ChairName">नगेन्द्र भण्डारी</div>
                     </div>
-                    <div class="p1-sig-title" id="lblP1ChairTitle">वडा अध्यक्ष</div>
+                    <div class="p1-sig-title sig-title" id="lblP1ChairTitle">वडा अध्यक्ष</div>
                 </div>
             </div>
         </div>

@@ -827,6 +827,35 @@
             margin-bottom: 10px;
         }
 
+        .nibedan-btn-open:hover {
+            background: #553c9a !important;
+        }
+
+        .nibedan-btn-download:hover {
+            background: #e2e8f0 !important;
+            border-color: #a0aec0 !important;
+        }
+
+        body.dark-mode .sifarish-section-divider h3 {
+            color: #e2e8f0 !important;
+        }
+
+        body.dark-mode .nibedan-card {
+            background: #1a202c !important;
+            border-color: #805ad5 !important;
+            color: #f7fafc !important;
+        }
+
+        body.dark-mode .nibedan-card div {
+            color: #f7fafc !important;
+        }
+
+        body.dark-mode .nibedan-btn-download {
+            background: #2d3748 !important;
+            color: #e2e8f0 !important;
+            border-color: #4a5568 !important;
+        }
+
         /* ===== SIFARISH LOGIN MODAL ===== */
         .sif-login-wrap {
             display: flex;
@@ -1179,13 +1208,6 @@
                 </button>
                 
                 <div id="quickMenuDropdown" class="quick-menu-dropdown">
-                    <a href="citizen-search.html" id="quickMenuCitizenSearch" class="quick-menu-item" style="display: none;">
-                        <span class="q-icon">🔍</span>
-                        <div class="q-text">
-                            <strong>नागरिक खोजी</strong>
-                            <small>एकीकृत सिफारिस इतिहास</small>
-                        </div>
-                    </a>
                     <a href="recycle-bin.html" id="quickMenuRecycleBin" class="quick-menu-item" style="display: none;">
                         <span class="q-icon">🗑️</span>
                         <div class="q-text">
@@ -1419,7 +1441,7 @@
                 </div>
                 <!-- 🔍 Live Recommendation Search Box 🔍 -->
                 <div style="position:relative; width:240px; min-width:180px;">
-                    <input type="text" id="sifarishSearchInput" placeholder="सिफारिस खोज्नुहोस्..." 
+                    <input type="text" id="sifarishSearchInput" placeholder="सिफारिस वा फारम खोज्नुहोस्..." 
                         oninput="filterSifarishCards(this.value)"
                         style="width:100%; padding:8px 12px 8px 34px; border:1.5px solid #feb2b2; border-radius:20px; font-size:0.92rem; font-family:inherit; outline:none; transition:all 0.2s; background:#fff;"
                         onfocus="this.style.borderColor='#e51a23'; this.style.boxShadow='0 0 0 3px rgba(229,26,35,0.15)'"
@@ -1570,12 +1592,23 @@
             let visibleCount = 0;
 
             cards.forEach(card => {
-                const text = card.innerText.toLowerCase();
-                if (!q || text.includes(q)) {
+                const searchKeywords = ((card.getAttribute('data-search') || '') + ' ' + card.innerText).toLowerCase();
+                if (!q || searchKeywords.includes(q)) {
                     card.style.display = 'flex';
                     visibleCount++;
                 } else {
                     card.style.display = 'none';
+                }
+            });
+
+            // Toggle category/section headers if present
+            const headers = container.querySelectorAll('.sifarish-section-divider');
+            headers.forEach(hdr => {
+                const target = hdr.getAttribute('data-group');
+                if (target) {
+                    const groupCards = container.querySelectorAll('.' + target);
+                    const anyVisible = Array.from(groupCards).some(c => c.style.display !== 'none');
+                    hdr.style.display = anyVisible ? 'flex' : 'none';
                 }
             });
 
@@ -1587,7 +1620,7 @@
                     noResultsEl.style.cssText = 'text-align: center; padding: 30px 15px; color: #e53e3e; font-weight: bold; font-size: 1.05rem; grid-column: span 2; width: 100%;';
                     container.appendChild(noResultsEl);
                 }
-                noResultsEl.innerText = `🔍 "${query}" सँग मिल्दो कुनै सिफारिस भेटिएन ।`;
+                noResultsEl.innerText = `🔍 "${query}" सँग मिल्दो कुनै सिफारिस वा निवेदन फारम भेटिएन ।`;
                 noResultsEl.style.display = 'block';
             } else if (noResultsEl) {
                 noResultsEl.style.display = 'none';
@@ -2058,10 +2091,6 @@
             if (modalAdminBtn) {
                 modalAdminBtn.style.display = (isAuth && isAdmin) ? 'inline-block' : 'none';
             }
-            const citLink = document.getElementById('quickMenuCitizenSearch');
-            if (citLink) {
-                citLink.style.display = isAuth ? 'flex' : 'none';
-            }
             const binLink = document.getElementById('quickMenuRecycleBin');
             if (binLink) {
                 binLink.style.display = (isAuth && isAdmin) ? 'flex' : 'none';
@@ -2365,6 +2394,88 @@
                     container.appendChild(card);
                 });
             }
+
+            // 📋 Render Official Application / Nibedan Forms Section (द्रुत खोजी)
+            const nibedanApplicationList = [
+                {
+                    id: 'nibedan-ghatna-nama-sansodhan',
+                    title: 'घटना दर्ता नाम संशोधन निवेदन',
+                    fileName: 'घटना दर्ता नाम संसोधन.pdf',
+                    category: 'निवेदन / फारम',
+                    emoji: '📝',
+                    borderColor: '#9f7aea',
+                    keywords: 'घटना दर्ता नाम संसोधन संशोधन नामसंसोधन नामसंशोधन निवेदन दरखास्त फारम nibedan form'
+                },
+                {
+                    id: 'nibedan-janma-mrityu-darta',
+                    title: 'जन्म तथा मृत्यु दर्ता निवेदन',
+                    fileName: 'जन्म तथा मृत्यु दर्ता.pdf',
+                    category: 'निवेदन / फारम',
+                    emoji: '📜',
+                    borderColor: '#805ad5',
+                    keywords: 'जन्म तथा मृत्यु दर्ता जन्मदर्ता मृत्युदर्ता निवेदन दरखास्त फारम nibedan form'
+                },
+                {
+                    id: 'nibedan-janma-darta-pratilipi',
+                    title: 'जन्म दर्ता प्रतिलिपि फारम',
+                    fileName: 'जन्म दर्ता प्रतिलिपि फारम.pdf',
+                    category: 'निवेदन / फारम',
+                    emoji: '📑',
+                    borderColor: '#6b46c1',
+                    keywords: 'जन्म दर्ता प्रतिलिपि फारम निवेदन जन्मदर्ता प्रतिलिपि नकल दरखास्त nibedan form'
+                },
+                {
+                    id: 'nibedan-bibaha-sambandha-vichhed',
+                    title: 'विवाह सम्बन्ध विच्छेद निवेदन',
+                    fileName: 'विवाह सम्वन्ध विच्छेद निवेदन.pdf',
+                    category: 'निवेदन / फारम',
+                    emoji: '📋',
+                    borderColor: '#b83280',
+                    keywords: 'विवाह सम्बन्ध विच्छेद सम्वन्धविच्छेद सम्बन्धविच्छेद निवेदन दरखास्त फारम पारपाचुके nibedan form'
+                }
+            ];
+
+            const divider = document.createElement('div');
+            divider.className = 'sifarish-section-divider';
+            divider.setAttribute('data-group', 'nibedan-card');
+            divider.style.cssText = 'grid-column: span 2; margin-top: 18px; padding-top: 16px; border-top: 2px dashed #cbd5e0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;';
+            divider.innerHTML = `
+                <h3 style="font-size: 1.15rem; color: #2d3748; margin: 0; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <span>📋</span> आधिकारिक निवेदन तथा दरखास्त फारमहरू (डाउनलोड / प्रिन्ट)
+                </h3>
+                <span style="font-size: 0.82rem; background: #ebf4ff; color: #2b6cb0; padding: 2px 8px; border-radius: 12px; font-weight: 600; border: 1px solid #bee3f8;">
+                    ४ वटा फारमहरू उपलब्ध
+                </span>
+            `;
+            container.appendChild(divider);
+
+            nibedanApplicationList.forEach(item => {
+                const encodedUrl = encodeURI('nibedan/' + item.fileName);
+                const card = document.createElement('div');
+                card.className = 'sifarish-link-card nibedan-card';
+                card.setAttribute('data-search', item.keywords + ' ' + item.title);
+                card.style.borderColor = item.borderColor;
+                card.style.cursor = 'pointer';
+                card.title = item.title + ' खोल्नुहोस्';
+                card.onclick = () => window.open(encodedUrl, '_blank');
+
+                card.innerHTML = `
+                    <span class="emoji">${item.emoji}</span>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: #1a202c; text-align: center; margin-bottom: 4px; line-height: 1.35;">${item.title}</div>
+                    <span style="font-size: 0.78rem; font-weight: 600; color: #553c9a; background: #f3e8ff; padding: 2px 10px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e9d8fd;">आधिकारिक निवेदन फारम • PDF</span>
+                    <div style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-top: 4px;" onclick="event.stopPropagation()">
+                        <a href="${encodedUrl}" target="_blank" class="nibedan-btn-open" title="नयाँ ट्याबमा हेर्नुहोस् वा प्रिन्ट गर्नुहोस्"
+                           style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; font-size: 0.88rem; font-weight: 600; border-radius: 6px; background: #6b46c1; color: #ffffff; text-decoration: none; transition: background 0.15s;">
+                            👁️ हेर्नुहोस्
+                        </a>
+                        <a href="${encodedUrl}" download="${item.fileName}" class="nibedan-btn-download" title="कम्प्युटरमा सुरक्षित गर्नुहोस्"
+                           style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; font-size: 0.88rem; font-weight: 600; border-radius: 6px; background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; text-decoration: none; transition: all 0.15s;">
+                            ⬇️ डाउनलोड
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
 
             // Show admin quick add button ONLY if actual admin logged in (NOT for normal operator like wada1)
             const curUser = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();

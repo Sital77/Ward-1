@@ -23,6 +23,9 @@ window.globalDatabase = globalDatabase;
 let rowCounter = 0;
 let activeRowIds = [];
 const LOCAL_STORAGE_KEY = 'bargikaran_sifarish_records_local';
+window._isSavingInProgress = false;
+let searchDebounceTimer = null;
+let importSourcesLoaded = false;
 
 // Sources for Importing Data (चार किल्ला / बाटो / घर बाटो)
 let importSources = {
@@ -32,11 +35,31 @@ let importSources = {
 };
 let currentImportFilter = 'all';
 
+// HTML escape helper for XSS prevention and safe table rendering
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // 2. Nepali Digits Converter
 window.toNepaliDigit = function (num) {
     if (num === undefined || num === null) return '';
     const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
     return num.toString().split('').map(d => nepaliDigits[d] !== undefined ? nepaliDigits[d] : d).join('');
+};
+
+window.toEnglishDigit = function (num) {
+    if (num === undefined || num === null) return '';
+    const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+    return num.toString().split('').map(d => {
+        const idx = nepaliDigits.indexOf(d);
+        return idx !== -1 ? String(idx) : d;
+    }).join('');
 };
 
 // 3. Fiscal Year & Automatic Date Conversion
@@ -92,10 +115,6 @@ window.initializeAutomaticDate = function () {
         let bsMonthVal = 2;
 
         const converter = window["@sbmdkl/nepali-date-converter"];
-        if (!converter && (window._dateInitRetries || 0) < 5) {
-            window._dateInitRetries = (window._dateInitRetries || 0) + 1;
-            setTimeout(window.initializeAutomaticDate, 400);
-        }
         if (converter && typeof converter.adToBs === 'function') {
             const today = new Date();
             const yyyy = today.getFullYear();
@@ -180,7 +199,7 @@ window.updateNepalSambatFromMiti = function () {
         const mitiVal = document.getElementById('inMiti').value || '';
         const parts = mitiVal.split('/');
         if (parts.length >= 1 && parts[0].length === 4) {
-            const bsYear = parseInt(parts[0].replace(/[०-९]/g, d => "०१२३४५६८९".indexOf(d) !== -1 ? "०१२३४५६७८९".indexOf(d) : d), 10);
+            const bsYear = parseInt(parts[0].replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d) !== -1 ? "०१२३४५६७८९".indexOf(d) : d), 10);
             if (!isNaN(bsYear)) {
                 const nsYear = bsYear - 937;
                 document.getElementById('inNepalSamvat').value = window.toNepaliDigit(nsYear);
@@ -192,6 +211,7 @@ window.updateNepalSambatFromMiti = function () {
 };
 
 // 4. Tapasheel Kitta Rows Management
+// Default classification for new rows is initially blank (or syncs from main zone if chosen)
 window.addKittaRow = function (data = null) {
     rowCounter++;
     const rowId = 'kitta_row_' + rowCounter;
@@ -201,7 +221,10 @@ window.addKittaRow = function (data = null) {
     const defaultHal = data ? (data.halWada || 'गौरादह वडा नं. १') : 'गौरादह वडा नं. १';
     const defaultKitta = data ? (data.kitta || '') : '';
     const defaultArea = data ? (data.area || '') : '';
-    const defaultKaifiyat = data ? (data.kaifiyat || 'व्यावसायिक शहरी क्षेत्र') : 'व्यावसायिक शहरी क्षेत्र';
+    
+    // Single Source of Truth: Inherit mainZone if available, otherwise initially blank
+    const currentMainZone = (document.getElementById('inMainZoneDisplay')?.value || '').trim();
+    const defaultKaifiyat = data ? (data.kaifiyat || '') : currentMainZone;
 
     const container = document.getElementById('kittaRowsContainer');
     if (!container) return;
@@ -214,28 +237,28 @@ window.addKittaRow = function (data = null) {
             <div class="row-grid">
                 <div class="form-group">
                     <label style="font-size:0.83rem;">साबिकको वडा / गा.वि.स.:</label>
-                    <input type="text" class="input-sabik" placeholder="उदा: गौरादह गाविस ९" value="${defaultSabik}" oninput="updateDoc()">
+                    <input type="text" class="input-sabik" placeholder="उदा: गौरादह गाविस ९" value="${escapeHtml(defaultSabik)}" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
                     <label style="font-size:0.83rem;">हालको वडा नं.:</label>
-                    <input type="text" class="input-hal" placeholder="उदा: गौरादह वडा नं. १" value="${defaultHal}" oninput="updateDoc()">
+                    <input type="text" class="input-hal" placeholder="उदा: गौरादह वडा नं. १" value="${escapeHtml(defaultHal)}" oninput="updateDoc()">
                 </div>
             </div>
 
             <div class="row-grid" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group">
                     <label style="font-size:0.83rem;">कि.नं. (कित्ता नम्बर):</label>
-                    <input type="text" class="input-kitta" placeholder="उदा: १६९८" value="${defaultKitta}" oninput="updateDoc()">
+                    <input type="text" class="input-kitta" placeholder="उदा: १६९८" value="${escapeHtml(defaultKitta)}" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
                     <label style="font-size:0.83rem;">क्षेत्रफल (ब.मि. / वर्ग मिटर):</label>
-                    <input type="text" class="input-area" placeholder="उदा: ३३८.६३" value="${defaultArea}" oninput="updateDoc()">
+                    <input type="text" class="input-area" placeholder="उदा: ३३८.६३" value="${escapeHtml(defaultArea)}" oninput="updateDoc()">
                 </div>
             </div>
 
             <div class="form-group" style="margin-bottom:0;">
                 <label style="font-size:0.83rem;">कैफियत / वर्गीकरण क्षेत्र:</label>
-                <input type="text" class="input-kaifiyat" list="categoryList" placeholder="उदा: व्यावसायिक शहरी क्षेत्र" value="${defaultKaifiyat}" oninput="onKaifiyatInput(this); updateDoc()">
+                <input type="text" class="input-kaifiyat" list="categoryList" placeholder="वर्गीकरण क्षेत्र छनौट गर्नुहोस्" value="${escapeHtml(defaultKaifiyat)}" oninput="onKaifiyatInput(this); updateDoc()">
             </div>
         </div>
     `;
@@ -270,11 +293,27 @@ function reindexFormRows() {
     });
 }
 
+// When user selects a main classification zone in 'ऐन तथा निर्णय व्यहोरा'
+window.onMainZoneChange = function (val) {
+    if (!val) return;
+    // Synchronize rows that are either blank or match previous default
+    activeRowIds.forEach(id => {
+        const block = document.getElementById(id);
+        if (block) {
+            const inp = block.querySelector('.input-kaifiyat');
+            if (inp && (!inp.value || inp.value === 'व्यावसायिक शहरी क्षेत्र' || inp.value === 'व्यवसायिक शहरी क्षेत्र')) {
+                inp.value = val;
+            }
+        }
+    });
+    window.updateDoc();
+};
+
 function onKaifiyatInput(inputEl) {
     const val = inputEl.value.trim();
-    if (val && activeRowIds.length > 0) {
+    if (val) {
         const mainZoneInp = document.getElementById('inMainZoneDisplay');
-        if (mainZoneInp && (!mainZoneInp.value || mainZoneInp.value === 'व्यवसायिक शहरी क्षेत्र' || mainZoneInp.value === 'व्यावसायिक शहरी क्षेत्र')) {
+        if (mainZoneInp && !mainZoneInp.value) {
             mainZoneInp.value = val;
         }
     }
@@ -410,7 +449,7 @@ window.updateDoc = function () {
                     <td>गौरादह वडा नं. १</td>
                     <td></td>
                     <td></td>
-                    <td>व्यावसायिक शहरी क्षेत्र</td>
+                    <td>-</td>
                 </tr>
             `;
         } else {
@@ -418,11 +457,11 @@ window.updateDoc = function () {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${window.toNepaliDigit(index + 1)}.</strong></td>
-                    <td>${item.sabikWada || '-'}</td>
-                    <td>${item.halWada || '-'}</td>
+                    <td>${escapeHtml(item.sabikWada || '-')}</td>
+                    <td>${escapeHtml(item.halWada || '-')}</td>
                     <td><strong>${window.toNepaliDigit(item.kitta) || ''}</strong></td>
                     <td>${window.toNepaliDigit(item.area) || ''}</td>
-                    <td><strong>${item.kaifiyat || '-'}</strong></td>
+                    <td><strong>${escapeHtml(item.kaifiyat || '-')}</strong></td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -432,7 +471,11 @@ window.updateDoc = function () {
     // 4. Paragraph 2 (Act & Decision Clause)
     const actName = (document.getElementById('inActName') ? document.getElementById('inActName').value.trim() : '') || 'भू-उपयोग ऐन २०७६ को दफा २०';
     const decisionDate = (document.getElementById('inDecisionDate') ? document.getElementById('inDecisionDate').value.trim() : '') || '२०७९/१०/२६';
-    const mainZone = (document.getElementById('inMainZoneDisplay') ? document.getElementById('inMainZoneDisplay').value.trim() : '') || (kittaList[0] ? kittaList[0].kaifiyat : 'व्यवसायिक शहरी क्षेत्र');
+    
+    // Single Source of Truth for Classification:
+    // Read directly from #inMainZoneDisplay, fallback to first kitta's kaifiyat, or leave placeholder
+    const mainZoneSelect = document.getElementById('inMainZoneDisplay');
+    const mainZone = (mainZoneSelect ? mainZoneSelect.value.trim() : '') || (kittaList[0] ? (kittaList[0].kaifiyat || '') : '');
 
     const validKittas = kittaList.filter(k => k.kitta && k.kitta.trim() !== '');
     const kittaCount = validKittas.length > 0 ? validKittas.length : kittaList.length;
@@ -445,7 +488,9 @@ window.updateDoc = function () {
     if (lblDec) lblDec.innerText = window.toNepaliDigit(decisionDate);
 
     const lblZone = document.getElementById('lblMainZoneSpan');
-    if (lblZone) lblZone.innerText = mainZone;
+    if (lblZone) {
+        lblZone.innerText = mainZone || '....................';
+    }
 
     const lblLandPlural1 = document.getElementById('lblLandPlural1');
     if (lblLandPlural1) lblLandPlural1.innerText = landText;
@@ -477,8 +522,12 @@ window.updateDoc = function () {
     if (lblSigTitle) lblSigTitle.innerText = sigTitle;
 };
 
-// 8. Print and Save Workflow
-window.printAndSaveSystem = function () {
+// 8. Print and Save Workflow — Safe Duplicate Prevention & Updating by Stable ID
+window.printAndSaveSystem = async function () {
+    if (window._isSavingInProgress) return;
+    const btn = document.querySelector('.btn-print');
+    const origBtnText = btn ? btn.innerText : '🖨️ प्रिन्ट र सुरक्षित गर्नुस्';
+
     const applicantName = document.getElementById('inName') ? document.getElementById('inName').value.trim() : '';
     if (!applicantName) {
         alert("⚠️ कृपया निवेदकको पुरा नाम लेख्नुहोस् !");
@@ -486,10 +535,18 @@ window.printAndSaveSystem = function () {
         return;
     }
 
-    const chalaniNo = document.getElementById('inChalani') ? document.getElementById('inChalani').value.trim() : '';
-    const miti = document.getElementById('inMiti') ? document.getElementById('inMiti').value.trim() : '';
     const kittaData = getKittaRowsData();
     const mainZone = document.getElementById('inMainZoneDisplay') ? document.getElementById('inMainZoneDisplay').value.trim() : '';
+
+    if (!mainZone && !kittaData.some(k => k.kaifiyat)) {
+        alert("⚠️ कृपया जग्गाको वर्गीकरण क्षेत्र (मुख्य वर्गीकरण क्षेत्र) छनौट गर्नुहोस् !");
+        if (document.getElementById('inMainZoneDisplay')) document.getElementById('inMainZoneDisplay').focus();
+        return;
+    }
+
+    const chalaniNo = document.getElementById('inChalani') ? document.getElementById('inChalani').value.trim() : '';
+    const miti = document.getElementById('inMiti') ? document.getElementById('inMiti').value.trim() : '';
+    const recordId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value.trim() : '';
 
     const recordData = {
         template: 'bargikaran-sifarish',
@@ -524,31 +581,51 @@ window.printAndSaveSystem = function () {
         timestamp: Date.now()
     };
 
-    const editIndex = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value : '';
+    window._isSavingInProgress = true;
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = "⏳ सुरक्षित हुँदैछ...";
+    }
 
-    // Save to LocalStorage Backup
-    let localList = [];
     try {
-        localList = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-    } catch (e) {
-        localList = [];
-    }
+        let finalId = recordId;
+        if (db && db.collection) {
+            if (recordId !== '') {
+                // UPDATE existing record in Firestore using its stable primary key
+                await db.collection("bargikaranSifarishRecords").doc(recordId).set(recordData, { merge: true });
+                showToast("✅ सिफारिस अद्यावधिक (Update) भयो !");
+            } else {
+                // CREATE genuinely new record in Firestore
+                const docRef = await db.collection("bargikaranSifarishRecords").add(recordData);
+                finalId = docRef.id;
+                document.getElementById('editRecordIndex').value = finalId;
+                const titleEl = document.getElementById('formMainTitle');
+                if (titleEl) titleEl.innerText = "🔄 जग्गा वर्गीकरण सिफारिस (सम्पादन मोड)";
+                showToast("✅ नयाँ सिफारिस सुरक्षित भयो !");
+            }
+        }
 
-    if (editIndex !== '' && !isNaN(parseInt(editIndex, 10))) {
-        localList[parseInt(editIndex, 10)] = recordData;
-    } else {
-        localList.unshift(recordData);
-    }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localList));
-
-    // Save to Firebase Firestore
-    if (db && db.collection) {
+        // Keep local storage synchronized with stable IDs
         try {
-            db.collection("bargikaranSifarishRecords").add(recordData)
-                .then(() => console.log("Cloud record saved."))
-                .catch(err => console.log("Firebase sync fallback:", err));
-        } catch (e) {
-            console.log("Firebase collection warning:", e);
+            let localList = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            const savedItem = { id: finalId || ('local_' + Date.now()), ...recordData };
+            const existingIdx = localList.findIndex(r => r.id === savedItem.id);
+            if (existingIdx !== -1) {
+                localList[existingIdx] = savedItem;
+            } else {
+                localList.unshift(savedItem);
+            }
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localList));
+        } catch (e) { }
+
+    } catch (err) {
+        console.error("Firestore save error:", err);
+        showToast("⚠️ क्लाउड सिङ्क असफल, स्थानीय रूपमा सुरक्षित गरियो ।");
+    } finally {
+        window._isSavingInProgress = false;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = origBtnText;
         }
     }
 
@@ -569,36 +646,49 @@ window.toggleModal = function (show) {
     }
 };
 
+window.onSearchInputDebounced = function () {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        renderDatabaseTable();
+    }, 150);
+};
+
 function renderDatabaseTable() {
     const searchField = document.getElementById('searchField');
     const searchVal = (searchField ? searchField.value : '').trim().toLowerCase();
-    const searchEn = (window.toEnglishDigit || (x => x))(searchVal);
-    const searchNe = (window.toNepaliDigit || (x => x))(searchVal);
+    const searchEn = window.toEnglishDigit(searchVal);
+    const searchNe = window.toNepaliDigit(searchVal);
     const tbody = document.getElementById('dbTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Merge Firestore and LocalStorage
+    // Primary source is globalDatabase (Firestore live sync); fallback to local cache
     let list = [];
-    try {
-        const local = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-        list = globalDatabase.length > 0 ? globalDatabase : local;
-    } catch (e) {
+    if (globalDatabase.length > 0) {
         list = globalDatabase;
+    } else {
+        try {
+            list = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+        } catch (e) {
+            list = [];
+        }
     }
 
-    const filtered = list.filter(item => {
+    // Filter out soft-deleted records
+    const activeList = list.filter(item => !item.isDeleted);
+
+    const filtered = activeList.filter(item => {
         if (!searchVal) return true;
         const name = (item.applicantName || '').toLowerCase();
         const chalani = (item.chalani || '').toLowerCase();
-        const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
-        const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+        const chalaniEn = window.toEnglishDigit(chalani);
+        const chalaniNe = window.toNepaliDigit(chalani);
         const citNo = (item.citNo || '').toLowerCase();
-        const citNoEn = (window.toEnglishDigit || (x => x))(citNo);
-        const citNoNe = (window.toNepaliDigit || (x => x))(citNo);
+        const citNoEn = window.toEnglishDigit(citNo);
+        const citNoNe = window.toNepaliDigit(citNo);
         const kittaStr = (item.kittaList || []).map(k => k.kitta).join(' ').toLowerCase();
-        const kittaEn = (window.toEnglishDigit || (x => x))(kittaStr);
-        const kittaNe = (window.toNepaliDigit || (x => x))(kittaStr);
+        const kittaEn = window.toEnglishDigit(kittaStr);
+        const kittaNe = window.toNepaliDigit(kittaStr);
         const zoneStr = (item.mainZone || '').toLowerCase();
 
         return name.includes(searchVal) ||
@@ -625,16 +715,16 @@ function renderDatabaseTable() {
         tr.innerHTML = `
             <td style="text-align:center;"><strong>${window.toNepaliDigit(idx + 1)}</strong></td>
             <td>
-                <div style="font-weight:700; color:#1e40af;">${rec.applicantName || '-'}</div>
+                <div style="font-weight:700; color:#1e40af;">${escapeHtml(rec.applicantName || '-')}</div>
                 <div style="font-size:0.82rem; color:#64748b;">च.नं. ${window.toNepaliDigit(rec.chalani) || '-'}</div>
             </td>
             <td style="font-size:0.9rem;">${kittaSummary}</td>
-            <td><strong style="color:#0f766e;">${rec.mainZone || '-'}</strong></td>
+            <td><strong style="color:#0f766e;">${escapeHtml(rec.mainZone || '-')}</strong></td>
             <td style="font-size:0.88rem;">${window.toNepaliDigit(rec.miti) || '-'}</td>
             <td>
                 <div style="display:flex; gap:4px;">
-                    <button type="button" class="btn-del" style="background:#2563eb;" onclick="loadRecordForEdit(${idx})" title="फारममा लोड गर्नुहोस्">✏️ लोड</button>
-                    <button type="button" class="btn-del" style="background:#ef4444;" onclick="deleteRecord(${idx})" title="मेटाउनुहोस्">🗑️</button>
+                    <button type="button" class="btn-del" style="background:#2563eb;" onclick="loadRecordForEdit('${rec.id}')" title="फारममा लोड गर्नुहोस्">✏️ लोड</button>
+                    <button type="button" class="btn-del" style="background:#ef4444;" onclick="deleteRecord('${rec.id}')" title="मेटाउनुहोस्">🗑️</button>
                 </div>
             </td>
         `;
@@ -642,24 +732,45 @@ function renderDatabaseTable() {
     });
 }
 
-window.loadRecordForEdit = function (index) {
-    let list = [];
-    try {
-        list = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-    } catch (e) { }
+// Fixed Wrong-Person Bug: Look up record by its exact, immutable string ID
+window.loadRecordForEdit = function (recordId) {
+    if (!recordId) return;
 
-    const rec = list[index] || globalDatabase[index];
-    if (!rec) return;
+    let rec = globalDatabase.find(r => r.id === recordId);
+    if (!rec) {
+        try {
+            const local = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            rec = local.find(r => r.id === recordId);
+        } catch (e) { }
+    }
+
+    if (!rec) {
+        alert("⚠️ यो अभिलेख फेला परेन !");
+        return;
+    }
+
+    // Guard against wrong-record leak
+    if (rec.id !== recordId) {
+        console.error("Mismatch error: requested", recordId, "got", rec.id);
+        return;
+    }
+
+    // Safely clear form state first to eliminate any stale data flash
+    resetFormFieldsOnly();
 
     if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
         window.NepalSambat.setCurrentRecord(rec);
     }
 
+    // Set stable primary key in editRecordIndex
     const editRecordIndex = document.getElementById('editRecordIndex');
-    if (editRecordIndex) editRecordIndex.value = index;
+    if (editRecordIndex) editRecordIndex.value = rec.id;
+
+    const titleEl = document.getElementById('formMainTitle');
+    if (titleEl) titleEl.innerText = "🔄 जग्गा वर्गीकरण सिफारिस (सम्पादन मोड)";
 
     if (rec.patraSankhya && document.getElementById('inPatraSankhya')) document.getElementById('inPatraSankhya').value = rec.patraSankhya;
-    if (rec.chalani && document.getElementById('inChalani')) document.getElementById('inChalani').value = rec.chalani;
+    if (rec.chalani !== undefined && document.getElementById('inChalani')) document.getElementById('inChalani').value = rec.chalani === '-' ? '' : rec.chalani;
     if (rec.miti && document.getElementById('inMiti')) document.getElementById('inMiti').value = rec.miti;
     if (document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = (rec.nepalSamvat !== '-' && rec.nepalSamvat) ? rec.nepalSamvat : ((rec.ns !== '-' && rec.ns) ? rec.ns : '');
     if (rec.receiver && document.getElementById('inReceiver')) document.getElementById('inReceiver').value = rec.receiver;
@@ -687,12 +798,29 @@ window.loadRecordForEdit = function (index) {
     if (Array.isArray(rec.kittaList) && rec.kittaList.length > 0) {
         rec.kittaList.forEach(k => addKittaRow(k));
     } else {
-        addKittaRow();
+        addKittaRow({
+            sabikWada: 'गौरादह गाविस ९',
+            halWada: 'गौरादह वडा नं. १',
+            kitta: '',
+            area: '',
+            kaifiyat: rec.mainZone || ''
+        });
     }
 
     if (rec.actName && document.getElementById('inActName')) document.getElementById('inActName').value = rec.actName;
     if (rec.decisionDate && document.getElementById('inDecisionDate')) document.getElementById('inDecisionDate').value = rec.decisionDate;
-    if (rec.mainZone && document.getElementById('inMainZoneDisplay')) document.getElementById('inMainZoneDisplay').value = rec.mainZone;
+
+    // Restore saved classification faithfully without forcing default
+    const savedZone = (rec.mainZone || (rec.kittaList && rec.kittaList[0] ? rec.kittaList[0].kaifiyat : '') || '').trim();
+    const zoneSelect = document.getElementById('inMainZoneDisplay');
+    if (zoneSelect) {
+        if (savedZone === 'व्यवसायिक शहरी क्षेत्र') {
+            zoneSelect.value = 'व्यावसायिक शहरी क्षेत्र';
+        } else {
+            zoneSelect.value = savedZone;
+        }
+    }
+
     if (rec.signAuthority && document.getElementById('inSignAuthority')) {
         document.getElementById('inSignAuthority').value = rec.signAuthority;
         toggleCustomSign();
@@ -702,34 +830,115 @@ window.loadRecordForEdit = function (index) {
 
     window.updateDoc();
     toggleModal(false);
+    showToast(`✅ ${rec.applicantName} को सिफारिस सम्पादनका लागि लोड भयो ।`);
 };
 
-window.deleteRecord = function (index) {
-    if (!confirm("के तपाईं यो सिफारिस अभिलेख मेटाउन निश्चित हुनुहुन्छ?")) return;
+// Soft-Delete with Recycle Bin Integration
+window.deleteRecord = async function (recordId) {
+    if (!recordId) return;
+    const rec = globalDatabase.find(r => r.id === recordId);
+    const applicant = rec ? rec.applicantName : '';
+    if (!confirm(`के तपाईं ${applicant ? applicant + ' को ' : ''}यो सिफारिस अभिलेख हटाउन निश्चित हुनुहुन्छ?\n(यो रेकर्ड १०० दिनसम्म रद्दीको टोकरीमा सुरक्षित रहनेछ)`)) return;
 
-    let list = [];
     try {
-        list = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-        list.splice(index, 1);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    } catch (e) { }
+        if (db && db.collection) {
+            await db.collection("bargikaranSifarishRecords").doc(recordId).update({
+                isDeleted: true,
+                deletedAtMillis: Date.now()
+            });
 
-    renderDatabaseTable();
+            try {
+                await db.collection("deleted_records_log").doc(recordId).set({
+                    originalId: recordId,
+                    collectionName: 'bargikaranSifarishRecords',
+                    recordData: rec || {},
+                    deletedAtMillis: Date.now()
+                });
+            } catch (logErr) {
+                console.log("Recycle bin log notice:", logErr);
+            }
+        }
+
+        // Update local cache
+        try {
+            let local = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            local = local.filter(r => r.id !== recordId);
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(local));
+        } catch (e) { }
+
+        showToast("🗑️ रेकर्ड रद्दीको टोकरीमा सारियो ।");
+    } catch (e) {
+        console.error("Delete error:", e);
+        alert("डिलिट गर्न समस्या भयो: " + e.message);
+    }
 };
+
+// Clean Form Reset for Starting a New Recommendation
+window.resetFormForNew = function () {
+    const editRecordIndex = document.getElementById('editRecordIndex');
+    if (editRecordIndex) editRecordIndex.value = '';
+    const formTitle = document.getElementById('formMainTitle');
+    if (formTitle) formTitle.innerText = "🗺️ जग्गा वर्गीकरण सिफारिस";
+
+    resetFormFieldsOnly();
+
+    // Classification MUST start blank for new recommendation
+    const mainZoneSelect = document.getElementById('inMainZoneDisplay');
+    if (mainZoneSelect) mainZoneSelect.value = '';
+
+    // Reset kitta rows to a single clean row with empty classification
+    const container = document.getElementById('kittaRowsContainer');
+    if (container) container.innerHTML = '';
+    activeRowIds = [];
+    rowCounter = 0;
+    addKittaRow({
+        sabikWada: 'गौरादह गाविस ९',
+        halWada: 'गौरादह वडा नं. १',
+        kitta: '',
+        area: '',
+        kaifiyat: ''
+    });
+
+    window.initializeAutomaticDate();
+    window.updateDoc();
+    showToast("ℹ️ नयाँ सिफारिस फारम तयार भयो ।");
+};
+
+function resetFormFieldsOnly() {
+    if (document.getElementById('inName')) document.getElementById('inName').value = '';
+    if (document.getElementById('inChalani')) document.getElementById('inChalani').value = '';
+    if (document.getElementById('inCitNo')) document.getElementById('inCitNo').value = '';
+    if (document.getElementById('inCitDate')) document.getElementById('inCitDate').value = '';
+    if (document.getElementById('inReceiver')) document.getElementById('inReceiver').value = 'श्री यो जोजस सँग सम्बन्धित छ ।';
+    if (document.getElementById('inPalika')) document.getElementById('inPalika').value = 'गौरादह नगरपालिका';
+    if (document.getElementById('inWadaNo')) document.getElementById('inWadaNo').value = window.toNepaliDigit(localStorage.getItem('sifarish_ward') || '1');
+    
+    const chkAddr = document.getElementById('chkChangeAddress');
+    if (chkAddr) {
+        chkAddr.checked = false;
+        toggleAddressFields();
+    }
+    if (document.getElementById('inCustDistrict')) document.getElementById('inCustDistrict').value = '';
+    if (document.getElementById('inCustPalika')) document.getElementById('inCustPalika').value = '';
+    if (document.getElementById('inCustWada')) document.getElementById('inCustWada').value = '';
+}
 
 window.exportRecordsToCSV = function () {
-    let list = [];
-    try {
-        list = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-    } catch (e) { }
-
+    let list = globalDatabase.length > 0 ? globalDatabase : [];
     if (list.length === 0) {
+        try {
+            list = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+        } catch (e) { }
+    }
+
+    const activeList = list.filter(r => !r.isDeleted);
+    if (activeList.length === 0) {
         alert("⚠️ निर्यात गर्न कुनै अभिलेख फेला परेन !");
         return;
     }
 
     let csvContent = "\uFEFFक्र.सं.,चलानी नं.,मिति,निवेदकको नाम,वडा,कित्ता विवरण,वर्गीकरण क्षेत्र\n";
-    list.forEach((rec, idx) => {
+    activeList.forEach((rec, idx) => {
         const kittaText = (rec.kittaList || []).map(k => `कि.नं. ${k.kitta} (${k.area} ब.मि.)`).join('; ');
         csvContent += `"${idx + 1}","${rec.chalani || ''}","${rec.miti || ''}","${rec.applicantName || ''}","${rec.wadaNo || '१'}","${kittaText}","${rec.mainZone || ''}"\n`;
     });
@@ -742,7 +951,7 @@ window.exportRecordsToCSV = function () {
 };
 
 // ════════════════════════════════════════════════════════════════════════════
-// 10. Data Import System (चार किल्ला / बाटो प्रमाणित / घर बाटो)
+// 10. Data Import System (Lazy Loaded for Speed)
 // ════════════════════════════════════════════════════════════════════════════
 
 window.openImportModal = function () {
@@ -750,8 +959,7 @@ window.openImportModal = function () {
     if (modal) {
         modal.style.display = 'flex';
         modal.classList.add('active');
-        reloadImportSources();
-        renderImportTable();
+        loadImportSourcesOnDemand();
     }
 };
 
@@ -773,8 +981,46 @@ window.setImportFilter = function (filterType) {
     renderImportTable();
 };
 
+// Lazy loading: only fetch import sources when user explicitly uses the import modal
+function loadImportSourcesOnDemand() {
+    reloadImportSources();
+    if (!importSourcesLoaded && db && db.collection) {
+        importSourcesLoaded = true;
+        db.collection("charKillaRecords").limit(120).get().then(snapshot => {
+            importSources.charkilla = [];
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                if (!d.isDeleted) importSources.charkilla.push({ id: doc.id, ...d });
+            });
+            importSources.charkilla.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            renderImportTable();
+        }).catch(e => console.log("Charkilla import notice:", e));
+
+        db.collection("batoPramanitRecords").limit(120).get().then(snapshot => {
+            importSources.bato = [];
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                if (!d.isDeleted) importSources.bato.push({ id: doc.id, ...d });
+            });
+            importSources.bato.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            renderImportTable();
+        }).catch(e => console.log("Bato import notice:", e));
+
+        db.collection("gharBatoRecords").limit(120).get().then(snapshot => {
+            importSources.gharbato = [];
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                if (!d.isDeleted) importSources.gharbato.push({ id: doc.id, ...d });
+            });
+            importSources.gharbato.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            renderImportTable();
+        }).catch(e => console.log("Gharbato import notice:", e));
+    } else {
+        renderImportTable();
+    }
+}
+
 window.reloadImportSources = function () {
-    // Load local storage records for all sources
     try {
         const localChar = JSON.parse(localStorage.getItem('charkilla_records_local') || localStorage.getItem('charKillaRecords') || '[]');
         if (localChar.length > 0 && importSources.charkilla.length === 0) importSources.charkilla = localChar;
@@ -819,7 +1065,6 @@ window.renderImportTable = function () {
         });
     }
 
-    // Filter by search term
     const filtered = combinedList.filter(item => {
         if (!searchVal) return true;
         const name = (item.name || item.applicantName || '').toLowerCase();
@@ -853,7 +1098,6 @@ window.renderImportTable = function () {
         const name = rec.name || rec.applicantName || '-';
         const wada = rec.wada || rec.wadaNo || '१';
 
-        // Format Kitta Summary
         let kittaDetails = [];
         if (Array.isArray(rec.kittas) && rec.kittas.length > 0) {
             kittaDetails = rec.kittas.map(k => `कि.नं. ${window.toNepaliDigit(k.kitta)} (${window.toNepaliDigit(k.area || '-')} ब.मि.)`);
@@ -871,7 +1115,7 @@ window.renderImportTable = function () {
         tr.innerHTML = `
             <td>${badgeHtml}</td>
             <td>
-                <div style="font-weight:700; color:#1e40af; font-size:0.95rem;">${name}</div>
+                <div style="font-weight:700; color:#1e40af; font-size:0.95rem;">${escapeHtml(name)}</div>
                 <div style="font-size:0.8rem; color:#64748b;">वडा नं. ${window.toNepaliDigit(wada)} ${rec.citNo ? '• ना.नं: ' + window.toNepaliDigit(rec.citNo) : ''}</div>
             </td>
             <td style="font-size:0.88rem;">${kittaSummaryHtml}</td>
@@ -897,21 +1141,17 @@ window.importRecordIntoForm = function (sourceType, origIdx) {
         return;
     }
 
-    // 1. Applicant Name
     const applicantName = rec.name || rec.applicantName || '';
     if (applicantName && document.getElementById('inName')) {
         document.getElementById('inName').value = applicantName;
     }
 
-    // 2. Ward and Palika
     if (document.getElementById('inPalika')) document.getElementById('inPalika').value = 'गौरादह नगरपालिका';
     if (document.getElementById('inWadaNo')) document.getElementById('inWadaNo').value = rec.wada || rec.wadaNo || '१';
 
-    // 3. Citizenship Details
     if (rec.citNo && document.getElementById('inCitNo')) document.getElementById('inCitNo').value = rec.citNo;
     if (rec.citDate && document.getElementById('inCitDate')) document.getElementById('inCitDate').value = rec.citDate;
 
-    // 4. Custom Address
     const hasCustomAddr = !!(rec.changeAddress || rec.isCustomAddr);
     if (document.getElementById('chkChangeAddress')) {
         document.getElementById('chkChangeAddress').checked = hasCustomAddr;
@@ -923,7 +1163,6 @@ window.importRecordIntoForm = function (sourceType, origIdx) {
         }
     }
 
-    // 5. Populate Kitta Rows
     const container = document.getElementById('kittaRowsContainer');
     if (container) container.innerHTML = '';
     activeRowIds = [];
@@ -942,7 +1181,7 @@ window.importRecordIntoForm = function (sourceType, origIdx) {
 
     const sabikWadaText = rec.sabikWada ? (rec.sabikWada.includes('गा') ? rec.sabikWada : `गौरादह गाविस ${rec.sabikWada}`) : 'गौरादह गाविस ९';
     const halWadaText = `गौरादह वडा नं. ${rec.wada || '१'}`;
-    const defaultZone = (rec.landUseZone && rec.landUseZone !== 'NONE') ? rec.landUseZone : (document.getElementById('inMainZoneDisplay').value || 'व्यावसायिक शहरी क्षेत्र');
+    const defaultZone = (rec.landUseZone && rec.landUseZone !== 'NONE') ? rec.landUseZone : (document.getElementById('inMainZoneDisplay').value || '');
 
     if (kittaItems.length > 0) {
         kittaItems.forEach(k => {
@@ -987,7 +1226,36 @@ function showToast(message) {
     }, 4000);
 }
 
-// 11. Initialization on Load
+// Diagnostic helper to inspect existing historical records for suspected duplicates
+window.detectHistoricalDuplicates = function () {
+    const map = {};
+    const suspected = [];
+    globalDatabase.forEach(rec => {
+        const name = (rec.applicantName || '').trim().toLowerCase();
+        const chalani = (rec.chalani || '').trim();
+        const kitta = (rec.kittaList || []).map(k => k.kitta).sort().join(',');
+        const key = `${name}|${chalani}|${kitta}`;
+        if (!map[key]) {
+            map[key] = [];
+        }
+        map[key].push(rec);
+    });
+
+    Object.keys(map).forEach(k => {
+        if (map[k].length > 1) {
+            suspected.push({
+                key: k,
+                count: map[k].length,
+                records: map[k].map(r => ({ id: r.id, name: r.applicantName, chalani: r.chalani, miti: r.miti, time: r.timestamp }))
+            });
+        }
+    });
+
+    console.log(`[Diagnostic] Found ${suspected.length} suspected duplicate group(s) in historical archive:`, suspected);
+    return suspected;
+};
+
+// 11. Initialization on Load — Clean Blank State & Instant Loading
 window.onload = function () {
     window.initializeAutomaticDate();
     if (activeRowIds.length === 0) {
@@ -996,7 +1264,7 @@ window.onload = function () {
             halWada: 'गौरादह वडा नं. १',
             kitta: '',
             area: '',
-            kaifiyat: 'व्यावसायिक शहरी क्षेत्र'
+            kaifiyat: ''
         });
     }
     window.adjustSignaturePosition(35);
@@ -1007,53 +1275,42 @@ window.addEventListener('templateInjected', function () {
     window.initializeAutomaticDate();
 });
 
+// Real-Time Firebase Listener — Only subscribe to Bargikaran records on startup for fast loading
 document.addEventListener('DOMContentLoaded', () => {
-    // Firebase Sync Listener for Bargikaran Sifarish
     (window._firebaseAuthReady || Promise.resolve()).then(() => {
         if (db && db.collection) {
-            // 1. Bargikaran Records
             db.collection("bargikaranSifarishRecords").onSnapshot((snapshot) => {
                 globalDatabase = [];
                 snapshot.forEach((doc) => {
-                    globalDatabase.push({ id: doc.id, ...doc.data() });
+                    const data = doc.data();
+                    if (!data.isDeleted) {
+                        globalDatabase.push({ id: doc.id, ...data });
+                    }
                 });
                 globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                // Synchronize local storage cache for instant cross-computer / offline resilience
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(globalDatabase));
+                } catch (e) { }
+
+                // Update sync status indicator in Abhilekh modal
+                const badge = document.getElementById('syncStatusBadge');
+                if (badge) {
+                    badge.innerText = `🟢 क्लाउड सिङ्क सक्रिय (${window.toNepaliDigit(globalDatabase.length)} रेकर्ड)`;
+                    badge.style.background = '#dcfce7';
+                    badge.style.color = '#166534';
+                }
+
                 renderDatabaseTable();
             }, (err) => {
-                console.log("Firestore snapshot fallback:", err);
-            });
-
-            // 2. Charkilla Records for Import
-            db.collection("charKillaRecords").onSnapshot((snapshot) => {
-                importSources.charkilla = [];
-                snapshot.forEach((doc) => {
-                    importSources.charkilla.push({ id: doc.id, ...doc.data() });
-                });
-                importSources.charkilla.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            }, (err) => {
-                console.log("Charkilla snapshot fallback:", err);
-            });
-
-            // 3. Bato Pramanit Records for Import
-            db.collection("batoPramanitRecords").onSnapshot((snapshot) => {
-                importSources.bato = [];
-                snapshot.forEach((doc) => {
-                    importSources.bato.push({ id: doc.id, ...doc.data() });
-                });
-                importSources.bato.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            }, (err) => {
-                console.log("Bato snapshot fallback:", err);
-            });
-
-            // 4. Ghar Bato Records for Import
-            db.collection("gharBatoRecords").onSnapshot((snapshot) => {
-                importSources.gharbato = [];
-                snapshot.forEach((doc) => {
-                    importSources.gharbato.push({ id: doc.id, ...doc.data() });
-                });
-                importSources.gharbato.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            }, (err) => {
-                console.log("Gharbato snapshot fallback:", err);
+                console.warn("Firestore snapshot error/fallback:", err);
+                const badge = document.getElementById('syncStatusBadge');
+                if (badge) {
+                    badge.innerText = '🟡 अफलाइन क्यास';
+                    badge.style.background = '#fef3c7';
+                    badge.style.color = '#92400e';
+                }
             });
         }
     }).catch(() => {});
