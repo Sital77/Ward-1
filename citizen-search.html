@@ -566,6 +566,53 @@
             return `${baseText} ${nepaliVersion} ${englishVersion}`;
         }
 
+        function getMatchedNibedanForms(query) {
+            const qLower = (query || '').trim().toLowerCase();
+            if (!qLower) return [];
+            return nibedanApplicationList.filter(f => {
+                const searchKeys = (f.keywords + ' ' + f.title + ' ' + f.fileName).toLowerCase();
+                return searchKeys.includes(qLower);
+            });
+        }
+
+        function renderNibedanFormsHtml(formsList, showBadge = true) {
+            if (!formsList || formsList.length === 0) return '';
+            return `
+                <div style="background: #faf5ff; border: 1.5px solid #d6bcfa; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                        <h4 style="color: #553c9a; font-size: 1.05rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>📋</span> आधिकारिक निवेदन तथा दरखास्त फारमहरू (${toNepaliNum(formsList.length)})
+                        </h4>
+                        ${showBadge ? `<span style="font-size: 0.78rem; background: #e9d8fd; color: #553c9a; padding: 2px 8px; border-radius: 10px; font-weight: 600;">द्रुत खोजी • PDF</span>` : ''}
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
+                        ${formsList.map(f => {
+                            const encodedUrl = encodeURI('nibedan/' + f.fileName);
+                            return `
+                                <div style="background: #fff; border: 1.5px solid #e9d8fd; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 8px rgba(107, 70, 193, 0.06);">
+                                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                        <span style="font-size: 1.8rem; line-height: 1;">${f.emoji}</span>
+                                        <div>
+                                            <div style="font-weight: 700; color: #2d3748; font-size: 1rem; line-height: 1.35; margin-bottom: 4px;">${escapeHtml(f.title)}</div>
+                                            <span style="font-size: 0.74rem; background: #f3e8ff; color: #6b46c1; padding: 2px 8px; border-radius: 4px; font-weight: 600;">आधिकारिक निवेदन फारम • PDF</span>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                        <a href="${encodedUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; background: #6b46c1; color: #fff; text-decoration: none; transition: background 0.15s;">
+                                            👁️ हेर्नुहोस्
+                                        </a>
+                                        <a href="${encodedUrl}" download="${f.fileName}" style="display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; text-decoration: none; transition: all 0.15s;">
+                                            ⬇️ डाउनलोड
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         function handleSearchInput(val) {
             const clearBtn = document.getElementById('clearSearchBtn');
             clearBtn.style.display = val ? 'block' : 'none';
@@ -574,6 +621,7 @@
             if (!val.trim()) {
                 document.getElementById('resultsSummaryBar').style.display = 'none';
                 document.getElementById('searchResultsContainer').innerHTML = `
+                    ${renderNibedanFormsHtml(nibedanApplicationList)}
                     <div class="empty-results">
                         <div class="empty-results-icon">📂</div>
                         <h3>नागरिक वा संस्थाको नाम टाइप गर्नुहोस्</h3>
@@ -602,8 +650,11 @@
         }
 
         function performSearch(query) {
+            const matchedForms = getMatchedNibedanForms(query);
+            const formsHtml = renderNibedanFormsHtml(matchedForms);
+
             if (!cachedAllRecords) {
-                document.getElementById('searchResultsContainer').innerHTML = `
+                document.getElementById('searchResultsContainer').innerHTML = formsHtml + `
                     <div class="loading-state">
                         <div class="loading-spinner"></div>
                         <h3>डाटाबेसबाट सम्पूर्ण सिफारिसहरू लोड गरिँदैछ...</h3>
@@ -633,7 +684,7 @@
                 fileName: 'घटना दर्ता नाम संसोधन.pdf',
                 category: 'निवेदन / फारम',
                 emoji: '📝',
-                keywords: 'घटना दर्ता नाम संसोधन संशोधन नामसंसोधन नामसंशोधन निवेदन दरखास्त फारम nibedan form'
+                keywords: 'घटना दर्ता नाम संसोधन संशोधन नामसंसोधन नामसंशोधन निवेदन दरखास्त फारम फाराम nibedan form pdf'
             },
             {
                 id: 'nibedan-janma-mrityu-darta',
@@ -641,7 +692,7 @@
                 fileName: 'जन्म तथा मृत्यु दर्ता.pdf',
                 category: 'निवेदन / फारम',
                 emoji: '📜',
-                keywords: 'जन्म तथा मृत्यु दर्ता जन्मदर्ता मृत्युदर्ता निवेदन दरखास्त फारम nibedan form'
+                keywords: 'जन्म तथा मृत्यु दर्ता जन्मदर्ता मृत्युदर्ता निवेदन दरखास्त फारम फाराम nibedan form pdf'
             },
             {
                 id: 'nibedan-janma-darta-pratilipi',
@@ -649,7 +700,7 @@
                 fileName: 'जन्म दर्ता प्रतिलिपि फारम.pdf',
                 category: 'निवेदन / फारम',
                 emoji: '📑',
-                keywords: 'जन्म दर्ता प्रतिलिपि फारम निवेदन जन्मदर्ता प्रतिलिपि नकल दरखास्त nibedan form'
+                keywords: 'जन्म दर्ता प्रतिलिपि फारम निवेदन जन्मदर्ता प्रतिलिपि नकल दरखास्त फाराम nibedan form pdf'
             },
             {
                 id: 'nibedan-bibaha-sambandha-vichhed',
@@ -657,7 +708,7 @@
                 fileName: 'विवाह सम्वन्ध विच्छेद निवेदन.pdf',
                 category: 'निवेदन / फारम',
                 emoji: '📋',
-                keywords: 'विवाह सम्बन्ध विच्छेद सम्वन्धविच्छेद सम्बन्धविच्छेद निवेदन दरखास्त फारम पारपाचुके nibedan form'
+                keywords: 'विवाह सम्बन्ध विच्छेद सम्वन्धविच्छेद सम्बन्धविच्छेद सम्वन्ध विच्छेद निवेदन दरखास्त फारम फाराम पारपाचुके nibedan form pdf'
             }
         ];
 
