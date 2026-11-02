@@ -93,7 +93,8 @@ function preIndexRecord(rec) {
     return rec;
 }
 
-// ── Realtime Listener for surakshyaSanrakshakTestRecords ──
+// ── Realtime Listener for surakshyaSanrakshakTestRecords & Sequential Counter ──
+let latestKnownCounterSeq = 100;
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
     db.collection("surakshyaSanrakshakTestRecords").onSnapshot((snapshot) => {
         globalDatabase = [];
@@ -104,12 +105,32 @@ function preIndexRecord(rec) {
             }
         });
         globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        window.globalDatabase = globalDatabase;
 
         const modal = document.getElementById('abhilekhModal');
         if (modal && modal.style.display === 'flex') {
             renderDatabaseTable();
         }
+        if (!document.getElementById('editRecordIndex')?.value) {
+            updateDoc();
+        }
     });
+
+    try {
+        db.collection('sifarish_counters').doc('guardian_test_seq').onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (typeof data.currentSeq === 'number') {
+                    latestKnownCounterSeq = data.currentSeq;
+                    if (!document.getElementById('editRecordIndex')?.value) {
+                        updateDoc();
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.warn("Counter listener setup error:", e);
+    }
 
     loadBeneficiaryRegister();
 }).catch(() => {});
@@ -302,6 +323,62 @@ function updateNepalSambatFromMiti() {
     }
 }
 
+// ── Calculate Next Sequential Recommendation Number ──
+function getNextSequentialRecNo() {
+    let maxNum = 99;
+    if (Array.isArray(globalDatabase)) {
+        globalDatabase.forEach(r => {
+            const num = parseInt(toEnglishDigit(r.recommendationNo || 0), 10);
+            if (!isNaN(num) && num > maxNum) {
+                maxNum = num;
+            }
+        });
+    }
+    if (typeof latestKnownCounterSeq === 'number' && latestKnownCounterSeq > maxNum) {
+        maxNum = latestKnownCounterSeq;
+    }
+    return Math.max(100, maxNum + 1);
+}
+
+// ── Official Nepali Phrasing Formatter for Schedule 2 Beneficiary Category ──
+function formatBenefitCategoryForSchedule2(rawCategory) {
+    if (!rawCategory) return 'अन्य ज्येष्ठ नागरिक सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    let cat = String(rawCategory).trim().replace(/\s+/g, ' ');
+
+    if (/(जेष्ठ|ज्येष्ठ)\s*नागरिक\s*एकल\s*महिला/i.test(cat)) {
+        return 'ज्येष्ठ नागरिक एकल महिला सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+    if (/(दलित.*(जेष्ठ|ज्येष्ठ)\s*नागरिक)|((जेष्ठ|ज्येष्ठ)\s*नागरिक.*दलित)/i.test(cat)) {
+        return 'ज्येष्ठ नागरिक (दलित) सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+    if (/^अन्य\s*(जेष्ठ|ज्येष्ठ)\s*नागरिक/i.test(cat) || cat === 'जेष्ठ नागरिक' || cat === 'ज्येष्ठ नागरिक' || cat.startsWith('जेष्ठ नागरिक (६८')) {
+        return 'अन्य ज्येष्ठ नागरिक सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+    if (/^विधवा/i.test(cat) || /एकल\s*महिला/i.test(cat)) {
+        return 'विधवा सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+    if (/पूर्ण\s*अपाङ्गता/i.test(cat)) {
+        return 'पूर्ण अपाङ्गता सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+    if (/अति\s*अशक्त\s*अपाङ्गता/i.test(cat)) {
+        return 'अति अशक्त अपाङ्गता सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+    if (/बालबालिका.*दलित|दलित.*बालबालिका/i.test(cat)) {
+        return 'दलित बालबालिका सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+    if (/लोपोन्मुख/i.test(cat)) {
+        return 'लोपोन्मुख आदिवासी/जनजाति सामाजिक सुरक्षा भत्ता प्राप्त गर्ने';
+    }
+
+    if (cat.endsWith('सामाजिक सुरक्षा भत्ता प्राप्त गर्ने')) {
+        return cat;
+    }
+    cat = cat.replace(/\s*भत्ता\s*$/, '').trim();
+    cat = cat.replace(/\s*\([^)]*(वर्ष|कार्ड)[^)]*\)/g, '').trim();
+    cat = cat.replace(/जेष्ठ/g, 'ज्येष्ठ');
+    return `${cat} सामाजिक सुरक्षा भत्ता प्राप्त गर्ने`;
+}
+
 // ── Atomic Sequence Number Allocation (Starts at 100) ──
 async function allocateNextSeqNumber() {
     try {
@@ -333,6 +410,7 @@ async function allocateNextSeqNumber() {
 
             return nextSeq;
         });
+        latestKnownCounterSeq = assignedSeq;
         return assignedSeq;
     } catch (err) {
         console.warn("Firestore transaction failed, applying memory reconciliation fallback:", err);
@@ -341,7 +419,10 @@ async function allocateNextSeqNumber() {
             const n = parseInt(toEnglishDigit(r.recommendationNo || 0), 10);
             if (!isNaN(n) && n > maxSeq) maxSeq = n;
         });
-        const fallbackSeq = maxSeq + 1;
+        if (typeof latestKnownCounterSeq === 'number' && latestKnownCounterSeq > maxSeq) {
+            maxSeq = latestKnownCounterSeq;
+        }
+        const fallbackSeq = Math.max(100, maxSeq + 1);
         try {
             await db.collection('sifarish_counters').doc('guardian_test_seq').set({
                 currentSeq: fallbackSeq,
@@ -350,6 +431,7 @@ async function allocateNextSeqNumber() {
                 module: "guardian_social_security_test"
             }, { merge: true });
         } catch (e) {}
+        latestKnownCounterSeq = fallbackSeq;
         return fallbackSeq;
     }
 }
@@ -372,18 +454,24 @@ function updateDoc() {
     const fiscalYear = getVal('selFiscalYear', patraSankhya);
     const quarter = getVal('selQuarter', 'प्रथम त्रैमासिक');
 
-    // Recommendation Number display
+    // Recommendation Number display (Starting at 100, sequential 100 -> 101 -> 102...)
     const editRecId = getVal('editRecordIndex', '');
-    let displayRecNo = '१००';
+    let displayRecNo = '';
+    let isEditing = false;
     if (editRecId !== '') {
         const existingRec = globalDatabase.find(r => r.id === editRecId);
         if (existingRec && existingRec.recommendationNo) {
             displayRecNo = toNepaliDigit(existingRec.recommendationNo);
+            isEditing = true;
         }
+    }
+    if (!isEditing) {
+        const nextSeq = getNextSequentialRecNo();
+        displayRecNo = toNepaliDigit(nextSeq);
     }
     const badgeRecNo = document.getElementById('badgeRecNoDisplay');
     if (badgeRecNo) {
-        badgeRecNo.innerText = editRecId ? `नं. ${displayRecNo}` : 'स्वतः उत्पन्न हुने (१०० बाट सुरु)';
+        badgeRecNo.innerText = isEditing ? `नं. ${displayRecNo} (सम्पादन मोड)` : `नं. ${displayRecNo} (स्वतः उत्पन्न हुने)`;
     }
 
     // Beneficiary Details
@@ -525,7 +613,7 @@ function updateDoc() {
     setTxt('lblP3RecNo', displayRecNo);
     setTxt('lblP3Miti', miti);
     setTxt('lblP3CardNo', cardNo);
-    setTxt('lblP3Category', benefitCategory);
+    setTxt('lblP3Category', formatBenefitCategoryForSchedule2(benefitCategory));
     setTxt('lblP3BeneficiaryName', beneficiaryName);
     setTxt('lblP3Condition', condition);
 
@@ -538,8 +626,15 @@ function updateDoc() {
     setTxt('lblP3GuardianCitNo', guardianCitNo);
     setTxt('lblP3GuardianCitDistrict', guardianCitDistrict);
 
+    let chairLabel = 'वडा अध्यक्षको नाम थरः';
+    if (chairTitle && chairTitle.includes('कार्यवाहक')) {
+        chairLabel = 'कार्यवाहक वडा अध्यक्षको नाम थरः';
+    } else if (chairTitle && chairTitle !== 'वडा अध्यक्ष') {
+        chairLabel = `${chairTitle}को नाम थरः`;
+    }
+    setTxt('lblP3ChairLabel', chairLabel);
     setTxt('lblP3ChairName', chairName);
-    setTxt('lblP3ChairTitle', `(${chairTitle})`);
+    setTxt('lblP3ChairTitle', '');
     setTxt('lblP3ValidityAY', fiscalYear);
 }
 
@@ -1218,8 +1313,6 @@ function resetForm() {
     document.getElementById('selRelation').value = 'छोरा';
     handleRelationChange();
 
-    document.getElementById('badgeRecNoDisplay').innerText = 'स्वतः उत्पन्न हुने (१०० बाट सुरु)';
-
     resetChairPosition();
     resetChairSignatureSettings();
     resetSpecimenBoxLayout();
@@ -1385,8 +1478,8 @@ function loadRecordForEdit(id) {
         if (selCat) {
             let found = false;
             for (let opt of selCat.options) {
-                if (opt.value === rec.benefitCategory) {
-                    selCat.value = rec.benefitCategory;
+                if (opt.value === rec.benefitCategory || opt.value.trim().replace(/\s+/g, ' ') === rec.benefitCategory.trim().replace(/\s+/g, ' ')) {
+                    selCat.value = opt.value;
                     found = true;
                     break;
                 }
@@ -1831,16 +1924,27 @@ function handleCreateNewRecordClick() {
     const inChalani = document.getElementById('inChalani');
     if (inChalani) inChalani.value = '';
 
-    // Next provisional recommendation number indicator
-    const badgeRecNo = document.getElementById('badgeRecNoDisplay');
-    if (badgeRecNo) badgeRecNo.innerText = 'स्वतः उत्पन्न हुने (१०० बाट सुरु)';
-
     updateDoc();
     switchPreviewPage(1);
 }
 
 function selectBeneficiaryItem(item) {
     if (!item) return;
+
+    // If currently in edit mode and the selected beneficiary doesn't match the record being edited, reset to new record mode
+    const curEditId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value : '';
+    if (curEditId) {
+        const curEditRec = globalDatabase.find(r => r.id === curEditId);
+        const curCard = curEditRec?.cardNo || '';
+        const curName = curEditRec?.beneficiaryName || curEditRec?.name || '';
+        if ((item.cardNo && item.cardNo !== curCard) || (item.name && item.name !== curName)) {
+            document.getElementById('editRecordIndex').value = '';
+            document.getElementById('formMainTitle').innerText = '🛡️ संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट';
+            const btnNew = document.getElementById('btnNewForm');
+            if (btnNew) btnNew.style.display = 'none';
+        }
+    }
+
     document.getElementById('inBeneficiaryName').value = item.name || '';
     if (item.cardNo) document.getElementById('inCardNo').value = item.cardNo;
     if (item.accountNo) document.getElementById('inAccountNo').value = item.accountNo;
@@ -1849,13 +1953,13 @@ function selectBeneficiaryItem(item) {
     }
 
     const cat = item.allowanceType || item.category || '';
-    if (cat) {
-        const selCat = document.getElementById('selBenefitCategory');
-        if (selCat) {
+    const selCat = document.getElementById('selBenefitCategory');
+    if (selCat) {
+        if (cat) {
             let found = false;
             for (let opt of selCat.options) {
-                if (opt.value === cat) {
-                    selCat.value = cat;
+                if (opt.value === cat || opt.value.trim().replace(/\s+/g, ' ') === cat.trim().replace(/\s+/g, ' ')) {
+                    selCat.value = opt.value;
                     found = true;
                     break;
                 }
@@ -1867,6 +1971,8 @@ function selectBeneficiaryItem(item) {
                 selCat.appendChild(opt);
                 selCat.value = cat;
             }
+        } else {
+            selCat.value = 'अन्य जेष्ठ नागरिक भत्ता';
         }
     }
 
