@@ -168,7 +168,7 @@
 
     <div class="input-panel">
         <div class="header-action-container">
-            <h2 class="panel-title">📑 योजना सम्झौता सिफारिस</h2>
+            <h2 class="panel-title" id="formMainTitle">📑 योजना सम्झौता सिफारिस</h2>
             <button class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
         </div>
 
@@ -326,7 +326,13 @@
             </div>
         </div>
 
-        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ सिफारिस प्रिन्ट गर्नुहोस्</button>
+                <div class="print-actions-wrapper" style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="button" class="btn-print" id="btnQuickPrint" onclick="quickPrintOnly()" style="background: #4a5568; flex: 1;" title="अभिलेखमा सेभ नगरी सिधै प्रिन्ट गर्नुहोस्">🖨️ सिफारिस प्रिन्ट मात्र</button>
+            <button type="button" class="btn-print" id="btnSaveAndPrint" onclick="printAndSaveSystem()" style="background: #2b6cb0; flex: 1.3;" title="अभिलेख सुरक्षित गरी सिफारिस प्रिन्ट गर्नुहोस्">💾 अभिलेख तथा सिफारिस प्रिन्ट</button>
+        </div>
+        <div style="margin-top: 8px; text-align: center;">
+            <button type="button" id="btnNewForm" onclick="resetFormToNew()" style="display: none; padding: 5px 12px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #2b6cb0;">➕ नयाँ सिफारिस फाराम</button>
+        </div>
     </div>
 
     <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
@@ -409,6 +415,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js?v=2.1"></script>
+    <script src="sifarish-save-service.js?v=1.0"></script>
 
     <script>
         // Check Auth
@@ -845,39 +852,113 @@
             if (show) renderDatabaseTable();
         }
 
+        function quickPrintOnly() {
+            if (window.SifarishSaveService && typeof window.SifarishSaveService.printOnly === 'function') {
+                window.SifarishSaveService.printOnly();
+            } else {
+                window.print();
+            }
+        }
+
+        function resetFormToNew() {
+            if (document.getElementById('editRecordIndex')) {
+                document.getElementById('editRecordIndex').value = '';
+            }
+            const titleEl = document.getElementById('formMainTitle');
+            if (titleEl) titleEl.innerText = '📑 योजना सम्झौता सिफारिस';
+            const btnNew = document.getElementById('btnNewForm');
+            if (btnNew) btnNew.style.display = 'none';
+
+            // Clear inputs
+            document.getElementById('inChalani').value = '';
+            document.getElementById('inProjectName').value = '';
+            document.getElementById('inCommitteeName').value = '';
+            document.getElementById('inChairman').value = '';
+            document.getElementById('inSecretary').value = '';
+            document.getElementById('inTreasurer').value = '';
+            document.getElementById('inBudgetAmt').value = '';
+            document.getElementById('inBudgetWords').value = '';
+            document.getElementById('membersContainer').innerHTML = '';
+            memberCount = 0;
+            updateDoc();
+        }
+
         async function printAndSaveSystem() {
-            const editId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value.trim() : '';
+            const projectName = document.getElementById('inProjectName').value.trim();
+            if (!projectName) {
+                alert("कृपया योजनाको नाम अनिवार्य लेख्नुहोस् !");
+                document.getElementById('inProjectName').focus();
+                return;
+            }
+
+            const ay = getSelectedAY();
+            const chalani = document.getElementById('inChalani').value.trim();
+            const miti = document.getElementById('inMiti').value.trim();
+            const nsVal = document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '';
+
             const record = {
-                miti: document.getElementById('inMiti').value.trim(),
-                chalani: document.getElementById('inChalani').value.trim(),
-                nepalSamvat: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
-                ns: document.getElementById('inNepalSamvat') ? document.getElementById('inNepalSamvat').value.trim() : '',
-                projectName: document.getElementById('inProjectName').value.trim(),
+                ay: ay,
+                fiscalYear: document.getElementById('inFiscalYear') ? (document.getElementById('inFiscalYear').value.trim() || ay) : ay,
+                miti: miti,
+                chalani: chalani || '-',
+                nepalSamvat: nsVal,
+                ns: nsVal,
+                projectName: projectName,
+                name: projectName,
                 committeeName: document.getElementById('inCommitteeName').value.trim(),
                 chairman: document.getElementById('inChairman').value.trim(),
                 secretary: document.getElementById('inSecretary').value.trim(),
                 treasurer: document.getElementById('inTreasurer').value.trim(),
                 budgetType: getSelectedBudgetType(),
                 amount: document.getElementById('inBudgetAmt').value.trim(),
+                budgetWords: document.getElementById('inBudgetWords') ? document.getElementById('inBudgetWords').value.trim() : '',
                 createdBy: localStorage.getItem('sifarish_user') || 'wada1',
                 createdWard: localStorage.getItem('sifarish_ward') || '1',
                 hasNepalSambatTithi: true,
                 nsFeatureVersion: 1,
-                nsRolloutCommit: (window.NepalSambat && window.NepalSambat.CONFIG) ? window.NepalSambat.CONFIG.rolloutCommit : 'd2ba29cef12ba2cfdd7cb211861af69f57880811',
-                timestamp: Date.now()
+                nsRolloutCommit: (window.NepalSambat && window.NepalSambat.CONFIG) ? window.NepalSambat.CONFIG.rolloutCommit : 'd2ba29cef12ba2cfdd7cb211861af69f57880811'
             };
 
-            try {
-                if (editId) {
-                    await db.collection("yojanaSamjhautaRecords").doc(editId).set(record, { merge: true });
-                } else {
-                    await db.collection("yojanaSamjhautaRecords").add(record);
-                }
-            } catch (e) {
-                console.warn("Save record warning:", e);
-            }
+            const btn = document.getElementById('btnSaveAndPrint') || document.querySelector('.btn-print');
 
-            window.print();
+            try {
+                if (window.SifarishSaveService && typeof window.SifarishSaveService.saveOrUpdateRecord === 'function') {
+                    const res = await window.SifarishSaveService.saveOrUpdateRecord({
+                        db: db,
+                        collectionName: "yojanaSamjhautaRecords",
+                        data: record,
+                        editIndexId: 'editRecordIndex',
+                        btnElement: btn,
+                        formTitleId: 'formMainTitle',
+                        formTitlePrefix: '🔄 सम्पादन मोड: '
+                    });
+                    if (res && res.blocked) return;
+                } else {
+                    let editId = document.getElementById('editRecordIndex') ? document.getElementById('editRecordIndex').value.trim() : '';
+                    if (!editId) {
+                        const cleanP = projectName.replace(/\s+/g, '').toLowerCase();
+                        const existing = (window.globalDatabase || []).find(r => !r.isDeleted && r.projectName && r.projectName.replace(/\s+/g, '').toLowerCase() === cleanP);
+                        if (existing) editId = existing.id;
+                    }
+                    if (editId) {
+                        record.lastUpdatedAt = Date.now();
+                        await db.collection("yojanaSamjhautaRecords").doc(editId).set(record, { merge: true });
+                        document.getElementById('editRecordIndex').value = editId;
+                    } else {
+                        record.timestamp = Date.now();
+                        const docRef = await db.collection("yojanaSamjhautaRecords").add(record);
+                        document.getElementById('editRecordIndex').value = docRef.id;
+                    }
+                }
+
+                const btnNew = document.getElementById('btnNewForm');
+                if (btnNew) btnNew.style.display = 'inline-block';
+
+                window.print();
+            } catch (e) {
+                console.error("Save error:", e);
+                alert("डाटा सुरक्षित गर्दा समस्या भयो! कृपया पुनः प्रयास गर्नुहोस्।");
+            }
         }
 
         window.editFromDB = function(id) {
@@ -891,6 +972,10 @@
             if (document.getElementById('editRecordIndex')) {
                 document.getElementById('editRecordIndex').value = id;
             }
+            const titleEl = document.getElementById('formMainTitle');
+            if (titleEl) titleEl.innerText = '🔄 सम्पादन मोड: ' + (rec.projectName || '');
+            const btnNew = document.getElementById('btnNewForm');
+            if (btnNew) btnNew.style.display = 'inline-block';
 
             if (document.getElementById('inMiti')) document.getElementById('inMiti').value = rec.miti || '';
             if (document.getElementById('inChalani')) document.getElementById('inChalani').value = rec.chalani === '-' ? '' : (rec.chalani || '');

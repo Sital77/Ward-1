@@ -29,6 +29,15 @@
     }
     try { protectSourceCode(); } catch(e){}
 
+    // Auto-load Sifarish Centralized Save & Deduplication Service
+    (function loadSaveService() {
+        if (!window.SifarishSaveService && !document.querySelector('script[src*="sifarish-save-service.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'sifarish-save-service.js?v=1.0';
+            document.head.appendChild(script);
+        }
+    })();
+
     let db;
     const firebaseConfig = {
         apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
@@ -61,7 +70,8 @@
         'bargikaran-sifarish': { collection: 'bargikaranSifarishRecords', title: 'जग्गा वर्गीकरण सिफारिस' },
         'jaggadhani-pratilipi': { collection: 'jaggadhaniPratilipiRecords', title: 'धनीपूर्जा प्रतिलिपि सिफारिस' },
         'jaggadhani-patra': { collection: 'jaggadhaniPoojaRecords', title: 'जग्गाधनीपूर्जा रजिष्ट्रेसन' },
-        'nabalak-parichayapatra': { collection: 'nabalakRecords', title: 'नाबालक परिचय पत्र सिफारिस' }
+        'nabalak-parichayapatra': { collection: 'nabalakRecords', title: 'नाबालक परिचय पत्र सिफारिस' },
+        'yojana-samjhauta': { collection: 'yojanaSamjhautaRecords', title: 'योजना सम्झौता सिफारिस' }
     };
 
     // Intercept firebase initializeApp to prevent duplicate app errors

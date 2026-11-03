@@ -2372,7 +2372,7 @@
             'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran',
             'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit',
             'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit',
-            'surakshya-bhatta-sifarish', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish',
+            'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish',
             'yojana-samjhauta', 'nabalak-parichayapatra'
         ];
 
@@ -2486,7 +2486,6 @@
             { id: 'bibaha-pramanit', title: 'विवाह प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'apangata-sifarish', title: 'अपाङ्गता परिचयपत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'abhilekh-pramanit', title: 'अभिलेख प्रमाणित', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
-            { id: 'surakshya-bhatta-sifarish', title: 'सामाजिक सुरक्षा भत्ता संरक्षक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'surakshya-sanrakshak-test', title: 'संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'bank-sifarish', title: 'सामाजिक सुरक्षा बैंक सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
             { id: 'nabalak-parichayapatra', title: 'नाबालक परिचय पत्र सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
@@ -2515,13 +2514,14 @@
 
             // Filter active templates and safely exclude broken obsolete modules
             let templates = Array.from(mergedMap.values()).filter(t => {
+                if (t.id === 'surakshya-bhatta-sifarish') return false; // Exclude legacy guardian module
                 if (t.id && (t.id.startsWith('bihe-') || (t.id.includes('bibaha') && t.id.includes('nagareko')))) return false;
                 if (t.title && (t.title.includes('बिहे नगरेको') || t.title.includes('विवाह नगरेको'))) return false;
                 return t.status === 'Active' || t.status === 'Published' || !t.status;
             });
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -2538,7 +2538,7 @@
                     const displayName = nepaliTitleMap[t.id] || (t.title && !/^[a-zA-Z0-9_\-\s]+$/.test(t.title) ? t.title : (nepaliTitleMap[t.id] || t.title));
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-bhatta-sifarish', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra'];
                     let targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
                     if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta' || t.id === 'yojana-tippani' || t.id === 'surakshya-sanrakshak-test') {
                         targetUrl += "?v=" + new Date().getTime();

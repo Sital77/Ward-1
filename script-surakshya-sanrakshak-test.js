@@ -33,6 +33,28 @@ let searchDebounceTimer = null;
 let beneficiarySearchSequence = 0;
 window.beneficiaryRegister = beneficiaryRegister;
 
+// ── Synchronous Beneficiary Cache Warm-up (0ms Initial Delay) ──
+(function initBeneficiaryCacheSync() {
+    try {
+        const cached = localStorage.getItem(BENEFICIARY_CACHE_KEY);
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                beneficiaryRegister = parsed.map(item => preIndexBeneficiaryItem(item));
+                isBeneficiaryRegisterLoaded = true;
+                window.beneficiaryRegister = beneficiaryRegister;
+                setTimeout(() => {
+                    if (typeof updateBeneficiaryStatusBadge === 'function') {
+                        updateBeneficiaryStatusBadge();
+                    }
+                }, 10);
+            }
+        }
+    } catch(e) {
+        console.warn("Sync warm-up beneficiary cache error:", e);
+    }
+})();
+
 let currentArchivePage = 1;
 const ARCHIVE_PAGE_SIZE = 25;
 let archiveSearchDebounceTimer = null;
@@ -1119,6 +1141,25 @@ function initSpecimenBoxDraggable() {
 }
 
 // ── Print & Save Workflow (Normalized Single Record) ──
+// ── Quick Print Only (No Database Write) ──
+async function quickPrintOnly() {
+    switchPreviewPage('all');
+    document.body.classList.remove('print-p1-only', 'print-p2-only', 'print-p3-only');
+    if (window.SifarishSaveService && typeof window.SifarishSaveService.printOnly === 'function') {
+        window.SifarishSaveService.printOnly();
+    } else {
+        if (document.fonts) {
+            try { await document.fonts.ready; } catch (fe) {}
+        }
+        const banner = document.querySelector('.svg-letterhead-banner');
+        if (banner && banner.decode) {
+            try { await banner.decode(); } catch (ie) {}
+        }
+        window.print();
+    }
+}
+
+// ── Save/Update & Print (Database Write with Concurrency & Deduplication) ──
 async function printAndSaveSystem() {
     const beneficiaryName = document.getElementById('inBeneficiaryName').value.trim();
     if (!beneficiaryName) {
@@ -1137,7 +1178,7 @@ async function printAndSaveSystem() {
     if (isSavingInProgress) return;
     isSavingInProgress = true;
 
-    const btn = document.querySelector('.btn-print');
+    const btn = document.getElementById('btnSaveAndPrint') || document.querySelector('.btn-print');
     const originalText = btn ? btn.innerHTML : '';
     if (btn) {
         btn.disabled = true;
@@ -1145,13 +1186,38 @@ async function printAndSaveSystem() {
     }
 
     try {
-        const recordId = document.getElementById('editRecordIndex').value;
+        let recordId = document.getElementById('editRecordIndex').value.trim();
         const selRel = document.getElementById('selRelation') ? document.getElementById('selRelation').value : 'छोरा';
         const customRel = document.getElementById('inCustomRelation') ? document.getElementById('inCustomRelation').value.trim() : '';
         const relation = (selRel === 'अन्य' || selRel === 'CUSTOM') ? (customRel || 'संरक्षक') : selRel;
 
         const fiscalYear = document.getElementById('selFiscalYear') ? document.getElementById('selFiscalYear').value : '२०८३/०८४';
         const quarter = document.getElementById('selQuarter') ? document.getElementById('selQuarter').value : 'प्रथम त्रैमासिक';
+
+        const applicantName = (document.getElementById('inApplicantName')?.value.trim()) || guardianName;
+        const selAppRel = document.getElementById('selApplicantRelation') ? document.getElementById('selApplicantRelation').value : 'छोरा';
+        const customAppRel = document.getElementById('inCustomApplicantRelation') ? document.getElementById('inCustomApplicantRelation').value.trim() : '';
+        const applicantRelation = (selAppRel === 'अन्य' || selAppRel === 'CUSTOM') ? (customAppRel || 'छोरा') : selAppRel;
+
+        const cardNo = document.getElementById('inCardNo').value.trim();
+        const accountNo = document.getElementById('inAccountNo').value.trim();
+
+        // Check if there is an existing record in globalDatabase if recordId is not set
+        if (!recordId && window.SifarishSaveService && typeof window.SifarishSaveService.findExistingRecord === 'function') {
+            const found = window.SifarishSaveService.findExistingRecord(globalDatabase, {
+                name: beneficiaryName,
+                beneficiaryName: beneficiaryName,
+                cardNo: cardNo,
+                accountNo: accountNo,
+                fiscalYear: fiscalYear,
+                quarter: quarter,
+                ay: document.getElementById('inPatraSankhya').value.trim() || '२०८३/०८४'
+            }, 'citizen');
+            if (found && found.id) {
+                recordId = found.id;
+                console.log("Matched existing guardian record for update:", recordId);
+            }
+        }
 
         // Check or allocate sequential recommendation number
         let recNumber = 100;
@@ -1164,11 +1230,6 @@ async function printAndSaveSystem() {
             recNumber = await allocateNextSeqNumber();
         }
 
-        const applicantName = (document.getElementById('inApplicantName')?.value.trim()) || guardianName;
-        const selAppRel = document.getElementById('selApplicantRelation') ? document.getElementById('selApplicantRelation').value : 'छोरा';
-        const customAppRel = document.getElementById('inCustomApplicantRelation') ? document.getElementById('inCustomApplicantRelation').value.trim() : '';
-        const applicantRelation = (selAppRel === 'अन्य' || selAppRel === 'CUSTOM') ? (customAppRel || 'छोरा') : selAppRel;
-
         const obj = {
             recommendationNo:     recNumber,
             ay:                   document.getElementById('inPatraSankhya').value.trim() || '२०८३/०८४',
@@ -1176,7 +1237,7 @@ async function printAndSaveSystem() {
             miti:                 document.getElementById('inMiti').value.trim() || '-',
             ns:                   document.getElementById('inNepalSamvat').value.trim() || '-',
             fiscalYear:           fiscalYear,
-            quarter:              quarter, // Single selected quarter
+            quarter:              quarter,
             bankName:             'कृषि विकास बैंक लिमिटेड',
             bankBranch:           'गौरादह शाखा, झापा',
             subject:              'सामाजिक सुरक्षा भत्ताको रकम संरक्षकलाई उपलब्ध गराइदिने बारे ।',
@@ -1187,10 +1248,10 @@ async function printAndSaveSystem() {
             beneficiaryName:      beneficiaryName,
             name:                 beneficiaryName,
             beneficiaryCitNo:     document.getElementById('inBeneficiaryCitNo').value.trim(),
-            cardNo:               document.getElementById('inCardNo').value.trim(),
+            cardNo:               cardNo,
             benefitCategory:      document.getElementById('selBenefitCategory').value,
             conditionDetail:      document.getElementById('inConditionDetail').value.trim(),
-            accountNo:            document.getElementById('inAccountNo').value.trim(),
+            accountNo:            accountNo,
             guardianName:         guardianName,
             relation:             relation,
             selRelation:          selRel,
@@ -1213,20 +1274,36 @@ async function printAndSaveSystem() {
             customSignName:       document.getElementById('inCustomSignName').value.trim(),
             customSignTitle:      document.getElementById('inCustomSignTitle').value.trim(),
             createdBy:            localStorage.getItem('sifarish_user') || 'wada1',
-            createdWard:          localStorage.getItem('sifarish_ward') || '1',
-            timestamp:            Date.now()
+            createdWard:          localStorage.getItem('sifarish_ward') || '1'
         };
 
         let savedDocId = recordId;
-        if (recordId !== "") {
-            obj.lastUpdatedAt = Date.now();
-            await db.collection("surakshyaSanrakshakTestRecords").doc(recordId).update(obj);
+        if (window.SifarishSaveService && typeof window.SifarishSaveService.saveOrUpdateRecord === 'function') {
+            const saveRes = await window.SifarishSaveService.saveOrUpdateRecord({
+                db: db,
+                collectionName: 'surakshyaSanrakshakTestRecords',
+                recordId: recordId,
+                recordData: obj,
+                category: 'citizen',
+                existingRecords: globalDatabase,
+                btnElement: btn
+            });
+            if (saveRes && saveRes.savedId) {
+                savedDocId = saveRes.savedId;
+            }
         } else {
-            const docRef = await db.collection("surakshyaSanrakshakTestRecords").add(obj);
-            savedDocId = docRef.id;
-            document.getElementById('editRecordIndex').value = savedDocId;
-            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + beneficiaryName;
+            if (recordId !== "") {
+                obj.lastUpdatedAt = Date.now();
+                await db.collection("surakshyaSanrakshakTestRecords").doc(recordId).update(obj);
+            } else {
+                obj.timestamp = Date.now();
+                const docRef = await db.collection("surakshyaSanrakshakTestRecords").add(obj);
+                savedDocId = docRef.id;
+            }
         }
+
+        document.getElementById('editRecordIndex').value = savedDocId;
+        document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + beneficiaryName;
 
         // Update in-memory cache
         const memoryRec = preIndexRecord({ id: savedDocId, ...obj });
@@ -1631,8 +1708,12 @@ function preIndexBeneficiaryItem(item) {
     item.fatherName = rawFather;
     item.spouseName = rawSpouse;
 
+    const normName = normalizeDevanagari(rawName);
+    const normNoSpace = normName.replace(/\s+/g, '');
+
     item._search = {
-        nameNorm: normalizeDevanagari(rawName),
+        nameNorm: normName,
+        nameNoSpace: normNoSpace,
         cardNorm: rawCard.toLowerCase(),
         cardEn: toEnglishDigit(rawCard).toLowerCase(),
         cardNe: toNepaliDigit(rawCard),
@@ -1723,7 +1804,7 @@ function onBeneficiarySearchInput(q) {
     const seq = ++beneficiarySearchSequence;
     searchDebounceTimer = setTimeout(() => {
         executeBeneficiarySearch(q, seq);
-    }, 180);
+    }, 90);
 }
 
 function onBeneficiarySearchFocus() {
@@ -1762,9 +1843,12 @@ function executeBeneficiarySearch(rawQ, seq) {
     const qClean = q.toLowerCase();
     const qEn = toEnglishDigit(qClean);
 
+    const qNoSpace = qNorm.replace(/\s+/g, '');
     const matches = beneficiaryRegister.filter(item => {
         const s = item._search || {};
-        return (s.nameNorm && s.nameNorm.includes(qNorm)) ||
+        const nameMatches = (s.nameNorm && s.nameNorm.includes(qNorm)) ||
+                            (qNoSpace && s.nameNoSpace && s.nameNoSpace.includes(qNoSpace));
+        return nameMatches ||
                (s.cardNorm && s.cardNorm.includes(qClean)) ||
                (s.cardEn && s.cardEn.includes(qEn)) ||
                (s.accNorm && s.accNorm.includes(qClean)) ||

@@ -772,12 +772,37 @@ async function printAndSaveSystem() {
     }
 
     try {
-        if (recordId !== "") {
-            await db.collection("yojanaTippaniRecords").doc(recordId).update(obj);
+        if (window.SifarishSaveService && typeof window.SifarishSaveService.saveOrUpdateRecord === 'function') {
+            const res = await window.SifarishSaveService.saveOrUpdateRecord({
+                db: db,
+                collectionName: "yojanaTippaniRecords",
+                data: obj,
+                editIndexId: 'editRecordIndex',
+                btnElement: btn,
+                formTitleId: 'formMainTitle',
+                formTitlePrefix: '🔄 सम्पादन मोड: '
+            });
+            if (res && res.blocked) return;
         } else {
-            const docRef = await db.collection("yojanaTippaniRecords").add(obj);
-            document.getElementById('editRecordIndex').value = docRef.id;
-            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + (projectName || budgetTitle);
+            if (recordId !== "") {
+                await db.collection("yojanaTippaniRecords").doc(recordId).update(obj);
+            } else {
+                let existingId = '';
+                const cleanP = (projectName || budgetTitle || payeeName).replace(/\s+/g, '').toLowerCase();
+                const existing = (window.globalDatabase || []).find(r => !r.isDeleted && (r.projectName || r.name || '').replace(/\s+/g, '').toLowerCase() === cleanP);
+                if (existing) existingId = existing.id;
+
+                if (existingId) {
+                    obj.lastUpdatedAt = Date.now();
+                    await db.collection("yojanaTippaniRecords").doc(existingId).update(obj);
+                    document.getElementById('editRecordIndex').value = existingId;
+                    document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + (projectName || budgetTitle);
+                } else {
+                    const docRef = await db.collection("yojanaTippaniRecords").add(obj);
+                    document.getElementById('editRecordIndex').value = docRef.id;
+                    document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + (projectName || budgetTitle);
+                }
+            }
         }
         const btnNew = document.getElementById('btnNewForm');
         if (btnNew) btnNew.style.display = 'inline-block';
@@ -1022,3 +1047,13 @@ window.onload = function () {
 window.addEventListener('templateInjected', function () {
     initializeAutomaticDate();
 });
+
+
+function quickPrintOnly() {
+    if (window.SifarishSaveService && typeof window.SifarishSaveService.printOnly === 'function') {
+        window.SifarishSaveService.printOnly();
+    } else {
+        window.print();
+    }
+}
+window.quickPrintOnly = quickPrintOnly;

@@ -655,7 +655,10 @@
             </div>
         </div>
 
-        <button class="btn-print" onclick="printAndSaveSystem()">🖨️ टिप्पणी-आदेश प्रिन्ट र सुरक्षित गर्नुस्</button>
+                <div class="print-actions-wrapper" style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="button" class="btn-print" id="btnQuickPrint" onclick="quickPrintOnly()" style="background: #4a5568; flex: 1;" title="अभिलेखमा सेभ नगरी सिधै प्रिन्ट गर्नुहोस्">🖨️ सिफारिस प्रिन्ट मात्र</button>
+            <button type="button" class="btn-print" id="btnSaveAndPrint" onclick="printAndSaveSystem()" style="background: #2b6cb0; flex: 1.3;" title="अभिलेख सुरक्षित गरी टिप्पणी प्रिन्ट गर्नुहोस्">💾 अभिलेख तथा टिप्पणी प्रिन्ट</button>
+        </div>
     </div>
 
     <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
@@ -844,6 +847,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js"></script>
+    <script src="sifarish-save-service.js?v=1.0"></script>
     <script src="ward1-yojana-data.js"></script>
     <script src="script-yojana-tippani.js"></script>
 </body>
