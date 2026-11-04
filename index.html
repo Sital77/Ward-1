@@ -11,12 +11,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="preload" href="logo-file-sital.pdf" as="fetch">
+    <!-- logo-file-sital.pdf lazily loaded on print click to accelerate startup -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="backup-manager.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
+    <script>
+        if (typeof window['@sbmdkl/nepali-date-converter'] === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"><\/script>');
+        }
+    </script>
     <script src="nepal-sambat-tithi.js"></script>
     <style>
         * {
@@ -2730,8 +2735,7 @@
         window.addEventListener('load', function () {
             initPortalNepaliDate();
             updateDashboardWardDisplay();
-            fetchLandData().catch(e => { /* logged */ });
-            preloadLogoPdf();
+            // Lazy load 1.78MB convertcsv.json and 1MB logo PDF only when user triggers them
         });
 
         // Fast & Preloaded Logo PDF print system
