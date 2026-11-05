@@ -488,16 +488,32 @@
             }
 
             if (cachedAllRecords || isPreloading) return;
+            
+            // Check session cache first for ultra-fast instant load (5 minute TTL)
+            const CACHE_KEY = 'citizen_search_cache_v2';
+            const CACHE_TIME_KEY = 'citizen_search_cache_time_v2';
+            try {
+                const cachedStr = sessionStorage.getItem(CACHE_KEY);
+                const cachedTime = sessionStorage.getItem(CACHE_TIME_KEY);
+                if (cachedStr && cachedTime && (Date.now() - parseInt(cachedTime, 10) < 300000)) {
+                    cachedAllRecords = JSON.parse(cachedStr);
+                    console.log(`⚡ Loaded ${cachedAllRecords.length} records from fast session cache (0ms delay).`);
+                    const q = document.getElementById('mainSearchInput').value;
+                    if (q.trim()) performSearch(q.trim());
+                    return;
+                }
+            } catch(e) {}
+
             isPreloading = true;
-            console.log('⚡ Preloading all collections for instant citizen search...');
+            console.log('⚡ Preloading collections with safe limits for fast citizen search...');
 
             const loaded = [];
             const promises = COLLECTION_SPECS.map(async (spec) => {
                 try {
-                    const snap = await db.collection(spec.name).get();
+                    const snap = await db.collection(spec.name).limit(150).get();
                     snap.forEach(doc => {
                         const data = doc.data();
-                        if (data.isDeleted) return; // Ignore soft-deleted items
+                        if (data.isDeleted) return;
 
                         loaded.push({
                             id: doc.id,
@@ -505,7 +521,6 @@
                             categoryLabel: spec.label,
                             pageUrl: spec.page,
                             data: data,
-                            // Extract primary searchable text
                             searchableText: extractSearchableText(data)
                         });
                     });
@@ -518,8 +533,11 @@
             cachedAllRecords = loaded;
             isPreloading = false;
             console.log(`✅ Loaded ${cachedAllRecords.length} records ready for cross-search.`);
+            try {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify(loaded));
+                sessionStorage.setItem(CACHE_TIME_KEY, String(Date.now()));
+            } catch(e) {}
 
-            // Trigger search if user already typed
             const q = document.getElementById('mainSearchInput').value;
             if (q.trim()) {
                 performSearch(q.trim());

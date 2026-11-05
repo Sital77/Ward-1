@@ -827,7 +827,6 @@
 
             <!-- ── Receiver ── -->
             <div class="bank-receiver">
-                <div id="lblReceiverSalutation" style="font-weight: 700;">श्री शाखा प्रबन्धक ज्यू,</div>
                 <div><span id="lblReceiverName" style="font-weight: 700;">श्री कृषि विकास बैङ्क लिमिटेड</span></div>
                 <div><span id="lblReceiverOffice">गौरादह शाखा</span>, <span id="lblReceiverLocation">गौरादह, झापा</span> ।</div>
             </div>
@@ -852,40 +851,35 @@
             <div class="tapasil-title" style="text-align: left;" id="tapasilHeaderBlock">तपसिल (लाभग्राहीको विवरण) :</div>
             <div class="beneficiary-details-block" id="tapasilTable">
                 <div class="detail-line" id="rowTapasilName">
-                    <span class="detail-label">१. लाभग्राहीको नाम, थर</span>
+                    <span class="detail-label">लाभग्राहीको नाम, थर</span>
                     <span class="detail-sep">:</span>
                     <span class="detail-val" id="lblTapasilName">..................</span>
                 </div>
                 <div class="detail-line" id="rowTapasilAddress">
-                    <span class="detail-label">२. स्थायी ठेगाना</span>
+                    <span class="detail-label">ठेगाना</span>
                     <span class="detail-sep">:</span>
                     <span class="detail-val" id="lblTapasilAddress">गौरादह नगरपालिका वडा नं. १, झापा</span>
                 </div>
                 <div class="detail-line" id="rowTapasilGroup">
-                    <span class="detail-label">३. सामाजिक सुरक्षा भत्ताको किसिम</span>
+                    <span class="detail-label">लक्षित समूह</span>
                     <span class="detail-sep">:</span>
                     <span class="detail-val" id="lblTapasilGroup">..................</span>
                 </div>
                 <div class="detail-line" id="rowTapasilCitNo">
-                    <span class="detail-label" id="lblTapasilCitLabel">४. नागरिकता नं.</span>
+                    <span class="detail-label" id="lblTapasilCitLabel">नागरिकता नं.</span>
                     <span class="detail-sep">:</span>
                     <span class="detail-val" id="lblTapasilCitNo">..................</span>
                 </div>
                 <div class="detail-line" id="rowTapasilNid">
-                    <span class="detail-label">५. राष्ट्रिय परिचयपत्र नं.</span>
+                    <span class="detail-label">राष्ट्रिय परिचयपत्र नं.</span>
                     <span class="detail-sep">:</span>
                     <span class="detail-val" id="lblTapasilNid">..................</span>
                 </div>
                 <div class="detail-line" id="rowTapasilCardNo">
-                    <span class="detail-label">६. सामाजिक सुरक्षा परिचयपत्र नं.</span>
+                    <span class="detail-label">सामाजिक सुरक्षा परिचयपत्र नं.</span>
                     <span class="detail-sep">:</span>
                     <span class="detail-val" id="lblTapasilCardNo">..................</span>
                 </div>
-            </div>
-
-            <!-- ── Closing Statement ── -->
-            <div class="closing-statement" id="closingStatement">
-                तसर्थ, उपरोक्त विवरण अनुसार निज लाभग्राहीको नाममा नियमानुसार बैंक खाता खोली सामाजिक सुरक्षा भत्ता भुक्तानी सहजीकरण गरिदिनुहुन पुनः अनुरोध छ ।
             </div>
 
             <!-- ── Signature ── -->
@@ -902,7 +896,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
+    <script>
+        if (typeof window['@sbmdkl/nepali-date-converter'] === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"><\/script>');
+        }
+    </script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js?v=2.1"></script>
     
@@ -984,29 +983,19 @@
             return defaultPlaceholder;
         }
 
-        // Helper to clean target group: ensures Nepali only, strips English and maps known English allowance types
-        function cleanTargetGroup(str) {
-            if (!str) return '';
-            let cleaned = str.trim();
-            // If Nepali characters exist, strip English transliteration and return Nepali portion
-            const nepaliMatch = cleaned.match(/[\u0900-\u097F]+[\u0900-\u097F\s\/\-\(\)]*/);
-            if (nepaliMatch && nepaliMatch[0].trim().length > 2) {
-                let nepPart = nepaliMatch[0].trim()
-                    .replace(/[A-Za-z0-9]+/g, '')
-                    .replace(/[\s\/\-]+$/, '')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-                if (nepPart.length > 2) {
-                    return nepPart;
-                }
-            }
-            // If only English, map known allowance types to official Nepali groups
-            const lower = cleaned.toLowerCase();
+        // Helper to normalize and map official Nepali allowance categories
+        function normalizeAllowanceCategory(text) {
+            if (!text) return '';
+            let t = text.trim();
+            if (/^[.\-_\s]+$/.test(t)) return t;
+
+            // Handle English variants first
+            const lower = t.toLowerCase();
             if (lower.includes('dalit') && (lower.includes('child') || lower.includes('nutrition') || lower.includes('balbalika'))) {
-                return 'दलित बालबालिका';
+                return 'दलित बालबालिका भत्ता';
             }
             if (lower.includes('child') || lower.includes('nutrition')) {
-                return 'दलित बालबालिका';
+                return 'दलित बालबालिका भत्ता';
             }
             if (lower.includes('senior') && lower.includes('dalit')) {
                 return 'दलित ज्येष्ठ नागरिक भत्ता';
@@ -1032,16 +1021,86 @@
             if (lower.includes('endangered')) {
                 return 'लोपोन्मुख जाति भत्ता';
             }
-            // Do not guess if unknown English
-            return '';
+
+            // Nepali text normalization: strip existing भत्ता / भत्ताको / को for clean matching
+            const cleanStr = t.replace(/(?:भत्ता(?:को)?|को)\s*$/, '').trim();
+
+            if (cleanStr.includes('अन्य') && (cleanStr.includes('ज्येष्ठ') || cleanStr.includes('जेष्ठ'))) {
+                return 'अन्य ज्येष्ठ नागरिक भत्ता';
+            }
+            if (cleanStr.includes('दलित') && (cleanStr.includes('ज्येष्ठ') || cleanStr.includes('जेष्ठ'))) {
+                return 'दलित ज्येष्ठ नागरिक भत्ता';
+            }
+            if ((cleanStr.includes('ज्येष्ठ') || cleanStr.includes('जेष्ठ')) && cleanStr.includes('एकल महिला')) {
+                return 'ज्येष्ठ नागरिक एकल महिला भत्ता';
+            }
+            if ((cleanStr.includes('ज्येष्ठ') || cleanStr.includes('जेष्ठ')) && !cleanStr.includes('दलित') && !cleanStr.includes('अन्य')) {
+                return 'ज्येष्ठ नागरिक भत्ता';
+            }
+            if (cleanStr.includes('एकल महिला')) {
+                return 'एकल महिला भत्ता';
+            }
+            if (cleanStr.includes('विधवा')) {
+                return 'विधवा भत्ता';
+            }
+            if (cleanStr.includes('पूर्ण अपाङ्गता')) {
+                return 'पूर्ण अपाङ्गता भत्ता';
+            }
+            if (cleanStr.includes('अति अशक्त') || cleanStr.includes('नीलो कार्ड')) {
+                return 'अति अशक्त अपाङ्गता भत्ता';
+            }
+            if (cleanStr.includes('अपाङ्गता') && !cleanStr.includes('पूर्ण') && !cleanStr.includes('अति')) {
+                return 'अपाङ्गता भत्ता';
+            }
+            if (cleanStr.includes('लोपोन्मुख')) {
+                return 'लोपोन्मुख जाति भत्ता';
+            }
+            if (cleanStr.includes('दलित') && cleanStr.includes('बालबालिका')) {
+                return 'दलित बालबालिका भत्ता';
+            }
+            if (cleanStr.includes('बालबालिका') && !cleanStr.includes('दलित')) {
+                return 'बालबालिका भत्ता';
+            }
+
+            // Generic fallback: guarantee it ends with 'भत्ता'
+            if (t.endsWith('भत्ता')) return t;
+            if (t.endsWith('भत्ताको')) return t.replace(/भत्ताको$/, 'भत्ता');
+            return t + ' भत्ता';
+        }
+
+        // Helper to clean target group: ensures Nepali only, strips English and maps known English allowance types
+        function cleanTargetGroup(str) {
+            if (!str) return '';
+            let cleaned = str.trim();
+            // If Nepali characters exist, strip English transliteration and return Nepali portion
+            const nepaliMatch = cleaned.match(/[\u0900-\u097F]+[\u0900-\u097F\s\/\-\(\)]*/);
+            if (nepaliMatch && nepaliMatch[0].trim().length > 2) {
+                let nepPart = nepaliMatch[0].trim()
+                    .replace(/[A-Za-z0-9]+/g, '')
+                    .replace(/[\s\/\-]+$/, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                if (nepPart.length > 2) {
+                    return normalizeAllowanceCategory(nepPart);
+                }
+            }
+            return normalizeAllowanceCategory(cleaned);
         }
 
         function getDisplayTargetGroup(rawVal, defaultGroup = '...........') {
             if (!rawVal) return defaultGroup;
+            if (/^[.\-_\s]+$/.test(rawVal.trim())) return rawVal.trim();
             const clean = cleanTargetGroup(rawVal);
             if (clean) return clean;
-            if (/^[.\-_\s]+$/.test(rawVal.trim())) return rawVal.trim();
             return defaultGroup;
+        }
+
+        function getDisplayTargetGroupPossessive(rawVal, defaultGroup = '...........') {
+            const display = getDisplayTargetGroup(rawVal, defaultGroup);
+            if (!display || /^[.\-_\s]+$/.test(display.trim())) return display ? display + ' को' : defaultGroup + ' को';
+            if (display.endsWith('भत्ताको')) return display;
+            if (display.endsWith('भत्ता')) return display + 'को';
+            return display + ' भत्ताको';
         }
 
         // Helper to clean and deduplicate bank account numbers (returns single account number in Nepali digits)
@@ -2043,14 +2102,11 @@
             const recOffice = document.getElementById('inReceiverOffice').value || '';
             const recLoc = document.getElementById('inReceiverLocation').value || '';
 
-            const salutationEl = document.getElementById('lblReceiverSalutation');
             if (isDeceased) {
-                if (salutationEl) salutationEl.style.display = 'none';
                 document.getElementById('lblReceiverName').innerText = "श्री गौरादह नगरपालिका";
                 document.getElementById('lblReceiverOffice').innerText = "नगर कार्यपालिकाको कार्यालय";
                 document.getElementById('lblReceiverLocation').innerText = "गौरादह, झापा";
             } else {
-                if (salutationEl) salutationEl.style.display = 'block';
                 document.getElementById('lblReceiverName').innerText = recName;
                 document.getElementById('lblReceiverOffice').innerText = recOffice;
                 document.getElementById('lblReceiverLocation').innerText = recLoc;
@@ -2129,36 +2185,31 @@
                 document.getElementById('tapasilHeaderBlock').innerText = "मृतक तथा हकदारको विवरण :";
                 document.getElementById('tapasilTable').innerHTML = `
                     <div class="detail-line">
-                        <span class="detail-label">१. मृतकको नाम, थर</span>
+                        <span class="detail-label">मृतकको नाम, थर</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${deceasedName}</b></span>
                     </div>
                     <div class="detail-line">
-                        <span class="detail-label">२. व्यक्तिगत परिचय पत्र नं.</span>
+                        <span class="detail-label">व्यक्तिगत परिचय पत्र नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${deceasedNid}</b></span>
                     </div>
                     <div class="detail-line">
-                        <span class="detail-label">३. नागरिकता नं.</span>
+                        <span class="detail-label">नागरिकता नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${deceasedCitNo}</b></span>
                     </div>
                     <div class="detail-line">
-                        <span class="detail-label">४. बन्द गरिने बैंक खाता नं.</span>
+                        <span class="detail-label">बन्द गरिने बैंक खाता नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${deceasedAccNo}</b></span>
                     </div>
                     <div class="detail-line">
-                        <span class="detail-label">५. नजिकको हकदार</span>
+                        <span class="detail-label">नजिकको हकदार</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${applicantName} (${heirRelation})</b></span>
                     </div>
                 `;
-                const closingEl = document.getElementById('closingStatement');
-                if (closingEl) {
-                    closingEl.style.display = 'block';
-                    closingEl.innerText = "तसर्थ, मृतकको उक्त बैंक खाता नियमानुसार बन्द गरी मौजुदा रकम नजिकको हकदारलाई भुक्तानी गरिदिनुहुन सिफारिस गरिन्छ ।";
-                }
 
             } else if (isChildClose) {
                 // ── CHILD ACCOUNT CLOSURE MODE ──
@@ -2213,38 +2264,34 @@
                 document.getElementById('tapasilHeaderBlock').innerText = "लाभग्राहीको विवरण :";
                 document.getElementById('tapasilTable').innerHTML = `
                     <div class="detail-line">
-                        <span class="detail-label">१. लाभग्राही (बालबालिका) को नाम</span>
+                        <span class="detail-label">लाभग्राही (बालबालिका) को नाम</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${childName}</b></span>
                     </div>
                     ${childBeneficiaryId ? `
                     <div class="detail-line">
-                        <span class="detail-label">२. व्यक्तिगत परिचय पत्र नं.</span>
+                        <span class="detail-label">व्यक्तिगत परिचय पत्र नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${childBeneficiaryId}</b></span>
                     </div>` : ''}
                     <div class="detail-line">
-                        <span class="detail-label">३. बन्द गरिने बैंक खाता नं.</span>
+                        <span class="detail-label">बन्द गरिने बैंक खाता नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${childAccNo}</b></span>
                     </div>
                     <div class="detail-line">
-                        <span class="detail-label">४. हकदार / संरक्षक</span>
+                        <span class="detail-label">हकदार / संरक्षक</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val"><b>${applicantName} (${guardianRel})</b></span>
                     </div>
                 `;
-                const closingEl = document.getElementById('closingStatement');
-                if (closingEl) {
-                    closingEl.style.display = 'block';
-                    closingEl.innerText = "तसर्थ, उमेर सीमा पुगेकाले निज बालबालिकाको उक्त बैंक खाता नियमानुसार बन्द गरी मौजुदा रकम नजिकको हकदारलाई निकासा गरिदिनुहुन सिफारिस गरिन्छ ।";
-                }
 
             } else {
                 // ── ACCOUNT OPENING MODE (DEFAULT) ──
                 const name        = getDisplayName(document.getElementById('inName').value, '.....................');
                 let cardNo        = document.getElementById('inCardNo').value       || '';
                 const targetGroup = getDisplayTargetGroup(document.getElementById('inTargetGroup').value, '...........');
+                const targetGroupPossessive = getDisplayTargetGroupPossessive(document.getElementById('inTargetGroup').value, '...........');
                 const citNo       = getDisplayCitNo(document.getElementById('inCitNo').value, '');
                 const citDistrict = document.getElementById('inCitDistrict').value || '';
                 let nid           = document.getElementById('inNid').value          || '';
@@ -2266,7 +2313,7 @@
                 bodyTextEl.innerHTML = `
                     प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने
                     <span id="lblName" style="font-weight:bold;">${name}</span>को
-                    लक्षित समूह <span id="lblTargetGroup" style="font-weight:bold;">${targetGroup}</span> को
+                    लक्षित समूह <span id="lblTargetGroup" style="font-weight:bold;">${targetGroupPossessive}</span>
                     आ.व. <span id="lblFiscalYear" style="font-weight:bold;">${fiscalYear ? fiscalYear : '.................'}</span> को
                     <span id="lblTrimester" style="font-weight:bold;">${trimester ? trimester : '..................'}</span>बाट सामाजिक सुरक्षा भत्ता प्राप्त गर्न योग्य हुनुभएको हुँदा निजले सामाजिक सुरक्षा भत्ता बापतको रकम प्राप्त गर्न बैँक खाता खोल्न आवश्यक रहेको हुँदा तहाँ कार्यालयको नियमानुसार बैँक खाता खोलिदिनुहुन सिफारिसका साथ अनुरोध छ ।
                 `;
@@ -2310,54 +2357,49 @@
                 document.getElementById('tapasilHeaderBlock').innerText = "तपसिल (लाभग्राहीको विवरण) :";
                 document.getElementById('tapasilTable').innerHTML = `
                     <div class="detail-line" id="rowTapasilName">
-                        <span class="detail-label">१. लाभग्राहीको नाम, थर</span>
+                        <span class="detail-label">लाभग्राहीको नाम, थर</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val" id="lblTapasilName">${name}</span>
                     </div>
                     <div class="detail-line" id="rowTapasilAddress">
-                        <span class="detail-label">२. स्थायी ठेगाना</span>
+                        <span class="detail-label">ठेगाना</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val">${appPalika} वडा नं. ${appWada}, ${appDist}</span>
                     </div>
                     <div class="detail-line" id="rowTapasilGroup">
-                        <span class="detail-label">३. सामाजिक सुरक्षा भत्ताको किसिम</span>
+                        <span class="detail-label">लक्षित समूह</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val" id="lblTapasilGroup">${targetGroup}</span>
                     </div>
                     <div class="detail-line" id="rowTapasilCitNo">
-                        <span class="detail-label" id="lblTapasilCitLabel">${isChild ? "४. जन्म दर्ता नं." : "४. नागरिकता नं."}</span>
+                        <span class="detail-label" id="lblTapasilCitLabel">${isChild ? "जन्म दर्ता नं." : "नागरिकता नं."}</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val" id="lblTapasilCitNo">${citString ? citString : '..................'}</span>
                     </div>
                     ${nid.trim() ? `
                     <div class="detail-line" id="rowTapasilNid">
-                        <span class="detail-label">५. राष्ट्रिय परिचयपत्र नं.</span>
+                        <span class="detail-label">राष्ट्रिय परिचयपत्र नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val" id="lblTapasilNid">${nid.trim()}</span>
                     </div>` : ''}
                     ${cardNo.trim() ? `
                     <div class="detail-line" id="rowTapasilCardNo">
-                        <span class="detail-label">६. सामाजिक सुरक्षा परिचयपत्र नं.</span>
+                        <span class="detail-label">सामाजिक सुरक्षा परिचयपत्र नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val" id="lblTapasilCardNo">${cardNo.trim()}</span>
                     </div>` : ''}
                     ${isChild ? `
                     <div class="detail-line" id="rowTapasilGuardianName">
-                        <span class="detail-label" id="lblTapasilGuardianNameLabel">७. संरक्षकको नाम, थर</span>
+                        <span class="detail-label" id="lblTapasilGuardianNameLabel">संरक्षकको नाम, थर</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val" id="lblTapasilGuardianName">${guardianNameDisplay ? guardianNameDisplay : '..................'}</span>
                     </div>
                     <div class="detail-line" id="rowTapasilGuardianCitNo">
-                        <span class="detail-label" id="lblTapasilGuardianCitLabel">८. संरक्षकको ना.प्र.नं.</span>
+                        <span class="detail-label" id="lblTapasilGuardianCitLabel">संरक्षकको ना.प्र.नं.</span>
                         <span class="detail-sep">:</span>
                         <span class="detail-val" id="lblTapasilGuardianCitNo">${guardianCitString ? guardianCitString : '..................'}</span>
                     </div>` : ''}
                 `;
-                const closingEl = document.getElementById('closingStatement');
-                if (closingEl) {
-                    closingEl.style.display = 'block';
-                    closingEl.innerText = "तसर्थ, उपरोक्त विवरण अनुसार निज लाभग्राहीको नाममा नियमानुसार बैंक खाता खोली सामाजिक सुरक्षा भत्ता भुक्तानी सहजीकरण गरिदिनुहुन पुनः अनुरोध छ ।";
-                }
             }
 
             // Signature

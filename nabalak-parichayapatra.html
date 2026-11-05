@@ -1496,8 +1496,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
+    <script>
+        if (typeof window['@sbmdkl/nepali-date-converter'] === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"><\/script>');
+        }
+    </script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js"></script>
     <script src="script-nabalak-parichayapatra.js"></script>

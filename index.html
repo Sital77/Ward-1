@@ -1534,7 +1534,7 @@
                 </div>
             </div>
             <div style="width: 100%; height: 72vh; border: 2px solid #e2e8f0; border-radius: 12px; overflow:hidden; position:relative; background:#fff;">
-                <iframe id="actIframe" src="aarthik-ain.html" width="100%" height="100%" style="border:none;" title="गौरादह नगरपालिका आर्थिक ऐन" onerror="handleActIframeError()"></iframe>
+                <iframe id="actIframe" data-src="aarthik-ain.html" width="100%" height="100%" style="border:none;" title="गौरादह नगरपालिका आर्थिक ऐन" onerror="handleActIframeError()"></iframe>
                 <div id="actIframeError" style="display:none; padding:40px 20px; text-align:center; color:#c53030;">
                     <div style="font-size:2.5rem; margin-bottom:8px;">⚠️</div>
                     <h3>आर्थिक ऐन फाइल लोड हुन सकेन</h3>
@@ -1630,11 +1630,16 @@
         </div>
     </div>
 
-    <script src="assets/nepali-date-converter.umd.min.js"></script>
     <script>
         function openModal(id) {
             const modal = document.getElementById(id);
             if (!modal) return;
+            if (id === 'modal-act') {
+                const iframe = document.getElementById('actIframe');
+                if (iframe && !iframe.src && iframe.dataset.src) {
+                    iframe.src = iframe.dataset.src;
+                }
+            }
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
             if (id === 'modal-bargikaran') {

@@ -475,7 +475,12 @@
     </div>
 
     <!-- Main Logic & Font Settings Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
+    <script>
+        if (typeof window['@sbmdkl/nepali-date-converter'] === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/dist/@sbmdkl/nepali-date-converter.umd.min.js"><\/script>');
+        }
+    </script>
     <script src="nepal-sambat-tithi.js"></script>
     <script src="font-settings.js?v=4.0"></script>
     <script src="script-aamdani-pramanit.js?v=4.0"></script>
