@@ -4,1195 +4,552 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>योजनाको बैंक खाता सञ्चालन सिफारिस - गौरादह नगरपालिका वडा नं. १</title>
-    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <title>योजनाको बैंक खाता सिफारिस - गौरादह नगरपालिका वडा नं. १</title>
     <link rel="stylesheet" href="charkilla.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/emblem_of_nepal.svg" type="image/svg+xml" fetchpriority="high">
-
     <style>
-        :root {
-            --primary-blue: #2b6cb0;
-            --primary-dark: #1a4971;
-            --accent-orange: #dd6b20;
-            --border-color: #e2e8f0;
-            --bg-card: #ffffff;
-            --text-dark: #2d3748;
-            --doc-font-size: 12.5pt;
-            --doc-line-height: 1.8;
-        }
-
-        * {
-            box-sizing: border-box;
+        .preview-panel .a4-page,
+        .preview-panel .a4-page * {
             font-family: 'Mukta', sans-serif;
         }
 
-        body {
-            background: #f7fafc;
-            color: var(--text-dark);
-            margin: 0;
-            padding: 0;
+        .letter-body-para {
+            font-size: 13pt;
+            line-height: var(--doc-line-height, 1.85);
+            text-align: justify;
+            text-justify: inter-word;
         }
 
-        /* ── Two-Column Layout ── */
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .input-panel {
-            width: 45%;
-            max-width: 580px;
-            background: #ffffff;
-            border-right: 1px solid var(--border-color);
-            padding: 24px 22px 40px;
-            overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
-        }
-
-        .preview-panel {
-            flex: 1;
-            background: #edf2f7;
-            padding: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            overflow-y: auto;
-        }
-
-        /* ── Top Bar Header ── */
-        .top-bar-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .btn-home, .btn-abhilekh {
-            padding: 7px 14px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-home {
-            background: #edf2f7;
-            color: #4a5568;
-            border: 1px solid #cbd5e0;
-        }
-        .btn-home:hover { background: #e2e8f0; }
-
-        .btn-abhilekh {
-            background: #ebf8ff;
-            color: var(--primary-blue);
-            border: 1px solid #bee3f8;
-        }
-        .btn-abhilekh:hover { background: #bee3f8; }
-
-        .panel-title {
-            font-size: 1.25rem;
-            color: var(--primary-blue);
-            font-weight: 800;
-            margin: 0 0 16px 0;
-            border-left: 4px solid var(--primary-blue);
-            padding-left: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* ── Mode Toggle Tabs ── */
         .mode-toggle-wrap {
             display: flex;
             gap: 8px;
             margin-bottom: 18px;
             background: #edf2f7;
-            padding: 4px;
-            border-radius: 10px;
+            padding: 5px;
+            border-radius: 12px;
             border: 1px solid #cbd5e0;
         }
 
         .mode-btn {
             flex: 1;
-            padding: 9px 8px;
+            padding: 11px 8px;
             border: none;
-            border-radius: 7px;
-            font-size: 0.9rem;
+            border-radius: 9px;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             color: #4a5568;
             background: transparent;
+            font-family: inherit;
         }
 
         .mode-btn.active-kholne {
             background: linear-gradient(135deg, #2b6cb0, #3182ce);
             color: #fff;
-            box-shadow: 0 2px 8px rgba(43, 108, 176, 0.25);
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
         }
 
         .mode-btn.active-banda {
             background: linear-gradient(135deg, #c53030, #9b2c2c);
             color: #fff;
-            box-shadow: 0 2px 8px rgba(197, 48, 48, 0.25);
+            box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
         }
 
-        /* ── Modern Form Section Cards ── */
         .section-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 16px 14px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .section-card:hover {
-            border-color: #cbd5e0;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #edf2f7;
+            padding: 14px;
+            margin-bottom: 18px;
         }
 
         .section-label {
-            font-size: 0.92rem;
+            font-size: 0.85rem;
             font-weight: 800;
-            color: #2b6cb0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .section-badge {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 12px;
-            background: #edf2f7;
-            color: #718096;
-            font-weight: 600;
-        }
-
-        .form-group {
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
             margin-bottom: 12px;
-        }
-
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.84rem;
-            font-weight: 700;
-            color: #4a5568;
-            margin-bottom: 4px;
-        }
-
-        .form-control,
-        input[type="text"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 8px 10px;
-            font-size: 0.9rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            background: #ffffff;
-            color: var(--text-dark);
-            transition: border-color 0.15s, box-shadow 0.15s;
-            font-family: inherit;
-        }
-
-        .form-control:focus,
-        input[type="text"]:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.15);
-        }
-
-        /* ── Radio Badges for Budget & AY ── */
-        .radio-pills {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .radio-pill {
-            display: inline-flex;
             align-items: center;
-            padding: 5px 10px;
-            background: #edf2f7;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            cursor: pointer;
-            color: #4a5568;
-            transition: all 0.15s;
-            user-select: none;
-        }
-
-        .radio-pill input[type="radio"] {
-            margin-right: 5px;
-            accent-color: var(--primary-blue);
-            cursor: pointer;
-        }
-
-        .radio-pill:has(input:checked) {
-            background: #ebf8ff;
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-        }
-
-        /* ── Member Row Grid ── */
-        .member-row {
-            display: grid;
-            grid-template-columns: 100px 1fr 140px;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .member-role-badge {
-            font-weight: 700;
-            font-size: 0.86rem;
-            color: #2b6cb0;
-            background: #ebf8ff;
-            padding: 7px 8px;
-            border-radius: 6px;
-            border: 1px solid #bee3f8;
-            text-align: center;
-        }
-
-        /* ── Collapsible Helper Section ── */
-        .collapsible-helper {
-            background: #f7fafc;
-            border: 1px dashed #cbd5e0;
-            border-radius: 8px;
-            padding: 10px 12px;
-            margin-bottom: 14px;
-        }
-
-        .collapsible-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #4a5568;
-        }
-
-        .collapsible-header:hover { color: var(--primary-blue); }
-
-        .collapsible-body {
-            margin-top: 10px;
-        }
-
-        /* ── Print Buttons Bar ── */
-        .print-actions-wrapper {
-            display: flex;
-            gap: 10px;
-            margin-top: 18px;
-        }
-
-        .btn-print {
-            padding: 10px 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #ffffff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
             gap: 6px;
         }
 
-        .btn-quick-print {
-            background: #4a5568;
-            flex: 1;
+        .body-section {
+            background: rgba(43, 108, 176, 0.05);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
         }
-        .btn-quick-print:hover { background: #2d3748; }
 
-        .btn-save-print {
-            background: var(--primary-blue);
-            flex: 1.3;
+        .body-section .section-label {
+            color: #2b6cb0;
         }
-        .btn-save-print:hover { background: var(--primary-dark); }
 
-        .btn-new-form {
-            display: none;
-            padding: 5px 14px;
-            background: #edf2f7;
-            border: 1px dashed #4a5568;
-            border-radius: 6px;
+        /* Scrolling Bank List option styling */
+        .bank-scroll-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-bottom: 1px solid #edf2f7;
             cursor: pointer;
-            font-size: 0.82rem;
-            font-weight: 700;
+            transition: background 0.15s ease;
+            font-size: 0.9rem;
             color: #2d3748;
         }
 
-        /* ══════════════ OFFICIAL A4 LETTERHEAD & PREVIEW ══════════════ */
-        .a4-page {
-            width: 210mm;
-            min-height: 297mm;
-            background: #ffffff;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            border-radius: 4px;
-            padding: 12mm 18mm 14mm 18mm;
-            box-sizing: border-box;
-            position: relative;
+        .bank-scroll-item:last-child {
+            border-bottom: none;
+        }
+
+        .bank-scroll-item:hover, .bank-scroll-item.selected {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            font-weight: 700;
+        }
+
+        .budget-type-radio-group {
             display: flex;
-            flex-direction: column;
-        }
-
-        .custom-svg-letterhead {
-            position: relative;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-
-        .svg-letterhead-banner {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .svg-letterhead-emblem {
-            position: absolute;
-            left: 2px;
-            top: 2px;
-            width: 82px;
-            height: auto;
-            z-index: 2;
-        }
-
-        .svg-lh-meta-left {
-            position: absolute;
-            left: 8px;
-            bottom: 4px;
-            font-size: 11pt;
-            font-weight: 700;
-            color: #000;
-            line-height: 1.35;
-        }
-
-        .svg-lh-meta-right {
-            position: absolute;
-            right: 8px;
-            bottom: 4px;
-            font-size: 11pt;
-            font-weight: 700;
-            color: #000;
-            text-align: right;
-            line-height: 1.35;
-        }
-
-        /* ── Bank Receiver Addressee ── */
-        .bank-receiver {
-            margin-top: 14px;
-            font-size: 12.5pt;
-            line-height: 1.45;
-            color: #000;
-        }
-
-        .bank-receiver-to {
-            font-size: 12pt;
-            font-weight: 600;
-        }
-
-        .bank-receiver-name {
-            font-size: 13pt;
-            font-weight: 700;
-        }
-
-        .bank-receiver-branch {
-            font-size: 12pt;
-            font-weight: 600;
-        }
-
-        /* ── Subject Line ── */
-        .subject-container {
-            margin: 16px 0 12px 0;
-            text-align: center;
-        }
-
-        .subject-line {
-            font-size: 13.5pt;
-            font-weight: 700;
-            display: inline-block;
-            border-bottom: 1.5px solid #2d3748;
-            padding-bottom: 2px;
-        }
-
-        .subject-label {
-            color: #e51a23;
-        }
-
-        /* ── Official Letter Body ── */
-        .letter-body {
-            font-size: var(--doc-font-size, 12.5pt);
-            line-height: var(--doc-line-height, 1.85);
-            color: #000;
-            flex: 1;
-        }
-
-        .letter-body-para {
-            text-align: justify;
-            text-justify: inter-word;
-            text-indent: 40px;
-            margin-bottom: 12px;
-        }
-
-        /* ── Structured Account Operators Table ── */
-        .tapsil-container {
-            margin-top: 10px;
-        }
-
-        .tapsil-title {
-            font-weight: 700;
-            font-size: 12pt;
-            margin-bottom: 6px;
-            text-decoration: underline;
-        }
-
-        .operator-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11.5pt;
-            margin-bottom: 10px;
-        }
-
-        .operator-table th,
-        .operator-table td {
-            border: 1px solid #4a5568;
-            padding: 5px 8px;
-            vertical-align: middle;
-        }
-
-        .operator-table th {
-            background: #f7fafc;
-            font-weight: 700;
-            text-align: center;
-        }
-
-        .account-condition-box {
-            font-size: 11pt;
-            line-height: 1.55;
-            padding: 6px 10px;
-            background: #fbfcfd;
-            border: 1px dashed #718096;
-            border-radius: 4px;
+            flex-wrap: wrap;
+            gap: 8px;
             margin-top: 6px;
         }
 
-        /* ── Signature Section ── */
-        .doc-footer {
-            margin-top: 35px;
+        .budget-radio-card {
             display: flex;
-            justify-content: flex-end;
-            page-break-inside: avoid;
-        }
-
-        .signature-block {
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .sig-name {
-            font-size: 12.5pt;
-            font-weight: 700;
-            padding-top: 4px;
-            border-top: 1.5px dashed #000;
-        }
-
-        .sig-title {
-            font-size: 11.5pt;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
             color: #2d3748;
         }
 
-        /* ══════════════ ABHILEKH MODAL ══════════════ */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            padding: 16px;
+        .budget-radio-card:hover {
+            border-color: #3182ce;
+            background: #ebf8ff;
         }
 
-        .modal-content {
-            background: #ffffff;
-            width: 900px;
-            max-width: 96%;
-            max-height: 90vh;
-            border-radius: 12px;
-            padding: 24px;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #a0aec0;
-        }
-        .modal-close:hover { color: #e53e3e; }
-
-        .modal-title {
-            margin: 0 0 16px 0;
-            font-size: 1.25rem;
-            color: var(--primary-blue);
-            font-weight: 800;
-        }
-
-        .db-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-
-        .db-table th, .db-table td {
-            border: 1px solid #e2e8f0;
-            padding: 8px 10px;
-            text-align: left;
-        }
-
-        .db-table th {
-            background: #edf2f7;
+        .budget-radio-card.active {
+            border-color: #2b6cb0;
+            background: #ebf8ff;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
             font-weight: 700;
-            color: #4a5568;
+            color: #2b6cb0;
         }
 
-        .db-table tr:hover { background: #f7fafc; }
-
-        /* ══════════════ RESPONSIVE BREAKPOINTS ══════════════ */
-        @media screen and (max-width: 1024px) {
-            .input-panel {
-                width: 48%;
-            }
-            .a4-page {
-                width: 100%;
-                min-height: auto;
-            }
-        }
-
-        @media screen and (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-
-            .input-panel {
-                width: 100%;
-                max-width: 100%;
-                border-right: none;
-                padding: 16px;
-            }
-
-            .preview-panel {
-                display: none;
-                padding: 10px;
-            }
-
-            .preview-panel.mobile-active {
-                display: flex;
-            }
-
-            .input-panel.mobile-hidden {
-                display: none;
-            }
-
-            .mobile-nav-bar {
-                display: flex !important;
-                background: #ffffff;
-                border-bottom: 2px solid #e2e8f0;
-                position: sticky;
-                top: 0;
-                z-index: 100;
-            }
-
-            .mobile-nav-btn {
-                flex: 1;
-                padding: 12px;
-                background: transparent;
-                border: none;
-                font-size: 0.95rem;
-                font-weight: 700;
-                color: #718096;
-                cursor: pointer;
-                text-align: center;
-                border-bottom: 3px solid transparent;
-            }
-
-            .mobile-nav-btn.active {
-                color: var(--primary-blue);
-                border-bottom-color: var(--primary-blue);
-                background: #ebf8ff;
-            }
-
-            .member-row {
-                grid-template-columns: 1fr;
-                gap: 6px;
-            }
-
-            .mobile-action-bar {
-                display: flex !important;
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                background: #ffffff;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-                padding: 8px 12px;
-                gap: 8px;
-                z-index: 1000;
-            }
-
-            .mobile-floating-btn {
-                display: flex !important;
-            }
-        }
-
-        .mobile-nav-bar,
-        .mobile-action-bar,
-        .mobile-floating-btn {
-            display: none;
-        }
-
-        .mobile-floating-btn {
-            position: fixed;
-            bottom: 65px;
-            right: 16px;
-            background: #2b6cb0;
-            color: #fff;
-            border: none;
-            border-radius: 30px;
-            padding: 10px 18px;
-            font-size: 0.9rem;
+        .btn-abhilekh {
+            background: #e2e8f0;
+            color: #2d3748;
+            padding: 6px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 0.88rem;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-            z-index: 99;
             cursor: pointer;
         }
 
-        /* ══════════════ ISOLATED PRINT STYLESHEET ══════════════ */
+        .btn-abhilekh:hover {
+            background: #cbd5e0;
+        }
+
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 0.35in 0.5in 0.3in 0.5in;
-            }
-
-            html, body {
-                width: 100% !important;
-                height: auto !important;
-                background: #ffffff !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                color: #000000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
             .input-panel,
+            .mode-toggle-wrap,
+            .top-bar-buttons,
+            .btn-abhilekh,
+            #abhilekhModal,
             .mobile-nav-bar,
             .mobile-floating-btn,
-            .mobile-action-bar,
-            .modal-overlay,
-            .top-bar-buttons,
-            .print-actions-wrapper,
-            .btn-new-form,
-            #abhilekhModal,
-            .btn-print {
+            .mobile-action-bar {
                 display: none !important;
             }
 
-            .app-container {
-                display: block !important;
-            }
-
             .preview-panel {
                 width: 100% !important;
                 height: auto !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: transparent !important;
-                display: block !important;
                 overflow: visible !important;
+                padding: 0 !important;
+                border: none !important;
+                margin: 0 !important;
+                background: transparent !important;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
             }
 
             .a4-page {
-                width: 100% !important;
-                min-height: unset !important;
-                height: auto !important;
                 box-shadow: none !important;
                 border: none !important;
-                border-radius: 0 !important;
                 margin: 0 !important;
-                padding: 0 !important;
-                page-break-inside: avoid !important;
-            }
-
-            .custom-svg-letterhead {
-                width: 100% !important;
-                margin: 0 0 10px 0 !important;
-                padding: 0 !important;
-                page-break-inside: avoid !important;
-            }
-
-            .svg-letterhead-banner {
-                width: 100% !important;
-                height: auto !important;
-            }
-
-            .operator-table {
-                width: 100% !important;
-                border-collapse: collapse !important;
-            }
-
-            .operator-table th,
-            .operator-table td {
-                border: 1px solid #000000 !important;
-                color: #000000 !important;
-            }
-
-            .account-condition-box {
-                border: 1px solid #444 !important;
-                background: #ffffff !important;
-                color: #000000 !important;
-            }
-
-            .doc-footer {
-                page-break-inside: avoid !important;
+                border-radius: 0 !important;
             }
         }
     </style>
+    <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/emblem_of_nepal.svg" type="image/svg+xml" fetchpriority="high">
 </head>
 
 <body>
     <script src="auth.js?v=2.3"></script>
 
-    <!-- 📱 Mobile Tab Switcher -->
+    <!-- 📱 Mobile View Navigation Bar (Only visible on mobile screens <= 768px) -->
     <div class="mobile-nav-bar">
         <button type="button" class="mobile-nav-btn active" id="btnMobForm" onclick="setMobileTab('form')">
             📝 फारम भर्नुहोस्
         </button>
         <button type="button" class="mobile-nav-btn" id="btnMobPreview" onclick="setMobileTab('preview')">
-            📄 सिफारिस हेर्नुहोस्
+            📄 पत्र हेर्नुहोस्
         </button>
     </div>
 
-    <div class="app-container">
-        <!-- ══════════════ LEFT COLUMN: INPUT PANEL ══════════════ -->
-        <div class="input-panel" id="inputPanel">
-            <div class="top-bar-buttons">
-                <a href="index.html" class="btn-home">🏠 गृहपृष्ठ</a>
-                <button type="button" class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख सूची</button>
+    <div class="input-panel">
+        <div class="top-bar-buttons">
+            <a href="index.html" class="btn-home">🏠 गृहपृष्ठ</a>
+            <button type="button" class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+        </div>
+
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">📂 योजनाको बैंक खाता सञ्चालन सिफारिस</h2>
+        </div>
+
+        <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
+        <input type="hidden" id="editRecordIndex" value="">
+
+        <!-- Mode Toggle Tabs (Fast Switch) -->
+        <div class="mode-toggle-wrap">
+            <button id="btnKholne" class="mode-btn active-kholne" onclick="setMode('OPEN_ACCOUNT')">
+                📂 बैंक खाता सञ्चालन (खोल्ने)
+            </button>
+            <button id="btnBanda" class="mode-btn" onclick="setMode('CLOSE_ACCOUNT')">
+                🔒 बैंक खाता बन्द सिफारिस
+            </button>
+        </div>
+
+        <!-- ══ RETRIEVE SAVED SAMJHAUTA RECORD SECTION ══ -->
+        <div class="section-card" style="background: #fffaf0; border: 1.5px solid #dd6b20; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+            <div class="section-label" style="color: #c05621; font-weight: 800; display:flex; align-items:center; gap:6px;">
+                📥 सम्झौता गरिएको योजनाबाट डाटा तान्नुहोस्
             </div>
-
-            <div class="panel-title" id="formMainTitle">
-                <span>📂 योजनाको बैंक खाता सञ्चालन सिफारिस</span>
-            </div>
-
-            <input type="hidden" id="currentMode" value="OPEN_ACCOUNT">
-            <input type="hidden" id="editRecordIndex" value="">
-
-            <!-- 1. Mode Switcher (खोल्ने / बन्द गर्ने) -->
-            <div class="mode-toggle-wrap">
-                <button type="button" id="btnKholne" class="mode-btn active-kholne" onclick="setMode('OPEN_ACCOUNT')">
-                    📂 बैंक खाता सञ्चालन (खोल्ने)
-                </button>
-                <button type="button" id="btnBanda" class="mode-btn" onclick="setMode('CLOSE_ACCOUNT')">
-                    🔒 बैंक खाता बन्द सिफारिस
-                </button>
-            </div>
-
-            <!-- 2. SECTION: योजना विवरण (Project Details) -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🏗️ योजना विवरण</span>
-                    <span class="section-badge">वडा नं. १</span>
-                </div>
-
-                <!-- Fast Approved Project Selection -->
-                <div class="form-group">
-                    <label for="selectApprovedProject" style="color: #2b6cb0;">⚡ स्वीकृत योजना सूचीबाट छान्नुहोस्:</label>
-                    <select id="selectApprovedProject" onchange="onSelectApprovedProject(this.value)" style="border-color: #3182ce; background: #ebf8ff;">
-                        <option value="">-- वडा नं. १ का स्वीकृत ४८ योजनाहरू मध्येबाट छान्नुहोस् --</option>
-                    </select>
-                </div>
-
-                <!-- Helper Accordions: Samjhauta Import & Auto-Paste -->
-                <div class="collapsible-helper">
-                    <div class="collapsible-header" onclick="toggleHelperAccordion('helperSamjhauta')">
-                        <span>📥 योजना सम्झौताको अभिलेखबाट डाटा तान्नुहोस्</span>
-                        <span id="iconHelperSamjhauta">▾</span>
-                    </div>
-                    <div id="helperSamjhauta" class="collapsible-body" style="display: none;">
-                        <select id="selectSamjhautaRecord" onchange="loadSamjhautaRecordData(this.value)">
-                            <option value="">-- योजना सम्झौताको अभिलेख छान्नुहोस् --</option>
-                        </select>
-                        <div id="retrieveBadge" style="display:none; margin-top:6px; font-size:0.8rem; font-weight:700; color:#2b6cb0;"></div>
-                    </div>
-                </div>
-
-                <div class="collapsible-helper">
-                    <div class="collapsible-header" onclick="toggleHelperAccordion('helperPaste')">
-                        <span>📋 टिप्पणी / सम्झौता पत्रबाट कपी-पेस्ट (Auto-Extract)</span>
-                        <span id="iconHelperPaste">▾</span>
-                    </div>
-                    <div id="helperPaste" class="collapsible-body" style="display: none;">
-                        <textarea id="pasteTextarea" style="height: 70px;" placeholder="सम्झौताको व्यहोरा यहाँ पेस्ट गर्नुहोस्... (बजेट, योजनाको नाम, समिति र पदहरू स्वतः भरिनेछन्)" oninput="processYojanaPastedContent()"></textarea>
-                        <div id="parseBadge" style="display:none; margin-top:4px; font-size:0.8rem; font-weight:700; color:#2b6cb0;"></div>
-                    </div>
-                </div>
-
-                <!-- Project Name -->
-                <div class="form-group">
-                    <label for="inProjectName">योजनाको नाम / शीर्षक: <span style="color:#e53e3e;">*</span></label>
-                    <input type="text" id="inProjectName" list="listApprovedProjectNames" placeholder="उदा: जानकेश्वर सडक रिटेनिङ वाल/इन्टरलक ब्लक" oninput="onProjectNameInput(this.value); updateDoc();">
-                    <datalist id="listApprovedProjectNames"></datalist>
-                </div>
-
-                <!-- Budget Type -->
-                <div class="form-group" id="groupBudgetType">
-                    <label>बजेटको किसिम:</label>
-                    <div class="radio-pills">
-                        <label class="radio-pill">
-                            <input type="radio" name="budgetTypeRadio" value="वडा स्तरीय" checked onchange="onBudgetTypeRadioChange(this)">
-                            वडा स्तरीय
-                        </label>
-                        <label class="radio-pill">
-                            <input type="radio" name="budgetTypeRadio" value="नगर स्तरीय" onchange="onBudgetTypeRadioChange(this)">
-                            नगर स्तरीय
-                        </label>
-                        <label class="radio-pill">
-                            <input type="radio" name="budgetTypeRadio" value="प्रदेश स्तरीय" onchange="onBudgetTypeRadioChange(this)">
-                            प्रदेश स्तरीय
-                        </label>
-                        <label class="radio-pill">
-                            <input type="radio" name="budgetTypeRadio" value="CUSTOM" onchange="onBudgetTypeRadioChange(this)">
-                            ✍️ अन्य (Custom)
-                        </label>
-                    </div>
-                    <input type="text" id="inBudgetTypeCustom" placeholder="उदा: संघ स्तरीय" style="display:none; margin-top:6px;" oninput="updateDoc()">
-                </div>
-
-                <!-- Budget Amount & Words (Hidden on Close Mode) -->
-                <div class="form-group" id="secBudgetAmounts" style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px;">
-                    <div>
-                        <label for="inBudgetAmt">विनियोजित रकम रू.: <span style="color:#e53e3e;">*</span></label>
-                        <input type="text" id="inBudgetAmt" placeholder="उदा: ७,५०,०००" oninput="autoConvertAmtToWords(); updateDoc();">
-                    </div>
-                    <div>
-                        <label for="inBudgetWords">रकम (अक्षरेपी):</label>
-                        <input type="text" id="inBudgetWords" placeholder="उदा: सात लाख पचास हजार मात्र" oninput="updateDoc();">
-                    </div>
-                </div>
-
-                <!-- Account Number (Active in Close Mode) -->
-                <div class="form-group" id="secCloseAccount" style="display: none; background: #fff5f5; border: 1px solid #feb2b2; padding: 10px; border-radius: 6px;">
-                    <label for="inAccountNo" style="color: #c53030;">सञ्चालनमा रहेको बैंक खाता नम्बर: <span style="color:#e53e3e;">*</span></label>
-                    <input type="text" id="inAccountNo" placeholder="उदा: ०४१२३०१००२९३००१" oninput="updateDoc()">
-                </div>
-            </div>
-
-            <!-- 3. SECTION: उपभोक्ता समिति तथा खाता सञ्चालकहरू (Committee & Operators) -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">👥 उपभोक्ता समिति तथा खाता सञ्चालक विवरण</span>
-                </div>
-
-                <div class="form-group">
-                    <label for="inCommitteeName">उपभोक्ता समितिको नाम: <span style="color:#e53e3e;">*</span></label>
-                    <input type="text" id="inCommitteeName" placeholder="उदा: जानकेश्वर सडक निर्माण उपभोक्ता समिति" oninput="updateDoc()">
-                </div>
-
-                <div class="form-group">
-                    <label for="inDecisionMiti">समितिको बैठक/निर्णय मिति (वैकल्पिक):</label>
-                    <input type="text" id="inDecisionMiti" placeholder="उदा: २०८३/०४/१५ (समितिले खाता खोल्न निर्णय गरेको मिति)" oninput="updateDoc()">
-                </div>
-
-                <!-- Account Operators Rows (Name + Citizenship/Phone) -->
-                <div style="margin-top: 10px;">
-                    <label style="font-weight: 700; font-size: 0.85rem; color: #2d3748; margin-bottom: 6px; display: block;">
-                        खाता सञ्चालक पदाधिकारीहरू (नाम र नागरिकता/फोन):
-                    </label>
-
-                    <!-- Chairperson -->
-                    <div class="member-row">
-                        <div class="member-role-badge">१. अध्यक्ष</div>
-                        <input type="text" id="inChairman" placeholder="अध्यक्षको नाम, थर" oninput="updateDoc()">
-                        <input type="text" id="inChairmanCit" placeholder="नागरिकता / फोन" oninput="updateDoc()">
-                    </div>
-
-                    <!-- Secretary -->
-                    <div class="member-row">
-                        <div class="member-role-badge">२. सचिव</div>
-                        <input type="text" id="inSecretary" placeholder="सचिवको नाम, थर" oninput="updateDoc()">
-                        <input type="text" id="inSecretaryCit" placeholder="नागरिकता / फोन" oninput="updateDoc()">
-                    </div>
-
-                    <!-- Treasurer -->
-                    <div class="member-row">
-                        <div class="member-role-badge">३. कोषाध्यक्ष</div>
-                        <input type="text" id="inTreasurer" placeholder="कोषाध्यक्षको नाम, थर" oninput="updateDoc()">
-                        <input type="text" id="inTreasurerCit" placeholder="नागरिकता / फोन" oninput="updateDoc()">
-                    </div>
-                </div>
-
-                <!-- Account Operation Mandate / Condition -->
-                <div class="form-group" id="secAccountMandate" style="margin-top: 12px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
-                    <label for="selAccountCondition" style="color: #2b6cb0;">खाता सञ्चालन सम्बन्धी अख्तियारी (दस्तखत विधि):</label>
-                    <select id="selAccountCondition" onchange="onAccountConditionChange(this.value)">
-                        <option value="MANDATE_A" selected>अध्यक्षको अनिवार्य र सचिव वा कोषाध्यक्ष कुनै १ जना गरी कम्तीमा २ जनाको संयुक्त दस्तखतबाट</option>
-                        <option value="MANDATE_B">अध्यक्ष, सचिव वा कोषाध्यक्ष मध्ये कुनै २ (दुई) जनाको संयुक्त दस्तखतबाट</option>
-                        <option value="MANDATE_C">अध्यक्ष र कोषाध्यक्षको संयुक्त दस्तखतबाट</option>
-                        <option value="CUSTOM">✍️ अन्य व्यहोरा (Custom)</option>
-                    </select>
-                    <input type="text" id="inCustomAccountCondition" placeholder="उदा: अध्यक्ष, सचिव र कोषाध्यक्ष तीनै जनाको संयुक्त दस्तखतबाट" style="display: none; margin-top: 6px;" oninput="updateDoc()">
-                </div>
-            </div>
-
-            <!-- 4. SECTION: बैंक तथा शाखा विवरण (Bank Selection) -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🏦 बैंक तथा शाखा विवरण</span>
-                </div>
-
-                <div class="form-group">
-                    <label for="selectBank">सिफारिस गरिने बैंक छान्नुहोस्:</label>
-                    <select id="selectBank" onchange="onSelectBankChange(this.value)">
-                        <option value="saptakoshi" selected>श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="krishi">श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="nic">श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="prime">श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="nabil">श्री नबिल बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="laxmi">श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="siddhartha">श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="global">श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="excel">श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, झापा)</option>
-                        <option value="CUSTOM">✍️ अन्य बैंक (Custom)</option>
-                    </select>
-                </div>
-
-                <!-- Custom Bank Fields (if selected) -->
-                <div id="secCustomBank" style="display: none; background: #f7fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e0;">
-                    <div class="form-group">
-                        <label>बैंकको पूरा नाम:</label>
-                        <input type="text" id="inCustomBankName" placeholder="उदा: श्री राष्ट्रिय वाणिज्य बैंक लिमिटेड" oninput="updateDoc()">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <div>
-                            <label>शाखा:</label>
-                            <input type="text" id="inCustomBankOffice" placeholder="उदा: गौरादह शाखा" oninput="updateDoc()">
-                        </div>
-                        <div>
-                            <label>स्थान / जिल्ला:</label>
-                            <input type="text" id="inCustomBankLocation" placeholder="उदा: झापा" oninput="updateDoc()">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. SECTION: पत्रसम्बन्धी विवरण (Letterhead Meta) -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">📄 पत्रसम्बन्धी विवरण</span>
-                </div>
-
-                <div class="form-group">
-                    <label>पत्र संख्या (प.सं.):</label>
-                    <div class="radio-pills">
-                        <label class="radio-pill"><input type="radio" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()">२०८१/०८२</label>
-                        <label class="radio-pill"><input type="radio" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()">२०८२/०८३</label>
-                        <label class="radio-pill"><input type="radio" name="ayRadio" value="२०८३/०८४" checked onchange="updateDoc()">२०८३/०८४</label>
-                        <label class="radio-pill"><input type="radio" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()">२०८४/०८५</label>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="form-group">
-                        <label for="inChalani">चलानी नं. (च.नं.):</label>
-                        <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
-                    </div>
-                    <div class="form-group">
-                        <label for="inMiti">मिति (वि.सं.):</label>
-                        <input type="text" id="inMiti" placeholder="उदा: २०८३/०४/१५" oninput="updateDoc()">
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 8px;">
-                    <label for="inNepalSamvat">नेपाल संवत् (ने.सं.):</label>
-                    <input type="text" id="inNepalSamvat" placeholder="उदा: ११४६" oninput="updateDoc()">
-                </div>
-            </div>
-
-            <!-- 6. SECTION: हस्ताक्षर अधिकारी (Signing Authority) -->
-            <div class="section-card" style="background: #fffafa; border-color: #fed7d7;">
-                <div class="section-header">
-                    <span class="section-label" style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी</span>
-                </div>
-
-                <div class="form-group">
-                    <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
-                        <option value="अनिता अधिकारी|वडा सचिव" selected>वडा सचिव - अनिता अधिकारी</option>
-                        <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
-                        <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
-                        <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
-                        <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
-                        <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
-                    </select>
-                </div>
-
-                <div id="customSignBox" style="display:none; margin-top:8px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
-                    <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
-                </div>
-
-                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #fed7d7; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.82rem; color: #4a5568;">↔️ हस्ताक्षरको दुरी:</span>
-                    <span id="marginVal" style="font-weight: 700; color: #2b6cb0; font-size: 0.85rem;">३५ px</span>
-                </div>
-                <input type="range" id="inSigMargin" min="10" max="180" value="35" oninput="adjustSignaturePosition(this.value)" style="width: 100%;">
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="print-actions-wrapper">
-                <button type="button" class="btn-print btn-quick-print" id="btnQuickPrint" onclick="quickPrintOnly()" title="डाटाबेसमा सुरक्षित नगरी सिधै प्रिन्ट गर्नुहोस्">
-                    🖨️ सिफारिस प्रिन्ट मात्र
-                </button>
-                <button type="button" class="btn-print btn-save-print" id="btnSaveAndPrint" onclick="printAndSaveSystem()" title="अभिलेख सुरक्षित गरी प्रिन्ट गर्नुहोस्">
-                    💾 अभिलेख तथा सिफारिस प्रिन्ट
-                </button>
-            </div>
-            <div style="margin-top: 10px; text-align: center;">
-                <button type="button" class="btn-new-form" id="btnNewForm" onclick="resetFormToNew()">
-                    ➕ नयाँ सिफारिस फाराम
-                </button>
+            <div class="form-group" style="margin-bottom:0;">
+                <select id="selectSamjhautaRecord" onchange="loadSamjhautaRecordData(this.value)" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e0; font-size:0.9rem; font-family:inherit; background:#fff; cursor:pointer;">
+                    <option value="">-- योजना सम्झौताको अभिलेख छान्नुहोस् --</option>
+                </select>
+                <div id="retrieveBadge" class="badge" style="display:none; margin-top:8px; font-size:0.85rem; padding:4px 12px; border-radius:6px; font-weight:700;"></div>
             </div>
         </div>
 
-        <!-- ══════════════ RIGHT COLUMN: OFFICIAL PREVIEW PANEL ══════════════ -->
-        <div class="preview-panel" id="previewPanel">
-            <div class="a4-page" id="documentPrintArea">
-                <!-- ── Official Custom SVG Letterhead ── -->
-                <div class="custom-svg-letterhead">
-                    <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड" width="561" height="138" loading="eager" fetchpriority="high" decoding="sync">
-                    <img class="svg-letterhead-emblem" src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप" loading="eager" fetchpriority="high" decoding="sync">
-                    <div class="svg-lh-meta-left">
-                        <div>प.सं. : <span id="lblPatraSankhya"><span id="lblAY">२०८३/०८४</span></span></div>
-                        <div>च.नं. : <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
-                    </div>
-                    <div class="svg-lh-meta-right">
-                        <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३/</span></div>
-                        <div class="ns-block">ने.सं. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४६</span></div>
+        <!-- ══ AUTO EXTRACT / PASTE SECTION ══ -->
+        <div class="section-card paste-section" id="secPasteBox" style="background: #ebf8ff; border: 1.5px dashed #3182ce; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+            <div class="section-label" style="color: #2b6cb0; font-weight: 800; display:flex; align-items:center; gap:6px;">📋 कपी-पेस्ट बक्स (Auto-Extract)</div>
+            <div class="form-group" style="margin-bottom:0;">
+                <textarea id="pasteTextarea" class="paste-textarea" style="width: 100%; height: 95px; border: 1.5px solid #90cdf4; border-radius: 8px; padding: 10px; font-family: inherit; font-size: 0.9rem; resize: vertical; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);" 
+                    placeholder="योजना सम्झौताको पत्र / टिप्पणीको पाठ यहाँ Ctrl+V (पेस्ट) गर्नुहोस्... (बजेटको प्रकार, योजनाको नाम, रकम, समिति र पदहरू स्वतः भरिनेछन्)"
+                    oninput="processYojanaPastedContent()"></textarea>
+                <div id="parseBadge" class="badge" style="display:none; margin-top:8px; font-size:0.85rem; padding:4px 12px; border-radius:6px; font-weight:700;"></div>
+            </div>
+        </div>
+
+        <!-- ══ SECTION 0: LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 पत्रसम्बन्धी विवरण</div>
+
+            <div class="form-group">
+                <label>पत्र संख्या (प.सं.):</label>
+                <div class="radio-container">
+                    <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"><label for="ay1" class="radio-label">२०८१/०८२</label></div>
+                    <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()"><label for="ay2" class="radio-label">२०८२/०८३</label></div>
+                    <div class="radio-option"><input type="radio" id="ay3" name="ayRadio" value="२०८३/०८४" checked onchange="updateDoc()"><label for="ay3" class="radio-label">२०८३/०८४</label></div>
+                    <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()"><label for="ay4" class="radio-label">२०८४/०८५</label></div>
+                </div>
+            </div>
+
+            <div class="form-group chalani-miti-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="उदा: २०८३/०४/१५" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ने.सं. :</label>
+                <input type="text" id="inNepalSamvat" placeholder="उदा: ११४६" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ SECTION 1: BANK SELECTION (ACCORDION / SCROLLING LIST) ══ -->
+        <div class="section-card body-section" style="background: rgba(237, 137, 54, 0.05); border-color: rgba(237, 137, 54, 0.4);">
+            <div class="section-label" style="color: #c05621; display:flex; justify-content:space-between; align-items:center;">
+                <span>🏦 बैंक छान्नुहोस् (सप्तकोशी बैंक Default)</span>
+                <span style="font-size:0.78rem; color:#dd6b20; text-transform:none;">(फेर्न थिच्नुहोस् ▾)</span>
+            </div>
+
+            <!-- Trigger Box showing currently selected bank -->
+            <div id="bankAccordionTrigger" onclick="toggleBankAccordion()" style="background: #fff; border: 2px solid #2b6cb0; border-radius: 8px; padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+                <div>
+                    <div style="font-size:0.75rem; color:#718096; font-weight:bold;">चयन गरिएको बैंक:</div>
+                    <div id="lblSelectedBankText" style="font-weight:bold; color:#2b6cb0; font-size:0.95rem;">
+                        श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)
                     </div>
                 </div>
+                <span id="bankAccordionIcon" style="font-size: 1.1rem; color: #2b6cb0; font-weight:bold;">▼</span>
+            </div>
 
-                <!-- DOM Sentinel for compatibility -->
-                <div class="header-red-line" style="display: none;"></div>
-
-                <!-- Bank Recipient Block -->
-                <div class="bank-receiver">
-                    <div class="bank-receiver-to">श्री शाखा प्रबन्धक ज्यू,</div>
-                    <div id="lblReceiverLine1" class="bank-receiver-name">श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,</div>
-                    <div id="lblReceiverLine2" class="bank-receiver-branch">गौरादह शाखा, झापा ।</div>
+            <!-- Scrolling List of Banks (Hidden by default, expands on click) -->
+            <div id="bankAccordionContent" style="display:none; margin-top: 10px; max-height: 240px; overflow-y: auto; background: #fff; border: 1.5px solid #cbd5e0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <div class="bank-scroll-item selected" onclick="selectBankOption('saptakoshi', 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)')">
+                    <span>🏦 श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)</span>
                 </div>
-
-                <!-- Subject Line -->
-                <div class="subject-container">
-                    <div class="subject-line">
-                        <span class="subject-label">विषय:</span> <strong><span id="lblSubject">बैंक खाता सञ्चालन सम्बन्धमा</span> ।</strong>
-                    </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('krishi', 'श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)</span>
                 </div>
-
-                <!-- Dynamic Letter Body -->
-                <div class="letter-body" id="bodyText">
-                    <!-- Populated dynamically by updateDoc() -->
+                <div class="bank-scroll-item" onclick="selectBankOption('nic', 'श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)</span>
                 </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('prime', 'श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('nabil', 'श्री नबिल बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री नबिल बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('laxmi', 'श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('siddhartha', 'श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('global', 'श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('excel', 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)')">
+                    <span>🏦 श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)</span>
+                </div>
+                <div class="bank-scroll-item" onclick="selectBankOption('CUSTOM', '✍️ अन्य बैंक (Custom)')">
+                    <span>✍️ अन्य बैंक (Custom)</span>
+                </div>
+            </div>
 
-                <!-- Signature Section -->
-                <div class="doc-footer" id="docFooterSection" style="margin-top: 35px;">
-                    <div class="signature-block">
-                        <div class="sig-name" id="lblSigName">अनिता अधिकारी</div>
-                        <div class="sig-title" id="lblSigTitle">वडा सचिव</div>
-                    </div>
+            <input type="hidden" id="selectedBankKey" value="saptakoshi">
+
+            <!-- Custom Bank Fields -->
+            <div id="customBankBox" class="custom-bank-grid" style="display:none; margin-top:12px; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                <div class="form-group">
+                    <label>बैंकको नाम:</label>
+                    <input type="text" id="inCustomBankName" placeholder="उदा: श्री राष्ट्रिय वाणिज्य बैंक लिमिटेड" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>शाखा:</label>
+                    <input type="text" id="inCustomBankOffice" placeholder="उदा: गौरादह शाखा" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>ठेगाना:</label>
+                    <input type="text" id="inCustomBankLocation" placeholder="उदा: गौरादह, झापा" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ SECTION 2: OPENING / CLOSING SPECIFIC DETAILS ══ -->
+        <div class="section-card body-section" id="secOpenAccount">
+            <div class="section-label">📂 खाता सञ्चालन (खोल्ने) विवरण</div>
+
+            <div class="form-group">
+                <label style="font-weight:bold; margin-bottom:6px; display:block;">स्वीकृत योजनाको प्रकार:</label>
+                <div class="budget-type-radio-group">
+                    <label class="budget-radio-card active" id="lblBudgetTypeWada">
+                        <input type="radio" name="budgetTypeRadio" value="वडा स्तरीय" checked onchange="onBudgetTypeRadioChange(this)">
+                        <span>वडा स्तरीय</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypeNagar">
+                        <input type="radio" name="budgetTypeRadio" value="नगर स्तरीय" onchange="onBudgetTypeRadioChange(this)">
+                        <span>नगर स्तरीय</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypePradesh">
+                        <input type="radio" name="budgetTypeRadio" value="प्रदेश स्तरीय" onchange="onBudgetTypeRadioChange(this)">
+                        <span>प्रदेश स्तरीय</span>
+                    </label>
+                    <label class="budget-radio-card" id="lblBudgetTypeCustom">
+                        <input type="radio" name="budgetTypeRadio" value="CUSTOM" onchange="onBudgetTypeRadioChange(this)">
+                        <span>✍️ आफैँ हाल्नुस (Custom)</span>
+                    </label>
+                </div>
+                <input type="text" id="inBudgetTypeCustom" placeholder="उदा: संघ स्तरीय" style="display:none; margin-top:8px;" oninput="updateDoc()">
+            </div>
+
+            <div class="form-group">
+                <label>योजनाको शिर्षक:</label>
+                <input type="text" id="inProjectName" placeholder="उदा: गौरादह १ बजार ढल तथा सडक निर्माण योजना" oninput="updateDoc()">
+            </div>
+
+            <div class="form-group budget-amt-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px;">
+                <div>
+                    <label>विनियोजन रकम रू. (अंकमा):</label>
+                    <input type="text" id="inBudgetAmt" placeholder="उदा: ५,५५,५५५/- वा 555555" oninput="autoConvertAmtToWords(); updateDoc()">
+                </div>
+                <div>
+                    <label>रकम (अक्षरेपी):</label>
+                    <input type="text" id="inBudgetWords" placeholder="उदा: पाँच लाख" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card body-section" id="secCloseAccount" style="display:none;">
+            <div class="section-label">🔒 खाता बन्द विवरण</div>
+            <div class="form-group">
+                <label>सञ्चालनमा रहेको बैंक खाता नम्बर:</label>
+                <input type="text" id="inAccountNo" placeholder="उदा: ०४१२३०१००२९३००१" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ SECTION 3: COMMON COMMITTEE DETAILS ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">📋 उपभोक्ता समिति विवरण</div>
+
+            <div class="form-group">
+                <label>उपभोक्ता समितिको नाम:</label>
+                <input type="text" id="inCommitteeName" placeholder="उदा: गौरादह खानेपानी उपभोक्ता समिति" oninput="updateDoc()">
+            </div>
+
+            <div class="form-group committee-members-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>अध्यक्षको नाम:</label>
+                    <input type="text" id="inChairman" placeholder="अध्यक्षको नाम" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>सचिवको नाम:</label>
+                    <input type="text" id="inSecretary" placeholder="सचिवको नाम" oninput="updateDoc()">
+                </div>
+                <div>
+                    <label>कोषाध्यक्षको नाम:</label>
+                    <input type="text" id="inTreasurer" placeholder="कोषाध्यक्षको नाम" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ SECTION 4: SIGNATURE AUTHORITY ══ -->
+        <div class="form-group" style="margin-top: 5px; background: #fff3f3; padding: 12px; border: 1px solid #feb2b2; border-radius: 8px;">
+            <label style="color: #c53030; font-weight:bold;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()" style="width:100%; padding:9px; border-radius:6px; border:1px solid #cbd5e0; margin-top:4px;">
+                <option value="अनिता अधिकारी|वडा सचिव" selected>वडा सचिव - अनिता अधिकारी</option>
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+            <div id="customSignBox" class="custom-sign-grid" style="display:none; margin-top:10px; gap:10px; grid-template-columns: 1fr 1fr;">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40" oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <div class="print-actions-wrapper" style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="button" class="btn-print" id="btnQuickPrint" onclick="quickPrintOnly()" style="background: #4a5568; flex: 1;" title="अभिलेखमा सेभ नगरी सिधै प्रिन्ट गर्नुहोस्">🖨️ सिफारिस प्रिन्ट मात्र</button>
+            <button type="button" class="btn-print" id="btnSaveAndPrint" onclick="printAndSaveSystem()" style="background: #2b6cb0; flex: 1.3;" title="अभिलेख सुरक्षित गरी सिफारिस प्रिन्ट गर्नुहोस्">💾 अभिलेख तथा सिफारिस प्रिन्ट</button>
+        </div>
+        <div style="margin-top: 8px; text-align: center;">
+            <button type="button" id="btnNewForm" onclick="resetFormToNew()" style="display: none; padding: 5px 12px; background: #edf2f7; border: 1px dashed #4a5568; border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: #2d3748;">➕ नयाँ सिफारिस फाराम</button>
+        </div>
+    </div>
+
+    <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ योजनाको बैंक खाता सिफारिस अभिलेख</h3>
+            <div class="search-container">
+                <label>🔍 खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="समिति वा अध्यक्षको नाम वा चलानी नं. टाइप गर्नुस्..." oninput="renderDatabaseTable()">
+            </div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">क्रम</th>
+                        <th style="width: 38%;">उपभोक्ता समितिको नाम</th>
+                        <th style="width: 20%;">प्रकार</th>
+                        <th style="width: 20%;">मिति</th>
+                        <th style="width: 14%; text-align: center;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ══════════════ PREVIEW PANEL ══════════════ -->
+    <div class="preview-panel">
+        <div class="a4-page">
+                        <!-- ── Official Custom SVG Letterhead ── -->
+            <div class="custom-svg-letterhead">
+                <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड" width="561" height="138" loading="eager" fetchpriority="high" decoding="sync">
+                <img class="svg-letterhead-emblem" src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप" loading="eager" fetchpriority="high" decoding="sync">
+                <div class="svg-lh-meta-left">
+                    <div>प.सं. <span id="lblPatraSankhya"><span id="lblAY">२०८३/०८४</span></span></div>
+                    <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
+                </div>
+                <div class="svg-lh-meta-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३/</span></div>
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४६</span></div>
+                </div>
+            </div>
+
+            <!-- DOM Sentinel for compatibility -->
+            <div class="header-red-line" style="display: none;"></div>
+
+            <div class="bank-receiver">
+                <div id="lblReceiverLine1" style="font-weight:bold;">श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,</div>
+                <div id="lblReceiverLine2">गौरादह शाखा, गौरादह झापा ।</div>
+            </div>
+
+            <div class="subject-container">
+                <div class="subject-line">
+                    <span class="subject-label" style="color: #e51a23;">विषय:</span> <span id="lblSubject">बैंक खाता सञ्चालन सम्बन्धमा</span> ।
+                </div>
+            </div>
+
+            <div class="letter-body" id="bodyText">
+                <!-- Dynamically Populated Text -->
+            </div>
+
+            <!-- ── Signature ── -->
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 40px;">
+                <div class="signature-block">
+                    <div class="sig-name" id="lblSigName">अनिता अधिकारी</div>
+                    <div class="sig-title" id="lblSigTitle">वडा सचिव</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 📱 Mobile Floating Buttons -->
+    <!-- 📱 Mobile Floating Quick Action Buttons (<= 768px) -->
     <button type="button" class="mobile-floating-btn" id="floatBtnToPreview" onclick="setMobileTab('preview')">
         👁️ पत्र हेर्नुहोस्
     </button>
 
-    <div class="mobile-action-bar" id="mobActionBar">
-        <button type="button" class="btn-print" style="background:#edf2f7; color:#2d3748; flex:1;" onclick="setMobileTab('form')">
+    <div class="mobile-action-bar" id="mobActionBar" style="display:none;">
+        <button type="button" class="btn-mob-edit" onclick="setMobileTab('form')">
             ✏️ फारम सम्पादन
         </button>
-        <button type="button" class="btn-print btn-quick-print" style="flex:1;" onclick="quickPrintOnly()">
+        <button type="button" class="btn-mob-print" onclick="quickPrintOnly()" style="background: #4a5568;">
             🖨️ प्रिन्ट मात्र
         </button>
-        <button type="button" class="btn-print btn-save-print" style="flex:1.2;" onclick="printAndSaveSystem()">
+        <button type="button" class="btn-mob-print" onclick="printAndSaveSystem()" style="background: #2b6cb0;">
             💾 सेभ र प्रिन्ट
         </button>
     </div>
 
-    <!-- ══════════════ ABHILEKH ARCHIVE MODAL ══════════════ -->
-    <div class="modal-overlay" id="abhilekhModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="toggleModal(false)">×</button>
-            <h3 class="modal-title">🗄️ योजनाको बैंक खाता सिफारिस अभिलेख सूची</h3>
-            <div style="margin-bottom: 14px;">
-                <input type="text" id="searchField" class="form-control" placeholder="🔍 योजना, समिति, अध्यक्षको नाम वा चलानी नं. टाइप गरी खोज्नुहोस्..." oninput="renderDatabaseTable()">
-            </div>
-            <div style="overflow-x: auto;">
-                <table class="db-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 7%;">क्र.सं.</th>
-                            <th style="width: 38%;">योजना तथा उपभोक्ता समिति</th>
-                            <th style="width: 18%;">प्रकार</th>
-                            <th style="width: 18%;">मिति</th>
-                            <th style="width: 19%; text-align: center;">कार्य</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dbTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase & Core Scripts -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -1203,9 +560,8 @@
         }
     </script>
     <script src="nepal-sambat-tithi.js"></script>
-    <script src="ward1-yojana-data.js"></script>
-    <script src="sifarish-save-service.js?v=1.0"></script>
     <script src="font-settings.js?v=2.1"></script>
+    <script src="sifarish-save-service.js?v=1.0"></script>
 
     <script>
         // Check Auth
@@ -1221,112 +577,305 @@
             messagingSenderId: "905617778132",
             appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
         };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const app = firebase.initializeApp(firebaseConfig);
+        const db  = firebase.firestore();
 
-        // Bank Directory
         const bankData = {
-            'saptakoshi': {
-                name: 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'krishi': {
-                name: 'श्री कृषि विकास बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'nic': {
-                name: 'श्री एन.आई.सी. एशिया बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'prime': {
-                name: 'श्री प्राईम कमर्सियल बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'nabil': {
-                name: 'श्री नबिल बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'laxmi': {
-                name: 'श्री लक्ष्मी सनराइज बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'siddhartha': {
-                name: 'श्री सिद्धार्थ बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'global': {
-                name: 'श्री ग्लोबल आइएमई बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            },
-            'excel': {
-                name: 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड,',
-                branch: 'गौरादह शाखा, झापा ।'
-            }
+            'saptakoshi': { line1: 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह झापा ।' },
+            'krishi': { line1: 'श्री कृषि विकास बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'nic': { line1: 'श्री एन.आई.सी. एशिया बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'prime': { line1: 'श्री प्राईम कमर्सियल बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'nabil': { line1: 'श्री नबिल बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'laxmi': { line1: 'श्री लक्ष्मी सनराइज बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'siddhartha': { line1: 'श्री सिद्धार्थ बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'global': { line1: 'श्री ग्लोबल आइएमई बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' },
+            'excel': { line1: 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड,', line2: 'गौरादह शाखा, गौरादह, झापा ।' }
         };
 
-        // Numbers & Words Helpers
-        function toNepaliDigit(num) {
-            if (num === null || num === undefined) return '';
-            const nepDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
-            return String(num).replace(/[0-9]/g, d => nepDigits[parseInt(d, 10)]);
-        }
-
+        // Convert Nepali Unicode digits (०-९) to ASCII digits (0-9)
         function nepaliDigitsToAscii(str) {
-            if (!str) return '';
-            const nepaliDigits = { '०': '0', '१': '1', '२': '2', '३': '3', '४': '4', '५': '5', '६': '6', '७': '7', '८': '8', '९': '9' };
-            return str.replace(/[०-९]/g, d => nepaliDigits[d]);
+            const nepaliDigits = '०१२३४५६७८९';
+            return str.replace(/[०-९]/g, function(ch) {
+                return nepaliDigits.indexOf(ch).toString();
+            });
         }
 
+        // Number to Nepali Words Converter (handles both Nepali & English digits)
         function convertNumberToNepaliWords(numberStr) {
-            const cleanStr = nepaliDigitsToAscii(numberStr.replace(/,/g, '').replace(/\/-/g, '').trim());
-            const num = parseInt(cleanStr, 10);
+            if (!numberStr) return '';
+            // First convert any Nepali digits to ASCII
+            let ascii = nepaliDigitsToAscii(numberStr);
+            // Remove all non-digit characters (commas, /-, spaces, etc.)
+            let clean = ascii.replace(/[^0-9]/g, '');
+            let num = parseInt(clean, 10);
             if (isNaN(num) || num <= 0) return '';
 
-            const ones = ["", "एक", "दुई", "तीन", "चार", "पाँच", "छ", "सात", "आठ", "नौ", "दश", "एघार", "बाह्र", "तेह्र", "चौध", "पन्ध्र", "सोह्र", "सत्र", "अठार", "उन्नाइस", "बीस", "एक्काइस", "बाइस", "तेइस", "चौविस", "पच्चिस", "छब्बीस", "सत्ताइस", "अट्ठाइस", "उनन्तीस", "तीस", "एकतीस", "बत्तीस", "तेत्तीस", "चौंतीस", "पैंतीस", "छत्तीस", "सरस्वतीस", "अड्तीस", "उनन्चालीस", "चालीस", "एकचालीस", "बयालीस", "त्रिचालीस", "चवालीस", "पैंतालीस", "छयालीस", "सच्चालीस", "अठचालीस", "उनपचास", "पचास", "एकाउन्न", "बाउन्न", "त्रिपन्न", "चउन्न", "पचपन्न", "छपन्न", "सत्ताउन्न", "अठ्ठाउन्न", "उनन्साठी", "साठी", "एकसठ्ठी", "बासठ्ठी", "त्रिसठ्ठी", "चौंसठ्ठी", "पैंसठ्ठी", "छयसठ्ठी", "सत्सठ्ठी", "अठसठ्ठी", "उनन्सत्तरी", "सत्तरी", "एकहत्तर", "बहत्तर", "त्रिहत्तर", "चौहत्तर", "पचहत्तर", "छयहत्तर", "सतहत्तर", "अठहत्तर", "उनसी", "अस्सी", "एकासी", "बयासी", "त्रियासी", "चौरासी", "पचासी", "छयासी", "सतासी", "अठासी", "उनान्नब्बे", "नब्बे", "एकानब्बे", "बयानब्बे", "त्रियानब्बे", "चौरानब्बे", "पन्चानब्बे", "छयानब्बे", "सन्तानब्बे", "अठानब्बे", "उनन्सय"];
+            const ones = ['', 'एक', 'दुई', 'तीन', 'चार', 'पाँच', 'छ', 'सात', 'आठ', 'नौ', 'दस',
+                'एघार', 'बाह्र', 'तेह्र', 'चौध', 'पन्ध्र', 'सोह्र', 'सत्र', 'अठार', 'उन्नाइस', 'बीस',
+                'एकाइस', 'बाइस', 'त्रिइस', 'चौबिस', 'पच्चिस', 'छब्बिस', 'सत्ताइस', 'अठ्ठाइस', 'उनन्तीस', 'तीस',
+                'एकतीस', 'बत्तीस', 'तेत्तीस', 'चौत्तीस', 'पैंतीस', 'छत्तीस', 'सरतीस', 'अड्तीस', 'उनन्चालीस', 'चालीस',
+                'एकचालीस', 'बयालीस', 'त्रिचालीस', 'चौवालीस', 'पैंतालीस', 'छयालीस', 'सच्चालीस', 'अढ्चालीस', 'उनन्पचास', 'पचास',
+                'एकान्न', 'बाउन्न', 'त्रिपन्न', 'चौपन्न', 'पचपन्न', 'छप्पन्न', 'सन्तान्न', 'अन्ठाउन्न', 'उनन्साठ्ठी', 'साठ्ठी',
+                'एकसट्ठी', 'ब्यासट्ठी', 'त्रिसट्ठी', 'चौसट्ठी', 'पैंसट्ठी', 'छ्यासट्ठी', 'सत्सट्ठी', 'अड्सट्ठी', 'उनन्सत्तरी', 'सत्तरी',
+                'एकहत्तर', 'बहत्तर', 'त्रिहत्तर', 'चौहत्तर', 'पचहत्तर', 'छ्याहत्तर', 'सतहत्तर', 'अठहत्तर', 'उनासी', 'असी',
+                'एकासी', 'बयासी', 'त्रियासी', 'चौरासी', 'पचासी', 'छयासी', 'सत्तासी', 'अठासी', 'उनान्नब्बे', 'नब्बे',
+                'एकान्नब्बे', 'बयान्नब्बे', 'त्रियान्नब्बे', 'चौरान्नब्बे', 'पञ्चान्नब्बे', 'छयान्नब्बे', 'सन्तान्नब्बे', 'अन्ठान्नब्बे', 'उनान्सय'];
 
             function twoDigits(n) {
-                if (n < 100) return ones[n] || "";
-                return "";
+                if (n <= 0) return '';
+                return ones[n] || '';
             }
 
-            let result = "";
-            let remaining = num;
+            let words = [];
 
-            if (remaining >= 10000000) {
-                const crore = Math.floor(remaining / 10000000);
-                result += twoDigits(crore) + " करोड ";
-                remaining %= 10000000;
-            }
-            if (remaining >= 100000) {
-                const lakh = Math.floor(remaining / 100000);
-                result += twoDigits(lakh) + " लाख ";
-                remaining %= 100000;
-            }
-            if (remaining >= 1000) {
-                const thousand = Math.floor(remaining / 1000);
-                result += twoDigits(thousand) + " हजार ";
-                remaining %= 1000;
-            }
-            if (remaining >= 100) {
-                const hundred = Math.floor(remaining / 100);
-                result += ones[hundred] + " सय ";
-                remaining %= 100;
-            }
-            if (remaining > 0) {
-                result += twoDigits(remaining);
-            }
-            return result.trim() + " रुपैयाँ मात्र";
+            // Handle अर्ब (arab = 1,00,00,00,000)
+            let arab = Math.floor(num / 1000000000);
+            num %= 1000000000;
+            if (arab > 0) words.push(twoDigits(arab) + ' अर्ब');
+
+            let crore = Math.floor(num / 10000000);
+            num %= 10000000;
+            if (crore > 0) words.push(twoDigits(crore) + ' करोड');
+
+            let lakh = Math.floor(num / 100000);
+            num %= 100000;
+            if (lakh > 0) words.push(twoDigits(lakh) + ' लाख');
+
+            let thousand = Math.floor(num / 1000);
+            num %= 1000;
+            if (thousand > 0) words.push(twoDigits(thousand) + ' हजार');
+
+            let hundred = Math.floor(num / 100);
+            num %= 100;
+            if (hundred > 0) words.push(twoDigits(hundred) + ' सय');
+
+            if (num > 0) words.push(twoDigits(num));
+
+            return words.join(' ');
         }
 
         function autoConvertAmtToWords() {
-            const amtVal = document.getElementById('inBudgetAmt').value;
-            const words = convertNumberToNepaliWords(amtVal);
+            const amtStr = document.getElementById('inBudgetAmt').value;
+            const words = convertNumberToNepaliWords(amtStr);
             if (words) {
-                document.getElementById('inBudgetWords').value = words;
+                document.getElementById('inBudgetWords').value = words + ' मात्र';
+            } else {
+                document.getElementById('inBudgetWords').value = '';
             }
         }
 
-        // ── Fast Mode Switcher (OPEN vs CLOSE) ──
+        // Bank Accordion Toggle & Selection Logic
+        function toggleBankAccordion() {
+            const content = document.getElementById('bankAccordionContent');
+            const icon = document.getElementById('bankAccordionIcon');
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                icon.innerText = '▲';
+            } else {
+                content.style.display = 'none';
+                icon.innerText = '▼';
+            }
+        }
+
+        function selectBankOption(key, displayText) {
+            document.getElementById('selectedBankKey').value = key;
+            document.getElementById('lblSelectedBankText').innerText = displayText;
+
+            // Highlight selected item in scroll list
+            document.querySelectorAll('.bank-scroll-item').forEach(el => el.classList.remove('selected'));
+            if (typeof event !== 'undefined' && event && event.currentTarget && event.currentTarget.classList) {
+                event.currentTarget.classList.add('selected');
+            } else {
+                const targetItem = document.querySelector(`.bank-scroll-item[onclick*="'${key}'"]`);
+                if (targetItem) targetItem.classList.add('selected');
+            }
+
+            // Collapse Accordion
+            document.getElementById('bankAccordionContent').style.display = 'none';
+            document.getElementById('bankAccordionIcon').innerText = '▼';
+
+            // Custom Bank Box toggle
+            const isCustom = (key === 'CUSTOM');
+            document.getElementById('customBankBox').style.display = isCustom ? 'grid' : 'none';
+
+            updateDoc();
+        }
+
+        function onBudgetTypeRadioChange(radio) {
+            document.querySelectorAll('.budget-radio-card').forEach(card => card.classList.remove('active'));
+            radio.closest('.budget-radio-card').classList.add('active');
+
+            const isCustom = radio.value === 'CUSTOM';
+            document.getElementById('inBudgetTypeCustom').style.display = isCustom ? 'block' : 'none';
+            updateDoc();
+        }
+
+        function toggleCustomSign() {
+            const val = document.getElementById('inSignAuthority').value;
+            document.getElementById('customSignBox').style.display = val === 'CUSTOM' ? 'grid' : 'none';
+        }
+
+        function adjustSignaturePosition(val) {
+            document.getElementById('sigSpacing').style.height = val + 'px';
+            document.getElementById('marginVal').innerText = val + ' px';
+        }
+
+        function toNepaliDigit(num) {
+            const digits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+            return String(num).replace(/[0-9]/g, w => digits[parseInt(w)]);
+        }
+
+        function showBadge(success, message) {
+            const badge = document.getElementById('parseBadge');
+            if (badge) {
+                badge.style.display = 'inline-flex';
+                badge.style.backgroundColor = success ? '#c6f6d5' : '#fed7d7';
+                badge.style.color = success ? '#22543d' : '#9b2c2c';
+                badge.innerText = message;
+            }
+        }
+
+        function clearBadge() {
+            const badge = document.getElementById('parseBadge');
+            if (badge) badge.style.display = 'none';
+        }
+
+        function processYojanaPastedContent() {
+            const pastedText = document.getElementById('pasteTextarea').value;
+            if (!pastedText.trim()) {
+                clearBadge();
+                return;
+            }
+
+            let parsedData = {
+                budgetType: '',   // प्रदेश स्तरीय, नगर स्तरीय, वडा स्तरीय, or CUSTOM
+                projectName: '',  // जनता माध्यमिक विद्यालयमा फर्निचर खरिद तथा रंगरोगन
+                amountNum: '',    // ९,००,०००/-
+                amountWords: '',  // नौ लाख रुपैयाँ मात्र
+                committeeName: '',// जनता माध्यमिक विद्यालयमा फर्निचर खरिद तथा रंगरोगन निर्माण उपभोक्ता समिति, गौरादह -१ झापा
+                chairman: '',     // बुद्धिमान कार्की
+                secretary: '',    // भानुभक्त घिमिरे
+                treasurer: ''     // मिना राई
+            };
+
+            // A. Budget Type / Plan Level Extraction
+            if (/(?:कोशी\s*)?प्रदेश\s*(?:सरकार|स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'प्रदेश स्तरीय';
+            } else if (/नगर\s*(?:पालिका|स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'नगर स्तरीय';
+            } else if (/वडा\s*(?:स्तर|स्तरीय)/i.test(pastedText)) {
+                parsedData.budgetType = 'वडा स्तरीय';
+            }
+
+            // B. Project Name (योजनाको शिर्षक)
+            const quoteMatch = pastedText.match(/[“"']([^”"']+?)[”"']/);
+            if (quoteMatch) {
+                parsedData.projectName = quoteMatch[1].trim();
+            } else {
+                const titleMatch = pastedText.match(/([^\n\r]+?)\s*शिर्षकमा/i);
+                if (titleMatch) {
+                    parsedData.projectName = titleMatch[1].replace(/.*?अन्तर्गत\s*/, '').trim();
+                }
+            }
+
+            // C. Amount Figures (विनियोजन रकम रू.)
+            const amtMatch = pastedText.match(/(?:रकम\s*रू\.?|रु\.?)\s*([०-९0-9,]+(?:\/\-|\.-)?)/i);
+            if (amtMatch) {
+                parsedData.amountNum = amtMatch[1].trim();
+                if (!parsedData.amountNum.endsWith('/-') && !parsedData.amountNum.endsWith('.-')) {
+                    parsedData.amountNum += '/-';
+                }
+            }
+
+            // D. Amount Words (रकम अक्षरेपी)
+            const wordsMatch = pastedText.match(/\(अक्षरेपी\s*([^)]+)\)/i);
+            if (wordsMatch) {
+                parsedData.amountWords = wordsMatch[1].trim();
+            }
+
+            // E. Committee Name (उपभोक्ता समितिको नाम)
+            const commMatch = pastedText.match(/गठित\s+([^\n\r]+?उपभोक्ता\s*समिति[^\n\r,]*?(?:,\s*[^\n\r,]+)?)\s+सँग/i) ||
+                              pastedText.match(/([^\n\r]*?उपभोक्ता\s*समिति[^\n\r,]*?(?:,\s*[^\n\r,]+)?)\s+सँग/i) ||
+                              pastedText.match(/([^\n\r]*?उपभोक्ता\s*समिति[^\n\r]*)/i);
+            if (commMatch) {
+                parsedData.committeeName = commMatch[1].replace(/.*?गठित\s*/, '').trim();
+            }
+
+            // F. Committee Officials (अध्यक्ष, सचिव, कोषाध्यक्ष)
+            const lines = pastedText.split(/\r?\n/);
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const chairM = trimmed.match(/(?:•|\*|-)?\s*अध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
+                if (chairM && !parsedData.chairman) parsedData.chairman = chairM[1].trim();
+
+                const secM = trimmed.match(/(?:•|\*|-)?\s*सचिव\s*:\s*([^\n\r•\*]+)/i);
+                if (secM && !parsedData.secretary) parsedData.secretary = secM[1].trim();
+
+                const treasM = trimmed.match(/(?:•|\*|-)?\s*कोषाध्यक्ष\s*:\s*([^\n\r•\*]+)/i);
+                if (treasM && !parsedData.treasurer) parsedData.treasurer = treasM[1].trim();
+            });
+
+            // Populate Form Inputs
+            let extractCount = 0;
+
+            // 1. Budget Type Radio
+            if (parsedData.budgetType) {
+                const radios = document.querySelectorAll('input[name="budgetTypeRadio"]');
+                radios.forEach(r => {
+                    if (r.value === parsedData.budgetType) {
+                        r.checked = true;
+                        onBudgetTypeRadioChange(r);
+                    }
+                });
+                extractCount++;
+            }
+
+            // 2. Project Name
+            if (parsedData.projectName) {
+                document.getElementById('inProjectName').value = parsedData.projectName;
+                extractCount++;
+            }
+
+            // 3. Amount
+            if (parsedData.amountNum) {
+                document.getElementById('inBudgetAmt').value = parsedData.amountNum;
+                extractCount++;
+                if (parsedData.amountWords) {
+                    document.getElementById('inBudgetWords').value = parsedData.amountWords;
+                } else {
+                    autoConvertAmtToWords();
+                }
+            }
+
+            // 4. Committee Name
+            if (parsedData.committeeName) {
+                document.getElementById('inCommitteeName').value = parsedData.committeeName;
+                extractCount++;
+            }
+
+            // 5. Officials
+            if (parsedData.chairman) {
+                document.getElementById('inChairman').value = parsedData.chairman;
+                extractCount++;
+            }
+            if (parsedData.secretary) {
+                document.getElementById('inSecretary').value = parsedData.secretary;
+                extractCount++;
+            }
+            if (parsedData.treasurer) {
+                document.getElementById('inTreasurer').value = parsedData.treasurer;
+                extractCount++;
+            }
+
+            if (extractCount > 0) {
+                showBadge(true, `✅ ${toNepaliDigit(extractCount)} वटा विवरणहरू (बजेट प्रकार, योजनाको नाम, रकम, समिति र पदहरू) छानिए (Parsed)।`);
+            } else {
+                showBadge(false, `❌ मिल्ने विवरण फेला परेन। ढाँचा जाँच गर्नुहोस्।`);
+            }
+
+            updateDoc();
+        }
+
         function setMode(mode) {
             const btnKholne = document.getElementById('btnKholne');
             const btnBanda  = document.getElementById('btnBanda');
@@ -1342,305 +891,137 @@
 
             document.getElementById('currentMode').value = mode;
 
-            // Toggle mode-specific form sections
-            const secBudget = document.getElementById('secBudgetAmounts');
-            const secClose = document.getElementById('secCloseAccount');
-            const secMandate = document.getElementById('secAccountMandate');
+            document.getElementById('secOpenAccount').style.display = isClosing ? 'none' : 'block';
+            document.getElementById('secCloseAccount').style.display = isClosing ? 'block' : 'none';
 
-            if (secBudget) secBudget.style.display = isClosing ? 'none' : 'grid';
-            if (secClose) secClose.style.display = isClosing ? 'block' : 'none';
-            if (secMandate) secMandate.style.display = isClosing ? 'none' : 'block';
-
-            const titleSpan = document.getElementById('formMainTitle');
-            if (titleSpan) {
-                titleSpan.innerText = isClosing
-                    ? "🔒 योजनाको बैंक खाता बन्द सिफारिस"
-                    : "📂 योजनाको बैंक खाता सञ्चालन सिफारिस";
-            }
+            document.getElementById('formMainTitle').innerText = isClosing 
+                ? "🔒 योजनाको बैंक खाता बन्द सिफारिस" 
+                : "📂 योजनाको बैंक खाता सञ्चालन सिफारिस";
 
             updateDoc();
         }
 
         function getSelectedAY() {
-            const checked = document.querySelector('input[name="ayRadio"]:checked');
-            return checked ? checked.value : '२०८३/०८४';
+            const radios = document.querySelectorAll('input[name="ayRadio"]');
+            for (const r of radios) { if (r.checked) return r.value; }
+            return '२०८३/०८४';
         }
 
-        function onBudgetTypeRadioChange(radio) {
-            const customInput = document.getElementById('inBudgetTypeCustom');
-            if (customInput) {
-                customInput.style.display = (radio.value === 'CUSTOM') ? 'block' : 'none';
-            }
-            updateDoc();
-        }
-
-        function onSelectBankChange(key) {
-            const customBox = document.getElementById('secCustomBank');
-            if (customBox) {
-                customBox.style.display = (key === 'CUSTOM') ? 'block' : 'none';
-            }
-            updateDoc();
-        }
-
-        function onAccountConditionChange(val) {
-            const customIn = document.getElementById('inCustomAccountCondition');
-            if (customIn) {
-                customIn.style.display = (val === 'CUSTOM') ? 'block' : 'none';
-            }
-            updateDoc();
-        }
-
-        function toggleCustomSign() {
-            const val = document.getElementById('inSignAuthority').value;
-            const box = document.getElementById('customSignBox');
-            if (box) {
-                box.style.display = (val === 'CUSTOM') ? 'grid' : 'none';
-            }
-        }
-
-        function adjustSignaturePosition(value) {
-            document.getElementById('marginVal').innerText = toNepaliDigit(value) + " px";
-            const footer = document.getElementById('docFooterSection');
-            if (footer) footer.style.marginTop = value + "px";
-        }
-
-        function toggleHelperAccordion(id) {
-            const el = document.getElementById(id);
-            const icon = document.getElementById('icon' + id.charAt(0).toUpperCase() + id.slice(1));
-            if (!el) return;
-            const isHidden = (el.style.display === 'none');
-            el.style.display = isHidden ? 'block' : 'none';
-            if (icon) icon.innerText = isHidden ? '▴' : '▾';
-        }
-
-        // ── Approved Projects Selection & Autocomplete ──
-        function populateApprovedProjectsUI() {
-            const sel = document.getElementById('selectApprovedProject');
-            const dl = document.getElementById('listApprovedProjectNames');
-            if (typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
-
-            if (sel) {
-                sel.innerHTML = '<option value="">-- वडा नं. १ का स्वीकृत ४८ योजनाहरू मध्येबाट छान्नुहोस् --</option>';
-                WARD1_APPROVED_PROJECTS.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.id;
-                    opt.innerText = `${p.sn}. ${p.name} (रू. ${p.budgetNep}) - ${p.sector}`;
-                    sel.appendChild(opt);
-                });
-            }
-
-            if (dl) {
-                dl.innerHTML = '';
-                WARD1_APPROVED_PROJECTS.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.name;
-                    opt.label = `रू. ${p.budgetNep} (${p.sector})`;
-                    dl.appendChild(opt);
-                });
-            }
-        }
-
-        function onSelectApprovedProject(planId) {
-            if (!planId || typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
-            const p = WARD1_APPROVED_PROJECTS.find(item => item.id === planId);
-            if (!p) return;
-
-            document.getElementById('inProjectName').value = p.name;
-            document.getElementById('inBudgetAmt').value = p.budgetNep || p.budget;
-            autoConvertAmtToWords();
-
-            const commEl = document.getElementById('inCommitteeName');
-            if (commEl && (!commEl.value || commEl.value.trim() === '')) {
-                commEl.value = `${p.name} उपभोक्ता समिति`;
-            }
-
-            updateDoc();
-        }
-
-        function onProjectNameInput(val) {
-            if (typeof WARD1_APPROVED_PROJECTS === 'undefined') return;
-            const trimmed = (val || '').trim();
-            const matched = WARD1_APPROVED_PROJECTS.find(p => p.name === trimmed);
-            if (matched) {
-                const bAmt = document.getElementById('inBudgetAmt');
-                if (bAmt && (!bAmt.value || bAmt.value.trim() === '')) {
-                    bAmt.value = matched.budgetNep || matched.budget;
-                    autoConvertAmtToWords();
-                }
-                const commEl = document.getElementById('inCommitteeName');
-                if (commEl && (!commEl.value || commEl.value.trim() === '')) {
-                    commEl.value = `${matched.name} उपभोक्ता समिति`;
-                }
-            }
-        }
-
-        // ── Main Document Reactive Generator ──
         function updateDoc() {
             const mode = document.getElementById('currentMode').value;
             const isClosing = (mode === 'CLOSE_ACCOUNT');
 
-            // 1. Meta / Letterhead Header
+            // Header Elements
             const ay = getSelectedAY();
             const chalani = document.getElementById('inChalani').value.trim();
             document.getElementById('lblAY').innerText = ay;
             document.getElementById('lblChalani').innerText = chalani || '';
-            document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '२०८३/..../....';
+            document.getElementById('lblMiti').innerText = document.getElementById('inMiti').value.trim() || '..............';
+            const inNSVal_yojana_b = document.getElementById('inNepalSamvat').value.trim() || '';
+            document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint) ? window.NepalSambat.formatPrint(inNSVal_yojana_b, document.getElementById('inMiti')?.value) : inNSVal_yojana_b;
+            
+            // Fiscal Year for body text
+            const ayText = ay || '२०८३/०८४';
 
-            const inNSVal = document.getElementById('inNepalSamvat').value.trim() || '';
-            document.getElementById('lblNepalSamvat').innerText = (window.NepalSambat && window.NepalSambat.formatPrint)
-                ? window.NepalSambat.formatPrint(inNSVal, document.getElementById('inMiti')?.value)
-                : (inNSVal || '११४६');
+            // Bank Receiver Logic (2-line display)
+            const bankVal = document.getElementById('selectedBankKey').value;
+
+            if (bankVal === 'CUSTOM') {
+                document.getElementById('lblReceiverLine1').innerText = document.getElementById('inCustomBankName').value.trim() || '...................................';
+                document.getElementById('lblReceiverLine2').innerText = (document.getElementById('inCustomBankOffice').value.trim() || '............') + ', ' + (document.getElementById('inCustomBankLocation').value.trim() || '............');
+            } else {
+                const b = bankData[bankVal];
+                if (b) {
+                    document.getElementById('lblReceiverLine1').innerText = b.line1;
+                    document.getElementById('lblReceiverLine2').innerText = b.line2;
+                }
+            }
+
+            // Common Committee Fields
+            const committeeName = document.getElementById('inCommitteeName').value.trim() || '............................';
+            
+            const pChair = document.getElementById('inChairman').value.trim();
+            const pSec = document.getElementById('inSecretary').value.trim();
+            const pTreas = document.getElementById('inTreasurer').value.trim();
+
+            let persons = [];
+            if (pChair) persons.push(`अध्यक्ष: ${pChair}`);
+            if (pSec) persons.push(`सचिव: ${pSec}`);
+            if (pTreas) persons.push(`कोषाध्यक्ष: ${pTreas}`);
+
+            let personsText = "";
+            let personCountWord = "तीन";
+            
+            if (persons.length > 0) {
+                if (persons.length === 1) {
+                    personsText = persons[0];
+                    personCountWord = "एक";
+                } else if (persons.length === 2) {
+                    personsText = persons.join(" तथा ");
+                    personCountWord = "दुई";
+                } else {
+                    const last = persons.pop();
+                    personsText = persons.join(", ") + " तथा " + last;
+                    personCountWord = "तीन";
+                }
+            } else {
+                personsText = "अध्यक्ष: .........., सचिव: .................... तथा कोषाध्यक्ष: .......................";
+                personCountWord = "तीन";
+            }
+
+            const bodyTextEl = document.getElementById('bodyText');
 
             const loggedWard = localStorage.getItem('sifarish_ward') || '1';
             const wardNep = toNepaliDigit(loggedWard);
-            const ayText = ay || '२०८३/०८४';
-
-            // 2. Bank Receiver
-            const bankKey = document.getElementById('selectBank').value;
-            let bankNameText = "", bankBranchText = "";
-
-            if (bankKey === 'CUSTOM') {
-                bankNameText = (document.getElementById('inCustomBankName').value.trim() || '...........................................') + ',';
-                const off = document.getElementById('inCustomBankOffice').value.trim() || '................';
-                const loc = document.getElementById('inCustomBankLocation').value.trim() || 'झापा';
-                bankBranchText = `${off}, ${loc} ।`;
-            } else {
-                const b = bankData[bankKey] || bankData['saptakoshi'];
-                bankNameText = b.name;
-                bankBranchText = b.branch;
-            }
-
-            document.getElementById('lblReceiverLine1').innerText = bankNameText;
-            document.getElementById('lblReceiverLine2').innerText = bankBranchText;
-
-            // 3. Subject Line
-            const lblSubject = document.getElementById('lblSubject');
-            if (lblSubject) {
-                lblSubject.innerText = isClosing ? "बैंक खाता बन्द सम्बन्धमा" : "बैंक खाता सञ्चालन सम्बन्धमा";
-            }
-
-            // 4. Common Committee & Operators Data
-            const projName = document.getElementById('inProjectName').value.trim() || '...................................................';
-            const committeeName = document.getElementById('inCommitteeName').value.trim() || '...................................................';
-            const decisionMiti = document.getElementById('inDecisionMiti').value.trim();
-            const decisionPhrase = decisionMiti ? `उपभोक्ता समितिको मिति ${toNepaliDigit(decisionMiti)} को निर्णयानुसार ` : '';
-
-            const pChair = document.getElementById('inChairman').value.trim();
-            const chairCit = document.getElementById('inChairmanCit').value.trim();
-
-            const pSec = document.getElementById('inSecretary').value.trim();
-            const secCit = document.getElementById('inSecretaryCit').value.trim();
-
-            const pTreas = document.getElementById('inTreasurer').value.trim();
-            const treasCit = document.getElementById('inTreasurerCit').value.trim();
-
-            const bodyEl = document.getElementById('bodyText');
 
             if (isClosing) {
-                // ── CLOSE ACCOUNT RECOMMENDATION ──
-                const accountNo = document.getElementById('inAccountNo').value.trim() || '........................';
-
-                bodyEl.innerHTML = `
+                // CLOSING TEXT
+                document.getElementById('lblSubject').innerText = "बैंक खाता बन्द गरिदिने सम्बन्धमा";
+                
+                const accNo = document.getElementById('inAccountNo').value.trim() || '...............';
+                const cName = committeeName.trim();
+                const commWithKa = cName.endsWith('का') ? cName : (cName + 'का');
+                
+                bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. ${wardNep} को चालू आर्थिक वर्ष ${ayText} को स्वीकृत योजना तथा कार्यक्रम अन्तर्गत <strong>“${projName}”</strong> को निर्माण कार्य सम्पन्न भई अन्तिम भुक्तानी तथा फरफारक समेत भइसकेको हुँदा उक्त योजना सञ्चालनार्थ <strong>${committeeName}</strong> का पदाधिकारीहरूको नाममा तहाँ बैंकमा रहेको खाता नं. <strong>${accountNo}</strong> को बैंक खाता नियमानुसार बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
-                    </div>
-
-                    <div class="tapsil-container">
-                        <div class="tapsil-title">तपसिल:</div>
-                        <ul style="list-style-type: disc; margin-left: 24px; font-size: 11.5pt; line-height: 1.6; margin-top: 4px;">
-                            <li>उपभोक्ता समितिको नाम: <strong>${committeeName}</strong></li>
-                            <li>योजनाको नाम: <strong>${projName}</strong></li>
-                            <li>बन्द गर्नुपर्ने बैंक खाता नं.: <strong>${accountNo}</strong></li>
-                            <li>अध्यक्षको नाम: <strong>${pChair || '-'}</strong> ${chairCit ? '(' + chairCit + ')' : ''}</li>
-                            <li>सचिवको नाम: <strong>${pSec || '-'}</strong> ${secCit ? '(' + secCit + ')' : ''}</li>
-                            <li>कोषाध्यक्षको नाम: <strong>${pTreas || '-'}</strong> ${treasCit ? '(' + treasCit + ')' : ''}</li>
-                        </ul>
+                        प्रस्तुत विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.${wardNep} स्थित ${commWithKa} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकमा सञ्चालनमा रहेको खाता नं. ${accNo} को बैंक खाता हाल उक्त योजना सम्पन्न भईसकेको हुँदा तहाँ कार्यालयको नियमानुसार उक्त बैंक खाता बन्द गरिदिनुहुन सिफारिसका साथ अनुरोध छ ।
                     </div>
                 `;
+
             } else {
-                // ── OPEN / OPERATE ACCOUNT RECOMMENDATION ──
-                let budgetType = 'वडा स्तरीय';
-                const selectedRadio = document.querySelector('input[name="budgetTypeRadio"]:checked');
-                if (selectedRadio) {
-                    budgetType = (selectedRadio.value === 'CUSTOM')
-                        ? (document.getElementById('inBudgetTypeCustom').value.trim() || 'वडा स्तरीय')
-                        : selectedRadio.value;
+                // OPENING TEXT
+                document.getElementById('lblSubject').innerText = "बैंक खाता सञ्चालन सम्बन्धमा";
+
+                let budgetType = "";
+                const selectedBudgetTypeRadio = document.querySelector('input[name="budgetTypeRadio"]:checked');
+                const bTypeVal = selectedBudgetTypeRadio ? selectedBudgetTypeRadio.value : 'वडा स्तरीय';
+
+                if (bTypeVal === 'CUSTOM') {
+                    budgetType = document.getElementById('inBudgetTypeCustom').value.trim() || '.........';
+                } else {
+                    budgetType = bTypeVal;
                 }
 
-                const amtNum = document.getElementById('inBudgetAmt').value.trim() || '................/-';
-                const amtWords = document.getElementById('inBudgetWords').value.trim() || '................................';
+                const projName = document.getElementById('inProjectName').value.trim() || '............';
+                const amtNum = document.getElementById('inBudgetAmt').value.trim() || '..........';
+                const amtWords = document.getElementById('inBudgetWords').value.trim() || '..........';
 
-                // Account Condition text
-                const condKey = document.getElementById('selAccountCondition').value;
-                let conditionText = "अध्यक्षको अनिवार्य र सचिव वा कोषाध्यक्ष कुनै १ जना गरी कम्तीमा २ (दुई) जनाको संयुक्त दस्तखतबाट खाता सञ्चालन हुनेछ ।";
-                if (condKey === 'MANDATE_B') {
-                    conditionText = "अध्यक्ष, सचिव वा कोषाध्यक्ष मध्ये कुनै २ (दुई) जनाको संयुक्त दस्तखतबाट खाता सञ्चालन हुनेछ ।";
-                } else if (condKey === 'MANDATE_C') {
-                    conditionText = "अध्यक्ष र कोषाध्यक्षको संयुक्त दस्तखतबाट खाता सञ्चालन हुनेछ ।";
-                } else if (condKey === 'CUSTOM') {
-                    conditionText = document.getElementById('inCustomAccountCondition').value.trim() || conditionText;
-                }
-
-                bodyEl.innerHTML = `
+                bodyTextEl.innerHTML = `
                     <div class="letter-body-para">
-                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं. ${wardNep} को चालू आर्थिक वर्ष ${ayText} को स्वीकृत ${budgetType} योजना तथा कार्यक्रम अन्तर्गत <strong>“${projName}”</strong> (विनियोजित रकम रू. <strong>${toNepaliDigit(amtNum)}</strong> अक्षरेपी <strong>${amtWords}</strong>) योजना कार्यान्वयन गर्नको लागि गठित <strong>${committeeName}</strong> का देहाय बमोजिमका पदाधिकारीहरूको संयुक्त दस्तखतबाट बैंक खाता सञ्चालन गर्न ${decisionPhrase}सिफारिस माग भई आएको हुँदा तहाँ बैंकको नियमानुसार खाता खोली सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध गरिन्छ ।
-                    </div>
-
-                    <div class="tapsil-container">
-                        <div class="tapsil-title">तपसिल (खाता सञ्चालक पदाधिकारीहरूको विवरण):</div>
-                        <table class="operator-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 8%;">क्र.सं.</th>
-                                    <th style="width: 20%;">पद</th>
-                                    <th style="width: 34%;">नाम, थर</th>
-                                    <th style="width: 22%;">नागरिकता / फोन नं.</th>
-                                    <th style="width: 16%;">दस्तखत नमूना</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="text-align: center;">१</td>
-                                    <td><strong>अध्यक्ष</strong></td>
-                                    <td><strong>${pChair || '................................'}</strong></td>
-                                    <td>${chairCit ? toNepaliDigit(chairCit) : '-'}</td>
-                                    <td style="height: 36px;"></td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">२</td>
-                                    <td><strong>सचिव</strong></td>
-                                    <td><strong>${pSec || '................................'}</strong></td>
-                                    <td>${secCit ? toNepaliDigit(secCit) : '-'}</td>
-                                    <td style="height: 36px;"></td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: center;">३</td>
-                                    <td><strong>कोषाध्यक्ष</strong></td>
-                                    <td><strong>${pTreas || '................................'}</strong></td>
-                                    <td>${treasCit ? toNepaliDigit(treasCit) : '-'}</td>
-                                    <td style="height: 36px;"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="account-condition-box">
-                            <strong>खाता सञ्चालन सम्बन्धी व्यवस्था:</strong> ${conditionText}
-                        </div>
+                        प्रस्तुत विषयमा यस गौरादह नगरपालिका वडा नं.${wardNep} को चालू आर्थिक वर्ष ${ayText} को स्वीकृत ${budgetType} योजना तथा कार्यक्रम अन्तर्गत “${projName}” शीर्षकमा विनियोजन भएको रकम रू. ${amtNum} (अक्षरेपी ${amtWords}) बाट योजना कार्यन्वयन गर्नको लागि गठित ${committeeName} ${personsText} समेत ${personCountWord} जनाको संयुक्त नामबाट तहाँ बैंकको नियमानुसार बैंक खाता सञ्चालन गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                     </div>
                 `;
             }
 
-            // 5. Signature Authority
+            // Sign Authority
             const signSelect = document.getElementById('inSignAuthority').value;
             let sigName = "", sigTitle = "";
             const lblSigName = document.getElementById('lblSigName');
             const lblSigTitle = document.getElementById('lblSigTitle');
-
             if (signSelect === 'BLANK') {
-                if (lblSigName) {
-                    lblSigName.innerText = "";
-                    lblSigName.style.borderTop = "none";
-                }
-                if (lblSigTitle) lblSigTitle.innerText = "";
+                sigName = "";
+                sigTitle = "";
+                if (lblSigName) lblSigName.style.borderTop = "none";
             } else {
                 if (lblSigName) lblSigName.style.borderTop = "1.5px dashed #000";
                 if (signSelect === 'CUSTOM') {
@@ -1651,54 +1032,59 @@
                     sigName = parts[0] || '';
                     sigTitle = parts[1] || '';
                 }
-                if (lblSigName) lblSigName.innerText = sigName;
-                if (lblSigTitle) lblSigTitle.innerText = sigTitle;
             }
+            if (lblSigName) lblSigName.innerText = sigName;
+            if (lblSigTitle) lblSigTitle.innerText = sigTitle;
         }
 
-        // ── Auto-Paste Parser ──
-        function processYojanaPastedContent() {
-            const pastedText = document.getElementById('pasteTextarea').value;
-            if (!pastedText.trim()) return;
-
-            // Project Name
-            const quoteMatch = pastedText.match(/[“"']([^”"']+?)[”"']/);
-            if (quoteMatch) {
-                document.getElementById('inProjectName').value = quoteMatch[1].trim();
-            }
-
-            // Amount
-            const amtMatch = pastedText.match(/(?:रकम\s*रू\.?|रु\.?)\s*([०-९0-9,]+(?:\/\-|\.-)?)/i);
-            if (amtMatch) {
-                document.getElementById('inBudgetAmt').value = amtMatch[1].replace(/\/|-/g, '').trim();
-                autoConvertAmtToWords();
-            }
-
-            // Committee
-            const commMatch = pastedText.match(/([^\r\n]+?)\s*उपभोक्ता\s*समिति/i);
-            if (commMatch) {
-                document.getElementById('inCommitteeName').value = commMatch[1].trim() + " उपभोक्ता समिति";
-            }
-
-            // Committee Members
-            const chairM = pastedText.match(/अध्यक्ष(?:\s*:\s*|\s+)([^\r\n,]+)/i);
-            if (chairM) document.getElementById('inChairman').value = chairM[1].trim();
-
-            const secM = pastedText.match(/सचिव(?:\s*:\s*|\s+)([^\r\n,]+)/i);
-            if (secM) document.getElementById('inSecretary').value = secM[1].trim();
-
-            const treasM = pastedText.match(/कोषाध्यक्ष(?:\s*:\s*|\s+)([^\r\n,]+)/i);
-            if (treasM) document.getElementById('inTreasurer').value = treasM[1].trim();
-
-            const badge = document.getElementById('parseBadge');
-            if (badge) {
-                badge.style.display = 'block';
-                badge.innerText = '✅ पाठबाट विवरण सफलतापूर्वक तानियो !';
-                setTimeout(() => badge.style.display = 'none', 3000);
-            }
-            updateDoc();
+        function adjustSignaturePosition(value) {
+            document.getElementById('marginVal').innerText = toNepaliDigit(value) + " px";
+            const footer = document.getElementById('docFooterSection');
+            if (footer) footer.style.marginTop = value + "px";
         }
 
+        // ================= DATABASE / ABHILEKH LOGIC =================
+
+        let globalDatabase = [];
+        window.globalDatabase = globalDatabase;
+
+        // Realtime Firestore listener
+        (window._firebaseAuthReady || Promise.resolve()).then(() => {
+            db.collection("yojanaBankRecords").onSnapshot((snapshot) => {
+                globalDatabase = [];
+                snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    if (d.isDeleted) return; // 🗑️ Skip soft-deleted items (in Recycle Bin)
+                    globalDatabase.push({ id: doc.id, ...d });
+                });
+                globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                renderDatabaseTable();
+            }, err => {
+                console.warn("Firestore snapshot error:", err);
+            });
+        }).catch(() => {});
+
+                window.updateNepalSambatFromMiti = function () {
+            if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+                window.NepalSambat.updateNepalSambatFromMiti();
+            }
+        };
+
+        function formatTimestamp(ts) {
+            if (!ts) return '';
+            const d = new Date(ts);
+            if (isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hr = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const formatted = `${y}/${m}/${day} ${hr}:${min}`;
+            const toNep = typeof toNepaliDigit === 'function' ? toNepaliDigit : (window.toNepaliDigit || (x => x));
+            return toNep(formatted);
+        }
+
+        
         function quickPrintOnly() {
             if (window.SifarishSaveService && typeof window.SifarishSaveService.printOnly === 'function') {
                 window.SifarishSaveService.printOnly();
@@ -1707,47 +1093,27 @@
             }
         }
 
-        // ── Reset Form to New ──
         function resetFormToNew() {
             document.getElementById('editRecordIndex').value = '';
             const mainTitle = document.getElementById('formMainTitle');
-            if (mainTitle) mainTitle.innerHTML = "<span>📂 योजनाको बैंक खाता सञ्चालन सिफारिस</span>";
+            if (mainTitle) mainTitle.innerText = "🏦 योजनाको बैंक खाता सिफारिस फाराम";
             const btnNew = document.getElementById('btnNewForm');
             if (btnNew) btnNew.style.display = 'none';
-
-            // Clear inputs
-            document.getElementById('inProjectName').value = '';
-            document.getElementById('inBudgetAmt').value = '';
-            document.getElementById('inBudgetWords').value = '';
-            document.getElementById('inCommitteeName').value = '';
-            document.getElementById('inDecisionMiti').value = '';
-            document.getElementById('inChairman').value = '';
-            document.getElementById('inChairmanCit').value = '';
-            document.getElementById('inSecretary').value = '';
-            document.getElementById('inSecretaryCit').value = '';
-            document.getElementById('inTreasurer').value = '';
-            document.getElementById('inTreasurerCit').value = '';
-            document.getElementById('inAccountNo').value = '';
-
-            updateDoc();
             if (window.SifarishSaveService && typeof window.SifarishSaveService.showToast === 'function') {
                 window.SifarishSaveService.showToast("नयाँ फाराम तयार भयो (अभिलेख सुरक्षित गर्दा नयाँ दर्ता हुनेछ)", "info");
             }
         }
 
-        // ── Print & Save System (With Deduplication & Concurrency) ──
         async function printAndSaveSystem() {
-            const projectName = document.getElementById('inProjectName').value.trim();
             const committeeName = document.getElementById('inCommitteeName').value.trim();
-
-            if (!committeeName && !projectName) {
-                alert("कृपया योजना वा उपभोक्ता समितिको नाम अनिवार्य लेख्नुहोस् !");
+            if (!committeeName) {
+                alert("कृपया उपभोक्ता समितिको नाम अनिवार्य लेख्नुहोस् !");
                 return;
             }
 
             const recordId = document.getElementById('editRecordIndex').value;
             const mode = document.getElementById('currentMode').value;
-            const bankVal = document.getElementById('selectBank').value;
+            const bankVal = document.getElementById('selectedBankKey').value;
 
             const record = {
                 mode: mode,
@@ -1755,23 +1121,18 @@
                 chalani: document.getElementById('inChalani').value.trim(),
                 miti: document.getElementById('inMiti').value.trim(),
                 ns: document.getElementById('inNepalSamvat').value.trim(),
-                projectName: projectName,
-                committeeName: committeeName || `${projectName} उपभोक्ता समिति`,
-                decisionMiti: document.getElementById('inDecisionMiti').value.trim(),
+                committeeName: committeeName,
                 chairman: document.getElementById('inChairman').value.trim(),
-                chairmanCit: document.getElementById('inChairmanCit').value.trim(),
                 secretary: document.getElementById('inSecretary').value.trim(),
-                secretaryCit: document.getElementById('inSecretaryCit').value.trim(),
                 treasurer: document.getElementById('inTreasurer').value.trim(),
-                treasurerCit: document.getElementById('inTreasurerCit').value.trim(),
                 bankKey: bankVal,
-                accountCondition: document.getElementById('selAccountCondition').value,
                 signAuth: document.getElementById('inSignAuthority').value,
                 sigMargin: document.getElementById('inSigMargin').value,
                 createdBy: localStorage.getItem('sifarish_user') || 'wada1',
                 createdWard: localStorage.getItem('sifarish_ward') || '1',
                 hasNepalSambatTithi: true,
-                nsFeatureVersion: 1
+                nsFeatureVersion: 1,
+                nsRolloutCommit: 'd2ba29cef12ba2cfdd7cb211861af69f57880811'
             };
 
             if (bankVal === 'CUSTOM') {
@@ -1791,6 +1152,7 @@
                 if (record.budgetTypeRadio === 'CUSTOM') {
                     record.budgetTypeCustom = document.getElementById('inBudgetTypeCustom').value.trim();
                 }
+                record.projectName = document.getElementById('inProjectName').value.trim();
                 record.budgetAmt = document.getElementById('inBudgetAmt').value.trim();
                 record.budgetWords = document.getElementById('inBudgetWords').value.trim();
             } else {
@@ -1810,16 +1172,15 @@
                         db: db,
                         collectionName: 'yojanaBankRecords',
                         recordId: recordId,
-                        data: record,
+                        recordData: record,
                         category: 'yojana',
                         existingRecords: globalDatabase,
                         btnElement: btn
                     });
-
                     if (result && result.savedId) {
                         document.getElementById('editRecordIndex').value = result.savedId;
                         const titleEl = document.getElementById('formMainTitle');
-                        if (titleEl) titleEl.innerText = "🔄 सम्पादन मोड: " + (record.projectName || record.committeeName);
+                        if (titleEl) titleEl.innerText = "🔄 सम्पादन मोड";
                         const btnNew = document.getElementById('btnNewForm');
                         if (btnNew) btnNew.style.display = 'inline-block';
                     }
@@ -1846,80 +1207,77 @@
                 }
             }
         }
-
-        // ── Realtime Database & Abhilekh Table ──
-        let globalDatabase = [];
-        window.globalDatabase = globalDatabase;
-
-        (window._firebaseAuthReady || Promise.resolve()).then(() => {
-            db.collection("yojanaBankRecords").onSnapshot((snapshot) => {
-                globalDatabase = [];
-                snapshot.forEach((doc) => {
-                    const d = doc.data();
-                    if (d.isDeleted) return;
-                    globalDatabase.push({ id: doc.id, ...d });
-                });
-                globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                window.globalDatabase = globalDatabase;
-                renderDatabaseTable();
-            });
-        }).catch(() => {});
-
+        
         function toggleModal(show) {
             const modal = document.getElementById('abhilekhModal');
-            if (modal) {
-                modal.style.display = show ? 'flex' : 'none';
-                if (show) renderDatabaseTable();
-            }
-        }
-
-        function formatTimestamp(ts) {
-            if (!ts) return '-';
-            const d = new Date(ts);
-            return d.toLocaleDateString('ne-NP');
+            if (modal) modal.style.display = show ? 'flex' : 'none';
+            if (show) renderDatabaseTable();
         }
 
         function renderDatabaseTable() {
             const tbody = document.getElementById('dbTableBody');
             if (!tbody) return;
-            const q = (document.getElementById('searchField')?.value || '').trim().toLowerCase();
+            const search = document.getElementById('searchField').value.trim().toLowerCase();
+            const searchEn = (window.toEnglishDigit || (x => x))(search);
+            const searchNe = (window.toNepaliDigit || (x => x))(search);
+            tbody.innerHTML = '';
+            let counter = 0;
+            
+            const filtered = globalDatabase.filter(rec => {
+                if (!search) return true;
+                const cName = (rec.committeeName || '').toLowerCase();
+                const chair = (rec.chairman || '').toLowerCase();
+                const chalani = (rec.chalani || '').toLowerCase();
+                const chalaniEn = (window.toEnglishDigit || (x => x))(chalani);
+                const chalaniNe = (window.toNepaliDigit || (x => x))(chalani);
+                const proj = (rec.projectName || '').toLowerCase();
+                const acc = (rec.accountNo || '').toLowerCase();
+                const accEn = (window.toEnglishDigit || (x => x))(acc);
+                const accNe = (window.toNepaliDigit || (x => x))(acc);
 
-            const filtered = globalDatabase.filter(r => {
-                if (!q) return true;
-                const cName = (r.committeeName || '').toLowerCase();
-                const pName = (r.projectName || '').toLowerCase();
-                const chName = (r.chairman || '').toLowerCase();
-                const chalani = (r.chalani || '').toLowerCase();
-                return cName.includes(q) || pName.includes(q) || chName.includes(q) || chalani.includes(q);
+                return cName.includes(search) || chair.includes(search) ||
+                       chalani.includes(search) || chalaniEn.includes(searchEn) || chalaniNe.includes(searchNe) ||
+                       acc.includes(search) || accEn.includes(searchEn) || accNe.includes(searchNe) ||
+                       proj.includes(search);
             });
 
-            tbody.innerHTML = '';
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#718096; padding:16px;">कुनै अभिलेख फेला परेन ।</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#a0aec0;">कुनै अभिलेख फेला परेन ।</td></tr>`;
                 return;
             }
 
-            filtered.forEach((r, idx) => {
-                const tr = document.createElement('tr');
-                const isClose = (r.mode === 'CLOSE_ACCOUNT');
+            filtered.forEach((rec) => {
+                counter++;
+                const isClose = (rec.mode === 'CLOSE_ACCOUNT');
                 const typeBadge = isClose
-                    ? '<span style="background:#fff5f5; color:#c53030; border:1px solid #feb2b2; padding:2px 8px; border-radius:4px; font-weight:700;">🔒 खाता बन्द</span>'
-                    : '<span style="background:#ebf8ff; color:#2b6cb0; border:1px solid #bee3f8; padding:2px 8px; border-radius:4px; font-weight:700;">📂 खाता सञ्चालन</span>';
+                    ? `<span style="color:#9b2c2c; background:#fed7d7; padding:2px 8px; border-radius:12px; font-weight:bold; font-size:0.8rem;">🔒 खाता बन्द</span>`
+                    : `<span style="color:#276749; background:#c6f6d5; padding:2px 8px; border-radius:12px; font-weight:bold; font-size:0.8rem;">📂 खाता सञ्चालन</span>`;
 
-                tr.innerHTML = `
-                    <td style="text-align:center;">${toNepaliDigit(idx + 1)}</td>
-                    <td>
-                        <strong style="color:#2b6cb0;">${r.projectName || r.committeeName || 'योजना'}</strong>
-                        <div style="font-size:0.8rem; color:#718096;">समिति: ${r.committeeName || '-'} | अध्यक्ष: ${r.chairman || '-'}</div>
-                    </td>
-                    <td>${typeBadge}</td>
-                    <td>${r.miti ? toNepaliDigit(r.miti) : formatTimestamp(r.timestamp)}</td>
-                    <td style="text-align:center;">
-                        <button type="button" onclick="editFromDB('${r.id}')" style="background:#2b6cb0; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-right:4px;">✏️ सम्पादन</button>
-                        <button type="button" onclick="deleteFromDB('${r.id}')" style="background:#e53e3e; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem;">🗑️</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+                const committeeDisplay = rec.committeeName || '-';
+                const chairDisplay = rec.chairman ? `<div style="font-size:0.8rem; color:#4a5568; margin-top:2px;">अध्यक्ष: ${rec.chairman}</div>` : '';
+                const chalaniDisplay = rec.chalani ? `<span style="font-size:0.75rem; background:#edf2f7; color:#4a5568; padding:1px 5px; border-radius:4px; margin-left:5px;">च.नं. ${rec.chalani}</span>` : '';
+                const timeStr = rec.timestamp ? `<div style="font-size:0.78rem; color:#718096; margin-top:2px;">⏱️ ${formatTimestamp(rec.timestamp)}</div>` : '';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><b>${toNepaliDigit(counter)}</b></td>
+                        <td>
+                            <b>${committeeDisplay}</b>${chalaniDisplay}
+                            ${chairDisplay}
+                        </td>
+                        <td>${typeBadge}</td>
+                        <td>
+                            ${rec.miti || '-'}
+                            ${timeStr}
+                        </td>
+                        <td style="text-align: center;">
+                            <div style="display:flex; gap:4px; justify-content:center;">
+                                <button class="btn-action btn-edit-db" onclick="editFromDB('${rec.id}')" title="सम्पादन / लोड" style="padding: 4px 8px; font-size: 0.85rem; width: auto; margin-top:0;">📝</button>
+                                <button class="btn-action btn-del-db" onclick="deleteFromDB('${rec.id}')" title="मेटाउनुहोस्" style="padding: 4px 8px; font-size: 0.85rem; width: auto; margin-top:0; background: #e53e3e; color: #fff;">❌</button>
+                            </div>
+                        </td>
+                    </tr>
+                `);
             });
         }
 
@@ -1927,44 +1285,58 @@
             const rec = globalDatabase.find(r => r.id === id);
             if (!rec) return;
 
-            document.getElementById('editRecordIndex').value = id;
-            const mainTitle = document.getElementById('formMainTitle');
-            if (mainTitle) mainTitle.innerText = "🔄 सम्पादन मोड: " + (rec.projectName || rec.committeeName || 'योजना');
+            if (window.NepalSambat && typeof window.NepalSambat.setCurrentRecord === 'function') {
+                window.NepalSambat.setCurrentRecord(rec);
+            }
 
+            document.getElementById('editRecordIndex').value = id;
+            document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड";
             const btnNew = document.getElementById('btnNewForm');
             if (btnNew) btnNew.style.display = 'inline-block';
 
-            // Mode
-            setMode(rec.mode || 'OPEN_ACCOUNT');
+            // Set Mode
+            const mode = rec.mode || 'OPEN_ACCOUNT';
+            setMode(mode);
 
-            // Fiscal Year
+            // Restore AY radio
             if (rec.ay) {
-                const ayR = document.querySelector(`input[name="ayRadio"][value="${rec.ay}"]`);
-                if (ayR) ayR.checked = true;
+                const ayRadio = document.querySelector(`input[name="ayRadio"][value="${rec.ay}"]`);
+                if (ayRadio) ayRadio.checked = true;
             }
-
-            // Meta
             document.getElementById('inChalani').value = rec.chalani || '';
             document.getElementById('inMiti').value = rec.miti || '';
-            document.getElementById('inNepalSamvat').value = rec.ns || '';
-
-            // Project & Committee
-            document.getElementById('inProjectName').value = rec.projectName || '';
+            document.getElementById('inNepalSamvat').value = rec.ns !== '-' ? (rec.ns || '') : '';
+            
             document.getElementById('inCommitteeName').value = rec.committeeName || '';
-            document.getElementById('inDecisionMiti').value = rec.decisionMiti || '';
-
-            // Members
             document.getElementById('inChairman').value = rec.chairman || '';
-            document.getElementById('inChairmanCit').value = rec.chairmanCit || '';
             document.getElementById('inSecretary').value = rec.secretary || '';
-            document.getElementById('inSecretaryCit').value = rec.secretaryCit || '';
             document.getElementById('inTreasurer').value = rec.treasurer || '';
-            document.getElementById('inTreasurerCit').value = rec.treasurerCit || '';
+            
+            if (rec.bankKey) {
+                const textMap = {
+                    'saptakoshi': 'श्री सप्तकोशी डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा, गौरादह झापा)',
+                    'krishi': 'श्री कृषि विकास बैंक लिमिटेड (गौरादह शाखा)',
+                    'nic': 'श्री एन.आई.सी. एशिया बैंक लिमिटेड (गौरादह शाखा)',
+                    'prime': 'श्री प्राईम कमर्सियल बैंक लिमिटेड (गौरादह शाखा)',
+                    'nabil': 'श्री नबिल बैंक लिमिटेड (गौरादह शाखा)',
+                    'laxmi': 'श्री लक्ष्मी सनराइज बैंक लिमिटेड (गौरादह शाखा)',
+                    'siddhartha': 'श्री सिद्धार्थ बैंक लिमिटेड (गौरादह शाखा)',
+                    'global': 'श्री ग्लोबल आइएमई बैंक लिमिटेड (गौरादह शाखा)',
+                    'excel': 'श्री एक्सेल डेभलपमेन्ट बैंक लिमिटेड (गौरादह शाखा)',
+                    'CUSTOM': '✍️ अन्य बैंक (Custom)'
+                };
+                selectBankOption(rec.bankKey, textMap[rec.bankKey] || textMap['saptakoshi']);
+                if (rec.bankKey === 'CUSTOM') {
+                    if (rec.customBankName) document.getElementById('inCustomBankName').value = rec.customBankName;
+                    if (rec.customBankOffice) document.getElementById('inCustomBankOffice').value = rec.customBankOffice;
+                    if (rec.customBankLocation) document.getElementById('inCustomBankLocation').value = rec.customBankLocation;
+                }
+            }
 
-            // Budget / Amounts
-            if (rec.mode === 'OPEN_ACCOUNT') {
-                document.getElementById('inBudgetAmt').value = rec.budgetAmt || '';
-                document.getElementById('inBudgetWords').value = rec.budgetWords || '';
+            if (mode === 'OPEN_ACCOUNT') {
+                if (rec.projectName) document.getElementById('inProjectName').value = rec.projectName;
+                if (rec.budgetAmt) document.getElementById('inBudgetAmt').value = rec.budgetAmt;
+                if (rec.budgetWords) document.getElementById('inBudgetWords').value = rec.budgetWords;
                 if (rec.budgetTypeRadio) {
                     const rType = document.querySelector(`input[name="budgetTypeRadio"][value="${rec.budgetTypeRadio}"]`);
                     if (rType) {
@@ -1976,33 +1348,15 @@
                     }
                 }
             } else {
-                document.getElementById('inAccountNo').value = rec.accountNo || '';
+                if (rec.accountNo) document.getElementById('inAccountNo').value = rec.accountNo;
             }
 
-            // Bank
-            if (rec.bankKey) {
-                document.getElementById('selectBank').value = rec.bankKey;
-                onSelectBankChange(rec.bankKey);
-                if (rec.bankKey === 'CUSTOM') {
-                    document.getElementById('inCustomBankName').value = rec.customBankName || '';
-                    document.getElementById('inCustomBankOffice').value = rec.customBankOffice || '';
-                    document.getElementById('inCustomBankLocation').value = rec.customBankLocation || '';
-                }
-            }
-
-            // Mandate
-            if (rec.accountCondition) {
-                document.getElementById('selAccountCondition').value = rec.accountCondition;
-                onAccountConditionChange(rec.accountCondition);
-            }
-
-            // Signature
             if (rec.signAuth) {
                 document.getElementById('inSignAuthority').value = rec.signAuth;
                 toggleCustomSign();
                 if (rec.signAuth === 'CUSTOM') {
-                    document.getElementById('inCustomSignName').value = rec.customSignName || '';
-                    document.getElementById('inCustomSignTitle').value = rec.customSignTitle || '';
+                    if (rec.customSignName) document.getElementById('inCustomSignName').value = rec.customSignName;
+                    if (rec.customSignTitle) document.getElementById('inCustomSignTitle').value = rec.customSignTitle;
                 }
             }
 
@@ -2017,106 +1371,161 @@
 
         async function deleteFromDB(id) {
             const rec = globalDatabase.find(r => r.id === id);
-            const name = rec ? (rec.projectName || rec.committeeName || 'यो सिफारिस') : 'यो सिफारिस';
-            if (!confirm(`के तपाईं "${name}" को यो अभिलेख हटाउन चाहनुहुन्छ?`)) return;
-
-            try {
-                await db.collection("yojanaBankRecords").doc(id).update({
-                    isDeleted: true,
-                    deletedAt: Date.now()
-                });
-                if (document.getElementById('editRecordIndex').value === id) {
-                    resetFormToNew();
+            const committeeName = rec ? (rec.committeeName || rec.projectName || 'योजना') : 'योजना';
+            if (confirm(`के तपाईं "${committeeName}" को यो रेकर्ड हटाउन चाहनुहुन्छ?\n(यो रेकर्ड १०० दिनसम्म रद्दीको टोकरी / Recycle Bin मा सुरक्षित रहनेछ)`)) {
+                try {
+                    if (typeof window.softDeleteRecord === 'function') {
+                        await window.softDeleteRecord("yojanaBankRecords", id, {
+                            title: committeeName,
+                            category: 'योजना बैंक खाता',
+                            chalani: rec ? (rec.chalani || '') : '',
+                            miti: rec ? (rec.miti || '') : '',
+                            mode: rec ? (rec.mode || '') : ''
+                        });
+                    } else {
+                        await db.collection("yojanaBankRecords").doc(id).update({
+                            isDeleted: true,
+                            deletedAtMillis: Date.now()
+                        });
+                    }
+                } catch (e) {
+                    alert("डिलिट गर्न समस्या भयो: " + e.message);
                 }
-            } catch (e) {
-                alert("अभिलेख मेटाउन सकिएन: " + e.message);
             }
         }
 
-        // ── Retrieve Samjhauta Records from yojanaSamjhautaRecords ──
         let fetchedSamjhautaDocs = {};
+
         async function populateSamjhautaDropdown() {
+            const selectEl = document.getElementById('selectSamjhautaRecord');
+            if (!selectEl) return;
             try {
-                const snap = await db.collection("yojanaSamjhautaRecords").orderBy("timestamp", "desc").limit(30).get();
-                const sel = document.getElementById('selectSamjhautaRecord');
-                if (!sel) return;
-
-                sel.innerHTML = '<option value="">-- योजना सम्झौताको अभिलेख छान्नुहोस् --</option>';
+                const snap = await db.collection("yojanaSamjhautaRecords").orderBy("timestamp", "desc").limit(40).get();
+                let options = '<option value="">-- योजना सम्झौताको अभिलेख छान्नुहोस् --</option>';
                 fetchedSamjhautaDocs = {};
-
                 snap.forEach(doc => {
                     const data = doc.data();
-                    if (!data.isDeleted) {
-                        fetchedSamjhautaDocs[doc.id] = data;
-                        const opt = document.createElement('option');
-                        opt.value = doc.id;
-                        opt.innerText = (data.projectName || data.committeeName || 'योजना') + (data.amount ? ` (रू. ${data.amount})` : '');
-                        sel.appendChild(opt);
-                    }
+                    fetchedSamjhautaDocs[doc.id] = data;
+                    const dateStr = data.miti ? `[${data.miti}] ` : '';
+                    const pName = data.projectName || data.committeeName || 'अनजान योजना';
+                    const amt = data.amount ? ` (रू. ${data.amount})` : '';
+                    options += `<option value="${doc.id}">📂 ${dateStr}${pName}${amt}</option>`;
                 });
+                selectEl.innerHTML = options;
             } catch (e) {
-                console.warn("Could not load samjhauta records:", e);
+                console.warn("Error fetching samjhauta records:", e);
             }
         }
 
         function loadSamjhautaRecordData(docId) {
-            if (!docId || !fetchedSamjhautaDocs[docId]) return;
+            if (!docId || !fetchedSamjhautaDocs[docId]) {
+                showRetrieveBadge(false, '');
+                return;
+            }
             const data = fetchedSamjhautaDocs[docId];
+            let loadedCount = 0;
 
-            if (data.projectName) document.getElementById('inProjectName').value = data.projectName;
+            if (data.projectName) {
+                document.getElementById('inProjectName').value = data.projectName;
+                loadedCount++;
+            }
             if (data.amount) {
                 document.getElementById('inBudgetAmt').value = data.amount;
                 autoConvertAmtToWords();
+                loadedCount++;
             }
-            if (data.committeeName) document.getElementById('inCommitteeName').value = data.committeeName;
-            if (data.chairman) document.getElementById('inChairman').value = data.chairman;
-            if (data.secretary) document.getElementById('inSecretary').value = data.secretary;
-            if (data.treasurer) document.getElementById('inTreasurer').value = data.treasurer;
+            if (data.committeeName) {
+                document.getElementById('inCommitteeName').value = data.committeeName;
+                loadedCount++;
+            }
+            if (data.chairman) {
+                document.getElementById('inChairman').value = data.chairman;
+                loadedCount++;
+            }
+            if (data.secretary) {
+                document.getElementById('inSecretary').value = data.secretary;
+                loadedCount++;
+            }
+            if (data.treasurer) {
+                document.getElementById('inTreasurer').value = data.treasurer;
+                loadedCount++;
+            }
+            if (data.budgetType) {
+                let matchedType = 'वडा स्तरीय';
+                if (data.budgetType.includes('प्रदेश')) matchedType = 'प्रदेश स्तरीय';
+                else if (data.budgetType.includes('नगर')) matchedType = 'नगर स्तरीय';
+                
+                const radios = document.querySelectorAll('input[name="budgetTypeRadio"]');
+                radios.forEach(r => {
+                    if (r.value === matchedType) {
+                        r.checked = true;
+                        onBudgetTypeRadioChange(r);
+                    }
+                });
+                loadedCount++;
+            }
 
+            if (loadedCount > 0) {
+                showRetrieveBadge(true, `✅ योजना सम्झौताबाट विवरण सफलतापुर्वक तानियो (Loaded)!`);
+            }
+
+            updateDoc();
+        }
+
+        function showRetrieveBadge(success, msg) {
             const badge = document.getElementById('retrieveBadge');
             if (badge) {
-                badge.style.display = 'block';
-                badge.innerText = '✅ सम्झौताको विवरण सफलतापूर्वक फाराममा तानियो !';
-                setTimeout(() => badge.style.display = 'none', 3000);
+                if (!msg) {
+                    badge.style.display = 'none';
+                    return;
+                }
+                badge.style.display = 'inline-flex';
+                badge.style.backgroundColor = success ? '#c6f6d5' : '#fed7d7';
+                badge.style.color = success ? '#22543d' : '#9b2c2c';
+                badge.innerText = msg;
             }
-            updateDoc();
         }
 
-        // ── Mobile Navigation Tabs ──
         function setMobileTab(tab) {
-            const inputPanel = document.getElementById('inputPanel');
-            const previewPanel = document.getElementById('previewPanel');
-            const btnForm = document.getElementById('btnMobForm');
-            const btnPrev = document.getElementById('btnMobPreview');
+            const isForm = (tab === 'form');
+            document.body.classList.remove('mobile-mode-form', 'mobile-mode-preview');
+            document.body.classList.add(isForm ? 'mobile-mode-form' : 'mobile-mode-preview');
 
-            if (tab === 'preview') {
-                inputPanel.classList.add('mobile-hidden');
-                previewPanel.classList.add('mobile-active');
-                if (btnForm) btnForm.classList.remove('active');
-                if (btnPrev) btnPrev.classList.add('active');
-            } else {
-                inputPanel.classList.remove('mobile-hidden');
-                previewPanel.classList.remove('mobile-active');
-                if (btnForm) btnForm.classList.add('active');
-                if (btnPrev) btnPrev.classList.remove('active');
+            const btnF = document.getElementById('btnMobForm');
+            const btnP = document.getElementById('btnMobPreview');
+            if (btnF) btnF.classList.toggle('active', isForm);
+            if (btnP) btnP.classList.toggle('active', !isForm);
+
+            const floatToPreview = document.getElementById('floatBtnToPreview');
+            const mobActionBar = document.getElementById('mobActionBar');
+            if (floatToPreview) floatToPreview.style.display = isForm ? 'flex' : 'none';
+            if (mobActionBar) mobActionBar.style.display = isForm ? 'none' : 'flex';
+
+            if (!isForm) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
-        // ── Initialization on Page Load ──
-        function initBankSifarishPage() {
-            populateApprovedProjectsUI();
-            updateDoc();
-            (window._firebaseAuthReady || Promise.resolve()).then(() => {
-                populateSamjhautaDropdown();
-            });
-        }
+        window.onload = function() {
+            setMode('OPEN_ACCOUNT');
+            populateSamjhautaDropdown();
+            if (window.innerWidth <= 768) {
+                setMobileTab('form');
+            }
+        };
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initBankSifarishPage);
-        } else {
-            initBankSifarishPage();
-        }
-
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-mode-form', 'mobile-mode-preview');
+                const floatToPreview = document.getElementById('floatBtnToPreview');
+                const mobActionBar = document.getElementById('mobActionBar');
+                if (floatToPreview) floatToPreview.style.display = 'none';
+                if (mobActionBar) mobActionBar.style.display = 'none';
+            } else if (!document.body.classList.contains('mobile-mode-form') && !document.body.classList.contains('mobile-mode-preview')) {
+                setMobileTab('form');
+            }
+        });
     </script>
 </body>
 </html>
+
