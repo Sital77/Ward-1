@@ -1,725 +1,547 @@
-/**
- * Gauradaha Municipal Sifarish Management System
- * Health Assistance Recommendation (स्वास्थ्य सहायता सिफारिस)
- * (script-swasthya-sahayata-sifarish.js)
- * 
- * Complies with:
- * - Nepal Government Impoverished Citizen Medical Scheme (विपन्न नागरिक औषधि उपचार सहुलियत कार्यक्रम)
- * - Multi-Ward Architecture & Independent Chalani Numbering
- * - Centralized Deduplication & Save Service
- * - Live Preview & Print Typography Controls
- */
+// ══════════════════════════════════════════════════════
+//  script-swasthya-sahayata-sifarish.js
+//  स्वास्थ्य सहायता सिफारिस — Firebase Firestore & Classic Layout Logic
+//  Collection: swasthyaSahayataRecords
+// ══════════════════════════════════════════════════════
 
-(function (window) {
-    'use strict';
+const firebaseConfig = {
+    apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
+    authDomain: "gauradaha-ward1.firebaseapp.com",
+    projectId: "gauradaha-ward1",
+    storageBucket: "gauradaha-ward1.firebasestorage.app",
+    messagingSenderId: "905617778132",
+    appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
+};
 
-    // ── 1. Firebase Initialization ──
-    const firebaseConfig = {
-        apiKey: "AIzaSyC3uCmLgNN8s0FDMIrkgxR8eH_AvJ_D3J4",
-        authDomain: "gauradaha-ward1.firebaseapp.com",
-        projectId: "gauradaha-ward1",
-        storageBucket: "gauradaha-ward1.firebasestorage.app",
-        messagingSenderId: "905617778132",
-        appId: "1:905617778132:web:b8149cf37ae3f3c3b42241"
-    };
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null;
+window.db = db;
 
-    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+let globalDatabase = [];
+window.globalDatabase = globalDatabase;
+
+// ── 1. Digit & Year Helpers ──
+function toNepaliDigit(num) {
+    if (num === null || num === undefined) return '';
+    const nd = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+    return String(num).split('').map(c => (c >= '0' && c <= '9') ? nd[parseInt(c, 10)] : c).join('');
+}
+window.toNepaliDigit = toNepaliDigit;
+
+function getSelectedAY() {
+    const radios = document.querySelectorAll('input[name="ayRadio"]');
+    for (const r of radios) {
+        if (r.checked) return r.value;
     }
-    const db = (typeof firebase !== 'undefined') ? firebase.firestore() : null;
+    return '२०८३/०८४';
+}
+window.getSelectedAY = getSelectedAY;
 
-    let globalDatabase = [];
-    window.globalDatabase = globalDatabase;
+// ── 2. Management Section Toggle (Hidden by Default) ──
+function toggleManagementSection() {
+    const sec = document.getElementById('sectionManagement');
+    const btn = document.getElementById('btnToggleMgmt');
+    if (!sec || !btn) return;
+    const isHidden = (sec.style.display === 'none' || sec.style.display === '');
+    sec.style.display = isHidden ? 'block' : 'none';
+    btn.innerHTML = isHidden ? '⚙️ सिफारिस व्यवस्थापन सेटिङ लुकाउनुहोस्' : '⚙️ सिफारिस व्यवस्थापन सेटिङ देखाउनुहोस्';
+}
+window.toggleManagementSection = toggleManagementSection;
 
-    let currentPage = 1;
-    const PAGE_SIZE = 10;
-    let currentSearchTerm = '';
+// ── 3. Signatory Selection & Position ──
+function toggleCustomSign() {
+    const val = document.getElementById('inSignAuthority')?.value || '';
+    const box = document.getElementById('customSignBox');
+    if (box) box.style.display = (val === 'CUSTOM') ? 'block' : 'none';
+}
+window.toggleCustomSign = toggleCustomSign;
 
-    // ── 2. Helper Functions ──
-    function toNepDigit(num) {
-        if (num === null || num === undefined) return '';
-        const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
-        return String(num).replace(/[0-9]/g, d => nepaliDigits[d]);
+function adjustSignaturePosition(val) {
+    const badge = document.getElementById('marginVal');
+    if (badge) badge.innerText = toNepaliDigit(val) + " px";
+    const footer = document.getElementById('docFooterSection');
+    if (footer) footer.style.marginTop = val + "px";
+}
+window.adjustSignaturePosition = adjustSignaturePosition;
+
+// ── 4. Disease Type Toggle ──
+function onDiseaseTypeChange() {
+    const val = document.getElementById('inDiseaseType')?.value || 'मुटु रोग';
+    const div = document.getElementById('divOtherDisease');
+    if (div) {
+        div.style.display = (val === 'अन्य') ? 'block' : 'none';
     }
+    updateDoc();
+}
+window.onDiseaseTypeChange = onDiseaseTypeChange;
 
-    function toEngDigit(str) {
-        if (!str) return '';
-        const nepaliDigits = { '०': '0', '१': '1', '२': '2', '३': '3', '४': '4', '५': '5', '६': '6', '७': '7', '८': '8', '९': '9' };
-        return String(str).replace(/[०-९]/g, d => nepaliDigits[d] || d);
-    }
+// ── 5. Mobile & UI Helpers ──
+function setMobileTab(tab) {
+    const isForm = tab === 'form';
+    document.querySelector('.input-panel')?.classList.toggle('active', isForm);
+    document.querySelector('.preview-panel')?.classList.toggle('active', !isForm);
+    document.getElementById('btnMobForm')?.classList.toggle('active', isForm);
+    document.getElementById('btnMobPreview')?.classList.toggle('active', !isForm);
+}
+window.setMobileTab = setMobileTab;
 
-    function getSelectedAY() {
-        const radios = document.querySelectorAll('input[name="ayRadio"]');
-        for (const r of radios) {
-            if (r.checked) return r.value;
-        }
-        return '२०८३/०८४';
-    }
+function toggleModal(show) {
+    const modal = document.getElementById('abhilekhModal');
+    if (!modal) return;
+    modal.style.display = show ? 'flex' : 'none';
+    if (show) renderDatabaseTable();
+}
+window.toggleModal = toggleModal;
 
-    // ── 3. Real-time Snapshot Listener ──
-    function initDatabaseListener() {
-        if (!db) return;
-        (window._firebaseAuthReady || Promise.resolve()).then(() => {
-            db.collection("swasthyaSahayataRecords").onSnapshot((snapshot) => {
-                globalDatabase = [];
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (!data.isDeleted) {
-                        globalDatabase.push({ id: doc.id, ...data });
-                    }
-                });
-                globalDatabase.sort((a, b) => (b.timestamp || b.createdAt || 0) - (a.timestamp || a.createdAt || 0));
-                window.globalDatabase = globalDatabase;
-                renderDatabaseTable();
-            }, (err) => {
-                console.warn("[SwasthyaSifarish] Firestore snapshot listener note:", err);
-            });
-        }).catch(() => {});
-    }
+function exportToPdf() {
+    window.print();
+}
+window.exportToPdf = exportToPdf;
 
-    // ── 4. Disease Type Selection Logic ──
-    window.onDiseaseTypeChange = function () {
-        const dSelect = document.getElementById('inDiseaseType');
-        const dType = dSelect ? dSelect.value : 'मुटु रोग';
-        const otherWrap = document.getElementById('otherDiseaseWrap');
-        const otherInp = document.getElementById('inOtherDiseaseName');
+// ── 6. Date Helpers (Kathmandu Time UTC +5:45) ──
+function getKathmanduISODate() {
+    const now = new Date();
+    const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const ktmMs = utcMs + (5 * 3600000) + (45 * 60000);
+    const ktm = new Date(ktmMs);
+    const y = ktm.getFullYear();
+    const m = String(ktm.getMonth() + 1).padStart(2, '0');
+    const d = String(ktm.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
 
-        if (dType === 'अन्य') {
-            if (otherWrap) otherWrap.style.display = 'block';
-            if (otherInp) otherInp.focus();
-        } else {
-            if (otherWrap) otherWrap.style.display = 'none';
-            if (otherInp) otherInp.value = '';
-        }
-    };
-
-    // ── 5. Signatory Handling ──
-    window.onSignAuthorityChange = function () {
-        const authSelect = document.getElementById('inSignAuthority');
-        const val = authSelect ? authSelect.value : 'CHAIRPERSON';
-        const customBox = document.getElementById('customSignFields');
-        if (customBox) {
-            customBox.style.display = (val === 'CUSTOM') ? 'block' : 'none';
-        }
-        updateDoc();
-    };
-
-    function resolveSignatory() {
-        const authSelect = document.getElementById('inSignAuthority');
-        const signVal = authSelect ? authSelect.value : 'CHAIRPERSON';
-        const activeWard = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
-            ? window.MultiWard.getActiveWard()
-            : (localStorage.getItem('sifarish_ward') || '1');
-        const profile = (window.MultiWard && typeof window.MultiWard.getWardProfile === 'function')
-            ? window.MultiWard.getWardProfile(activeWard)
-            : { chairperson: 'तिलक प्रसाद दाहाल', secretary: 'हेमनाथ थापा' };
-
-        if (signVal === 'CHAIRPERSON') {
-            return {
-                name: profile.chairperson || 'तिलक प्रसाद दाहाल',
-                title: 'वडा अध्यक्ष'
-            };
-        } else if (signVal === 'ACTING_CHAIRPERSON') {
-            return {
-                name: profile.actingChairperson || profile.chairperson || 'कार्यवाहक वडा अध्यक्ष',
-                title: 'कार्यवाहक वडा अध्यक्ष'
-            };
-        } else if (signVal === 'SECRETARY') {
-            return {
-                name: profile.secretary || 'हेमनाथ थापा',
-                title: 'वडा सचिव'
-            };
-        } else {
-            const cName = document.getElementById('inCustomSignName')?.value.trim();
-            const cTitle = document.getElementById('inCustomSignTitle')?.value.trim();
-            return {
-                name: cName || 'अधिकृत हस्ताक्षरकर्ता',
-                title: cTitle || 'प्रशासकीय अधिकृत'
-            };
-        }
-    }
-
-    // ── 6. Independent Atomic Chalani Number Generation ──
-    window.generateAutoChalani = async function () {
-        if (!window.MultiWard || typeof window.MultiWard.getNextChalani !== 'function') {
-            const cur = parseInt(localStorage.getItem('swasthya_local_chalani') || '1', 10);
-            localStorage.setItem('swasthya_local_chalani', String(cur + 1));
-            const chalaniEl = document.getElementById('inChalani');
-            if (chalaniEl) chalaniEl.value = toNepDigit(cur);
-            updateDoc();
-            return;
-        }
-        const activeWard = window.MultiWard.getActiveWard();
-        const nextNum = await window.MultiWard.getNextChalani(db, 'swasthya', activeWard);
-        const chalaniEl = document.getElementById('inChalani');
-        if (chalaniEl) chalaniEl.value = nextNum;
-        updateDoc();
-    };
-
-    // ── 7. Current Date (Asia/Kathmandu +5:45) ──
-    window.setCurrentKathmanduDate = function () {
-        try {
-            const now = new Date();
-            const ktmOffsetMinutes = 345;
-            const localOffsetMinutes = now.getTimezoneOffset();
-            const totalOffset = ktmOffsetMinutes + localOffsetMinutes;
-            const ktmDate = new Date(now.getTime() + totalOffset * 60000);
-
-            const yyyy = ktmDate.getFullYear();
-            const mm = String(ktmDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(ktmDate.getDate()).padStart(2, '0');
-            const adKey = `${yyyy}-${mm}-${dd}`;
-
-            const converter = window["@sbmdkl/nepali-date-converter"];
-            if (converter && typeof converter.adToBs === 'function') {
-                const bs = converter.adToBs(adKey);
-                if (typeof bs === 'string') {
-                    const bsStr = bs.replace(/-/g, '/');
-                    const mitiInp = document.getElementById('inMiti');
-                    if (mitiInp) mitiInp.value = toNepDigit(bsStr);
-                    updateDoc();
-                    return;
+function setCurrentNepaliDate() {
+    const iso = getKathmanduISODate();
+    let bsDate = '२०८३/०१/०१';
+    try {
+        const converter = window["@sbmdkl/nepali-date-converter"];
+        if (converter && typeof converter.adToBs === 'function') {
+            const res = converter.adToBs(iso);
+            if (res) {
+                const parts = res.split('-');
+                if (parts.length === 3) {
+                    bsDate = `${toNepaliDigit(parts[0])}/${toNepaliDigit(parts[1])}/${toNepaliDigit(parts[2])}`;
                 }
             }
-
-            if (window.NepaliFunctions && typeof window.NepaliFunctions.AD2BS === 'function') {
-                const bsObj = window.NepaliFunctions.AD2BS({
-                    year: yyyy,
-                    month: parseInt(mm, 10),
-                    day: parseInt(dd, 10)
-                });
-                const bsStr = `${bsObj.year}/${String(bsObj.month).padStart(2, '0')}/${String(bsObj.day).padStart(2, '0')}`;
-                const mitiInp = document.getElementById('inMiti');
-                if (mitiInp) mitiInp.value = toNepDigit(bsStr);
-                updateDoc();
-                return;
-            }
-
-            // Fallback: If converter not ready, calculate roughly
-            let bsYear = yyyy + 57;
-            let bsMonth = ktmDate.getMonth() + 8;
-            if (bsMonth > 12) { bsMonth -= 12; } else { bsYear -= 1; }
-            let bsDay = ktmDate.getDate() + 14;
-            if (bsDay > 30) { bsDay -= 30; bsMonth += 1; }
-            const bsFallback = `${toNepDigit(bsYear)}/${toNepDigit(String(bsMonth).padStart(2, '0'))}/${toNepDigit(String(bsDay).padStart(2, '0'))}`;
-            const mitiInp = document.getElementById('inMiti');
-            if (mitiInp && !mitiInp.value) mitiInp.value = bsFallback;
-        } catch (e) {
-            console.warn('[SwasthyaSifarish] Date calc warning:', e);
-            const mitiInp = document.getElementById('inMiti');
-            if (mitiInp && !mitiInp.value) mitiInp.value = '२०८३/०७/२८';
+        } else {
+            bsDate = '२०८३/०१/०१';
         }
-        updateDoc();
-    };
+    } catch (e) {
+        bsDate = '२०८३/०१/०१';
+    }
 
-    // ── 8. Live Preview Updater (Core Data Binding) ──
-    window.updateDoc = function () {
-        const activeWard = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
-            ? window.MultiWard.getActiveWard()
-            : (localStorage.getItem('sifarish_ward') || '1');
-        const wardNep = toNepDigit(activeWard);
+    const dateInput = document.getElementById('inMiti');
+    if (dateInput) {
+        dateInput.value = bsDate;
+    }
+    updateDoc();
+}
+window.setCurrentNepaliDate = setCurrentNepaliDate;
 
-        // Active Ward Digit in letterhead and body paragraph
-        const wardEl = document.getElementById('lblWardNum');
-        if (wardEl) wardEl.textContent = wardNep;
+// ── 7. Live Preview Updater (Classic Sifarish Layout) ──
+function updateDoc() {
+    // Part 1: Patient details
+    const patientName = document.getElementById('inPatientName')?.value.trim() || '';
+    const citNo = document.getElementById('inCitNo')?.value.trim() || '';
+    const citDate = document.getElementById('inCitDate')?.value.trim() || '';
+    const citDistrict = document.getElementById('inCitDistrict')?.value.trim() || 'झापा';
 
-        // Letterhead metadata
-        const ay = getSelectedAY();
-        const chalani = document.getElementById('inChalani')?.value.trim() || '';
-        const miti = document.getElementById('inMiti')?.value.trim() || '';
-        const nsVal = document.getElementById('inNepalSamvat')?.value.trim() || '११४६';
+    const lblPat = document.getElementById('lblPatientName');
+    if (lblPat) lblPat.textContent = patientName || '..................';
+    const lblCit = document.getElementById('lblCitNo');
+    if (lblCit) lblCit.textContent = citNo || '..................';
+    const lblCDate = document.getElementById('lblCitDate');
+    if (lblCDate) lblCDate.textContent = citDate || '..................';
+    const lblDist = document.getElementById('lblCitDistrict');
+    if (lblDist) lblDist.textContent = citDistrict || 'झापा';
 
-        const lblAY = document.getElementById('lblAY');
-        if (lblAY) lblAY.textContent = ay;
-        const lblChalani = document.getElementById('lblChalani');
-        if (lblChalani) lblChalani.textContent = chalani || '';
-        const lblMiti = document.getElementById('lblMiti');
-        if (lblMiti) lblMiti.textContent = miti || '';
-        const lblNS = document.getElementById('lblNepalSamvat');
-        if (lblNS) {
-            lblNS.textContent = (window.NepalSambat && typeof window.NepalSambat.formatPrint === 'function')
-                ? window.NepalSambat.formatPrint(nsVal, miti)
-                : nsVal;
+    // Part 2: Health & Treatment details
+    const hospitalName = document.getElementById('inHospitalName')?.value.trim() || '';
+    const diseaseType = document.getElementById('inDiseaseType')?.value || 'मुटु रोग';
+    const otherDisease = document.getElementById('inOtherDiseaseName')?.value.trim() || '';
+    const certifiedDetails = document.getElementById('inHospitalCertifiedDetails')?.value.trim() || '';
+
+    const lblHosp = document.getElementById('lblHospitalName');
+    if (lblHosp) lblHosp.textContent = hospitalName || '..................';
+
+    // Effective disease display name
+    let effectiveDisease = diseaseType;
+    if (diseaseType === 'अन्य') {
+        effectiveDisease = otherDisease || '(अन्य रोग)';
+    }
+    const lblDis = document.getElementById('lblDiseaseName');
+    if (lblDis) lblDis.textContent = effectiveDisease;
+
+    // Certified details inside quotation marks
+    const lblCert = document.getElementById('lblCertifiedDetails');
+    if (lblCert) lblCert.textContent = certifiedDetails || '..................';
+
+    // Signatory resolution from existing system (<select id="inSignAuthority">)
+    const signSelect = document.getElementById('inSignAuthority')?.value || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
+    let sigName = "", sigTitle = "";
+    const lblSigName = document.getElementById('lblSigName');
+    const lblSigTitle = document.getElementById('lblSigTitle');
+
+    if (signSelect === 'BLANK') {
+        sigName = "";
+        sigTitle = "";
+        if (lblSigName) lblSigName.style.borderTop = "none";
+    } else {
+        if (lblSigName) lblSigName.style.borderTop = "1.5px dashed #000";
+        if (signSelect === 'CUSTOM') {
+            sigName = document.getElementById('inCustomSignName')?.value.trim() || '....................';
+            sigTitle = document.getElementById('inCustomSignTitle')?.value.trim() || '....................';
+        } else {
+            const parts = signSelect.split('|');
+            sigName = parts[0] || '';
+            sigTitle = parts[1] || '';
         }
+    }
+    if (lblSigName) lblSigName.textContent = sigName;
+    if (lblSigTitle) lblSigTitle.textContent = sigTitle;
 
-        // Part 1: Patient details
-        const patientName = document.getElementById('inPatientName')?.value.trim() || '';
-        const citNo = document.getElementById('inCitNo')?.value.trim() || '';
-        const citDate = document.getElementById('inCitDate')?.value.trim() || '';
-        const citDistrict = document.getElementById('inCitDistrict')?.value.trim() || 'झापा';
+    // Dynamic Ward Number
+    const wardNum = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
+        ? window.MultiWard.getActiveWard()
+        : (localStorage.getItem('sifarish_ward') || '1');
+    const wardNep = toNepaliDigit(wardNum);
 
-        const lblPat = document.getElementById('lblPatientName');
-        if (lblPat) lblPat.textContent = patientName || '..................';
-        const lblCit = document.getElementById('lblCitNo');
-        if (lblCit) lblCit.textContent = citNo || '..................';
-        const lblCDate = document.getElementById('lblCitDate');
-        if (lblCDate) lblCDate.textContent = citDate || '..................';
-        const lblDist = document.getElementById('lblCitDistrict');
-        if (lblDist) lblDist.textContent = citDistrict || 'झापा';
+    const lblWard = document.getElementById('lblWardNum');
+    if (lblWard) lblWard.textContent = wardNep;
 
-        // Part 2: Health & Treatment details
-        const hospitalName = document.getElementById('inHospitalName')?.value.trim() || '';
-        const diseaseType = document.getElementById('inDiseaseType')?.value || 'मुटु रोग';
-        const otherDisease = document.getElementById('inOtherDiseaseName')?.value.trim() || '';
-        const certifiedDetails = document.getElementById('inHospitalCertifiedDetails')?.value.trim() || '';
+    // Letterhead metadata
+    const curAY = getSelectedAY();
+    const lblAY = document.getElementById('lblAY');
+    if (lblAY) lblAY.textContent = curAY;
 
-        const lblHosp = document.getElementById('lblHospitalName');
-        if (lblHosp) lblHosp.textContent = hospitalName || '..................';
+    const chalani = document.getElementById('inChalani')?.value.trim() || '';
+    const lblChal = document.getElementById('lblChalani');
+    if (lblChal) lblChal.textContent = chalani;
 
-        // Effective disease display name
-        let effectiveDisease = diseaseType;
-        if (diseaseType === 'अन्य') {
-            effectiveDisease = otherDisease || '(अन्य रोग)';
-        }
-        const lblDis = document.getElementById('lblDiseaseName');
-        if (lblDis) lblDis.textContent = effectiveDisease;
+    const miti = document.getElementById('inMiti')?.value.trim() || '';
+    const lblMiti = document.getElementById('lblMiti');
+    if (lblMiti) lblMiti.textContent = miti;
 
-        // Certified details inside quotation marks
-        const lblCert = document.getElementById('lblCertifiedDetails');
-        if (lblCert) lblCert.textContent = certifiedDetails || '..................';
+    // Multi-Ward dynamic letterhead
+    if (window.MultiWard && typeof window.MultiWard.applyLetterheadToDocument === 'function') {
+        window.MultiWard.applyLetterheadToDocument(document);
+    }
 
-        // Signatory block
-        const sig = resolveSignatory();
-        const lblSigName = document.getElementById('lblSigName');
-        if (lblSigName) lblSigName.textContent = sig.name;
-        const lblSigTitle = document.getElementById('lblSigTitle');
-        if (lblSigTitle) lblSigTitle.textContent = sig.title;
+    // Nepal Sambat sync
+    if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatUI === 'function') {
+        window.NepalSambat.updateNepalSambatUI();
+    }
+}
+window.updateDoc = updateDoc;
 
-        // Apply Multi-Ward dynamic letterhead
-        if (window.MultiWard && typeof window.MultiWard.applyLetterheadToDocument === 'function') {
-            window.MultiWard.applyLetterheadToDocument(document.getElementById('printArea'));
-        }
-    };
+// ── 8. Single Main Action: Save and Print Record ──
+async function saveAndPrintRecord() {
+    const patName = document.getElementById('inPatientName')?.value.trim();
+    if (!patName) {
+        alert("कृपया बिरामीको पूरा नाम लेख्नुहोस् ।");
+        document.getElementById('inPatientName')?.focus();
+        return;
+    }
 
-    // ── 9. Typography Sliders ──
-    window.adjustFontSize = function (val) {
-        document.documentElement.style.setProperty('--doc-font-size', `${val}pt`);
-        const el = document.getElementById('fontSizeVal');
-        if (el) el.textContent = `${toNepDigit(val)} pt`;
-    };
+    const citNo = document.getElementById('inCitNo')?.value.trim();
+    if (!citNo) {
+        alert("कृपया नागरिकता प्रमाणपत्र नम्बर लेख्नुहोस् ।");
+        document.getElementById('inCitNo')?.focus();
+        return;
+    }
 
-    window.adjustLineHeight = function (val) {
-        document.documentElement.style.setProperty('--doc-line-height', val);
-        const el = document.getElementById('lineHeightVal');
-        if (el) el.textContent = toNepDigit(val);
-    };
+    const hosp = document.getElementById('inHospitalName')?.value.trim();
+    if (!hosp) {
+        alert("कृपया उपचार गराइरहेको अस्पतालको नाम लेख्नुहोस् ।");
+        document.getElementById('inHospitalName')?.focus();
+        return;
+    }
 
-    window.adjustTopMargin = function (val) {
-        document.documentElement.style.setProperty('--doc-top-margin', `${val}mm`);
-        const el = document.getElementById('topMarginVal');
-        if (el) el.textContent = `${toNepDigit(val)} mm`;
-        const page = document.getElementById('printArea');
-        if (page) page.style.paddingTop = `${val}mm`;
-    };
-
-    window.adjustSideMargin = function (val) {
-        document.documentElement.style.setProperty('--doc-side-margin', `${val}mm`);
-        const el = document.getElementById('sideMarginVal');
-        if (el) el.textContent = `${toNepDigit(val)} mm`;
-        const page = document.getElementById('printArea');
-        if (page) {
-            page.style.paddingLeft = `${val}mm`;
-            page.style.paddingRight = `${val}mm`;
-        }
-    };
-
-    window.adjustSignaturePosition = function (val) {
-        const foot = document.getElementById('docFooterSection');
-        if (foot) foot.style.marginTop = `${val}px`;
-        const el = document.getElementById('sigMarginVal');
-        if (el) el.textContent = `${toNepDigit(val)} px`;
-    };
-
-    window.resetPrintControls = function () {
-        const fs = document.getElementById('inFontSize');
-        if (fs) { fs.value = 13.5; adjustFontSize(13.5); }
-        const lh = document.getElementById('inLineHeight');
-        if (lh) { lh.value = 1.8; adjustLineHeight(1.8); }
-        const tm = document.getElementById('inTopMargin');
-        if (tm) { tm.value = 15; adjustTopMargin(15); }
-        const sm = document.getElementById('inSideMargin');
-        if (sm) { sm.value = 20; adjustSideMargin(20); }
-        const sig = document.getElementById('inSigMargin');
-        if (sig) { sig.value = 40; adjustSignaturePosition(40); }
-    };
-
-    // ── 10. Quick Print Only (No DB Write) ──
-    window.quickPrintOnly = function () {
-        if (window.SifarishSaveService && typeof window.SifarishSaveService.showToast === 'function') {
-            window.SifarishSaveService.showToast("सिफारिस प्रिन्ट मात्र गरिँदैछ (अभिलेखमा कुनै परिवर्तन गरिएको छैन) ।", "info");
-        }
-        window.print();
-    };
-
-    // ── 11. Save and Print (Deduplicated & Multi-Ward Isolated) ──
-    window.saveAndPrintRecord = async function () {
-        const patientName = document.getElementById('inPatientName')?.value.trim();
-        const citNo = document.getElementById('inCitNo')?.value.trim();
-        const hospitalName = document.getElementById('inHospitalName')?.value.trim();
-        const diseaseType = document.getElementById('inDiseaseType')?.value;
-        const otherDisease = document.getElementById('inOtherDiseaseName')?.value.trim();
-        const certifiedDetails = document.getElementById('inHospitalCertifiedDetails')?.value.trim();
-
-        // Validation
-        if (!patientName) {
-            alert("⚠️ कृपया बिरामीको पूरा नाम लेख्नुहोस् ।");
-            document.getElementById('inPatientName')?.focus();
-            return;
-        }
-        if (!citNo) {
-            alert("⚠️ कृपया बिरामीको नागरिकता नम्बर लेख्नुहोस् ।");
-            document.getElementById('inCitNo')?.focus();
-            return;
-        }
-        if (!hospitalName) {
-            alert("⚠️ कृपया उपचार गराइरहेको अस्पतालको नाम लेख्नुहोस् ।");
-            document.getElementById('inHospitalName')?.focus();
-            return;
-        }
-        if (diseaseType === 'अन्य' && !otherDisease) {
-            alert("⚠️ कृपया 'अन्य' रोगको नाम लेख्नुहोस् ।");
+    const disType = document.getElementById('inDiseaseType')?.value || 'मुटु रोग';
+    if (disType === 'अन्य') {
+        const otherDis = document.getElementById('inOtherDiseaseName')?.value.trim();
+        if (!otherDis) {
+            alert("कृपया अन्य रोगको नाम लेख्नुहोस् ।");
             document.getElementById('inOtherDiseaseName')?.focus();
             return;
         }
-        if (!certifiedDetails) {
-            alert("⚠️ कृपया अस्पतालबाट प्रमाणित भएको रोग वा समस्याको विवरण लेख्नुहोस् ।");
-            document.getElementById('inHospitalCertifiedDetails')?.focus();
-            return;
-        }
+    }
 
-        const activeWard = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
-            ? window.MultiWard.getActiveWard()
-            : (localStorage.getItem('sifarish_ward') || '1');
-        const activeUser = (window.MultiWard && typeof window.MultiWard.getCurrentUser === 'function')
-            ? window.MultiWard.getCurrentUser()
-            : (localStorage.getItem('sifarish_user') || 'wada1');
+    const ward = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
+        ? window.MultiWard.getActiveWard()
+        : (localStorage.getItem('sifarish_ward') || '1');
+    const editId = document.getElementById('editRecordIndex')?.value.trim() || '';
 
-        let effectiveDisease = diseaseType;
-        if (diseaseType === 'अन्य') {
-            effectiveDisease = otherDisease;
-        }
+    const signSelect = document.getElementById('inSignAuthority')?.value || 'नगेन्द्र भण्डारी|वडा अध्यक्ष';
+    let sigName = "", sigTitle = "";
+    if (signSelect === 'CUSTOM') {
+        sigName = document.getElementById('inCustomSignName')?.value.trim() || '';
+        sigTitle = document.getElementById('inCustomSignTitle')?.value.trim() || '';
+    } else if (signSelect !== 'BLANK') {
+        const parts = signSelect.split('|');
+        sigName = parts[0] || '';
+        sigTitle = parts[1] || '';
+    }
 
-        const recordId = document.getElementById('editRecordIndex')?.value.trim() || '';
-        const sig = resolveSignatory();
+    const recordData = {
+        patientName: patName,
+        citNo: citNo,
+        citDate: document.getElementById('inCitDate')?.value.trim() || '',
+        citDistrict: document.getElementById('inCitDistrict')?.value.trim() || 'झापा',
+        hospitalName: hosp,
+        diseaseType: disType,
+        otherDiseaseName: document.getElementById('inOtherDiseaseName')?.value.trim() || '',
+        certifiedDetails: document.getElementById('inHospitalCertifiedDetails')?.value.trim() || '',
+        miti: document.getElementById('inMiti')?.value.trim() || '',
+        chalani: document.getElementById('inChalani')?.value.trim() || '',
+        ay: getSelectedAY(),
+        patraSankhya: getSelectedAY(),
+        ns: document.getElementById('inNepalSamvat')?.value.trim() || '',
+        signAuth: signSelect,
+        customSignName: document.getElementById('inCustomSignName')?.value.trim() || '',
+        customSignTitle: document.getElementById('inCustomSignTitle')?.value.trim() || '',
+        signatoryName: sigName,
+        signatoryTitle: sigTitle,
+        sigMargin: document.getElementById('inSigMargin')?.value || '40',
+        scheme: 'विपन्न नागरिक औषधि उपचार वापतको सहुलियत कार्यक्रम',
+        municipality_id: 'gauradaha',
+        ward_id: parseInt(ward, 10),
+        createdWard: String(ward),
+        updatedAt: Date.now()
+    };
 
-        const recordData = {
-            patientName: patientName,
-            name: patientName,
-            applicantName: patientName,
-            citNo: citNo,
-            citizenshipNo: citNo,
-            citDate: document.getElementById('inCitDate')?.value.trim() || '',
-            citDistrict: document.getElementById('inCitDistrict')?.value.trim() || 'झापा',
-            hospitalName: hospitalName,
-            diseaseType: diseaseType,
-            otherDiseaseName: otherDisease,
-            effectiveDisease: effectiveDisease,
-            certifiedDetails: certifiedDetails,
-            ay: getSelectedAY(),
-            chalani: document.getElementById('inChalani')?.value.trim() || '',
-            miti: document.getElementById('inMiti')?.value.trim() || '',
-            signatoryName: sig.name,
-            signatoryTitle: sig.title,
-            ward_id: parseInt(activeWard, 10),
-            createdWard: String(activeWard),
-            municipality_id: 'gauradaha',
-            subject: 'स्वास्थ्य सहायता उपलब्ध गराईदिने बारे ।',
-            scheme: 'विपन्न नागरिक औषधि उपचार वापतको सहुलियत कार्यक्रम'
-        };
+    try {
+        let savedId = editId;
 
-        const btn = document.getElementById('btnSaveAndPrint');
-
-        try {
-            if (window.SifarishSaveService && typeof window.SifarishSaveService.saveOrUpdateRecord === 'function') {
-                const res = await window.SifarishSaveService.saveOrUpdateRecord({
-                    db: db,
-                    collectionName: 'swasthyaSahayataRecords',
-                    data: recordData,
-                    recordId: recordId,
-                    editIndexId: 'editRecordIndex',
-                    btnElement: btn,
-                    formTitleId: 'formMainTitle',
-                    formTitlePrefix: '🔄 सम्पादन मोड: '
-                });
-
-                if (res.blocked) return;
-
-                if (res.savedId) {
-                    document.getElementById('editRecordIndex').value = res.savedId;
-                }
-
-                if (window.MultiWard && typeof window.MultiWard.logAuditEvent === 'function') {
-                    window.MultiWard.logAuditEvent(db, 'HEALTH_RECOMMENDATION_SAVED', {
-                        patientName: patientName,
-                        hospital: hospitalName,
-                        disease: effectiveDisease,
-                        action: res.action,
-                        recordId: res.savedId
-                    });
-                }
-            } else if (db) {
-                if (recordId) {
-                    recordData.lastUpdatedAt = Date.now();
-                    recordData.lastUpdatedBy = activeUser;
-                    await db.collection('swasthyaSahayataRecords').doc(recordId).set(recordData, { merge: true });
+        if (db) {
+            if (editId) {
+                // In-place update
+                await db.collection('swasthyaSahayataRecords').doc(editId).update(recordData);
+                const idx = globalDatabase.findIndex(r => r.id === editId);
+                if (idx !== -1) {
+                    globalDatabase[idx] = { ...globalDatabase[idx], ...recordData };
                 } else {
-                    recordData.createdAt = Date.now();
-                    recordData.createdBy = activeUser;
+                    globalDatabase.unshift({ id: editId, ...recordData });
+                }
+            } else {
+                recordData.createdAt = Date.now();
+                // Deduplication check
+                const existingSnap = await db.collection('swasthyaSahayataRecords')
+                    .where('createdWard', '==', String(ward))
+                    .where('patientName', '==', patName)
+                    .limit(1)
+                    .get();
+
+                if (!existingSnap.empty) {
+                    savedId = existingSnap.docs[0].id;
+                    await db.collection('swasthyaSahayataRecords').doc(savedId).update(recordData);
+                    const idx = globalDatabase.findIndex(r => r.id === savedId);
+                    if (idx !== -1) {
+                        globalDatabase[idx] = { ...globalDatabase[idx], ...recordData };
+                    } else {
+                        globalDatabase.unshift({ id: savedId, ...recordData });
+                    }
+                } else {
                     const docRef = await db.collection('swasthyaSahayataRecords').add(recordData);
-                    document.getElementById('editRecordIndex').value = docRef.id;
+                    savedId = docRef.id;
+                    globalDatabase.unshift({ id: savedId, ...recordData });
                 }
             }
-
-            window.print();
-        } catch (err) {
-            console.error('[SwasthyaSifarish] Save error:', err);
-            alert("⚠️ अभिलेख सुरक्षित गर्दा त्रुटि भयो! कृपया पुन: प्रयास गर्नुहोस्।");
-        }
-    };
-
-    // ── 12. Export to PDF ──
-    window.exportToPdf = function () {
-        window.print();
-    };
-
-    // ── 13. Abhilekh Modal & Search ──
-    window.toggleModal = function (show) {
-        const modal = document.getElementById('abhilekhModal');
-        if (!modal) return;
-        modal.style.display = show ? 'flex' : 'none';
-        if (show) {
-            renderDatabaseTable();
-            setTimeout(() => {
-                document.getElementById('searchField')?.focus();
-            }, 50);
-        }
-    };
-
-    window.onArchiveSearchInput = function (val) {
-        currentSearchTerm = (val || '').trim();
-        currentPage = 1;
-        const btnClear = document.getElementById('btnClearArchiveSearch');
-        if (btnClear) {
-            btnClear.style.display = currentSearchTerm ? 'block' : 'none';
-        }
-        renderDatabaseTable();
-    };
-
-    window.clearArchiveSearch = function () {
-        const inp = document.getElementById('searchField');
-        if (inp) inp.value = '';
-        currentSearchTerm = '';
-        const btnClear = document.getElementById('btnClearArchiveSearch');
-        if (btnClear) btnClear.style.display = 'none';
-        currentPage = 1;
-        renderDatabaseTable();
-    };
-
-    window.renderDatabaseTable = function () {
-        const tbody = document.getElementById('dbTableBody');
-        const summary = document.getElementById('dbTableSummary');
-        const pagination = document.getElementById('dbTablePagination');
-        if (!tbody) return;
-
-        const sTerm = currentSearchTerm.toLowerCase();
-        const sEn = toEngDigit(sTerm);
-        const sNe = toNepDigit(sTerm);
-
-        const filtered = globalDatabase.filter(item => {
-            if (!sTerm) return true;
-            const pName = (item.patientName || item.name || '').toLowerCase();
-            const cit = (item.citNo || item.citizenshipNo || '').toLowerCase();
-            const citEn = toEngDigit(cit);
-            const citNe = toNepDigit(cit);
-            const chalani = (item.chalani || '').toLowerCase();
-            const chalaniEn = toEngDigit(chalani);
-            const chalaniNe = toNepDigit(chalani);
-            const hosp = (item.hospitalName || '').toLowerCase();
-            const disease = (item.effectiveDisease || item.diseaseType || '').toLowerCase();
-
-            return pName.includes(sTerm) ||
-                cit.includes(sTerm) || citEn.includes(sEn) || citNe.includes(sNe) ||
-                chalani.includes(sTerm) || chalaniEn.includes(sEn) || chalaniNe.includes(sNe) ||
-                hosp.includes(sTerm) ||
-                disease.includes(sTerm);
-        });
-
-        const totalRecords = filtered.length;
-        const totalPages = Math.ceil(totalRecords / PAGE_SIZE) || 1;
-        if (currentPage > totalPages) currentPage = totalPages;
-
-        const startIdx = (currentPage - 1) * PAGE_SIZE;
-        const pageRecords = filtered.slice(startIdx, startIdx + PAGE_SIZE);
-
-        if (summary) {
-            summary.textContent = `कुल अभिलेख: ${toNepDigit(totalRecords)} वटा ${currentSearchTerm ? `(खोजी परिणाम)` : ''}`;
-        }
-
-        if (pageRecords.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: #a0aec0;">कुनै अभिलेख फेला परेन।</td></tr>`;
-            if (pagination) pagination.innerHTML = '';
-            return;
-        }
-
-        tbody.innerHTML = pageRecords.map((rec, idx) => {
-            const sn = toNepDigit(startIdx + idx + 1);
-            const ch = rec.chalani ? toNepDigit(rec.chalani) : '-';
-            const dt = rec.miti || '-';
-            const pName = rec.patientName || rec.name || '-';
-            const cit = rec.citNo || rec.citizenshipNo || '-';
-            const hosp = rec.hospitalName || '-';
-            const dis = rec.effectiveDisease || rec.diseaseType || '-';
-
-            return `
-                <tr style="border-bottom: 1px solid #edf2f7; transition: background 0.15s;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='transparent'">
-                    <td style="padding: 10px 8px; font-weight: 700;">${sn}</td>
-                    <td style="padding: 10px 8px; font-weight: 700; color: #2b6cb0;">${ch}</td>
-                    <td style="padding: 10px 8px; color: #4a5568;">${dt}</td>
-                    <td style="padding: 10px 8px; font-weight: 700; color: #1a202c;">${pName}</td>
-                    <td style="padding: 10px 8px; color: #4a5568;">${cit}</td>
-                    <td style="padding: 10px 8px; font-size: 0.85rem;">
-                        <div style="font-weight: 600; color: #2d3748;">${hosp}</div>
-                        <div style="color: #e53e3e; font-size: 0.8rem;">${dis}</div>
-                    </td>
-                    <td style="padding: 10px 8px; text-align: center;">
-                        <div style="display: flex; gap: 6px; justify-content: center;">
-                            <button type="button" onclick="editFromDB('${rec.id}')" title="सम्पादन तथा खोल्नुहोस्" style="padding: 5px 10px; background: #ebf8ff; border: 1px solid #90cdf4; border-radius: 6px; cursor: pointer; color: #2b6cb0; font-weight: 600; font-size: 0.82rem;">✏️ खोल्नुस्</button>
-                            <button type="button" onclick="reprintFromDB('${rec.id}')" title="पुनः प्रिन्ट गर्नुहोस्" style="padding: 5px 8px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 6px; cursor: pointer; color: #4a5568; font-size: 0.82rem;">🖨️</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-        // Pagination buttons
-        if (pagination) {
-            pagination.innerHTML = `
-                <div>पृष्ठ ${toNepDigit(currentPage)} / ${toNepDigit(totalPages)}</div>
-                <div style="display: flex; gap: 6px;">
-                    <button type="button" ${currentPage <= 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e0; background: #fff; cursor: ${currentPage <= 1 ? 'not-allowed' : 'pointer'};">अघिल्लो</button>
-                    <button type="button" ${currentPage >= totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e0; background: #fff; cursor: ${currentPage >= totalPages ? 'not-allowed' : 'pointer'};">पछिल्लो</button>
-                </div>
-            `;
-        }
-    };
-
-    window.changePage = function (p) {
-        currentPage = p;
-        renderDatabaseTable();
-    };
-
-    // ── 14. Edit & Reopen from Archive ──
-    window.editFromDB = function (docId) {
-        const item = globalDatabase.find(x => x.id === docId);
-        if (!item) return;
-
-        const editIdx = document.getElementById('editRecordIndex');
-        if (editIdx) editIdx.value = docId;
-
-        // Populate fields
-        const patInp = document.getElementById('inPatientName');
-        if (patInp) patInp.value = item.patientName || item.name || '';
-
-        const citInp = document.getElementById('inCitNo');
-        if (citInp) citInp.value = item.citNo || item.citizenshipNo || '';
-
-        const citDateInp = document.getElementById('inCitDate');
-        if (citDateInp) citDateInp.value = item.citDate || '';
-
-        const distInp = document.getElementById('inCitDistrict');
-        if (distInp) distInp.value = item.citDistrict || 'झापा';
-
-        const hospInp = document.getElementById('inHospitalName');
-        if (hospInp) hospInp.value = item.hospitalName || '';
-
-        const disSelect = document.getElementById('inDiseaseType');
-        if (disSelect) {
-            if (['मुटु रोग', 'क्यान्सर', 'अन्य'].includes(item.diseaseType)) {
-                disSelect.value = item.diseaseType;
-            } else {
-                disSelect.value = 'अन्य';
-            }
-        }
-
-        const otherInp = document.getElementById('inOtherDiseaseName');
-        if (otherInp) {
-            otherInp.value = item.otherDiseaseName || (item.diseaseType === 'अन्य' ? item.effectiveDisease : '') || '';
-        }
-
-        const certInp = document.getElementById('inHospitalCertifiedDetails');
-        if (certInp) certInp.value = item.certifiedDetails || '';
-
-        const chalaniInp = document.getElementById('inChalani');
-        if (chalaniInp) chalaniInp.value = item.chalani || '';
-
-        const mitiInp = document.getElementById('inMiti');
-        if (mitiInp) mitiInp.value = item.miti || '';
-
-        // Select AY radio
-        if (item.ay) {
-            const radios = document.querySelectorAll('input[name="ayRadio"]');
-            radios.forEach(r => {
-                if (r.value === item.ay) r.checked = true;
-            });
-        }
-
-        // Trigger toggles and update
-        onDiseaseTypeChange();
-        updateDoc();
-
-        // Update form title
-        const formTitle = document.getElementById('formMainTitle');
-        if (formTitle) {
-            formTitle.textContent = `🔄 सम्पादन मोड: ${item.patientName || item.name || ''}`;
-        }
-
-        toggleModal(false);
-
-        // Feedback toast
-        if (window.SifarishSaveService && typeof window.SifarishSaveService.showToast === 'function') {
-            window.SifarishSaveService.showToast(`अभिलेख खोलियो: ${item.patientName || item.name}`, 'info');
-        }
-    };
-
-    // ── 15. Reprint Directly ──
-    window.reprintFromDB = function (docId) {
-        editFromDB(docId);
-        setTimeout(() => {
-            window.print();
-        }, 300);
-    };
-
-    // ── 16. Mobile Tab Navigation ──
-    window.setMobileTab = function (tab) {
-        const btnForm = document.getElementById('btnMobForm');
-        const btnPreview = document.getElementById('btnMobPreview');
-        const inPanel = document.querySelector('.input-panel');
-        const prevPanel = document.querySelector('.preview-panel');
-
-        if (tab === 'form') {
-            if (btnForm) btnForm.classList.add('active');
-            if (btnPreview) btnPreview.classList.remove('active');
-            if (inPanel) inPanel.style.display = 'block';
-            if (prevPanel) prevPanel.style.display = 'none';
         } else {
-            if (btnPreview) btnPreview.classList.add('active');
-            if (btnForm) btnForm.classList.remove('active');
-            if (inPanel) inPanel.style.display = 'none';
-            if (prevPanel) prevPanel.style.display = 'block';
+            // Offline fallback
+            if (!savedId) savedId = 'swasthya_' + Date.now();
+            const idx = globalDatabase.findIndex(r => r.id === savedId);
+            if (idx !== -1) globalDatabase[idx] = { ...globalDatabase[idx], ...recordData };
+            else globalDatabase.unshift({ id: savedId, ...recordData });
         }
-    };
 
-    // ── 17. Initialization ──
-    function init() {
-        initDatabaseListener();
-        setCurrentKathmanduDate();
-        updateDoc();
+        document.getElementById('editRecordIndex').value = savedId;
+        document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + patName;
+        renderDatabaseTable();
+
+        // Open print dialog only after successful save
+        window.print();
+    } catch (err) {
+        console.error("[Swasthya] Save failed:", err);
+        alert("अभिलेख सुरक्षित गर्न सकिएन: " + (err.message || err));
     }
+}
+window.saveAndPrintRecord = saveAndPrintRecord;
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+// ── 9. Archive Load & Reprint ──
+function editFromDB(id) {
+    const rec = globalDatabase.find(r => r.id === id);
+    if (!rec) return;
+
+    document.getElementById('editRecordIndex').value = id;
+    document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड: " + (rec.patientName || '');
+
+    // Patient inputs
+    if (document.getElementById('inPatientName')) document.getElementById('inPatientName').value = rec.patientName || '';
+    if (document.getElementById('inCitNo')) document.getElementById('inCitNo').value = rec.citNo || '';
+    if (document.getElementById('inCitDate')) document.getElementById('inCitDate').value = rec.citDate || '';
+    if (document.getElementById('inCitDistrict')) document.getElementById('inCitDistrict').value = rec.citDistrict || 'झापा';
+
+    // Health inputs
+    if (document.getElementById('inHospitalName')) document.getElementById('inHospitalName').value = rec.hospitalName || '';
+    if (document.getElementById('inDiseaseType')) document.getElementById('inDiseaseType').value = rec.diseaseType || 'मुटु रोग';
+    if (document.getElementById('inOtherDiseaseName')) document.getElementById('inOtherDiseaseName').value = rec.otherDiseaseName || '';
+    if (document.getElementById('inHospitalCertifiedDetails')) document.getElementById('inHospitalCertifiedDetails').value = rec.certifiedDetails || '';
+
+    onDiseaseTypeChange();
+
+    // Meta inputs
+    if (document.getElementById('inChalani')) document.getElementById('inChalani').value = rec.chalani || '';
+    if (document.getElementById('inMiti')) document.getElementById('inMiti').value = rec.miti || '';
+    if (document.getElementById('inNepalSamvat')) document.getElementById('inNepalSamvat').value = rec.ns || '';
+
+    // AY radio
+    const radios = document.querySelectorAll('input[name="ayRadio"]');
+    radios.forEach(r => {
+        r.checked = (r.value === rec.ay || r.value === rec.patraSankhya);
+    });
+
+    // Signatory restoration
+    const signVal = rec.signAuth || (rec.signatoryName && rec.signatoryTitle ? `${rec.signatoryName}|${rec.signatoryTitle}` : 'नगेन्द्र भण्डारी|वडा अध्यक्ष');
+    const sel = document.getElementById('inSignAuthority');
+    if (sel) {
+        sel.value = signVal;
+        if (sel.value !== signVal && signVal !== 'CUSTOM' && signVal !== 'BLANK') {
+            const opt = document.createElement('option');
+            opt.value = signVal;
+            opt.textContent = `${rec.signatoryTitle || ''} - ${rec.signatoryName || ''}`;
+            sel.insertBefore(opt, sel.firstChild);
+            sel.value = signVal;
+        }
+    }
+    if (signVal === 'CUSTOM') {
+        document.getElementById('customSignBox').style.display = 'block';
+        document.getElementById('inCustomSignName').value = rec.customSignName || rec.signatoryName || '';
+        document.getElementById('inCustomSignTitle').value = rec.customSignTitle || rec.signatoryTitle || '';
     } else {
-        init();
+        document.getElementById('customSignBox').style.display = 'none';
     }
 
-})(typeof window !== 'undefined' ? window : this);
+    if (rec.sigMargin) {
+        const sigSlider = document.getElementById('inSigMargin');
+        if (sigSlider) sigSlider.value = rec.sigMargin;
+        adjustSignaturePosition(rec.sigMargin);
+    }
+
+    updateDoc();
+    toggleModal(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+window.editFromDB = editFromDB;
+
+function reprintFromDB(id) {
+    editFromDB(id);
+    window.print();
+}
+window.reprintFromDB = reprintFromDB;
+
+// ── 10. Archive Search & Table Rendering ──
+function onSearchInput(query) {
+    renderDatabaseTable(query);
+}
+window.onSearchInput = onSearchInput;
+
+function renderDatabaseTable(searchQuery = '') {
+    const tbody = document.getElementById('abhilekhTableBody');
+    if (!tbody) return;
+
+    const q = (searchQuery || '').trim().toLowerCase();
+    const ward = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
+        ? window.MultiWard.getActiveWard()
+        : (localStorage.getItem('sifarish_ward') || '1');
+    const isSuper = (window.MultiWard && typeof window.MultiWard.isSuperAdmin === 'function')
+        ? window.MultiWard.isSuperAdmin()
+        : (localStorage.getItem('sifarish_admin') === 'true');
+
+    const filtered = globalDatabase.filter(r => {
+        const wardMatch = isSuper || (String(r.createdWard || r.ward_id) === String(ward));
+        if (!wardMatch) return false;
+        if (!q) return true;
+        const pat = (r.patientName || '').toLowerCase();
+        const cit = (r.citNo || '').toLowerCase();
+        const chal = (r.chalani || '').toLowerCase();
+        const hosp = (r.hospitalName || '').toLowerCase();
+        return pat.includes(q) || cit.includes(q) || chal.includes(q) || hosp.includes(q);
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: #a0aec0;">कुनै अभिलेख फेला परेन।</td></tr>`;
+        return;
+    }
+
+    let html = '';
+    filtered.forEach(r => {
+        const dis = r.diseaseType === 'अन्य' ? (r.otherDiseaseName || 'अन्य') : (r.diseaseType || '-');
+        html += `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 8px;">${r.chalani || '-'}</td>
+                <td style="padding: 8px;">${r.miti || '-'}</td>
+                <td style="padding: 8px; font-weight: 700; color: #2d3748;">${r.patientName || '-'}</td>
+                <td style="padding: 8px;">${r.hospitalName || '-'}</td>
+                <td style="padding: 8px;">${dis}</td>
+                <td style="padding: 8px; text-align: center;">
+                    <button type="button" onclick="editFromDB('${r.id}')" style="background: #3182ce; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-right: 4px;">खोल्नुहोस् / सम्पादन</button>
+                    <button type="button" onclick="reprintFromDB('${r.id}')" style="background: #4a5568; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">प्रिन्ट</button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+window.renderDatabaseTable = renderDatabaseTable;
+
+// ── 11. Initialization on Page Load ──
+async function initSwasthyaModule() {
+    setCurrentNepaliDate();
+    toggleCustomSign();
+
+    const ward = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
+        ? window.MultiWard.getActiveWard()
+        : (localStorage.getItem('sifarish_ward') || '1');
+
+    if (window.MultiWard && typeof window.MultiWard.getNextChalani === 'function') {
+        try {
+            const chalaniVal = await window.MultiWard.getNextChalani(db, 'swasthya', ward);
+            const chalInput = document.getElementById('inChalani');
+            if (chalInput && !chalInput.value) {
+                chalInput.value = chalaniVal;
+            }
+        } catch (e) {
+            console.warn('[Swasthya] Chalani fetch error:', e);
+        }
+    }
+
+    if (db) {
+        try {
+            db.collection('swasthyaSahayataRecords')
+                .onSnapshot(snap => {
+                    globalDatabase = [];
+                    snap.forEach(doc => {
+                        globalDatabase.push({ id: doc.id, ...doc.data() });
+                    });
+                    globalDatabase.sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+                    window.globalDatabase = globalDatabase;
+                    renderDatabaseTable();
+                }, err => {
+                    console.warn('[Swasthya] Realtime listener error:', err);
+                });
+        } catch (err) {
+            console.warn('[Swasthya] Firestore setup error:', err);
+        }
+    }
+
+    updateDoc();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSwasthyaModule);
+} else {
+    initSwasthyaModule();
+}
