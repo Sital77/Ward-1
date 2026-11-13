@@ -18,6 +18,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+    <script src="multi-ward-config.js"></script>
     <script src="auth.js"></script>
     <script src="assets/nepali-date-converter.umd.min.js"></script>
     <script>
@@ -72,8 +73,28 @@
             <img class="header-logo" src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप">
             <div class="header-title">
                 <h1>सिफारिस CMS ड्यासबोर्ड</h1>
-                <p>गौरादह नगरपालिका वडा नं. १ • प्रशासन प्यानल</p>
+                <p id="adminMuniTitle">गौरादह नगरपालिका • केन्द्रीय सुपर एडमिन प्यानल</p>
                 <div id="adminNepaliDate" style="display:inline-block; margin-top:4px; background:rgba(255,255,255,0.15); padding:3px 12px; border-radius:15px; font-size:12px; font-weight:600;">🗓️ मिति लोड हुँदैछ...</div>
+            </div>
+            <!-- 🏢 Central Ward Selector for Super Admin 🏢 -->
+            <div class="central-ward-selector-box" style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.15); padding:6px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.25); margin-left:15px;">
+                <label for="centralWardSelect" style="color:#fff; font-weight:700; font-size:0.86rem; display:flex; align-items:center; gap:4px; margin:0;">
+                    🏢 सक्रिय वडा:
+                </label>
+                <select id="centralWardSelect" onchange="handleCentralWardSwitch(this.value)" 
+                    style="padding:6px 10px; font-weight:700; font-size:0.9rem; border-radius:6px; border:1.5px solid #2b6cb0; background:#fff; color:#1a365d; cursor:pointer; outline:none;">
+                    <option value="ALL">🌐 सम्पूर्ण ९ वटा वडा (केन्द्रीय)</option>
+                    <option value="1">१ नं. वडा कार्यालय</option>
+                    <option value="2">२ नं. वडा कार्यालय</option>
+                    <option value="3">३ नं. वडा कार्यालय</option>
+                    <option value="4">४ नं. वडा कार्यालय</option>
+                    <option value="5">५ नं. वडा कार्यालय</option>
+                    <option value="6">६ नं. वडा कार्यालय</option>
+                    <option value="7">७ नं. वडा कार्यालय</option>
+                    <option value="8">८ नं. वडा कार्यालय</option>
+                    <option value="9">९ नं. वडा कार्यालय</option>
+                </select>
+                <span id="activeWardBadge" style="background:#276749; color:#fff; font-size:0.75rem; padding:3px 8px; border-radius:12px; font-weight:700;">सक्रिय</span>
             </div>
         </div>
         <div class="header-actions">
@@ -116,8 +137,17 @@
             <div class="sidebar-nav-item" data-section="signatures" onclick="switchSection('signatures')">
                 <span class="nav-icon">🖋️</span> हस्ताक्षर अधिकारी
             </div>
+            <div class="sidebar-nav-item" data-section="ward-management" onclick="switchSection('ward-management')">
+                <span class="nav-icon">🏢</span> ९ वटा वडा व्यवस्थापन
+            </div>
+            <div class="sidebar-nav-item" data-section="local-areas" onclick="switchSection('local-areas')">
+                <span class="nav-icon">🗺️</span> स्थानीय क्षेत्र (साविक गा.वि.स.)
+            </div>
             <div class="sidebar-nav-item" data-section="ward-users" onclick="switchSection('ward-users')">
-                <span class="nav-icon">🏢</span> वडा प्रयोगकर्ता
+                <span class="nav-icon">👥</span> वडा प्रयोगकर्ता खाता
+            </div>
+            <div class="sidebar-nav-item" data-section="audit-logs" onclick="switchSection('audit-logs')">
+                <span class="nav-icon">📜</span> केन्द्रीय अडिट लग
             </div>
             <div class="sidebar-nav-item" data-section="activity" onclick="switchSection('activity')">
                 <span class="nav-icon">📝</span> गतिविधि लग
@@ -406,6 +436,190 @@
                 </div>
             </div>
 
+            
+            <!-- ===== SECTION: 9-WARD MANAGEMENT ===== -->
+            <div class="dashboard-section" id="section-ward-management">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">🏢 ९ वटा वडा कार्यालय व्यवस्थापन</div>
+                        <div class="section-subtitle">प्रत्येक वडाको पहिचान, लेटरहेड, पदाधिकारी र सम्पर्क विवरण व्यवस्थापन गर्नुहोस्</div>
+                    </div>
+                </div>
+
+                <!-- 9 Ward Grid Cards -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;" id="wardCardsGrid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Ward Profile & Letterhead Edit Modal / Box -->
+                <div class="table-card" id="wardProfileEditorCard" style="display:none; margin-top:20px; border:2px solid #3182ce;">
+                    <div style="padding:16px 20px; background:#ebf8ff; border-bottom:1px solid #bee3f8; display:flex; justify-content:space-between; align-items:center;">
+                        <h3 id="wardEditorTitle" style="color:#2b6cb0; margin:0; font-size:1.15rem; font-weight:700;">वडा विवरण सम्पादन</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="closeWardEditor()">✕ बन्द गर्नुहोस्</button>
+                    </div>
+                    <div style="padding:20px;">
+                        <input type="hidden" id="editWardNum">
+                        <div class="form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div class="form-group">
+                                <label class="form-label">वडा कार्यालयको नाम</label>
+                                <input type="text" class="form-input" id="editWardName">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">कार्यालयको ठेगाना</label>
+                                <input type="text" class="form-input" id="editWardAddress">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">सम्पर्क फोन नं.</label>
+                                <input type="text" class="form-input" id="editWardPhone">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">आधिकारिक इमेल</label>
+                                <input type="email" class="form-input" id="editWardEmail">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">वडा अध्यक्ष</label>
+                                <input type="text" class="form-input" id="editWardChair">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">वडा सचिव</label>
+                                <input type="text" class="form-input" id="editWardSecretary">
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label class="form-label">लेटरहेड ब्यानर तस्बिर URL वा अपलोड</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="text" class="form-input" id="editWardLetterheadUrl" placeholder="https://... वा स्थानीय पाथ (उदा: assets/letter head.svg)" style="flex:1;">
+                                    <input type="file" id="uploadWardBannerFile" accept="image/*" style="display:none;" onchange="handleBannerFileUpload(this)">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadWardBannerFile').click()">📁 फाइल छान्नुहोस्</button>
+                                </div>
+                                <div id="bannerPreviewBox" style="margin-top:10px; max-width:400px; display:none;">
+                                    <img id="bannerPreviewImg" src="" style="width:100%; border:1px solid #cbd5e0; border-radius:6px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+                            <button class="btn btn-secondary" onclick="closeWardEditor()">रद्द</button>
+                            <button class="btn btn-primary" onclick="saveWardProfileFromEditor()">💾 वडा विवरण सुरक्षित गर्नुहोस्</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SECTION: LOCAL AREAS (FORMER VDC & TOLE) ===== -->
+            <div class="dashboard-section" id="section-local-areas">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">🗺️ स्थानीय क्षेत्र तथा साविक गा.वि.स. व्यवस्थापन</div>
+                        <div class="section-subtitle">प्रत्येक वडा अनुसार साविक गा.वि.स., साविक वडा नं. र टोलहरूको विवरण</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <label style="font-weight:600; font-size:0.9rem;">वडा छान्नुहोस्:</label>
+                        <select id="localAreaWardSelect" onchange="renderLocalAreaTables(this.value)" class="form-select" style="width:auto; padding:6px 12px;">
+                            <option value="1">१ नं. वडा</option>
+                            <option value="2">२ नं. वडा</option>
+                            <option value="3">३ नं. वडा</option>
+                            <option value="4">४ नं. वडा</option>
+                            <option value="5">५ नं. वडा</option>
+                            <option value="6">६ नं. वडा</option>
+                            <option value="7">७ नं. वडा</option>
+                            <option value="8">८ नं. वडा</option>
+                            <option value="9">९ नं. वडा</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-card" style="margin-bottom:20px;">
+                    <div style="padding:14px 18px; background:#f7fafc; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; font-size:1rem; font-weight:700; color:#2d3748;">साविक गा.वि.स. / क्षेत्र सूची</h4>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="newFormerVDCInput" placeholder="उदा: साविक गौरादह गा.वि.स. वडा नं. १" style="padding:6px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:0.88rem; width:260px;">
+                            <button class="btn btn-primary btn-sm" onclick="addFormerVDCToSelectedWard()">➕ थप्नुहोस्</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px;">क्र.सं.</th>
+                                    <th>साविक गाउँ विकास समिति / वडा विवरण</th>
+                                    <th style="width:100px;">कार्य</th>
+                                </tr>
+                            </thead>
+                            <tbody id="formerVDCTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div style="padding:14px 18px; background:#f7fafc; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; font-size:1rem; font-weight:700; color:#2d3748;">टोल / बस्ती सूची</h4>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="newToleInput" placeholder="उदा: मिलन चोक, जनता टोल" style="padding:6px 10px; border:1px solid #cbd5e0; border-radius:6px; font-size:0.88rem; width:220px;">
+                            <button class="btn btn-primary btn-sm" onclick="addToleToSelectedWard()">➕ थप्नुहोस्</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px;">क्र.सं.</th>
+                                    <th>टोल / बस्तीको नाम</th>
+                                    <th style="width:100px;">कार्य</th>
+                                </tr>
+                            </thead>
+                            <tbody id="toleTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SECTION: CENTRAL AUDIT LOGS ===== -->
+            <div class="dashboard-section" id="section-audit-logs">
+                <div class="section-header">
+                    <div>
+                        <div class="section-title">📜 केन्द्रीय प्रणाली अडिट लग (Audit Logs)</div>
+                        <div class="section-subtitle">सबै ९ वटा वडामा भएका लगइन, सम्पादन, सिफारिस जारी तथा सुरक्षा गतिविधिहरू</div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <select id="auditWardFilter" onchange="renderAuditLogsTable()" class="form-select" style="width:auto; padding:6px 10px;">
+                            <option value="ALL">सबै वडाहरू</option>
+                            <option value="1">वडा नं. १</option>
+                            <option value="2">वडा नं. २</option>
+                            <option value="3">वडा नं. ३</option>
+                            <option value="4">वडा नं. ४</option>
+                            <option value="5">वडा नं. ५</option>
+                            <option value="6">वडा नं. ६</option>
+                            <option value="7">वडा नं. ७</option>
+                            <option value="8">वडा नं. ८</option>
+                            <option value="9">वडा नं. ९</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" onclick="refreshAuditLogs()">🔄 ताजा गर्नुहोस्</button>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:140px;">मिति / समय</th>
+                                    <th style="width:90px;">वडा</th>
+                                    <th style="width:110px;">प्रयोगकर्ता</th>
+                                    <th style="width:140px;">कार्य (Action)</th>
+                                    <th>विवरण</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditLogsTableBody">
+                                <tr><td colspan="5" style="text-align:center; padding:20px; color:#a0aec0;">🌀 लगहरू लोड हुँदैछ...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- ===== SECTION: ACTIVITY LOG ===== -->
             <div class="dashboard-section" id="section-activity">
                 <div class="section-header">
@@ -512,6 +726,14 @@
                                 <option value="High">High</option>
                                 <option value="Critical">Critical</option>
                             </select>
+                        </div>
+                        <div class="form-group" style="grid-column: span 2; background: #fffaf0; padding: 10px; border-radius: 8px; border: 1.5px solid #feb2b2;">
+                            <label class="form-label" style="font-weight:700; color:#c53030;">🎯 परिमार्जनको दायरा (Scope):</label>
+                            <select class="form-select" id="formTemplateScope" style="font-weight:600; border-color:#feb2b2;">
+                                <option value="SELECTED_WARD_ONLY" selected>🔒 यो वडा मात्र (Selected Ward Only — सुरक्षित)</option>
+                                <option value="ALL_WARDS">🌐 सबै ९ वटै वडाहरू (All Wards — Super Admin)</option>
+                            </select>
+                            <small style="color:#744210; font-size:0.78rem; display:block; margin-top:4px;">नोट: पूर्वनिर्धारित रूपमा यो परिवर्तन हाल चयन गरिएको वडामा मात्र लागु हुनेछ, अन्य वडामा असर गर्दैन।</small>
                         </div>
                         <div class="form-group">
                             <label class="form-label">🚥 स्थिति</label>
@@ -2550,7 +2772,386 @@
         window.prompt = function(msg, def) { return 'नयाँ घरबाटो प्रमाणित'; };
         window.confirm = function(msg) { return true; };
     }
-    </script>
+    
+    // ══════════════════════════════════════════════════════
+    // 🏢 MULTI-WARD SUPER ADMIN ENGINE & CENTRAL CONTROLS 🏢
+    // ══════════════════════════════════════════════════════
+
+    // 1. Central Ward Switcher
+    window.handleCentralWardSwitch = function(wardVal) {
+        if (window.MultiWard) {
+            window.MultiWard.setActiveWard(wardVal === 'ALL' ? '1' : wardVal);
+        }
+        localStorage.setItem('sifarish_ward', wardVal === 'ALL' ? '1' : wardVal);
+        localStorage.setItem('sifarish_admin_view_ward', wardVal);
+
+        const badge = document.getElementById('activeWardBadge');
+        if (badge) {
+            if (wardVal === 'ALL') {
+                badge.style.background = '#2b6cb0';
+                badge.textContent = 'केन्द्रीय दृश्य (All)';
+            } else {
+                badge.style.background = '#276749';
+                badge.textContent = `वडा नं. ${toNepaliDigit(wardVal)} सक्रिय`;
+            }
+        }
+
+        // Re-filter or update templates and signatures
+        if (typeof renderTemplatesTable === 'function') {
+            try { renderTemplatesTable(); } catch(e){}
+        }
+        if (typeof renderSignaturesTable === 'function') {
+            try { renderSignaturesTable(); } catch(e){}
+        }
+        renderDashboardWardMatrix();
+        showToast(wardVal === 'ALL' ? 'केन्द्रीय नगरपालिका दृश्य सक्रिय भयो' : `वडा नं. ${toNepaliDigit(wardVal)} को प्रशासनिक दृश्य सक्रिय भयो`, 'info');
+    };
+
+    // 2. Render 9-Ward Dashboard Matrix
+    window.renderDashboardWardMatrix = function() {
+        const container = document.getElementById('dashboardWardMatrix');
+        if (!container) return;
+        const currentActive = localStorage.getItem('sifarish_ward') || '1';
+
+        let html = '';
+        for (let i = 1; i <= 9; i++) {
+            const wStr = String(i);
+            const prof = (window.MultiWard && window.MultiWard.getWardProfile) ? window.MultiWard.getWardProfile(wStr) : {};
+            const isActive = (currentActive === wStr);
+            const wNep = toNepaliDigit(i);
+
+            html += `
+                <div class="stat-card" style="padding:16px; border:2px solid ${isActive ? '#3182ce' : '#e2e8f0'}; background:${isActive ? '#ebf8ff' : '#fff'}; border-radius:12px; position:relative;">
+                    ${isActive ? '<span style="position:absolute; top:10px; right:10px; background:#2b6cb0; color:#fff; font-size:0.7rem; padding:2px 7px; border-radius:10px; font-weight:700;">सक्रिय वडा</span>' : ''}
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                        <span style="font-size:1.6rem;">🏛️</span>
+                        <div>
+                            <strong style="font-size:1rem; color:#2d3748;">वडा नं. ${wNep} कार्यालय</strong>
+                            <div style="font-size:0.8rem; color:#718096;">${prof.officeAddress || 'गौरादह, झापा'}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.82rem; color:#4a5568; line-height:1.5; margin-bottom:10px;">
+                        <div><strong>अध्यक्ष:</strong> ${prof.chairperson || 'उल्लेख छैन'}</div>
+                        <div><strong>सचिव:</strong> ${prof.secretary || 'उल्लेख छैन'}</div>
+                        <div><strong>इमेल:</strong> ${prof.email || '-'}</div>
+                    </div>
+                    <div style="display:flex; gap:6px; margin-top:8px;">
+                        <button class="btn btn-secondary btn-sm" style="flex:1; font-size:0.78rem; padding:5px 8px;" onclick="openWardEditorModal(${i})">⚙️ विवरण</button>
+                        <button class="btn btn-primary btn-sm" style="flex:1; font-size:0.78rem; padding:5px 8px;" onclick="selectAndSwitchWard(${i})">प्रवेश ➔</button>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    };
+
+    window.selectAndSwitchWard = function(wardNum) {
+        const select = document.getElementById('centralWardSelect');
+        if (select) select.value = String(wardNum);
+        handleCentralWardSwitch(String(wardNum));
+    };
+
+    // 3. Render Ward Management Grid (In section-ward-management)
+    window.renderWardManagementCards = function() {
+        const grid = document.getElementById('wardCardsGrid');
+        if (!grid) return;
+
+        let html = '';
+        for (let i = 1; i <= 9; i++) {
+            const wStr = String(i);
+            const prof = (window.MultiWard && window.MultiWard.getWardProfile) ? window.MultiWard.getWardProfile(wStr) : {};
+            const wNep = toNepaliDigit(i);
+
+            html += `
+                <div class="table-card" style="padding:16px; border-radius:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                        <div>
+                            <h4 style="margin:0; font-size:1.05rem; color:#1a365d; font-weight:700;">वडा नं. ${wNep}</h4>
+                            <span style="font-size:0.8rem; color:#718096;">${prof.officeAddress || 'गौरादह, झापा'}</span>
+                        </div>
+                        <span style="background:${i === 1 ? '#c6f6d5' : '#edf2f7'}; color:${i === 1 ? '#22543d' : '#4a5568'}; font-size:0.72rem; padding:3px 8px; border-radius:8px; font-weight:600;">
+                            ${i === 1 ? 'जग्गा वर्गीकरण सहित' : 'सामान्य वडा'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.85rem; color:#2d3748; line-height:1.6; margin-bottom:12px;">
+                        <div><strong>अध्यक्ष:</strong> ${prof.chairperson || '-'}</div>
+                        <div><strong>सचिव:</strong> ${prof.secretary || '-'}</div>
+                        <div><strong>सम्पर्क:</strong> ${prof.phone || '-'}</div>
+                        <div><strong>इमेल:</strong> <span style="font-family:monospace; font-size:0.8rem;">${prof.email || '-'}</span></div>
+                        <div><strong>साविक क्षेत्र:</strong> ${(prof.formerVDCs || []).length} वटा दर्ज</div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-primary btn-sm" style="flex:1;" onclick="openWardEditorModal(${i})">✏️ प्रोफाइल सम्पादन</button>
+                        <button class="btn btn-secondary btn-sm" onclick="switchSection('local-areas'); document.getElementById('localAreaWardSelect').value='${i}'; renderLocalAreaTables('${i}');">🗺️ क्षेत्र</button>
+                    </div>
+                </div>
+            `;
+        }
+        grid.innerHTML = html;
+    };
+
+    window.openWardEditorModal = function(wardNum) {
+        switchSection('ward-management');
+        const prof = (window.MultiWard && window.MultiWard.getWardProfile) ? window.MultiWard.getWardProfile(String(wardNum)) : {};
+        document.getElementById('editWardNum').value = wardNum;
+        document.getElementById('wardEditorTitle').textContent = `वडा नं. ${toNepaliDigit(wardNum)} विवरण तथा लेटरहेड सम्पादन`;
+        document.getElementById('editWardName').value = prof.wardNameNepali || `${toNepaliDigit(wardNum)} नं. वडा कार्यालय`;
+        document.getElementById('editWardAddress').value = prof.officeAddress || 'गौरादह, झापा';
+        document.getElementById('editWardPhone').value = prof.phone || '';
+        document.getElementById('editWardEmail').value = prof.email || `ward${wardNum}.gauradaha@gmail.com`;
+        document.getElementById('editWardChair').value = prof.chairperson || '';
+        document.getElementById('editWardSecretary').value = prof.secretary || '';
+        document.getElementById('editWardLetterheadUrl').value = prof.letterheadBannerUrl || '';
+
+        const previewBox = document.getElementById('bannerPreviewBox');
+        const previewImg = document.getElementById('bannerPreviewImg');
+        if (prof.letterheadBannerUrl) {
+            previewImg.src = prof.letterheadBannerUrl;
+            previewBox.style.display = 'block';
+        } else {
+            previewBox.style.display = 'none';
+        }
+
+        const editorCard = document.getElementById('wardProfileEditorCard');
+        editorCard.style.display = 'block';
+        editorCard.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.closeWardEditor = function() {
+        document.getElementById('wardProfileEditorCard').style.display = 'none';
+    };
+
+    window.handleBannerFileUpload = function(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('editWardLetterheadUrl').value = e.target.result;
+            document.getElementById('bannerPreviewImg').src = e.target.result;
+            document.getElementById('bannerPreviewBox').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.saveWardProfileFromEditor = async function() {
+        const wNum = document.getElementById('editWardNum').value;
+        const data = {
+            wardNumber: parseInt(wNum, 10),
+            wardNameNepali: document.getElementById('editWardName').value.trim(),
+            officeAddress: document.getElementById('editWardAddress').value.trim(),
+            phone: document.getElementById('editWardPhone').value.trim(),
+            email: document.getElementById('editWardEmail').value.trim(),
+            chairperson: document.getElementById('editWardChair').value.trim(),
+            secretary: document.getElementById('editWardSecretary').value.trim(),
+            letterheadBannerUrl: document.getElementById('editWardLetterheadUrl').value.trim(),
+            updatedAt: Date.now()
+        };
+
+        if (window.MultiWard) {
+            window.MultiWard.saveWardProfileLocal(wNum, data);
+        }
+
+        try {
+            await db.collection('ward_profiles').doc(String(wNum)).set(data, { merge: true });
+            if (window.MultiWard && window.MultiWard.logAuditEvent) {
+                window.MultiWard.logAuditEvent(db, 'WARD_PROFILE_UPDATED', { ward: wNum, changes: data });
+            }
+            showToast(`वडा नं. ${toNepaliDigit(wNum)} को विवरण सफलतापूर्वक सुरक्षित गरियो !`, 'success');
+        } catch(err) {
+            console.warn('Remote ward profile save warning:', err);
+            showToast(`वडा नं. ${toNepaliDigit(wNum)} को विवरण स्थानीय रूपमा सुरक्षित गरियो`, 'info');
+        }
+
+        closeWardEditor();
+        renderWardManagementCards();
+        renderDashboardWardMatrix();
+    };
+
+    // 4. Local Area (Former VDC & Tole) Management
+    window.renderLocalAreaTables = function(wardNum) {
+        const w = String(wardNum || document.getElementById('localAreaWardSelect')?.value || '1');
+        const prof = (window.MultiWard && window.MultiWard.getWardProfile) ? window.MultiWard.getWardProfile(w) : {};
+        const vdcs = prof.formerVDCs || [];
+        const toles = prof.toles || [];
+
+        // Render Former VDCs
+        const vdcTbody = document.getElementById('formerVDCTableBody');
+        if (vdcTbody) {
+            if (vdcs.length === 0) {
+                vdcTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:#a0aec0;">कुनै साविक गा.वि.स. विवरण प्रविष्ट छैन।</td></tr>';
+            } else {
+                vdcTbody.innerHTML = vdcs.map((v, idx) => `
+                    <tr>
+                        <td>${toNepaliDigit(idx + 1)}</td>
+                        <td><strong>${v}</strong></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteFormerVDC(${idx})">हटाउनुहोस्</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Render Toles
+        const toleTbody = document.getElementById('toleTableBody');
+        if (toleTbody) {
+            if (toles.length === 0) {
+                toleTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:#a0aec0;">कुनै टोल विवरण प्रविष्ट छैन।</td></tr>';
+            } else {
+                toleTbody.innerHTML = toles.map((t, idx) => `
+                    <tr>
+                        <td>${toNepaliDigit(idx + 1)}</td>
+                        <td><strong>${t}</strong></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteTole(${idx})">हटाउनुहोस्</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+    };
+
+    window.addFormerVDCToSelectedWard = async function() {
+        const w = document.getElementById('localAreaWardSelect').value;
+        const inp = document.getElementById('newFormerVDCInput');
+        const val = inp.value.trim();
+        if (!val) {
+            alert('कृपया साविक गा.वि.स. वा वडा विवरण लेख्नुहोस् !');
+            return;
+        }
+
+        const prof = window.MultiWard.getWardProfile(w);
+        const list = prof.formerVDCs || [];
+        if (!list.includes(val)) {
+            list.push(val);
+            window.MultiWard.saveWardProfileLocal(w, { formerVDCs: list });
+            try {
+                await db.collection('ward_profiles').doc(w).set({ formerVDCs: list }, { merge: true });
+            } catch(e){}
+            showToast('नयाँ साविक क्षेत्र थपियो !', 'success');
+        }
+        inp.value = '';
+        renderLocalAreaTables(w);
+    };
+
+    window.deleteFormerVDC = async function(idx) {
+        const w = document.getElementById('localAreaWardSelect').value;
+        const prof = window.MultiWard.getWardProfile(w);
+        const list = prof.formerVDCs || [];
+        if (idx >= 0 && idx < list.length) {
+            list.splice(idx, 1);
+            window.MultiWard.saveWardProfileLocal(w, { formerVDCs: list });
+            try {
+                await db.collection('ward_profiles').doc(w).set({ formerVDCs: list }, { merge: true });
+            } catch(e){}
+            showToast('साविक क्षेत्र हटाइयो', 'info');
+            renderLocalAreaTables(w);
+        }
+    };
+
+    window.addToleToSelectedWard = async function() {
+        const w = document.getElementById('localAreaWardSelect').value;
+        const inp = document.getElementById('newToleInput');
+        const val = inp.value.trim();
+        if (!val) {
+            alert('कृपया टोल वा बस्तीको नाम लेख्नुहोस् !');
+            return;
+        }
+
+        const prof = window.MultiWard.getWardProfile(w);
+        const list = prof.toles || [];
+        if (!list.includes(val)) {
+            list.push(val);
+            window.MultiWard.saveWardProfileLocal(w, { toles: list });
+            try {
+                await db.collection('ward_profiles').doc(w).set({ toles: list }, { merge: true });
+            } catch(e){}
+            showToast('नयाँ टोल थपियो !', 'success');
+        }
+        inp.value = '';
+        renderLocalAreaTables(w);
+    };
+
+    window.deleteTole = async function(idx) {
+        const w = document.getElementById('localAreaWardSelect').value;
+        const prof = window.MultiWard.getWardProfile(w);
+        const list = prof.toles || [];
+        if (idx >= 0 && idx < list.length) {
+            list.splice(idx, 1);
+            window.MultiWard.saveWardProfileLocal(w, { toles: list });
+            try {
+                await db.collection('ward_profiles').doc(w).set({ toles: list }, { merge: true });
+            } catch(e){}
+            showToast('टोल हटाइयो', 'info');
+            renderLocalAreaTables(w);
+        }
+    };
+
+    // 5. Central Audit Logs Viewer
+    window.renderAuditLogsTable = async function() {
+        const tbody = document.getElementById('auditLogsTableBody');
+        if (!tbody) return;
+        const filterWard = document.getElementById('auditWardFilter')?.value || 'ALL';
+
+        try {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#3182ce;">🌀 लगहरू खोजी हुँदैछ...</td></tr>';
+            let query = db.collection('audit_logs').limit(50);
+            const snap = await query.get();
+
+            if (snap.empty) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#a0aec0;">हाल कुनै अडिट लग फेला परेन।</td></tr>';
+                return;
+            }
+
+            const logs = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                if (filterWard !== 'ALL' && String(d.ward_id || d.ward) !== filterWard) {
+                    return;
+                }
+                logs.push({ id: doc.id, ...d });
+            });
+
+            logs.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#a0aec0;">वडा नं. ${toNepaliDigit(filterWard)} को कुनै अडिट लग छैन।</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(l => {
+                const dt = l.timestamp ? new Date(l.timestamp).toLocaleString('ne-NP') : '-';
+                const actionBadge = l.action ? `<span style="background:#e2e8f0; color:#2d3748; padding:3px 8px; border-radius:6px; font-weight:700; font-size:0.75rem;">${l.action}</span>` : '-';
+                const wardDisplay = l.ward_id ? `वडा नं. ${toNepaliDigit(l.ward_id)}` : 'केन्द्रीय';
+                return `
+                    <tr>
+                        <td style="font-size:0.8rem; color:#4a5568;">${dt}</td>
+                        <td><span style="font-weight:700; color:#2b6cb0;">${wardDisplay}</span></td>
+                        <td><strong>${l.user || 'system'}</strong></td>
+                        <td>${actionBadge}</td>
+                        <td style="font-size:0.82rem; color:#4a5568;">${JSON.stringify(l.details || {})}</td>
+                    </tr>
+                `;
+            }).join('');
+        } catch(err) {
+            console.warn('Audit logs load warning:', err);
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#e53e3e;">अडिट लगहरू लोड गर्न सकिएन।</td></tr>';
+        }
+    };
+
+    window.refreshAuditLogs = function() {
+        renderAuditLogsTable();
+    };
+
+    // Auto-init Multi-Ward on Admin Load
+    window.addEventListener('DOMContentLoaded', () => {
+        renderDashboardWardMatrix();
+        renderWardManagementCards();
+        renderLocalAreaTables('1');
+        renderAuditLogsTable();
+    });
+
+</script>
 </body>
 </html>
 

@@ -2,61 +2,167 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 🔒 Security: Only authenticated ward staff can access system records
+    // 🔒 Security Helpers: Multi-Ward Role & Permission Engine
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return isAuthenticated() && (request.auth.token.admin == true || request.auth.uid == 'admin' || request.auth.token.email == 'adhikarishrital@gmail.com');
+    function hasSessionDoc() {
+      return exists(/databases/$(database)/documents/ward_users/$(request.auth.uid));
     }
 
-    // Ward users collection: Only authenticated users can read/write their own info
+    function getSessionDoc() {
+      return get(/databases/$(database)/documents/ward_users/$(request.auth.uid));
+    }
+
+    function getSessionWard() {
+      return hasSessionDoc() ? string(getSessionDoc().data.wardNumber) : null;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        request.auth.uid == 'admin' ||
+        request.auth.token.role == 'super_admin' ||
+        request.auth.token.email == 'adhikarishrital@gmail.com' ||
+        (hasSessionDoc() && getSessionDoc().data.role == 'super_admin')
+      );
+    }
+
+    function isWardUser(wardNum) {
+      return isAuthenticated() && (
+        isSuperAdmin() ||
+        request.auth.token.ward == string(wardNum) ||
+        request.auth.token.ward == wardNum ||
+        getSessionWard() == string(wardNum)
+      );
+    }
+
+    // Ward users collection:
+    // - Authenticated users can read profiles
+    // - Super Admin can manage all
+    // - Self-registration allowed only if not attempting unauthorized escalation to super_admin
     match /ward_users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      allow write: if isSuperAdmin() || (
+        isAuthenticated() && 
+        request.auth.uid == userId && 
+        (!('role' in request.resource.data) || request.resource.data.role != 'super_admin')
+      );
     }
 
-    // System Backups: Only authenticated staff can create/read backups; deletion requires admin
+    // Super Admin & System Configuration
+    // Protected against unauthorized resets once initialized
+    match /system_config/{configId} {
+      allow read: if true;
+      allow write: if isSuperAdmin() || (
+        configId == 'super_admin' && 
+        (!exists(/databases/$(database)/documents/system_config/super_admin) || resource.data.isTemporary == true)
+      );
+    }
+
+    // Ward Profiles (Wards 1 through 9 configurations)
+    match /ward_profiles/{wardId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // Recommendation Sequence Counters (Independent per Ward)
+    match /sifarish_counters/{counterId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Audit Logs (Append-only for authenticated staff; reading restricted to Super Admin)
+    match /audit_logs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isSuperAdmin();
+      allow update, delete: if false; // Append-only immutable log
+    }
+
+    // System Backups: Authenticated staff can create/read; deletion restricted to Super Admin
     match /system_backups/{backupId} {
       allow read, create: if isAuthenticated();
-      allow update, delete: if isAdmin();
+      allow update, delete: if isSuperAdmin();
     }
 
-    // Deleted Records Log / Recycle Bin: Viewing and permanent purge restricted to admin; staff can log soft-delete
+    // Deleted Records Log / Recycle Bin: Viewing and permanent purge restricted to admin
     match /deleted_records_log/{logId} {
-      allow read: if isAdmin();
+      allow read: if isSuperAdmin();
       allow create: if isAuthenticated();
-      allow update, delete: if isAdmin();
+      allow update, delete: if isSuperAdmin();
     }
 
-    // Nissa Records (Squatters, Dalit, Landless records): Authenticated staff read-only, admin write
-    match /nissa_records/{docId} {
+    // Local Area Master Data (Former VDC & Tole data per ward)
+    match /local_area_master/{docId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isSuperAdmin();
     }
 
-    // Social Security Beneficiary Register (Excel-imported verified records)
-    match /socialSecurityBeneficiaries/{docId} {
-      allow read: if isAuthenticated();
-      allow create, update: if isAuthenticated();
-      allow delete: if isAdmin();
+    // Land Classification Records: Exclusively accessible to Ward 1 and Super Admin
+    match /bargikaranSifarishRecords/{docId} {
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        getSessionWard() == '1' ||
+        request.auth.token.ward == '1' ||
+        request.auth.token.ward == 1
+      );
+      allow create, update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        ((getSessionWard() == '1' || request.auth.token.ward == '1') &&
+         (request.resource.data.ward_id == 1 || request.resource.data.createdWard == '1'))
+      );
+      allow delete: if isSuperAdmin();
     }
 
     // Recommendation Templates (Letter layouts)
     match /sifarish_templates/{templateId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    // Social Security Beneficiary Register
+    match /socialSecurityBeneficiaries/{docId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isSuperAdmin();
+    }
+
+    // Health Assistance Recommendation Records (Strict Sensitive Health Data Isolation)
+    match /swasthyaSahayataRecords/{docId} {
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        getSessionWard() == null ||
+        !('ward_id' in resource.data) ||
+        resource.data.ward_id == int(getSessionWard()) ||
+        resource.data.createdWard == getSessionWard()
+      );
+      allow create, update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        getSessionWard() == null ||
+        !('ward_id' in request.resource.data) ||
+        request.resource.data.ward_id == int(getSessionWard()) ||
+        request.resource.data.createdWard == getSessionWard()
+      );
+      allow delete: if isSuperAdmin();
     }
 
     // All Sifarish Recommendation Collections
     match /{collectionName}/{docId} {
-      // Allow read & write only if authenticated
-      allow read: if isAuthenticated();
-      allow create, update: if isAuthenticated();
-      
-      // Hard delete restricted to admin
-      allow delete: if isAdmin();
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        getSessionWard() == null ||
+        !('ward_id' in resource.data) ||
+        resource.data.ward_id == int(getSessionWard()) ||
+        resource.data.createdWard == getSessionWard()
+      );
+      allow create, update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        getSessionWard() == null ||
+        !('ward_id' in request.resource.data) ||
+        request.resource.data.ward_id == int(getSessionWard()) ||
+        request.resource.data.createdWard == getSessionWard()
+      );
+      allow delete: if isSuperAdmin();
     }
   }
 }

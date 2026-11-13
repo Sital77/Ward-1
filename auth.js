@@ -38,16 +38,23 @@ function generateSessionToken(rememberMe, isAdmin) {
     };
 }
 
-function createSession(isAdmin, rememberMe) {
+function createSession(isAdmin, rememberMe, role) {
     const user = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
-    if (user === 'wada1' || user === 'wada3') {
+    if (/^wada[1-9]$|^ward[1-9]$/.test(user)) {
         isAdmin = false;
+        role = role || 'ward_staff';
+    }
+    if (user === 'sital') {
+        isAdmin = true;
+        role = 'super_admin';
     }
     const session = generateSessionToken(rememberMe || false, isAdmin);
     session.isAdmin = !!isAdmin;
+    session.role = role || (isAdmin ? 'super_admin' : 'ward_staff');
     localStorage.setItem(AUTH_CONFIG.SESSION_KEY, JSON.stringify(session));
     localStorage.setItem(AUTH_CONFIG.AUTH_KEY, 'true');
     localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, isAdmin ? 'true' : 'false');
+    localStorage.setItem('sifarish_role', session.role);
 }
 
 function isSessionValid() {
@@ -73,22 +80,30 @@ function isSessionValid() {
 function isAdminSession() {
     try {
         const user = (localStorage.getItem('sifarish_user') || '').trim().toLowerCase();
+        const role = (localStorage.getItem('sifarish_role') || '').trim().toLowerCase();
+        
+        // Super Admin (Sital or designated super_admin)
+        if (user === 'sital' || role === 'super_admin' || user === 'admin') {
+            return true;
+        }
+
         // Strict role check: Ordinary ward operators cannot be admin
-        if (user === 'wada1' || user === 'wada3' || !user) {
+        if (/^wada[1-9]$|^ward[1-9]$/.test(user) || role === 'ward_staff' || !user) {
             if (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true') {
                 localStorage.setItem(AUTH_CONFIG.ADMIN_KEY, 'false');
             }
             return false;
         }
+
         const sessionStr = localStorage.getItem(AUTH_CONFIG.SESSION_KEY);
         if (!sessionStr) {
-            return user === 'admin' && localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true';
+            return (user === 'admin' || user === 'sital') && localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true';
         }
         const session = JSON.parse(sessionStr);
         if (session.expiresAt && Date.now() > session.expiresAt) {
             return false;
         }
-        return (user === 'admin' || session.isAdmin === true) && (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true' || session.isAdmin === true);
+        return (user === 'admin' || user === 'sital' || session.isAdmin === true || role === 'super_admin') && (localStorage.getItem(AUTH_CONFIG.ADMIN_KEY) === 'true' || session.isAdmin === true);
     } catch (e) {
         return false;
     }

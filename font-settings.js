@@ -29,12 +29,115 @@
     }
     try { protectSourceCode(); } catch(e){}
 
+    // Auto-load Multi-Ward Core Configuration Engine
+    (function loadMultiWardConfig() {
+        if (!window.MultiWard && !document.querySelector('script[src*="multi-ward-config.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'multi-ward-config.js?v=1.0';
+            document.head.appendChild(script);
+        }
+    })();
+
     // Auto-load Sifarish Centralized Save & Deduplication Service
     (function loadSaveService() {
         if (!window.SifarishSaveService && !document.querySelector('script[src*="sifarish-save-service.js"]')) {
             const script = document.createElement('script');
             script.src = 'sifarish-save-service.js?v=1.0';
             document.head.appendChild(script);
+        }
+    })();
+
+    // 🔒 Multi-Ward Firestore Collection Isolation Hook 🔒
+    (function installMultiWardIsolation() {
+        function wrapDb() {
+            if (typeof firebase === 'undefined' || !firebase.firestore) return;
+            const origFirestore = firebase.firestore;
+            if (origFirestore.__multiWardHooked) return;
+
+            firebase.firestore = function () {
+                const dbInstance = origFirestore.apply(this, arguments);
+                if (dbInstance.__multiWardWrapped) return dbInstance;
+
+                const origCol = dbInstance.collection.bind(dbInstance);
+                dbInstance.collection = function (colName) {
+                    const colRef = origCol(colName);
+                    const exemptCollections = [
+                        'ward_users', 'ward_profiles', 'system_config', 
+                        'audit_logs', 'system_backups', 'deleted_records_log',
+                        'sifarish_counters', 'signing_authorities', 'local_area_master'
+                    ];
+                    if (exemptCollections.includes(colName)) {
+                        return colRef;
+                    }
+
+                    const isSuper = (window.MultiWard && typeof window.MultiWard.isSuperAdmin === 'function')
+                        ? window.MultiWard.isSuperAdmin()
+                        : (localStorage.getItem('sifarish_role') === 'super_admin' || (localStorage.getItem('sifarish_user') || '').toLowerCase() === 'sital');
+
+                    const activeWard = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
+                        ? window.MultiWard.getActiveWard()
+                        : (localStorage.getItem('sifarish_ward') || '1');
+
+                    // Land classification protection: bargikaranSifarishRecords
+                    if (colName === 'bargikaranSifarishRecords') {
+                        if (!isSuper && activeWard !== '1') {
+                            const dummyQuery = colRef.where('__forbidden_cross_ward__', '==', true);
+                            return dummyQuery;
+                        }
+                    }
+
+                    // Scoped query for ordinary ward staff
+                    if (!isSuper) {
+                        const origOnSnapshot = colRef.onSnapshot.bind(colRef);
+                        colRef.onSnapshot = function (callback, errorCallback) {
+                            return origOnSnapshot((snapshot) => {
+                                const filteredDocs = snapshot.docs.filter(doc => {
+                                    const d = doc.data();
+                                    const docWard = String(d.ward_id || d.createdWard || d.ward || '1');
+                                    return docWard === String(activeWard);
+                                });
+                                const wrappedSnapshot = {
+                                    empty: filteredDocs.length === 0,
+                                    size: filteredDocs.length,
+                                    docs: filteredDocs,
+                                    forEach: function (cb) { filteredDocs.forEach(cb); },
+                                    docChanges: snapshot.docChanges ? snapshot.docChanges.bind(snapshot) : () => []
+                                };
+                                callback(wrappedSnapshot);
+                            }, errorCallback);
+                        };
+
+                        const origGet = colRef.get.bind(colRef);
+                        colRef.get = async function () {
+                            const snap = await origGet();
+                            const filteredDocs = snap.docs.filter(doc => {
+                                const d = doc.data();
+                                const docWard = String(d.ward_id || d.createdWard || d.ward || '1');
+                                return docWard === String(activeWard);
+                            });
+                            return {
+                                empty: filteredDocs.length === 0,
+                                size: filteredDocs.length,
+                                docs: filteredDocs,
+                                forEach: function (cb) { filteredDocs.forEach(cb); }
+                            };
+                        };
+                    }
+
+                    return colRef;
+                };
+
+                dbInstance.__multiWardWrapped = true;
+                return dbInstance;
+            };
+
+            origFirestore.__multiWardHooked = true;
+        }
+
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            wrapDb();
+        } else {
+            window.addEventListener('DOMContentLoaded', wrapDb);
         }
     })();
 
@@ -571,12 +674,23 @@
             el.innerHTML = el.innerHTML.replace(/वडा\s*न[ं]?\s*[\.\-]*\s*[१३२४५६७८९\d]+/g, `वडा नं. ${replaceDigit}`);
         });
 
-        // Email address (strictly English ward1.gauradaha@gmail.com)
-        const email = (ward === '3') ? 'gauradahaward3@gmail.com' : 'ward1.gauradaha@gmail.com';
+        // Multi-Ward Profile Resolution (Wards 1 through 9)
+        const profile = (window.MultiWard && typeof window.MultiWard.getWardProfile === 'function')
+            ? window.MultiWard.getWardProfile(ward)
+            : { email: (ward === '3' ? 'gauradahaward3@gmail.com' : `ward${ward}.gauradaha@gmail.com`), officeAddress: 'गौरादह, झापा' };
+
+        const email = profile.email || `ward${ward}.gauradaha@gmail.com`;
         document.querySelectorAll('.email-t').forEach(el => {
             el.innerText = `Email: ${email}`;
             el.classList.add('no-convert', 'english-text', 'no-nepali-digits');
         });
+
+        // Dynamic address update
+        if (profile.officeAddress) {
+            document.querySelectorAll('.address-t').forEach(el => {
+                el.innerText = profile.officeAddress;
+            });
+        }
 
         // Stamps & System Footers
         const nabalakStamp = document.getElementById('lblNabalakOfficeStamp');

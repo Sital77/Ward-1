@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>स्वास्थ्य सहायता सिफारिस - गौरादह नगरपालिका</title>
+    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
+    <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/emblem_of_nepal.svg" type="image/svg+xml" fetchpriority="high">
+    <link rel="stylesheet" href="charkilla.css">
+    <style>
+        .preview-panel .a4-page,
+        .preview-panel .a4-page * {
+            font-family: 'Mukta', sans-serif;
+        }
+
+        .letter-body-para {
+            font-size: var(--doc-font-size, 13.5pt);
+            line-height: var(--doc-line-height, 1.8);
+            text-align: justify;
+            text-justify: inter-word;
+            margin-top: 18px;
+            color: #1a202c;
+        }
+
+        .fill-space {
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .section-card {
+            border-radius: 10px;
+            padding: 14px 14px 10px 14px;
+            margin-bottom: 16px;
+        }
+
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lh-section {
+            background: #f7fafc;
+            border: 1.5px solid #e2e8f0;
+        }
+        .lh-section .section-label { color: #4a5568; }
+
+        .patient-section {
+            background: rgba(43, 108, 176, 0.06);
+            border: 1.5px dashed rgba(43, 108, 176, 0.35);
+        }
+        .patient-section .section-label { color: #2b6cb0; }
+        .patient-section label { color: #2c5282; font-weight: 600; }
+
+        .health-section {
+            background: rgba(229, 62, 62, 0.05);
+            border: 1.5px dashed rgba(229, 62, 62, 0.35);
+        }
+        .health-section .section-label { color: #c53030; }
+        .health-section label { color: #9b2c2c; font-weight: 600; }
+
+        .mgmt-section {
+            background: rgba(49, 151, 149, 0.05);
+            border: 1.5px dashed rgba(49, 151, 149, 0.35);
+        }
+        .mgmt-section .section-label { color: #285e61; }
+
+        .controls-card {
+            background: #fff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+
+        .top-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-home {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #cbd5e0;
+            transition: all 0.2s;
+        }
+        .btn-home:hover { background: #e2e8f0; }
+
+        .btn-abhilekh-top {
+            background: #3182ce;
+            color: #fff;
+            padding: 7px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-abhilekh-top:hover { background: #2b6cb0; }
+
+        .btn-pdf-export {
+            background: #38a169;
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-pdf-export:hover { background: #2f855a; }
+
+        .action-button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .btn-quick-print {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            color: #fff;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            transition: all 0.2s;
+        }
+        .btn-quick-print:hover { background: #1a202c; }
+
+        .btn-save-print {
+            background: linear-gradient(135deg, #2b6cb0, #1a365d);
+            color: #fff;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-save-print:hover { background: #1a365d; }
+
+        .custom-svg-letterhead {
+            position: relative;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .svg-letterhead-banner {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 561 / 138;
+            display: block;
+            margin: 0;
+            padding: 0;
+            border: none;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .svg-letterhead-emblem {
+            position: absolute;
+            left: 3.5%;
+            top: 10%;
+            height: 53%;
+            width: auto;
+            aspect-ratio: 1500 / 1266;
+            object-fit: contain;
+            z-index: 2;
+            pointer-events: none;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .svg-lh-meta-left {
+            position: absolute;
+            left: 0;
+            bottom: 4%;
+            font-size: 11pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            z-index: 2;
+        }
+
+        .svg-lh-meta-right {
+            position: absolute;
+            right: 0;
+            bottom: 4%;
+            text-align: right;
+            font-size: 11pt;
+            font-weight: 600;
+            line-height: 1.35;
+            color: #000;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .subject-container {
+            margin-top: 14px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .subject-line {
+            display: inline-block;
+            font-size: 13.5pt;
+            font-weight: 700;
+            border-bottom: 1.5px solid #000;
+            padding-bottom: 2px;
+        }
+
+        .signature-block {
+            text-align: right;
+            margin-top: 40px;
+            float: right;
+        }
+        .signature-block .sig-name {
+            font-weight: 700;
+            font-size: 12pt;
+        }
+        .signature-block .sig-title {
+            font-size: 11pt;
+            color: #2d3748;
+        }
+
+        @media print {
+            .input-panel,
+            .top-action-bar,
+            .mobile-nav-bar,
+            .modal-overlay {
+                display: none !important;
+            }
+
+            .preview-panel {
+                width: 100% !important;
+                margin-left: 0 !important;
+                padding: 0 !important;
+                background-color: #fff !important;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            .a4-page {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: var(--doc-top-margin, 15mm) var(--doc-side-margin, 20mm) !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="auth.js"></script>
+
+    <!-- 📱 Mobile Tab Switcher (<= 768px) -->
+    <div class="mobile-nav-bar">
+        <button type="button" class="mobile-nav-btn active" id="btnMobForm" onclick="setMobileTab('form')">
+            📝 फारम भर्नुहोस्
+        </button>
+        <button type="button" class="mobile-nav-btn" id="btnMobPreview" onclick="setMobileTab('preview')">
+            📄 पत्र हेर्नुहोस्
+        </button>
+    </div>
+
+    <!-- ════════════════════════════ INPUT PANEL ════════════════════════════ -->
+    <div class="input-panel">
+        <div class="top-action-bar">
+            <a href="index.html" class="btn-home">🏠 गृहपृष्ठ</a>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-pdf-export" id="btnExportPdf" onclick="exportToPdf()" title="प्रिन्ट वा PDF को रूपमा सुरक्षित गर्नुहोस्">
+                    📄 PDF
+                </button>
+                <button type="button" class="btn-abhilekh-top" onclick="toggleModal(true)">
+                    📊 अभिलेख
+                </button>
+            </div>
+        </div>
+
+        <div class="header-action-container" style="margin-bottom: 12px;">
+            <h2 class="panel-title" id="formMainTitle" style="color: #1a365d; font-size: 1.25rem; font-weight: 800;">
+                🏥 स्वास्थ्य सहायता सिफारिस
+            </h2>
+            <div style="font-size: 0.82rem; color: #4a5568; margin-top: 2px;">
+                विपन्न नागरिक औषधि उपचार सहुलियत कार्यक्रम
+            </div>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+        <input type="hidden" id="inNepalSamvat" value="">
+
+        <!-- ── भाग १: बिरामीको व्यक्तिगत विवरण ── -->
+        <div class="section-card patient-section">
+            <div class="section-label">
+                <span>👤</span> भाग १: बिरामीको विवरण
+            </div>
+            <div class="form-group">
+                <label for="inPatientName">बिरामीको पूरा नाम, थर: <span style="color:#e53e3e;">*</span></label>
+                <input type="text" id="inPatientName" placeholder="बिरामीको नाम लेख्नुहोस्" oninput="updateDoc()" required>
+            </div>
+            <div class="form-row" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label for="inCitNo">नागरिकता प्रमाणपत्र नं.: <span style="color:#e53e3e;">*</span></label>
+                    <input type="text" id="inCitNo" placeholder="नागरिकता नं." oninput="updateDoc()" required>
+                </div>
+                <div class="form-group">
+                    <label for="inCitDistrict">जारी जिल्ला:</label>
+                    <input type="text" id="inCitDistrict" value="झापा" placeholder="जिल्ला" oninput="updateDoc()">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inCitDate">नागरिकता जारी मिति (वि.सं.):</label>
+                <input type="text" id="inCitDate" placeholder="YYYY/MM/DD (उदा: २०६२/०४/१५)" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ── भाग २: स्वास्थ्य तथा उपचार विवरण ── -->
+        <div class="section-card health-section">
+            <div class="section-label">
+                <span>🏥</span> भाग २: स्वास्थ्य तथा उपचार विवरण
+            </div>
+            <div class="form-group">
+                <label for="inHospitalName">उपचार गराइरहेको अस्पतालको नाम: <span style="color:#e53e3e;">*</span></label>
+                <input type="text" id="inHospitalName" placeholder="उदा: बी.पी. कोइराला स्वास्थ्य विज्ञान प्रतिष्ठान, धरान" oninput="updateDoc()" required>
+            </div>
+            <div class="form-group">
+                <label for="inDiseaseType">रोग वा स्वास्थ्य समस्याको प्रकार: <span style="color:#e53e3e;">*</span></label>
+                <select id="inDiseaseType" onchange="onDiseaseTypeChange(); updateDoc();" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1.5px solid #cbd5e0; font-size: 0.92rem; background: #fff;">
+                    <option value="मुटु रोग">मुटु रोग</option>
+                    <option value="क्यान्सर">क्यान्सर</option>
+                    <option value="अन्य">अन्य (आफैँ लेख्नुहोस्)</option>
+                </select>
+            </div>
+            <div class="form-group" id="otherDiseaseWrap" style="display: none; background: #fff5f5; padding: 10px; border-radius: 8px; border: 1px solid #feb2b2;">
+                <label for="inOtherDiseaseName" style="color: #c53030; font-weight: 700;">अन्य रोग वा समस्याको नाम लेख्नुहोस्: <span style="color:#e53e3e;">*</span></label>
+                <input type="text" id="inOtherDiseaseName" placeholder="उदा: मृगौला रोग / पार्किन्सन्स / हेड इन्जुरी" oninput="updateDoc()">
+            </div>
+            <div class="form-group">
+                <label for="inHospitalCertifiedDetails">अस्पतालबाट प्रमाणित भएको रोग वा समस्याको विवरण: <span style="color:#e53e3e;">*</span></label>
+                <textarea id="inHospitalCertifiedDetails" rows="3" placeholder="अस्पतालको प्रमाणपत्रमा उल्लेख भएअनुसार अक्षरशः लेख्नुहोस् (उदा: मुटुको भल्भमा गम्भीर समस्या भएको)" oninput="updateDoc()" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1.5px solid #cbd5e0; font-family: inherit; font-size: 0.95rem; resize: vertical;" required></textarea>
+                <div style="font-size: 0.78rem; color: #718096; margin-top: 3px;">
+                    * यो विवरण सिफारिस पत्रमा ठ्याक्कै उद्धरण चिह्न <strong>“...”</strong> भित्र देखिनेछ।
+                </div>
+            </div>
+        </div>
+
+        <!-- ── भाग ३: सिफारिस व्यवस्थापन (मिति, चलानी, हस्ताक्षर) ── -->
+        <div class="section-card mgmt-section">
+            <div class="section-label">
+                <span>📋</span> भाग ३: सिफारिस व्यवस्थापन
+            </div>
+            <div class="form-group">
+                <label>पत्र संख्या (आ.व.):</label>
+                <div class="radio-container" id="ayRadioGroup" style="display: flex; gap: 14px; flex-wrap: wrap;">
+                    <label class="radio-label" style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="radio" name="ayRadio" value="२०८३/०८४" checked onchange="updateDoc()"> २०८३/०८४
+                    </label>
+                    <label class="radio-label" style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="radio" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()"> २०८२/०८३
+                    </label>
+                    <label class="radio-label" style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="radio" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"> २०८१/०८२
+                    </label>
+                </div>
+            </div>
+            <div class="form-row" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label for="inChalani">चलानी नम्बर:</label>
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="inChalani" placeholder="चलानी नं." oninput="updateDoc()" style="flex: 1;">
+                        <button type="button" onclick="generateAutoChalani()" title="स्वतः नयाँ चलानी नम्बर तान्नुहोस्" style="padding: 0 10px; background: #e2e8f0; border: 1px solid #cbd5e0; border-radius: 6px; cursor: pointer; font-size: 0.82rem; font-weight: 700;">⚡</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inMiti">सिफारिस मिति:</label>
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="inMiti" placeholder="YYYY/MM/DD" oninput="updateDoc()" style="flex: 1;">
+                        <button type="button" id="btnTodayDate" onclick="setCurrentKathmanduDate()" title="आजको मिति भर्नुहोस्" style="padding: 0 10px; background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 6px; cursor: pointer; font-size: 0.82rem; font-weight: 700; color: #2b6cb0;">🗓️</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inSignAuthority">हस्ताक्षरकर्ता छनोट:</label>
+                <select id="inSignAuthority" onchange="onSignAuthorityChange(); updateDoc();" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1.5px solid #cbd5e0; font-size: 0.92rem; background: #fff;">
+                    <option value="CHAIRPERSON">वडा अध्यक्ष</option>
+                    <option value="ACTING_CHAIRPERSON">कार्यवाहक वडा अध्यक्ष</option>
+                    <option value="SECRETARY">वडा सचिव</option>
+                    <option value="CUSTOM">अन्य (आफैँ लेख्नुहोस्)</option>
+                </select>
+            </div>
+            <div id="customSignFields" style="display: none; background: #f7fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+                <div class="form-group" style="margin-bottom: 6px;">
+                    <label for="inCustomSignName">हस्ताक्षरकर्ताको नाम:</label>
+                    <input type="text" id="inCustomSignName" placeholder="नाम थर" oninput="updateDoc()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="inCustomSignTitle">पद:</label>
+                    <input type="text" id="inCustomSignTitle" placeholder="पद (उदा: अधिकृत)" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ── प्रिन्ट ढाँचा तथा फन्ट कन्ट्रोलहरू ── -->
+        <div class="controls-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-weight: 700; font-size: 0.85rem; color: #4a5568;">⚙️ प्रिन्ट लेआउट तथा फन्ट नियन्त्रण</span>
+                <button type="button" onclick="resetPrintControls()" style="background: none; border: none; color: #3182ce; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">पुनः सेट</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.82rem;">
+                <div>
+                    <label style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span>फन्ट साइज:</span><strong id="fontSizeVal">१३.५ pt</strong>
+                    </label>
+                    <input type="range" id="inFontSize" min="10" max="18" step="0.5" value="13.5" oninput="adjustFontSize(this.value)" style="width:100%;">
+                </div>
+                <div>
+                    <label style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span>लाइन स्पेस:</span><strong id="lineHeightVal">१.८</strong>
+                    </label>
+                    <input type="range" id="inLineHeight" min="1.3" max="2.4" step="0.05" value="1.8" oninput="adjustLineHeight(this.value)" style="width:100%;">
+                </div>
+                <div>
+                    <label style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span>माथिल्लो मार्जिन:</span><strong id="topMarginVal">१५ mm</strong>
+                    </label>
+                    <input type="range" id="inTopMargin" min="5" max="35" step="1" value="15" oninput="adjustTopMargin(this.value)" style="width:100%;">
+                </div>
+                <div>
+                    <label style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span>दायाँ/बायाँ मार्जिन:</span><strong id="sideMarginVal">२० mm</strong>
+                    </label>
+                    <input type="range" id="inSideMargin" min="10" max="35" step="1" value="20" oninput="adjustSideMargin(this.value)" style="width:100%;">
+                </div>
+            </div>
+            <div style="margin-top: 8px; font-size: 0.82rem;">
+                <label style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                    <span>हस्ताक्षर दुरी:</span><strong id="sigMarginVal">४० px</strong>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="120" step="5" value="40" oninput="adjustSignaturePosition(this.value)" style="width:100%;">
+            </div>
+        </div>
+
+        <!-- ── TWIN ACTION BUTTONS ── -->
+        <div class="action-button-row">
+            <button type="button" class="btn-quick-print" id="btnQuickPrint" onclick="quickPrintOnly()">
+                <span>🖨️</span> सिफारिस प्रिन्ट मात्र गर्ने
+            </button>
+            <button type="button" class="btn-save-print" id="btnSaveAndPrint" onclick="saveAndPrintRecord()">
+                <span>💾</span> अभिलेख तथा प्रिन्ट गर्ने
+            </button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════ PREVIEW PANEL (A4 Letter) ════════════════════════════ -->
+    <div class="preview-panel" id="previewPanel">
+        <div class="a4-page" id="printArea" style="padding: 15mm 20mm; min-height: 297mm; box-sizing: border-box; background: #fff; position: relative;">
+
+            <!-- ── Official Custom SVG Letterhead ── -->
+            <div class="custom-svg-letterhead">
+                <img class="svg-letterhead-banner" src="assets/letter%20head.svg"
+                    alt="गौरादह नगरपालिका लेटरहेड" width="561" height="138" loading="eager"
+                    fetchpriority="high" decoding="sync">
+                <img class="svg-letterhead-emblem" src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप"
+                    loading="eager" fetchpriority="high" decoding="sync">
+                <div class="svg-lh-meta-left">
+                    <div>प.सं. <span id="lblPatraSankhya"><span id="lblAY">२०८३/०८४</span></span></div>
+                    <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
+                </div>
+                <div class="svg-lh-meta-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३/</span></div>
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४६</span></div>
+                </div>
+            </div>
+
+            <!-- Red line sentinel for compatibility -->
+            <div class="header-red-line" style="display: none;"></div>
+
+            <!-- ── Subject ── -->
+            <div class="subject-container">
+                <div class="subject-line">
+                    <span class="subject-label" style="color: #e51a23;">विषय:-</span>
+                    <span id="lblSubject" style="font-weight: 700;">स्वास्थ्य सहायता उपलब्ध गराईदिने बारे ।</span>
+                </div>
+            </div>
+
+            <!-- ── Official Body Paragraph ── -->
+            <div class="letter-body-para" id="bodyText">
+                प्रस्तुत विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं. <strong id="lblWardNum">१</strong> मा बसोबास गर्ने <strong id="lblPatientName">..................</strong> (नागरिकता नं. <span id="lblCitNo">..................</span>, जारी मिति: <span id="lblCitDate">..................</span>, <span id="lblCitDistrict">झापा</span>) हाल <strong id="lblHospitalName">..................</strong> मा <strong id="lblDiseaseName">मुटु रोग</strong> को गम्भीर समस्या भई उपचार गराइरहनुभएको र निज बिरामीलाई “<strong id="lblCertifiedDetails">..................</strong>” भएको भनी अस्पतालबाट प्रमाणित भई आएको र निज बिरामीको आर्थिक अवस्था अत्यन्त विपन्न रहेको हुँदा, नेपाल सरकारले प्रदान गर्ने <strong>विपन्न नागरिक औषधि उपचार वापतको सहुलियत कार्यक्रम</strong> अन्तर्गत सुविधा उपलब्ध गराइदिनुहुन सिफारिसका साथ अनुरोध छ ।
+            </div>
+
+            <!-- ── Signature Block ── -->
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 40px;">
+                <div class="signature-block">
+                    <div class="sig-name" id="lblSigName">तिलक प्रसाद दाहाल</div>
+                    <div class="sig-title" id="lblSigTitle">वडा अध्यक्ष</div>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+
+        </div><!-- /a4-page -->
+    </div><!-- /preview-panel -->
+
+    <!-- ════════════════════════════ ABHILEKH MODAL ════════════════════════════ -->
+    <div class="modal-overlay" id="abhilekhModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: #fff; width: 100%; max-width: 960px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
+            <div style="padding: 16px 20px; background: #edf2f7; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #cbd5e0;">
+                <h3 style="margin: 0; font-size: 1.15rem; color: #2d3748; display: flex; align-items: center; gap: 8px;">
+                    📊 स्वास्थ्य सहायता सिफारिस अभिलेख सूची
+                </h3>
+                <button type="button" onclick="toggleModal(false)" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #718096; line-height: 1;">✕</button>
+            </div>
+            <div style="padding: 16px 20px 8px 20px;">
+                <div style="position: relative;">
+                    <input type="text" id="searchField"
+                        placeholder="बिरामीको नाम, नागरिकता नं. वा चलानी नं. खोज्नुहोस्..."
+                        oninput="onArchiveSearchInput(this.value)" autocomplete="off"
+                        style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #cbd5e0; font-size: 0.95rem; font-family: inherit; box-sizing: border-box;">
+                    <button type="button" id="btnClearArchiveSearch" onclick="clearArchiveSearch()"
+                        title="खोजी हटाउनुस्"
+                        style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #a0aec0; cursor: pointer; font-size: 1.1rem;">✕</button>
+                </div>
+                <div id="dbTableSummary" style="margin-top: 8px; font-size: 0.85rem; color: #718096; min-height: 18px;"></div>
+            </div>
+            <div style="padding: 0 20px 16px 20px; overflow-y: auto; flex: 1;">
+                <table class="db-table" style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 0.9rem;">
+                    <thead style="position: sticky; top: 0; background: #f7fafc; border-bottom: 2px solid #e2e8f0; z-index: 10;">
+                        <tr>
+                            <th style="padding: 10px 8px; text-align: left; width: 6%;">क्र.सं.</th>
+                            <th style="padding: 10px 8px; text-align: left; width: 12%;">चलानी नं.</th>
+                            <th style="padding: 10px 8px; text-align: left; width: 13%;">मिति</th>
+                            <th style="padding: 10px 8px; text-align: left; width: 22%;">बिरामीको नाम</th>
+                            <th style="padding: 10px 8px; text-align: left; width: 16%;">नागरिकता नं.</th>
+                            <th style="padding: 10px 8px; text-align: left; width: 17%;">अस्पताल / रोग</th>
+                            <th style="padding: 10px 8px; text-align: center; width: 14%;">कार्य</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dbTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 30px; color: #a0aec0;">अभिलेख लोड हुँदैछ...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="dbTablePagination" style="padding: 10px 20px; background: #f7fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;"></div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════ SCRIPTS ════════════════════════════ -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
+    <script src="nepal-sambat-tithi.js"></script>
+    <script src="multi-ward-config.js"></script>
+    <script src="sifarish-save-service.js"></script>
+    <script src="font-settings.js"></script>
+    <script src="script-swasthya-sahayata-sifarish.js?v=1.0"></script>
+</body>
+
+</html>

@@ -426,7 +426,14 @@
                 <span class="input-icon">🏢</span>
                 <select class="form-input" id="inWard" style="cursor: pointer; height: auto;">
                     <option value="1">गौरादह वडा नं. १ (Ward 1)</option>
+                    <option value="2">गौरादह वडा नं. २ (Ward 2)</option>
                     <option value="3">गौरादह वडा नं. ३ (Ward 3)</option>
+                    <option value="4">गौरादह वडा नं. ४ (Ward 4)</option>
+                    <option value="5">गौरादह वडा नं. ५ (Ward 5)</option>
+                    <option value="6">गौरादह वडा नं. ६ (Ward 6)</option>
+                    <option value="7">गौरादह वडा नं. ७ (Ward 7)</option>
+                    <option value="8">गौरादह वडा नं. ८ (Ward 8)</option>
+                    <option value="9">गौरादह वडा नं. ९ (Ward 9)</option>
                 </select>
                 <small id="wardLoadingHint" style="display:none; color:#64748b; font-size:0.78rem; margin-top:4px;">🔄 वडा सूची लोड हुँदैछ...</small>
             </div>
@@ -477,10 +484,41 @@
         </div>
     </div>
 
+    <!-- 🔐 Mandatory Super Admin First-Time Password Reset Modal 🔐 -->
+    <div class="forgot-modal-overlay" id="mandatoryResetModal" style="display:none; align-items:center; justify-content:center; z-index:9999;">
+        <div class="forgot-modal" style="max-width:440px; text-align:left; background:#fff; padding:28px; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.3);">
+            <h3 style="color:#c53030; font-size:1.3rem; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+                🔐 नयाँ पासवर्ड निर्धारण (अनिवार्य)
+            </h3>
+            <p style="font-size:0.92rem; color:#4a5568; line-height:1.5; margin-bottom:14px;">
+                नमस्ते <strong id="resetTargetUser">Sital</strong>, पहिलो पटक लग-इन गर्दा प्रणाली सुरक्षाका लागि प्रारम्भिक पासवर्ड परिवर्तन गरी नयाँ बलियो पासवर्ड राख्न अनिवार्य छ।
+            </p>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.86rem; font-weight:600; color:#2d3748; display:block; margin-bottom:4px;">नयाँ गोप्य पासवर्ड (कम्तिमा १२ अक्षर):</label>
+                <input type="password" id="resetNewPass" placeholder="कम्तिमा १२ अक्षर (ठूलो, सानो, अंक, विशेष चिन्ह)" 
+                    style="width:100%; padding:9px 12px; border:1.5px solid #cbd5e0; border-radius:8px; font-size:0.92rem; outline:none;">
+                <div style="font-size:0.75rem; color:#718096; margin-top:4px;">नीति: कम्तिमा १२ अक्षर, ठूलो अक्षर (A-Z), सानो अक्षर (a-z), अंक (0-9) र विशेष चिन्ह (@$!%*...) समावेश भएको।</div>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:0.86rem; font-weight:600; color:#2d3748; display:block; margin-bottom:4px;">नयाँ पासवर्ड पुन: प्रविष्ट गर्नुहोस्:</label>
+                <input type="password" id="resetConfirmPass" placeholder="नयाँ पासवर्ड दोहोर्याउनुहोस्" 
+                    style="width:100%; padding:9px 12px; border:1.5px solid #cbd5e0; border-radius:8px; font-size:0.92rem; outline:none;">
+            </div>
+            <div id="resetError" style="display:none; color:#e53e3e; font-size:0.84rem; margin-bottom:14px; background:#fff5f5; padding:8px 12px; border-radius:6px; border:1px solid #feb2b2;"></div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="cancelMandatoryReset()" 
+                    style="padding:8px 16px; background:#edf2f7; border:none; border-radius:8px; font-weight:600; cursor:pointer; color:#4a5568;">रद्द गर्नुहोस्</button>
+                <button type="button" id="btnSubmitReset" onclick="submitMandatoryPasswordReset()" 
+                    style="padding:8px 20px; background:linear-gradient(135deg, #1e3a8a, #2563eb); border:none; border-radius:8px; font-weight:600; cursor:pointer; color:#fff;">सुरक्षित गर्नुहोस् ➔</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Include Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="multi-ward-config.js"></script>
 
     <!-- Include auth utilities -->
     <script>
@@ -692,6 +730,52 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
+        // ===== Cryptographic Salted & Stretched Key Derivation (PBKDF2-SHA512) =====
+        async function derivePBKDF2Hash(password, saltHex, iterations = 100000) {
+            if (!window.crypto || !window.crypto.subtle) {
+                return { hash: 'FALLBACK_' + btoa(password), salt: saltHex || 'legacy_salt', iterations: 1, algo: 'FALLBACK' };
+            }
+            const enc = new TextEncoder();
+            let saltBytes;
+            if (saltHex && typeof saltHex === 'string') {
+                const matches = saltHex.match(/.{1,2}/g) || [];
+                saltBytes = new Uint8Array(matches.map(b => parseInt(b, 16)));
+            } else {
+                saltBytes = new Uint8Array(32);
+                window.crypto.getRandomValues(saltBytes);
+            }
+            const keyMaterial = await window.crypto.subtle.importKey(
+                'raw',
+                enc.encode(password),
+                { name: 'PBKDF2' },
+                false,
+                ['deriveBits']
+            );
+            const derivedBits = await window.crypto.subtle.deriveBits(
+                {
+                    name: 'PBKDF2',
+                    salt: saltBytes,
+                    iterations: iterations,
+                    hash: 'SHA-512'
+                },
+                keyMaterial,
+                512
+            );
+            const hashHex = Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, '0')).join('');
+            const saltHexOut = Array.from(saltBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+            return { hash: hashHex, salt: saltHexOut, iterations, algo: 'PBKDF2-SHA512' };
+        }
+
+        async function verifySuperAdminPassword(password, adminDoc) {
+            if (!adminDoc) return false;
+            if (adminDoc.algo === 'PBKDF2-SHA512' && adminDoc.salt && adminDoc.passwordHash) {
+                const derived = await derivePBKDF2Hash(password, adminDoc.salt, adminDoc.iterations || 100000);
+                return derived.hash === adminDoc.passwordHash;
+            }
+            const shaHash = await hashPassword(password);
+            return adminDoc.passwordHash === shaHash;
+        }
+
         // ===== Security: Rate Limiting =====
         const loginAttempts = { count: 0, lockedUntil: 0 };
         const MAX_ATTEMPTS = 5;
@@ -763,46 +847,103 @@
             try {
                 const passwordHash = await hashPassword(password);
 
-                const secureHashes = {
-                    'wada1': { hash: '670ab6a549de1aed9c41556bfcdedede93bd80fdf393309113478991e84d0104', ward: '1', admin: false },
-                    'wada3': { hash: 'fcc2c4db1543d2dd9ba7ba80df38e7d579a5169cb9fa1be2437ae6806a8ab370', ward: '3', admin: false },
-                    'admin': { hash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', ward: '1', admin: true }
-                };
-
                 let isAdmin = false;
+                let role = 'ward_staff';
                 let finalWard = selectedWard;
                 let isValidUser = false;
+                const db = firebase.firestore();
 
-                // 1. Verify against SHA-256 hash
-                if (secureHashes[cleanUser] && secureHashes[cleanUser].hash === passwordHash) {
-                    finalWard = secureHashes[cleanUser].ward;
-                    isAdmin = secureHashes[cleanUser].admin;
-                    isValidUser = true;
-                }
-                if (cleanUser === 'wada1' || cleanUser === 'wada3') {
-                    isAdmin = false;
+                // Ensure active authenticated session before reading system collections
+                try {
+                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    if (!firebase.auth().currentUser) {
+                        await firebase.auth().signInAnonymously();
+                    }
+                } catch (authInitErr) {
+                    console.warn('Anonymous auth init error:', authInitErr);
                 }
 
-                // 2. If not matched in secureHashes, query Firestore securely
-                if (!isValidUser) {
+                // ── 1. SUPER ADMIN AUTHENTICATION (Sital) ──
+                if (cleanUser === 'sital') {
+                    const BOOTSTRAP_HASH = 'c442571dad63299cda65ec6492778a13dae8490970273cf152658972f64d476a';
+                    let superAdminDoc = null;
+
                     try {
-                        const db = firebase.firestore();
-                        const wardQuery = await db.collection('ward_users')
+                        const sSnap = await db.collection('system_config').doc('super_admin').get();
+                        if (sSnap.exists) {
+                            superAdminDoc = sSnap.data();
+                        }
+                    } catch (e) {
+                        console.warn('Super admin lookup exception:', e);
+                    }
+
+                    const isFirstTimeBootstrap = !superAdminDoc || superAdminDoc.isTemporary === true;
+
+                    if (isFirstTimeBootstrap) {
+                        // Check if password entered matches initial temporary password 'Sital123'
+                        if (password === 'Sital123' || passwordHash === BOOTSTRAP_HASH || (superAdminDoc && superAdminDoc.passwordHash === passwordHash)) {
+                            // 🔒 First-time login: MANDATORY PASSWORD RESET REQUIRED!
+                            btn.disabled = false;
+                            btn.classList.remove('loading');
+                            btn.querySelector('.btn-text').textContent = 'लग-इन';
+                            showMandatoryPasswordResetModal('Sital');
+                            return;
+                        }
+                    } else {
+                        // Subsequent logins: verify against saved PBKDF2 stretched hash
+                        const isMatch = await verifySuperAdminPassword(password, superAdminDoc);
+                        if (isMatch) {
+                            isValidUser = true;
+                            isAdmin = true;
+                            role = 'super_admin';
+                            finalWard = '1';
+                        }
+                    }
+                }
+
+                // ── 2. WARD ACCOUNTS (wada1 through wada9) ──
+                const wardMatch = cleanUser.match(/^wada([1-9])$|^ward([1-9])$/);
+                if (wardMatch) {
+                    const wardNum = wardMatch[1] || wardMatch[2];
+                    finalWard = wardNum;
+                    isAdmin = false;
+                    role = 'ward_staff';
+
+                    // First check Firestore 'ward_users'
+                    try {
+                        const wQuery = await db.collection('ward_users')
                             .where('username', '==', cleanUser)
                             .limit(1)
                             .get();
 
-                        if (!wardQuery.empty) {
-                            const wardDoc = wardQuery.docs[0].data();
-                            const storedPass = wardDoc.passwordHash || '';
-                            if (storedPass === passwordHash) {
-                                finalWard = String(wardDoc.wardNumber || selectedWard);
-                                isAdmin = wardDoc.isAdmin === true;
+                        if (!wQuery.empty) {
+                            const wDoc = wQuery.docs[0].data();
+                            if (wDoc.passwordHash && wDoc.passwordHash === passwordHash) {
                                 isValidUser = true;
+                                if (wDoc.isAdmin) isAdmin = true;
                             }
                         }
-                    } catch(fsErr) {
-                        console.warn('Firestore user lookup error:', fsErr);
+                    } catch (fsErr) {
+                        console.warn('Ward user lookup error:', fsErr);
+                    }
+
+                    // Fallback to default secure hash (wada{N} -> default password 'wada{N}')
+                    if (!isValidUser) {
+                        const defaultWardPassHash = await hashPassword(`wada${wardNum}`);
+                        if (passwordHash === defaultWardPassHash) {
+                            isValidUser = true;
+                        }
+                    }
+                }
+
+                // ── 3. LEGACY ADMIN CHECK ──
+                if (!isValidUser && cleanUser === 'admin') {
+                    const adminHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+                    if (passwordHash === adminHash) {
+                        isValidUser = true;
+                        isAdmin = true;
+                        role = 'super_admin';
+                        finalWard = '1';
                     }
                 }
 
@@ -815,25 +956,45 @@
                 loginAttempts.count = 0;
                 loginAttempts.lockedUntil = 0;
 
-                if (cleanUser === 'wada1' || cleanUser === 'wada3') {
-                    isAdmin = false;
-                }
-
-                // Establish authenticated Firebase session safely without hardcoded secrets
+                // Establish authenticated Firebase session safely
                 try {
                     await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                     await firebase.auth().signInAnonymously();
                 } catch(pErr) {}
 
-                // Save ward, username, and session info locally
+                // Synchronize backend ward_users profile for server-side rule verification
+                try {
+                    const currentUid = firebase.auth().currentUser ? firebase.auth().currentUser.uid : null;
+                    if (currentUid) {
+                        await db.collection('ward_users').doc(currentUid).set({
+                            username: cleanUser,
+                            role: role,
+                            wardNumber: String(finalWard),
+                            updatedAt: Date.now()
+                        }, { merge: true });
+                    }
+                } catch (uidSyncErr) {
+                    console.warn('ward_users sync warning:', uidSyncErr);
+                }
+
+                // Save ward, username, role, and session info
                 localStorage.setItem('sifarish_ward', finalWard);
                 localStorage.setItem('sifarish_user', username.trim());
-                createSession(isAdmin, rememberMe);
+                localStorage.setItem('sifarish_role', role);
+                createSession(isAdmin, rememberMe, role);
+
+                if (window.MultiWard && typeof window.MultiWard.logAuditEvent === 'function') {
+                    window.MultiWard.logAuditEvent(db, 'USER_LOGIN_SUCCESS', {
+                        username: username.trim(),
+                        ward: finalWard,
+                        role: role
+                    });
+                }
 
                 btn.querySelector('.btn-text').textContent = '✅ प्रवेश हुँदैछ...';
                 btn.style.background = 'linear-gradient(135deg, #276749, #38a169)';
 
-                let dest = getSafeRedirect(localStorage.getItem('sifarish_redirect') || 'index.html');
+                let dest = getSafeRedirect(localStorage.getItem('sifarish_redirect') || (isAdmin ? 'admin.html' : 'index.html'));
                 if (dest.includes('admin.html') && !isAdmin) {
                     dest = 'index.html';
                 }
@@ -862,10 +1023,155 @@
             }
         }
 
+        // ── MANDATORY SUPER ADMIN FIRST-TIME PASSWORD RESET ──
+        function showMandatoryPasswordResetModal(uname) {
+            document.getElementById('resetTargetUser').textContent = uname || 'Sital';
+            document.getElementById('resetNewPass').value = '';
+            document.getElementById('resetConfirmPass').value = '';
+            const errDiv = document.getElementById('resetError');
+            errDiv.style.display = 'none';
+            errDiv.textContent = '';
+            const modal = document.getElementById('mandatoryResetModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+            document.getElementById('resetNewPass').focus();
+        }
+
+        function cancelMandatoryReset() {
+            const modal = document.getElementById('mandatoryResetModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        async function submitMandatoryPasswordReset() {
+            const newPass = document.getElementById('resetNewPass').value.trim();
+            const confirmPass = document.getElementById('resetConfirmPass').value.trim();
+            const errDiv = document.getElementById('resetError');
+            const submitBtn = document.getElementById('btnSubmitReset');
+
+            errDiv.style.display = 'none';
+
+            // Strict password policy: min 12 chars, upper, lower, number, special char
+            if (newPass.length < 12) {
+                errDiv.textContent = '⚠️ नयाँ पासवर्ड कम्तिमा १२ अक्षर लामो हुनुपर्छ।';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if (!/[A-Z]/.test(newPass)) {
+                errDiv.textContent = '⚠️ पासवर्डमा कम्तिमा एउटा ठूलो अक्षर (Uppercase A-Z) समावेश हुनु अनिवार्य छ।';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if (!/[a-z]/.test(newPass)) {
+                errDiv.textContent = '⚠️ पासवर्डमा कम्तिमा एउटा सानो अक्षर (Lowercase a-z) समावेश हुनु अनिवार्य छ।';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if (!/[0-9]/.test(newPass)) {
+                errDiv.textContent = '⚠️ पासवर्डमा कम्तिमा एउटा अंक (0-9) समावेश हुनु अनिवार्य छ।';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPass)) {
+                errDiv.textContent = '⚠️ पासवर्डमा कम्तिमा एउटा विशेष चिन्ह (!@#$%^&*...) समावेश हुनु अनिवार्य छ।';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if (newPass.toLowerCase() === 'sital123') {
+                errDiv.textContent = '⚠️ प्रारम्भिक पासवर्ड (Sital123) पुनः राख्न पाइँदैन। कृपया नयाँ बलियो पासवर्ड राख्नुहोस्।';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if (newPass !== confirmPass) {
+                errDiv.textContent = '⚠️ दुबै पासवर्डहरू मेल खाएनन्!';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ सुरक्षित हुँदैछ...';
+
+            try {
+                // Authenticate session first so Firebase Firestore permits initial bootstrap write
+                try {
+                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    if (!firebase.auth().currentUser) {
+                        await firebase.auth().signInAnonymously();
+                    }
+                } catch(e) {}
+
+                // Cryptographic salted stretched key derivation (WebCrypto PBKDF2 with SHA-512, 100,000 iterations)
+                const derivedObj = await derivePBKDF2Hash(newPass);
+                const db = firebase.firestore();
+
+                await db.collection('system_config').doc('super_admin').set({
+                    username: 'Sital',
+                    passwordHash: derivedObj.hash,
+                    salt: derivedObj.salt,
+                    iterations: derivedObj.iterations,
+                    algo: derivedObj.algo,
+                    isTemporary: false,
+                    role: 'super_admin',
+                    updatedAt: Date.now()
+                }, { merge: true });
+
+                const uid = firebase.auth().currentUser ? firebase.auth().currentUser.uid : null;
+                if (uid) {
+                    await db.collection('ward_users').doc(uid).set({
+                        username: 'Sital',
+                        role: 'super_admin',
+                        wardNumber: '1',
+                        updatedAt: Date.now()
+                    }, { merge: true });
+                }
+
+                localStorage.setItem('sifarish_user', 'Sital');
+                localStorage.setItem('sifarish_ward', '1');
+                localStorage.setItem('sifarish_role', 'super_admin');
+                createSession(true, true, 'super_admin');
+
+                if (window.MultiWard && typeof window.MultiWard.logAuditEvent === 'function') {
+                    window.MultiWard.logAuditEvent(db, 'SUPER_ADMIN_PASSWORD_INITIALIZED', {
+                        username: 'Sital',
+                        algo: derivedObj.algo,
+                        iterations: derivedObj.iterations,
+                        status: 'ACTIVE_PERMANENT'
+                    });
+                }
+
+                submitBtn.textContent = '✅ सुरक्षित भयो! प्रवेश हुँदैछ...';
+                submitBtn.style.background = '#276749';
+
+                setTimeout(() => {
+                    window.location.replace('admin.html');
+                }, 500);
+
+            } catch (err) {
+                console.error('Password reset save error:', err);
+                errDiv.textContent = '⚠️ नयाँ पासवर्ड सुरक्षित गर्दा त्रुटि भयो। कृपया पुनः प्रयास गर्नुहोस्।';
+                errDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'सुरक्षित गर्नुहोस् ➔';
+            }
+        }
+
+        // Auto-select ward dropdown when typing wada1..wada9
+        document.getElementById('inUsername').addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            const m = val.match(/^wada([1-9])$|^ward([1-9])$/);
+            if (m) {
+                const wardSelect = document.getElementById('inWard');
+                if (wardSelect) wardSelect.value = m[1] || m[2];
+            }
+        });
+
         // Allow Enter key to submit
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
-                // Don't submit if forgot modal is open
+                if (document.getElementById('mandatoryResetModal').classList.contains('show')) {
+                    submitMandatoryPasswordReset();
+                    return;
+                }
                 if (document.getElementById('forgotModal').classList.contains('show')) {
                     closeForgotModal();
                     return;

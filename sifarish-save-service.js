@@ -80,6 +80,7 @@
             'citizen', 'surakshyaSanrakshakTestRecords', 'surakshyaBhattaRecords', 'bankRecords',
             'apangataRecords', 'panRecords', 'abibahitRecords', 'bibahaRecords',
             'nabalakRecords', 'pariwarikRecords', 'aamdaniPramanitRecords', 'abhilekhRecords',
+            'swasthyaSahayataRecords',
             'test_citizenRecords'
         ];
         if (personalCols.includes(normCol)) {
@@ -91,7 +92,7 @@
             }
 
             // Fallback: Safe combination of name + relative / DOB / fiscal year
-            const citizenName = data.beneficiaryName || data.applicantName || data.name || '';
+            const citizenName = data.beneficiaryName || data.applicantName || data.name || data.patientName || '';
             const cleanName = normalizeNoSpace(citizenName);
             const relativeName = normalizeNoSpace(data.fatherName || data.spouseName || data.guardianName || '');
             const ay = normalizeNepaliText(data.ay || data.fiscalYear || '');
@@ -313,22 +314,33 @@
             let savedId = editId;
             let wasUpdated = false;
 
+            const activeWard = localStorage.getItem('sifarish_ward') || '1';
+            const activeMuni = localStorage.getItem('sifarish_municipality') || 'gauradaha';
+            const activeUser = localStorage.getItem('sifarish_user') || 'wada1';
+
             if (editId) {
                 // Update existing record
                 wasUpdated = true;
                 data.lastUpdatedAt = timestampNow;
-                data.lastUpdatedBy = localStorage.getItem('sifarish_user') || 'wada1';
+                data.lastUpdatedBy = activeUser;
+                if (!data.ward_id) data.ward_id = parseInt(activeWard, 10);
+                if (!data.createdWard) data.createdWard = String(activeWard);
+                if (!data.municipality_id) data.municipality_id = activeMuni;
+
                 await db.collection(collectionName).doc(editId).set(data, { merge: true });
                 savedId = editId;
                 if (typeof showToast === 'function') {
                     showToast("अवस्थित अभिलेख फेला पर्यो - सोही अभिलेख अपडेट गरियो !", "info");
                 }
             } else {
-                // Create brand new record
+                // Create brand new record with strict ward context
                 data.timestamp = timestampNow;
                 data.createdAt = timestampNow;
-                data.createdBy = data.createdBy || localStorage.getItem('sifarish_user') || 'wada1';
-                data.createdWard = data.createdWard || localStorage.getItem('sifarish_ward') || '1';
+                data.createdBy = data.createdBy || activeUser;
+                data.createdWard = data.createdWard || String(activeWard);
+                data.ward_id = data.ward_id || parseInt(activeWard, 10);
+                data.municipality_id = data.municipality_id || activeMuni;
+
                 const docRef = await db.collection(collectionName).add(data);
                 savedId = docRef.id;
                 if (editIndexEl) editIndexEl.value = savedId;

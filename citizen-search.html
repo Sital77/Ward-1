@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="multi-ward-config.js"></script>
     <script src="auth.js?v=2.5"></script>
     <style>
         * {
@@ -446,7 +447,8 @@
             { name: 'apangataRecords', label: '♿ अपाङ्गता सिफारिस', page: 'apangata-sifarish.html' },
             { name: 'surakshyaBhattaRecords', label: '🛡️ सामाजिक सुरक्षा भत्ता संरक्षक (पुराना अभिलेख)', page: 'surakshya-bhatta-sifarish.html' },
             { name: 'surakshyaSanrakshakTestRecords', label: '🛡️ संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट', page: 'surakshya-sanrakshak-test.html' },
-            { name: 'bankRecords', label: '🏦 बैंक खाता सिफारिस', page: 'bank-sifarish.html' }
+            { name: 'bankRecords', label: '🏦 बैंक खाता सिफारिस', page: 'bank-sifarish.html' },
+            { name: 'swasthyaSahayataRecords', label: '🏥 स्वास्थ्य सहायता सिफारिस', page: 'swasthya-sahayata-sifarish.html' }
         ];
 
         let searchDebounceTimer = null;
@@ -509,11 +511,32 @@
 
             const loaded = [];
             const promises = COLLECTION_SPECS.map(async (spec) => {
+                // 🔒 Multi-Ward Gatekeeper: bargikaranSifarishRecords exclusively for Ward 1 & Super Admin
+                if (spec.name === 'bargikaranSifarishRecords') {
+                    const canAccess = (window.MultiWard && typeof window.MultiWard.canAccessLandClassification === 'function')
+                        ? window.MultiWard.canAccessLandClassification()
+                        : ((localStorage.getItem('sifarish_ward') || '1') === '1' || localStorage.getItem('sifarish_role') === 'super_admin');
+                    if (!canAccess) return;
+                }
+
                 try {
+                    const isSuper = (window.MultiWard && typeof window.MultiWard.isSuperAdmin === 'function')
+                        ? window.MultiWard.isSuperAdmin()
+                        : (localStorage.getItem('sifarish_role') === 'super_admin' || (localStorage.getItem('sifarish_user') || '').toLowerCase() === 'sital');
+                    const activeWard = (window.MultiWard && typeof window.MultiWard.getActiveWard === 'function')
+                        ? window.MultiWard.getActiveWard()
+                        : (localStorage.getItem('sifarish_ward') || '1');
+
                     const snap = await db.collection(spec.name).limit(150).get();
                     snap.forEach(doc => {
                         const data = doc.data();
                         if (data.isDeleted) return;
+
+                        // 🔒 Ward Data Isolation: Ordinary staff only see their ward's citizens
+                        if (!isSuper) {
+                            const docWard = String(data.ward_id || data.createdWard || data.ward || '1');
+                            if (docWard !== String(activeWard)) return;
+                        }
 
                         loaded.push({
                             id: doc.id,

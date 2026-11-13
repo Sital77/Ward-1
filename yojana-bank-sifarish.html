@@ -273,7 +273,14 @@
                     <input type="text" id="inChalani" placeholder="उदा: ११५२" oninput="updateDoc()">
                 </div>
                 <div>
-                    <label>मिति (वि.सं.):</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <label style="margin-bottom: 0;">मिति (वि.सं.):</label>
+                        <button type="button" id="btnTodayDate" onclick="setCurrentKathmanduDate()" 
+                            style="padding: 2px 7px; font-size: 0.74rem; background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; border-radius: 4px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;"
+                            title="काठमाडौँ समय अनुसार आजको नेपाली मिति स्वतः भर्नुहोस्">
+                            🗓️ हालको मिति
+                        </button>
+                    </div>
                     <input type="text" id="inMiti" placeholder="उदा: २०८३/०४/१५" oninput="updateDoc()">
                 </div>
             </div>
@@ -447,17 +454,67 @@
                 <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
                 <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
             </div>
-            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
-                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
-                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
-                </label>
-                <input type="range" id="inSigMargin" min="10" max="250" value="40" oninput="adjustSignaturePosition(this.value)">
+            <!-- ── Print Formatting & Typography Controls ── -->
+            <div class="print-controls-card" style="margin-top: 14px; border-top: 2px solid #fed7d7; padding-top: 10px; background: #f8fafc; border-radius: 8px; padding: 10px; border: 1px solid #edf2f7;">
+                <div style="font-weight: 700; color: #2d3748; font-size: 0.86rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>⚙️ प्रिन्ट ढाँचा तथा फन्ट नियन्त्रण</span>
+                    <button type="button" onclick="resetPrintControls()" style="font-size: 0.72rem; padding: 2px 6px; border: 1px solid #cbd5e0; background: #fff; border-radius: 4px; cursor: pointer; color: #4a5568;">पुनर्स्थापित</button>
+                </div>
+
+                <!-- Font Size -->
+                <div style="margin-bottom: 8px;">
+                    <label style="color: #4a5568; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span>📐 अक्षरको आकार (फन्ट):</span><span id="fontSizeVal" style="font-weight: 600; color: #2b6cb0;">१३.५ pt</span>
+                    </label>
+                    <input type="range" id="inFontSize" min="10" max="20" step="0.5" value="13.5" oninput="adjustFontSize(this.value)" style="width: 100%;">
+                </div>
+
+                <!-- Line Spacing -->
+                <div style="margin-bottom: 8px;">
+                    <label style="color: #4a5568; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span>↕️ हरफको दुरी (लाइन स्पेसिङ):</span><span id="lineHeightVal" style="font-weight: 600; color: #2b6cb0;">१.६</span>
+                    </label>
+                    <input type="range" id="inLineHeight" min="1.1" max="2.4" step="0.1" value="1.6" oninput="adjustLineHeight(this.value)" style="width: 100%;">
+                </div>
+
+                <!-- Letterhead Top Margin -->
+                <div style="margin-bottom: 8px;">
+                    <label style="color: #4a5568; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span>🔝 माथिल्लो मार्जिन:</span><span id="topMarginVal" style="font-weight: 600; color: #2b6cb0;">१५ mm</span>
+                    </label>
+                    <input type="range" id="inTopMargin" min="0" max="50" step="1" value="15" oninput="adjustTopMargin(this.value)" style="width: 100%;">
+                </div>
+
+                <!-- Side Margin -->
+                <div style="margin-bottom: 8px;">
+                    <label style="color: #4a5568; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span>↔️ दायाँ/बायाँ मार्जिन:</span><span id="sideMarginVal" style="font-weight: 600; color: #2b6cb0;">२० mm</span>
+                    </label>
+                    <input type="range" id="inSideMargin" min="5" max="35" step="1" value="20" oninput="adjustSideMargin(this.value)" style="width: 100%;">
+                </div>
+
+                <!-- Signature Distance -->
+                <div>
+                    <label style="color: #4a5568; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span>✍️ हस्ताक्षरको दुरी:</span><span id="marginVal" style="font-weight: 600; color: #2b6cb0;">४० px</span>
+                    </label>
+                    <input type="range" id="inSigMargin" min="10" max="250" value="40" oninput="adjustSignaturePosition(this.value)" style="width: 100%;">
+                </div>
             </div>
         </div>
 
+        <!-- ── Responsive Twin Print Actions Bar ── -->
         <div class="print-actions-wrapper" style="display: flex; gap: 10px; margin-top: 15px;">
-            <button type="button" class="btn-print" id="btnQuickPrint" onclick="quickPrintOnly()" style="background: #4a5568; flex: 1;" title="अभिलेखमा सेभ नगरी सिधै प्रिन्ट गर्नुहोस्">🖨️ सिफारिस प्रिन्ट मात्र</button>
-            <button type="button" class="btn-print" id="btnSaveAndPrint" onclick="printAndSaveSystem()" style="background: #2b6cb0; flex: 1.3;" title="अभिलेख सुरक्षित गरी सिफारिस प्रिन्ट गर्नुहोस्">💾 अभिलेख तथा सिफारिस प्रिन्ट</button>
+            <button type="button" class="btn-print" id="btnQuickPrint" onclick="quickPrintOnly()" 
+                style="background: #4a5568; color: #fff; flex: 1; padding: 11px 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s;" 
+                title="अभिलेखमा सेभ नगरी सिधै प्रिन्ट गर्नुहोस्">
+                🖨️ सिफारिस प्रिन्ट मात्र गर्ने
+            </button>
+            <button type="button" class="btn-print" id="btnSaveAndPrint" onclick="printAndSaveSystem()" 
+                style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; flex: 1.3; padding: 11px 14px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(37,99,235,0.25);" 
+                title="अभिलेख सुरक्षित गरी सिफारिस प्रिन्ट गर्नुहोस्">
+                💾 अभिलेख तथा प्रिन्ट गर्ने
+            </button>
         </div>
         <div style="margin-top: 8px; text-align: center;">
             <button type="button" id="btnNewForm" onclick="resetFormToNew()" style="display: none; padding: 5px 12px; background: #edf2f7; border: 1px dashed #4a5568; border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: #2d3748;">➕ नयाँ सिफारिस फाराम</button>
@@ -716,8 +773,107 @@
         }
 
         function adjustSignaturePosition(val) {
-            document.getElementById('sigSpacing').style.height = val + 'px';
-            document.getElementById('marginVal').innerText = val + ' px';
+            const el = document.getElementById('sigSpacing') || document.getElementById('docFooterSection');
+            if (el) {
+                if (el.id === 'sigSpacing') el.style.height = val + 'px';
+                else el.style.marginTop = val + 'px';
+            }
+            const lbl = document.getElementById('marginVal');
+            if (lbl) lbl.innerText = toNepaliDigit(val) + ' px';
+        }
+
+        function adjustFontSize(val) {
+            const lbl = document.getElementById('fontSizeVal');
+            if (lbl) lbl.innerText = toNepaliDigit(val) + ' pt';
+            const body = document.getElementById('bodyText');
+            if (body) body.style.fontSize = val + 'pt';
+        }
+
+        function adjustLineHeight(val) {
+            const lbl = document.getElementById('lineHeightVal');
+            if (lbl) lbl.innerText = toNepaliDigit(val);
+            const body = document.getElementById('bodyText');
+            if (body) body.style.lineHeight = val;
+        }
+
+        function adjustTopMargin(val) {
+            const lbl = document.getElementById('topMarginVal');
+            if (lbl) lbl.innerText = toNepaliDigit(val) + ' mm';
+            const page = document.querySelector('.a4-page');
+            if (page) page.style.paddingTop = val + 'mm';
+        }
+
+        function adjustSideMargin(val) {
+            const lbl = document.getElementById('sideMarginVal');
+            if (lbl) lbl.innerText = toNepaliDigit(val) + ' mm';
+            const page = document.querySelector('.a4-page');
+            if (page) {
+                page.style.paddingLeft = val + 'mm';
+                page.style.paddingRight = val + 'mm';
+            }
+        }
+
+        function resetPrintControls() {
+            const fs = document.getElementById('inFontSize');
+            if (fs) { fs.value = 13.5; adjustFontSize(13.5); }
+            const lh = document.getElementById('inLineHeight');
+            if (lh) { lh.value = 1.6; adjustLineHeight(1.6); }
+            const tm = document.getElementById('inTopMargin');
+            if (tm) { tm.value = 15; adjustTopMargin(15); }
+            const sm = document.getElementById('inSideMargin');
+            if (sm) { sm.value = 20; adjustSideMargin(20); }
+            const sig = document.getElementById('inSigMargin');
+            if (sig) { sig.value = 40; adjustSignaturePosition(40); }
+        }
+
+        function setCurrentKathmanduDate() {
+            try {
+                const now = new Date();
+                const ktmOffsetMinutes = 345;
+                const utcMinutes = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const ktmDate = new Date(utcMinutes + (ktmOffsetMinutes * 60000));
+                
+                const yyyy = ktmDate.getFullYear();
+                const mm = String(ktmDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(ktmDate.getDate()).padStart(2, '0');
+                
+                const converter = window["@sbmdkl/nepali-date-converter"];
+                let nepaliDateStr = '';
+                if (converter) {
+                    let bs = null;
+                    if (typeof converter.adToBs === 'function') {
+                        bs = converter.adToBs(`${yyyy}-${mm}-${dd}`);
+                    } else if (typeof converter === 'function') {
+                        const nd = new converter(ktmDate);
+                        bs = nd.format ? nd.format('YYYY/MM/DD') : null;
+                    }
+                    if (bs) {
+                        if (typeof bs === 'string') {
+                            const p = bs.split(/[-/]/);
+                            nepaliDateStr = `${toNepaliDigit(p[0])}/${toNepaliDigit(String(p[1]).padStart(2, '0'))}/${toNepaliDigit(String(p[2]).padStart(2, '0'))}`;
+                        } else if (typeof bs === 'object') {
+                            const y = bs.bsYear || bs.year;
+                            const m = String(bs.bsMonth || bs.month).padStart(2, '0');
+                            const d = String(bs.bsDay || bs.day || bs.date).padStart(2, '0');
+                            nepaliDateStr = `${toNepaliDigit(y)}/${toNepaliDigit(m)}/${toNepaliDigit(d)}`;
+                        }
+                    }
+                }
+                if (!nepaliDateStr) {
+                    nepaliDateStr = '२०८३/०४/१५';
+                }
+                const mitiInput = document.getElementById('inMiti');
+                if (mitiInput) {
+                    mitiInput.value = nepaliDateStr;
+                }
+                const nsInput = document.getElementById('inNepalSamvat');
+                if (nsInput && !nsInput.value.trim()) {
+                    nsInput.value = '११४६';
+                }
+                updateDoc();
+            } catch(e) {
+                console.error('Date calculation error:', e);
+            }
         }
 
         function toNepaliDigit(num) {
