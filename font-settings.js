@@ -54,7 +54,7 @@
             const origFirestore = firebase.firestore;
             if (origFirestore.__multiWardHooked) return;
 
-            firebase.firestore = function () {
+            const wrappedFirestore = function () {
                 const dbInstance = origFirestore.apply(this, arguments);
                 if (dbInstance.__multiWardWrapped) return dbInstance;
 
@@ -131,7 +131,19 @@
                 return dbInstance;
             };
 
+            // Copy all static properties/namespaces (Firestore, FieldValue, Timestamp, etc.) onto wrapper
+            Object.getOwnPropertyNames(origFirestore).forEach(prop => {
+                if (!['length', 'name', 'prototype', 'arguments', 'caller'].includes(prop)) {
+                    try {
+                        const desc = Object.getOwnPropertyDescriptor(origFirestore, prop);
+                        if (desc) Object.defineProperty(wrappedFirestore, prop, desc);
+                    } catch (e) {}
+                }
+            });
+            try { Object.setPrototypeOf(wrappedFirestore, origFirestore); } catch (e) {}
+            wrappedFirestore.__multiWardHooked = true;
             origFirestore.__multiWardHooked = true;
+            firebase.firestore = wrappedFirestore;
         }
 
         if (typeof firebase !== 'undefined' && firebase.firestore) {
@@ -174,7 +186,9 @@
         'jaggadhani-pratilipi': { collection: 'jaggadhaniPratilipiRecords', title: 'धनीपूर्जा प्रतिलिपि सिफारिस' },
         'jaggadhani-patra': { collection: 'jaggadhaniPoojaRecords', title: 'जग्गाधनीपूर्जा रजिष्ट्रेसन' },
         'nabalak-parichayapatra': { collection: 'nabalakRecords', title: 'नाबालक परिचय पत्र सिफारिस' },
-        'yojana-samjhauta': { collection: 'yojanaSamjhautaRecords', title: 'योजना सम्झौता सिफारिस' }
+        'yojana-samjhauta': { collection: 'yojanaSamjhautaRecords', title: 'योजना सम्झौता सिफारिस' },
+        'swasthya-sahayata-sifarish': { collection: 'swasthyaSahayataRecords', title: 'स्वास्थ्य सहायता सिफारिस' },
+        'chhatrabritti-sifarish': { collection: 'chhatrabrittiRecords', title: 'छात्रवृत्ति सिफारिस' }
     };
 
     // Intercept firebase initializeApp to prevent duplicate app errors
@@ -357,15 +371,17 @@
                 }
             }
 
-            const originalCollection = firebase.firestore.Firestore.prototype.collection;
-            firebase.firestore.Firestore.prototype.collection = function (name) {
-                const ward = localStorage.getItem('sifarish_ward') || '1';
-                const sharedCols = ['sifarish_templates', 'sifarish_categories', 'signing_authorities', 'ward_users', 'deleted_records_log', 'system_logs'];
-                if (ward !== '1' && !sharedCols.includes(name)) {
-                    return originalCollection.call(this, name + "_w" + ward);
-                }
-                return originalCollection.call(this, name);
-            };
+            if (firebase.firestore.Firestore && firebase.firestore.Firestore.prototype && firebase.firestore.Firestore.prototype.collection) {
+                const originalCollection = firebase.firestore.Firestore.prototype.collection;
+                firebase.firestore.Firestore.prototype.collection = function (name) {
+                    const ward = localStorage.getItem('sifarish_ward') || '1';
+                    const sharedCols = ['sifarish_templates', 'sifarish_categories', 'signing_authorities', 'ward_users', 'deleted_records_log', 'system_logs'];
+                    if (ward !== '1' && !sharedCols.includes(name)) {
+                        return originalCollection.call(this, name + "_w" + ward);
+                    }
+                    return originalCollection.call(this, name);
+                };
+            }
         }
     }
 
@@ -394,6 +410,8 @@
     else if (path.includes('jaggadhani-pratilipi.html')) templateId = 'jaggadhani-pratilipi';
     else if (path.includes('aamdani-pramanit.html')) templateId = 'aamdani-pramanit';
     else if (path.includes('bargikaran-sifarish.html')) templateId = 'bargikaran-sifarish';
+    else if (path.includes('swasthya-sahayata-sifarish.html')) templateId = 'swasthya-sahayata-sifarish';
+    else if (path.includes('chhatrabritti-sifarish.html')) templateId = 'chhatrabritti-sifarish';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
         isDynamic = true;
@@ -407,7 +425,7 @@
     });
 
     // yojana-bank-sifarish, bank-sifarish, surakshya-bhatta-sifarish, surakshya-sanrakshak-test, and yojana-tippani have their own complete JS logic - skip template loading entirely
-    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish' || templateId === 'surakshya-sanrakshak-test' || templateId === 'yojana-tippani');
+    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish' || templateId === 'surakshya-sanrakshak-test' || templateId === 'yojana-tippani' || templateId === 'swasthya-sahayata-sifarish' || templateId === 'chhatrabritti-sifarish');
 
     if (templateId && !isDynamic && !skipTemplateLoad) {
         // Intercept window.onload assigner
@@ -1699,7 +1717,8 @@
         try {
             const nepaliMonths = ["बैशाख", "जेठ", "असार", "साउन", "भदौ", "असोज", "कार्तिक", "मंसिर", "पुष", "माघ", "फागुन", "चैत"];
             const nepaliDays = ["आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
-            const today = new Date();
+            const _nowKtm = new Date();
+            const today = new Date(_nowKtm.getTime() + (_nowKtm.getTimezoneOffset() * 60000) + (345 * 60000));
             const dayName = nepaliDays[today.getDay()];
             let bsY = today.getFullYear() + 57;
             let bsM = 3;
@@ -1741,7 +1760,7 @@
                     let updated = false;
                     mFields.forEach(id => {
                         const el = document.getElementById(id);
-                        if (el && (!el.value || el.value.trim() === '' || el.value === '२०८३/')) {
+                        if (el && (!el.value || el.value.trim() === '' || /^२०८[०-९]\s*\/?$/.test(el.value.trim()))) {
                             el.value = autoMiti;
                             updated = true;
                         }

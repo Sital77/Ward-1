@@ -867,8 +867,10 @@
                     mitiInput.value = nepaliDateStr;
                 }
                 const nsInput = document.getElementById('inNepalSamvat');
-                if (nsInput && !nsInput.value.trim()) {
-                    nsInput.value = '११४६';
+                if (window.NepalSambat && typeof window.NepalSambat.updateNepalSambatFromMiti === 'function') {
+                    window.NepalSambat.updateNepalSambatFromMiti();
+                } else if (nsInput && !nsInput.value.trim()) {
+                    nsInput.value = '११४७';
                 }
                 updateDoc();
             } catch(e) {
@@ -1662,13 +1664,19 @@
             }
         }
 
-        window.onload = function() {
+        function initYojanaBankPage() {
+            const curMiti = (document.getElementById('inMiti')?.value || '').trim();
+            if (!curMiti) setCurrentKathmanduDate();
             setMode('OPEN_ACCOUNT');
             populateSamjhautaDropdown();
             if (window.innerWidth <= 768) {
                 setMobileTab('form');
             }
-        };
+        }
+        window.onload = initYojanaBankPage;
+        if (document.readyState !== 'loading') {
+            initYojanaBankPage();
+        }
 
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {

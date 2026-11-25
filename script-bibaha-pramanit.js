@@ -720,6 +720,14 @@ function updateNepalSambatFromMiti() {
 }
 
 // ── Page Initialization ────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+function initBibahaModule() {
+    if (window.NepalSambat && typeof window.NepalSambat.ensureDefaultMiti === 'function') {
+        window.NepalSambat.ensureDefaultMiti(false);
+    }
     updateDoc();
-});
+}
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initBibahaModule);
+} else {
+    initBibahaModule();
+}

@@ -306,6 +306,61 @@
      * STRICTLY for dashboard headers, screen badges, and live clocks only.
      * NEVER used as a fallback for recommendation documents.
      */
+    /**
+     * Get today's BS date string in Asia/Kathmandu timezone ("YYYY/MM/DD" in Devanagari)
+     */
+    function getTodayBS() {
+        const ktm = getKathmanduDate();
+        const converter = (typeof window !== 'undefined') ? window['@sbmdkl/nepali-date-converter'] : null;
+        if (converter && typeof converter.adToBs === 'function') {
+            try {
+                const bs = converter.adToBs(ktm.adKey);
+                if (typeof bs === 'string') {
+                    const p = bs.split(/[-/]/);
+                    if (p.length === 3) {
+                        return toDevanagari(`${p[0]}/${String(p[1]).padStart(2, '0')}/${String(p[2]).padStart(2, '0')}`);
+                    }
+                } else if (bs && typeof bs === 'object') {
+                    const y = bs.bsYear || bs.year;
+                    const m = String(bs.bsMonth || bs.month).padStart(2, '0');
+                    const d = String(bs.bsDay || bs.day || bs.date).padStart(2, '0');
+                    return toDevanagari(`${y}/${m}/${d}`);
+                }
+            } catch (e) {}
+        }
+        return '';
+    }
+
+    /**
+     * Populate #inMiti (if empty or partial placeholder like "२०८३/") when creating a new record
+     */
+    function ensureDefaultMiti(force) {
+        if (typeof document === 'undefined') return false;
+        const editIdx = document.getElementById('editRecordIndex');
+        if (!force && ((editIdx && editIdx.value.trim() !== '') || _currentLoadedRecordBaseline)) {
+            return false;
+        }
+        const bsStr = getTodayBS();
+        if (!bsStr) return false;
+
+        let changed = false;
+        ['inMiti', 'inSubmitMiti'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const cur = (el.value || '').trim();
+            if (force || cur === '' || /^२०८[०-९]\s*\/?$/.test(cur)) {
+                el.value = bsStr;
+                changed = true;
+            }
+        });
+        if (changed) {
+            updateNepalSambatFromMiti();
+        } else {
+            updateDocumentLabels();
+        }
+        return changed;
+    }
+
     function getToday() {
         const ktm = getKathmanduDate();
         const res = lookupKey(ktm.adKey);
@@ -597,10 +652,16 @@
     // Auto-update letterhead labels before printing and on page interactions
     if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         window.addEventListener('beforeprint', updateDocumentLabels);
-        document.addEventListener('DOMContentLoaded', () => {
+        const _bootNS = () => {
             installLoaderHooks();
+            ensureDefaultMiti(false);
             updateDocumentLabels();
-        });
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', _bootNS);
+        } else {
+            _bootNS();
+        }
         document.addEventListener('input', (e) => {
             if (e.target && (e.target.id === 'inMiti' || e.target.id === 'inNepalSamvat' || e.target.id === 'inSubmitMiti' || e.target.id === 'inCustomCertifiedMiti')) {
                 setTimeout(updateDocumentLabels, 20);
@@ -618,6 +679,8 @@
     window.NepalSambat.getNepalSambatForBSDate = getNepalSambatForBSDate;
     window.NepalSambat.getByBsDate = getNepalSambatForBSDate;
     window.NepalSambat.getToday = getToday;
+    window.NepalSambat.getTodayBS = getTodayBS;
+    window.NepalSambat.ensureDefaultMiti = ensureDefaultMiti;
     window.NepalSambat.formatPrint = formatPrint;
     window.NepalSambat.updateDocumentLabels = updateDocumentLabels;
     window.NepalSambat.updateNepalSambatFromMiti = updateNepalSambatFromMiti;

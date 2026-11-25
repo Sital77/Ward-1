@@ -448,7 +448,8 @@
             { name: 'surakshyaBhattaRecords', label: '🛡️ सामाजिक सुरक्षा भत्ता संरक्षक (पुराना अभिलेख)', page: 'surakshya-bhatta-sifarish.html' },
             { name: 'surakshyaSanrakshakTestRecords', label: '🛡️ संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट', page: 'surakshya-sanrakshak-test.html' },
             { name: 'bankRecords', label: '🏦 बैंक खाता सिफारिस', page: 'bank-sifarish.html' },
-            { name: 'swasthyaSahayataRecords', label: '🏥 स्वास्थ्य सहायता सिफारिस', page: 'swasthya-sahayata-sifarish.html' }
+            { name: 'swasthyaSahayataRecords', label: '🏥 स्वास्थ्य सहायता सिफारिस', page: 'swasthya-sahayata-sifarish.html' },
+            { name: 'chhatrabrittiRecords', label: '🎓 छात्रवृत्ति सिफारिस', page: 'chhatrabritti-sifarish.html' }
         ];
 
         let searchDebounceTimer = null;
@@ -599,7 +600,14 @@
                 d.miti,
                 d.tole,
                 d.ward,
-                d.bankName
+                d.bankName,
+                d.studentName,
+                d.patientName,
+                d.motherName,
+                d.birthRegNo,
+                d.schoolName,
+                d.campusName,
+                d.classDetails
             ];
             const baseText = parts.filter(Boolean).join(' ').toLowerCase();
             const nepaliVersion = toNepaliNum(baseText);
@@ -826,7 +834,7 @@
             const grouped = {};
             records.forEach(r => {
                 const d = r.data;
-                const primaryName = d.name || d.applicantName || d.committeeName || d.projectName || d.ownerName || 'अन्य';
+                const primaryName = d.studentName || d.patientName || d.name || d.applicantName || d.committeeName || d.projectName || d.ownerName || 'अन्य';
                 if (!grouped[primaryName]) {
                     grouped[primaryName] = [];
                 }

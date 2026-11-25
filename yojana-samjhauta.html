@@ -834,13 +834,22 @@
         window.adjustSignaturePosition = adjustSignaturePosition;
 
         // Initialize Date & Initial State
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof initPortalNepaliDate === 'function') initPortalNepaliDate();
+        function initYojanaSamjhautaPage() {
+            if (window.NepalSambat && typeof window.NepalSambat.ensureDefaultMiti === 'function') {
+                window.NepalSambat.ensureDefaultMiti(false);
+            } else if (typeof initPortalNepaliDate === 'function') {
+                initPortalNepaliDate();
+            }
 
             renderDatabaseTable();
             updateDoc();
             adjustSignaturePosition(40);
-        });
+        }
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', initYojanaSamjhautaPage);
+        } else {
+            initYojanaSamjhautaPage();
+        }
 
         // ── Abhilekh & Firestore Database Logic ──
         let globalDatabase = [];

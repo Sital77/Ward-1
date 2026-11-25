@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ne">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>छात्रवृत्ति सिफारिस - गौरादह नगरपालिका वडा नं. १</title>
+    <link rel="icon" type="image/svg+xml" href="assets/emblem_of_nepal.svg">
+    <link rel="apple-touch-icon" href="assets/emblem_of_nepal.svg">
+    <link rel="stylesheet" href="charkilla.css?v=2.0">
+    <style>
+        .preview-panel .a4-page,
+        .preview-panel .a4-page * {
+            font-family: 'Mukta', sans-serif;
+        }
+
+        .letter-body-para {
+            font-size: 13pt;
+            line-height: var(--doc-line-height, 1.85);
+            text-align: justify;
+            text-justify: inter-word;
+            margin-top: 14px;
+        }
+
+        .fill-space {
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Mode toggle */
+        .mode-toggle-wrap {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            background: #edf2f7;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4a5568;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .mode-btn.active-chhori {
+            background: linear-gradient(135deg, #2b6cb0, #3182ce);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
+        }
+
+        .mode-btn.active-general {
+            background: linear-gradient(135deg, #276749, #38a169);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(39, 103, 73, 0.3);
+        }
+
+        /* Section Cards */
+        .section-card {
+            border-radius: 10px;
+            padding: 14px 14px 8px 14px;
+            margin-bottom: 16px;
+        }
+
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lh-section {
+            background: #f7fafc;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .lh-section .section-label {
+            color: #4a5568;
+        }
+
+        .body-section {
+            background: rgba(43, 108, 176, 0.07);
+            border: 1.5px dashed rgba(43, 108, 176, 0.4);
+        }
+
+        .body-section .section-label {
+            color: #2b6cb0;
+        }
+
+        .body-section label {
+            color: #2c5282;
+        }
+
+        .edu-section {
+            background: rgba(56, 161, 105, 0.06);
+            border: 1.5px dashed rgba(56, 161, 105, 0.4);
+        }
+
+        .edu-section .section-label {
+            color: #276749;
+        }
+
+        .edu-section label {
+            color: #22543d;
+        }
+
+        .optional-box {
+            background: #ffffff;
+            border: 1px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+
+        .mode-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11pt;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .badge-chhori {
+            background: #ebf8ff;
+            color: #2b6cb0;
+        }
+
+        .badge-general {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        @media print {
+            .input-panel {
+                display: none !important;
+            }
+
+            .preview-panel {
+                width: 100% !important;
+            }
+
+            .modal-overlay {
+                display: none !important;
+            }
+
+            .mode-badge {
+                display: none !important;
+            }
+        }
+    </style>
+    <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/emblem_of_nepal.svg" type="image/svg+xml" fetchpriority="high">
+</head>
+
+<body>
+    <script src="auth.js"></script>
+
+    <!-- ══════════════ INPUT PANEL ══════════════ -->
+    <div class="input-panel">
+        <div class="header-action-container">
+            <h2 class="panel-title" id="formMainTitle">🎓 छात्रवृत्ति सिफारिस</h2>
+            <div style="display:flex; gap:8px;">
+                <a href="index.html" class="btn-home" style="background:#edf2f7; color:#2d3748; padding:6px 10px; border-radius:6px; font-weight:700; text-decoration:none; font-size:0.84rem; border:1px solid #cbd5e0; display:inline-flex; align-items:center;">🏠 गृहपृष्ठ</a>
+                <button type="button" class="btn-abhilekh" onclick="toggleModal(true)">📊 अभिलेख</button>
+            </div>
+        </div>
+
+        <input type="hidden" id="editRecordIndex" value="">
+        <input type="hidden" id="currentMode" value="chhori-buhari">
+
+        <!-- ── TWO-MODE TOGGLE (Default: छोरीबुहारी छात्रवृत्ति, Second: छात्रवृत्ति सिफारिस) ── -->
+        <div class="mode-toggle-wrap">
+            <button type="button" id="btnModeChhoriBuhari" class="mode-btn active-chhori" onclick="setMode('chhori-buhari')">
+                👩‍🎓 छोरीबुहारी छात्रवृत्ति
+            </button>
+            <button type="button" id="btnModeGeneral" class="mode-btn" onclick="setMode('general')">
+                🎓 छात्रवृत्ति सिफारिस
+            </button>
+        </div>
+
+        <!-- ══ LETTERHEAD SECTION ══ -->
+        <div class="section-card lh-section">
+            <div class="section-label">📄 पत्रसम्बन्धी विवरण</div>
+
+            <div class="form-group">
+                <label>पत्र संख्या (प.सं.):</label>
+                <div class="radio-container">
+                    <div class="radio-option"><input type="radio" id="ay1" name="ayRadio" value="२०८१/०८२" onchange="updateDoc()"><label for="ay1" class="radio-label">२०८१/०८२</label></div>
+                    <div class="radio-option"><input type="radio" id="ay2" name="ayRadio" value="२०८२/०८३" onchange="updateDoc()"><label for="ay2" class="radio-label">२०८२/०८३</label></div>
+                    <div class="radio-option"><input type="radio" id="ay3" name="ayRadio" value="२०८३/०८४" onchange="updateDoc()" checked><label for="ay3" class="radio-label">२०८३/०८४</label></div>
+                    <div class="radio-option"><input type="radio" id="ay4" name="ayRadio" value="२०८४/०८५" onchange="updateDoc()"><label for="ay4" class="radio-label">२०८४/०८५</label></div>
+                </div>
+            </div>
+
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>चलानी नं (च.नं.):</label>
+                    <input type="text" id="inChalani" placeholder="उदा: ५२" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>मिति (वि.सं.):</label>
+                    <input type="text" id="inMiti" placeholder="२०८३/०८/०९" oninput="updateNepalSambatFromMiti(); updateDoc()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ने.स. :</label>
+                <input type="text" id="inNepalSamvat" placeholder="११४७" oninput="updateDoc()">
+            </div>
+        </div>
+
+        <!-- ══ BODY SECTION: STUDENT & FAMILY ══ -->
+        <div class="section-card body-section">
+            <div class="section-label">👤 विद्यार्थी तथा अभिभावक विवरण</div>
+
+            <!-- अभिभावक (बुवा / आमा वैकल्पिक - एक वा दुबै) -->
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>बुवाको नाम (ऐच्छिक):</label>
+                    <input type="text" id="inFatherName" placeholder="बुवाको मात्र वा दुबै हाल्न मिल्ने" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label>आमाको नाम (ऐच्छिक):</label>
+                    <input type="text" id="inMotherName" placeholder="आमाको मात्र वा दुबै हाल्न मिल्ने" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- नाता -->
+            <div class="form-group">
+                <label>नाता (छोरी / बुहारी / छोरा):</label>
+                <div class="radio-container">
+                    <div class="radio-option" id="wrapRelChhori">
+                        <input type="radio" id="relChhori" name="relationRadio" value="छोरी" onchange="updateDoc()" checked>
+                        <label for="relChhori" class="radio-label">छोरी</label>
+                    </div>
+                    <div class="radio-option" id="wrapRelBuhari">
+                        <input type="radio" id="relBuhari" name="relationRadio" value="बुहारी" onchange="updateDoc()">
+                        <label for="relBuhari" class="radio-label">बुहारी</label>
+                    </div>
+                    <div class="radio-option" id="wrapRelChhora">
+                        <input type="radio" id="relChhora" name="relationRadio" value="छोरा" onchange="updateDoc()">
+                        <label for="relChhora" class="radio-label">छोरा</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- विद्यार्थीको नाम -->
+            <div class="form-group">
+                <label>विद्यार्थीको पूरा नाम: <span style="color:#e53e3e;">*</span></label>
+                <input type="text" id="inStudentName" placeholder="उदा: सृजना अधिकारी" oninput="updateDoc()">
+            </div>
+
+            <!-- नागरिकता / जन्म दर्ता / नभएको (पूर्ण रूपमा वैकल्पिक) -->
+            <div class="form-group" style="margin-bottom: 4px;">
+                <label>पहिचान कागजात विवरण (वैकल्पिक):</label>
+                <div class="radio-container" style="height:auto;">
+                    <div class="radio-option">
+                        <input type="radio" id="docNone" name="idDocTypeRadio" value="NONE" onchange="toggleIdDocSection(); updateDoc()">
+                        <label for="docNone" class="radio-label" style="font-size:0.82rem; padding:7px 4px;">उल्लेख नगर्ने</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="docCit" name="idDocTypeRadio" value="CITIZENSHIP" onchange="toggleIdDocSection(); updateDoc()" checked>
+                        <label for="docCit" class="radio-label" style="font-size:0.82rem; padding:7px 4px;">नागरिकता प्र.नं.</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="docBirth" name="idDocTypeRadio" value="BIRTH_REG" onchange="toggleIdDocSection(); updateDoc()">
+                        <label for="docBirth" class="radio-label" style="font-size:0.82rem; padding:7px 4px;">जन्म दर्ता नं.</label>
+                    </div>
+                </div>
+                <div style="font-size:0.75rem; color:#4a5568; margin-top:4px;">
+                    ℹ️ विवरण खाली छाडिएमा वा "उल्लेख नगर्ने" छानिएमा सिफारिस पत्रमा देखाइने छैन ।
+                </div>
+            </div>
+
+            <!-- Citizenship Box -->
+            <div id="citizenshipBox" class="optional-box">
+                <div class="form-group" style="margin-bottom:8px;">
+                    <label style="font-size:0.82rem;">ना.प्र.नं. (नागरिकता नम्बर):</label>
+                    <input type="text" id="inCitNo" placeholder="उदा: ०४-०१-७९-००१२५" oninput="updateDoc()">
+                </div>
+                <div class="row-grid" style="margin-bottom:0;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.82rem;">जारी मिति:</label>
+                        <input type="text" id="inCitDate" placeholder="उदा: २०७९/०४/१२" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.82rem;">जारी जिल्ला:</label>
+                        <input type="text" id="inCitDistrict" value="झापा" placeholder="झापा" oninput="updateDoc()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Birth Registration Box -->
+            <div id="birthRegBox" class="optional-box" style="display:none;">
+                <div class="row-grid" style="margin-bottom:0;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.82rem;">जन्म दर्ता नं.:</label>
+                        <input type="text" id="inBirthRegNo" placeholder="उदा: २०७२-०१०२-०००४५" oninput="updateDoc()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.82rem;">दर्ता मिति (ऐच्छिक):</label>
+                        <input type="text" id="inBirthRegDate" placeholder="उदा: २०७२/०३/१५" oninput="updateDoc()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ EDUCATION SECTION (Mode-Specific) ══ -->
+        <div class="section-card edu-section">
+            <div class="section-label" id="eduSectionTitle">🎓 क्याम्पस तथा अध्ययन विवरण (छोरीबुहारी)</div>
+
+            <!-- Mode 1: Chhori-Buhari Campus Details -->
+            <div id="chhoriEducationFields">
+                <div class="form-group">
+                    <label>क्याम्पसको नाम:</label>
+                    <input type="text" id="inCampusName" value="त्रिभुवन विश्वविद्यालय अन्तर्गतको गौरादह बहुमुखी क्याम्पस" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>अध्ययनरत संकाय / विषय (Subject):</label>
+                    <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:4px;">
+                        <div class="radio-option" style="min-width:48%;">
+                            <input type="radio" id="subBed" name="subjectRadio" value="बी.एड. (ब्याचलर अफ एजुकेशन)" onchange="toggleCustomSubject(); updateDoc()" checked>
+                            <label for="subBed" class="radio-label" style="font-size:0.8rem; padding:7px 4px;">बी.एड. (ब्याचलर अफ एजुकेशन)</label>
+                        </div>
+                        <div class="radio-option" style="min-width:48%;">
+                            <input type="radio" id="subBbs" name="subjectRadio" value="बी.बी.एस. (ब्याचलर अफ बिजनेस स्टडिज)" onchange="toggleCustomSubject(); updateDoc()">
+                            <label for="subBbs" class="radio-label" style="font-size:0.8rem; padding:7px 4px;">बी.बी.एस. (ब्याचलर अफ बिजनेस स्टडिज)</label>
+                        </div>
+                        <div class="radio-option" style="min-width:100%;">
+                            <input type="radio" id="subCustom" name="subjectRadio" value="CUSTOM" onchange="toggleCustomSubject(); updateDoc()">
+                            <label for="subCustom" class="radio-label" style="font-size:0.8rem; padding:6px 4px;">✍️ अन्य विषय (आफैँ लेख्ने)</label>
+                        </div>
+                    </div>
+                    <input type="text" id="inCustomSubject" placeholder="अन्य विषय लेख्नुहोस् (उदा: बी.ए. / बी.एस्सी.)" style="display:none; margin-top:6px;" oninput="updateDoc()">
+                </div>
+
+                <div class="form-group">
+                    <label>अध्ययनरत वर्ष (Year):</label>
+                    <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:4px;">
+                        <div class="radio-option">
+                            <input type="radio" id="yr1" name="yearRadio" value="पहिलो" onchange="toggleCustomYear(); updateDoc()" checked>
+                            <label for="yr1" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">पहिलो</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="yr2" name="yearRadio" value="दोश्रो" onchange="toggleCustomYear(); updateDoc()">
+                            <label for="yr2" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">दोश्रो</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="yr3" name="yearRadio" value="तेस्रो" onchange="toggleCustomYear(); updateDoc()">
+                            <label for="yr3" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">तेस्रो</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="yr4" name="yearRadio" value="चौथो" onchange="toggleCustomYear(); updateDoc()">
+                            <label for="yr4" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">चौथो</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="yrCustom" name="yearRadio" value="CUSTOM" onchange="toggleCustomYear(); updateDoc()">
+                            <label for="yrCustom" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">अन्य</label>
+                        </div>
+                    </div>
+                    <input type="text" id="inCustomYear" placeholder="अन्य वर्ष वा सेमेस्टर" style="display:none; margin-top:6px;" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- Mode 2: General School Details -->
+            <div id="generalEducationFields" style="display:none;">
+                <div class="row-grid">
+                    <div class="form-group" style="flex:0.38;">
+                        <label>विद्यालय वडा नं.:</label>
+                        <select id="inSchoolWard" onchange="updateDoc()">
+                            <option value="१" selected>वडा नं. १</option>
+                            <option value="२">वडा नं. २</option>
+                            <option value="३">वडा नं. ३</option>
+                            <option value="४">वडा नं. ४</option>
+                            <option value="५">वडा नं. ५</option>
+                            <option value="६">वडा नं. ६</option>
+                            <option value="७">वडा नं. ७</option>
+                            <option value="८">वडा नं. ८</option>
+                            <option value="९">वडा नं. ९</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:0.62;">
+                        <label>विद्यालयको नाम: <span style="color:#e53e3e;">*</span></label>
+                        <input type="text" id="inSchoolName" placeholder="उदा: जनता माध्यमिक विद्यालय" oninput="updateDoc()">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:4px;">
+                    <label>अध्ययनरत कक्षा विवरण: <span style="color:#e53e3e;">*</span></label>
+                    <input type="text" id="inClassDetails" placeholder="उदा: कक्षा १० (दश) / कक्षा ८" oninput="updateDoc()">
+                </div>
+            </div>
+        </div>
+
+        <!-- हस्ताक्षर अधिकारी -->
+        <div class="form-group"
+            style="margin-top: 5px; background: #fff3f3; padding: 10px; border: 1px solid #feb2b2; border-radius: 6px;">
+            <label style="color: #c53030;">🖋️ हस्ताक्षर अधिकारी:</label>
+            <select id="inSignAuthority" onchange="toggleCustomSign(); updateDoc()">
+                <option value="नगेन्द्र भण्डारी|वडा अध्यक्ष">वडा अध्यक्ष - नगेन्द्र भण्डारी</option>
+                <option value="अन्जु निरौला|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - अन्जु निरौला</option>
+                <option value="लक्ष्मीदेवी विश्वकर्मा|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - लक्ष्मीदेवी विश्वकर्मा</option>
+                <option value="केशर बहादुर खवास भुजेल|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - केशर बहादुर खवास भुजेल</option>
+                <option value="जमुन राई|कार्यवाहक वडा अध्यक्ष">कार्यवाहक वडा अध्यक्ष - जमुन राई</option>
+                <option value="CUSTOM">✍️ आफैँ नाम लेख्नुहोस् (Custom)</option>
+                <option value="BLANK">🫙 खाली छाड्नुस् (Blank)</option>
+            </select>
+            <div id="customSignBox" style="display:none; margin-top:10px; gap:10px;" class="row-grid">
+                <input type="text" id="inCustomSignName" placeholder="नाम" oninput="updateDoc()">
+                <input type="text" id="inCustomSignTitle" placeholder="पद" oninput="updateDoc()">
+            </div>
+            <div style="margin-top: 12px; border-top: 1px dashed #feb2b2; padding-top: 8px;">
+                <label style="color: #2b6cb0; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                    <span>↔️ हस्ताक्षरको दुरी:</span><span id="marginVal">४० px</span>
+                </label>
+                <input type="range" id="inSigMargin" min="10" max="250" value="40" oninput="adjustSignaturePosition(this.value)">
+            </div>
+        </div>
+
+        <button type="button" class="btn-print" onclick="printAndSaveSystem()">🖨️ प्रिन्ट र सुरक्षित गर्नुस्</button>
+    </div>
+
+    <!-- ══════════════ ABHILEKH MODAL ══════════════ -->
+    <div class="modal-overlay" id="abhilekhModal">
+        <div class="modal-content">
+            <button type="button" class="modal-close" onclick="toggleModal(false)">×</button>
+            <h3 class="modal-title">🗄️ छात्रवृत्ति सिफारिस अभिलेख</h3>
+            <div class="search-container">
+                <label>🔍 विद्यार्थीको नाम, अभिभावक वा चलानी नं. बाट खोज्नुहोस्:</label>
+                <input type="text" id="searchField" placeholder="खोज्नुपर्ने नाम टाइप गर्नुहोस्..." oninput="renderDatabaseTable()">
+            </div>
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th style="width:7%;">क्रम</th>
+                        <th style="width:27%;">विद्यार्थीको नाम</th>
+                        <th style="width:22%;">प्रकार</th>
+                        <th style="width:29%;">संस्था / विवरण</th>
+                        <th style="width:15%;">कार्य</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ══════════════ PREVIEW PANEL (A4 Letter) ══════════════ -->
+    <div class="preview-panel">
+        <div class="a4-page">
+
+            <!-- ── Official Custom SVG Letterhead ── -->
+            <div class="custom-svg-letterhead">
+                <img class="svg-letterhead-banner" src="assets/letter%20head.svg" alt="गौरादह नगरपालिका वडा नं. १ लेटरहेड" width="561" height="138" loading="eager" fetchpriority="high" decoding="sync">
+                <img class="svg-letterhead-emblem" src="assets/emblem_of_nepal.svg" alt="नेपालको निशान छाप" loading="eager" fetchpriority="high" decoding="sync">
+                <div class="svg-lh-meta-left">
+                    <div>प.सं. <span id="lblPatraSankhya"><span id="lblAY">२०८३/०८४</span></span></div>
+                    <div>च.नं. <span id="lblChalani" class="fill-space" style="min-width: 60px;"></span></div>
+                </div>
+                <div class="svg-lh-meta-right">
+                    <div class="miti-block">मिति : <span id="lblMiti" class="fill-space" style="min-width: 90px;">२०८३/</span></div>
+                    <div class="ns-block">ने.सं. : <span id="lblNepalSamvat" class="fill-space" style="min-width: 50px;">११४७</span></div>
+                </div>
+            </div>
+
+            <!-- DOM Sentinel for compatibility -->
+            <div class="header-red-line" style="display: none;"></div>
+
+            <!-- ── Receiver ── -->
+            <div class="receiver-address-block" id="receiverBlock">
+                <div id="lblReceiverAddress">
+                    श्री गौरादह नगरपालिका<br>
+                    नगर कार्यपालिकाको कार्यालय<br>
+                    गौरादह, झापा ।
+                </div>
+            </div>
+
+            <!-- ── Subject ── -->
+            <div class="subject-container">
+                <div class="subject-line">
+                    <span class="subject-label" style="color: #e51a23;">विषयः</span> <span id="lblSubject">छोरीबुहारी छात्रवृत्ति सिफारिस सम्बन्धमा ।</span>
+                </div>
+            </div>
+
+            <!-- ── Body (छोरीबुहारी छात्रवृत्ति) ── -->
+            <div class="letter-body-para" id="bodyChhoriBuhari"></div>
+
+            <!-- ── Body (सामान्य छात्रवृत्ति) ── -->
+            <div class="letter-body-para" id="bodyGeneral" style="display:none;"></div>
+
+            <!-- ── Signature ── -->
+            <div class="doc-footer" id="docFooterSection" style="margin-top: 40px;">
+                <div class="signature-block">
+                    <div class="sig-name" id="lblSigName">नगेन्द्र भण्डारी</div>
+                    <div class="sig-title" id="lblSigTitle">वडा अध्यक्ष</div>
+                </div>
+            </div>
+
+        </div><!-- /a4-page -->
+    </div><!-- /preview-panel -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="assets/nepali-date-converter.umd.min.js"></script>
+    <script src="nepal-sambat-tithi.js"></script>
+    <script src="multi-ward-config.js"></script>
+    <script src="font-settings.js?v=2.8"></script>
+    <script src="sifarish-save-service.js"></script>
+    <script src="script-chhatrabritti-sifarish.js?v=1.0"></script>
+</body>
+
+</html>
+

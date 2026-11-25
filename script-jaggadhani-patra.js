@@ -257,7 +257,8 @@ function initializeAutomaticDate() {
         initializeFiscalYear(bsYearVal, bsMonthVal);
 
         const inMiti = document.getElementById('inMiti');
-        if (inMiti && !inMiti.value) inMiti.value = nepaliBSDateStr;
+        const curMiti = inMiti ? inMiti.value.trim() : '';
+        if (inMiti && (!curMiti || /^२०८[०-९]\s*\/?$/.test(curMiti))) inMiti.value = nepaliBSDateStr;
 
         const inNS = document.getElementById('inNepalSamvat');
         if (inNS && !inNS.value) inNS.value = window.toNepaliDigit(bsYearVal - 937);
@@ -659,8 +660,13 @@ window.deleteRecord = function (id) {
 };
 
 // Initial Setup on load
-document.addEventListener('DOMContentLoaded', () => {
+function initJaggadhaniPatraModule() {
     initializeAutomaticDate();
-    window.addKittaRow();
+    if (activeRowIds.length === 0) window.addKittaRow();
     window.updateDoc();
-});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initJaggadhaniPatraModule);
+} else {
+    initJaggadhaniPatraModule();
+}

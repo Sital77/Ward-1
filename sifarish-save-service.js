@@ -80,19 +80,19 @@
             'citizen', 'surakshyaSanrakshakTestRecords', 'surakshyaBhattaRecords', 'bankRecords',
             'apangataRecords', 'panRecords', 'abibahitRecords', 'bibahaRecords',
             'nabalakRecords', 'pariwarikRecords', 'aamdaniPramanitRecords', 'abhilekhRecords',
-            'swasthyaSahayataRecords',
+            'swasthyaSahayataRecords', 'chhatrabrittiRecords',
             'test_citizenRecords'
         ];
         if (personalCols.includes(normCol)) {
             // Check primary unique identifiers first
-            const primaryId = data.cardNo || data.citNo || data.beneficiaryCitNo || data.citizenshipNo || data.nid || data.panNo || '';
+            const primaryId = data.cardNo || data.citNo || data.beneficiaryCitNo || data.citizenshipNo || data.birthRegNo || data.nid || data.panNo || '';
             const cleanId = toEnglishDigits(primaryId).replace(/[^0-9a-zA-Z]/g, '').trim();
             if (cleanId) {
                 return `citizen_id___${cleanId}`;
             }
 
             // Fallback: Safe combination of name + relative / DOB / fiscal year
-            const citizenName = data.beneficiaryName || data.applicantName || data.name || data.patientName || '';
+            const citizenName = data.studentName || data.beneficiaryName || data.applicantName || data.name || data.patientName || '';
             const cleanName = normalizeNoSpace(citizenName);
             const relativeName = normalizeNoSpace(data.fatherName || data.spouseName || data.guardianName || '');
             const ay = normalizeNepaliText(data.ay || data.fiscalYear || '');

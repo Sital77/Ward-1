@@ -2326,7 +2326,8 @@
             'yojana-samjhauta': 'योजना सम्झौता सिफारिस',
             'yojana-tippani': 'वडा स्तरीय योजना टिप्पणी-आदेश',
             'nabalak-parichayapatra': 'नाबालक परिचय पत्र सिफारिस',
-            'swasthya-sahayata-sifarish': 'स्वास्थ्य सहायता सिफारिस'
+            'swasthya-sahayata-sifarish': 'स्वास्थ्य सहायता सिफारिस',
+            'chhatrabritti-sifarish': 'छात्रवृत्ति सिफारिस'
         };
 
         // Automatic Background Seeding of all missing templates
@@ -2355,7 +2356,8 @@
                 'yojana-samjhauta': 'कार्यालय/प्रशासन',
                 'yojana-tippani': 'कार्यालय/प्रशासन',
                 'nabalak-parichayapatra': 'व्यक्तिगत प्रमाणित',
-                'swasthya-sahayata-sifarish': 'व्यक्तिगत प्रमाणित'
+                'swasthya-sahayata-sifarish': 'व्यक्तिगत प्रमाणित',
+                'chhatrabritti-sifarish': 'व्यक्तिगत प्रमाणित'
             };
 
             try {
@@ -2478,7 +2480,8 @@
             'yojana-bank-sifarish': '🏦',
             'yojana-samjhauta': '🤝',
             'yojana-tippani': '📑',
-            'swasthya-sahayata-sifarish': '🏥'
+            'swasthya-sahayata-sifarish': '🏥',
+            'chhatrabritti-sifarish': '🎓'
         };
         const borderMap = {
             'suchana-tans': '#d6bcfa',
@@ -2499,7 +2502,8 @@
             'yojana-bank-sifarish': '#9ae6b4',
             'yojana-samjhauta': '#feebc8',
             'yojana-tippani': '#cbd5e0',
-            'swasthya-sahayata-sifarish': '#fc8181'
+            'swasthya-sahayata-sifarish': '#fc8181',
+            'chhatrabritti-sifarish': '#90cdf4'
         };
         const categoryEmojis = {
             'जग्गा सम्बन्धि': '🗺️',
@@ -2530,7 +2534,8 @@
             { id: 'yojana-bank-sifarish', title: 'योजनाको बैंक खाता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
             { id: 'yojana-samjhauta', title: 'योजना सम्झौता सिफारिस', category: 'कार्यालय/प्रशासन', status: 'Active' },
             { id: 'yojana-tippani', title: 'वडा स्तरीय योजना टिप्पणी-आदेश', category: 'कार्यालय/प्रशासन', status: 'Active' },
-            { id: 'swasthya-sahayata-sifarish', title: 'स्वास्थ्य सहायता सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
+            { id: 'swasthya-sahayata-sifarish', title: 'स्वास्थ्य सहायता सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' },
+            { id: 'chhatrabritti-sifarish', title: 'छात्रवृत्ति सिफारिस', category: 'व्यक्तिगत प्रमाणित', status: 'Active' }
         ];
 
         function renderSifarishGrid(remoteList) {
@@ -2557,7 +2562,7 @@
             });
 
             // Sort list
-            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra', 'swasthya-sahayata-sifarish', 'swasthya-sahayata-sifarish'];
+            const order = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra', 'swasthya-sahayata-sifarish', 'chhatrabritti-sifarish'];
             templates.sort((a, b) => {
                 const idxA = order.indexOf(a.id);
                 const idxB = order.indexOf(b.id);
@@ -2574,9 +2579,9 @@
                     const displayName = nepaliTitleMap[t.id] || (t.title && !/^[a-zA-Z0-9_\-\s]+$/.test(t.title) ? t.title : (nepaliTitleMap[t.id] || t.title));
                     const emoji = emojiMap[t.id] || categoryEmojis[t.category] || '📄';
                     const borderColor = borderMap[t.id] || '#e2e8f0';
-                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra', 'swasthya-sahayata-sifarish', 'swasthya-sahayata-sifarish'];
+                    const builtIn = ['gharbato', 'charkilla', 'bato-pramanit', 'bargikaran-sifarish', 'jaggadhani-pratilipi', 'jaggadhani-patra', 'aamdani-pramanit', 'pariwarik-bibaran', 'suchana-tans', 'ghar-kayam', 'pan-sifarish', 'abibahit-pramanit', 'bibaha-pramanit', 'apangata-sifarish', 'abhilekh-pramanit', 'surakshya-sanrakshak-test', 'bank-sifarish', 'yojana-bank-sifarish', 'yojana-samjhauta', 'yojana-tippani', 'nabalak-parichayapatra', 'swasthya-sahayata-sifarish', 'chhatrabritti-sifarish'];
                     let targetUrl = builtIn.includes(t.id) ? `${t.id}.html` : `dynamic-sifarish.html?id=${t.id}`;
-                    if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta' || t.id === 'yojana-tippani' || t.id === 'surakshya-sanrakshak-test' || t.id === 'swasthya-sahayata-sifarish') {
+                    if (t.id === 'bank-sifarish' || t.id === 'yojana-bank-sifarish' || t.id === 'yojana-samjhauta' || t.id === 'yojana-tippani' || t.id === 'surakshya-sanrakshak-test' || t.id === 'swasthya-sahayata-sifarish' || t.id === 'chhatrabritti-sifarish') {
                         targetUrl += "?v=" + new Date().getTime();
                     }
 

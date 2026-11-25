@@ -2888,10 +2888,38 @@
             }
         }
 
+        function initDefaultDate() {
+            if (window.NepalSambat && typeof window.NepalSambat.ensureDefaultMiti === 'function') {
+                window.NepalSambat.ensureDefaultMiti(false);
+                return;
+            }
+            const inMiti = document.getElementById('inMiti');
+            if (inMiti && (!inMiti.value.trim() || /^२०८[०-९]\s*\/?$/.test(inMiti.value.trim()))) {
+                const converter = window['@sbmdkl/nepali-date-converter'];
+                if (converter && typeof converter.adToBs === 'function') {
+                    const d = new Date();
+                    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+                    const ktm = new Date(utc + (345 * 60000));
+                    const iso = `${ktm.getFullYear()}-${String(ktm.getMonth() + 1).padStart(2, '0')}-${String(ktm.getDate()).padStart(2, '0')}`;
+                    const bs = converter.adToBs(iso);
+                    if (typeof bs === 'string') {
+                        const p = bs.split(/[-/]/);
+                        inMiti.value = toNepaliDigit(`${p[0]}/${p[1].padStart(2, '0')}/${p[2].padStart(2, '0')}`);
+                    }
+                }
+            }
+            updateNepalSambatFromMiti();
+        }
+
         // Initialize on load
         window.onload = function() {
+            initDefaultDate();
             setMode('OPEN_ACCOUNT');
         };
+        if (document.readyState !== 'loading') {
+            initDefaultDate();
+            setMode('OPEN_ACCOUNT');
+        }
     </script>
 </body>
 
