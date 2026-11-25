@@ -106,11 +106,23 @@ function setMode(mode) {
         document.getElementById('lblSubject').innerText = 'छात्रवृत्ति सिफारिस सम्बन्धमा ।';
     }
 
+    toggleRelationFields();
     updateDoc();
 }
 window.setMode = setMode;
 
 // ── Conditional Field Toggles ───────────────────────────
+function toggleRelationFields() {
+    const rel = getCheckedRadio('relationRadio', 'छोरी');
+    const isBuhari = (rel === 'बुहारी');
+    const husBox = document.getElementById('husbandBox');
+    const lblF = document.getElementById('lblInFatherName');
+    const lblM = document.getElementById('lblInMotherName');
+    if (husBox) husBox.style.display = isBuhari ? 'block' : 'none';
+    if (lblF) lblF.innerText = isBuhari ? 'बुबा / ससुराको नाम (ऐच्छिक):' : 'बुबाको नाम (ऐच्छिक):';
+    if (lblM) lblM.innerText = isBuhari ? 'आमा / सासूको नाम (ऐच्छिक):' : 'आमाको नाम (ऐच्छिक):';
+}
+window.toggleRelationFields = toggleRelationFields;
 function toggleIdDocSection() {
     const docType = getCheckedRadio('idDocTypeRadio', 'CITIZENSHIP');
     const citBox = document.getElementById('citizenshipBox');
@@ -158,20 +170,35 @@ function toggleModal(show) {
 window.toggleModal = toggleModal;
 
 // ── Sentence Builders (Guardian, Identity Doc, School) ──
-function buildGuardianClause(father, mother, relation) {
+function buildGuardianClause(father, mother, husband, relation) {
     const f = father.trim();
     const m = mother.trim();
+    const h = (husband || '').trim();
     const rel = escapeHtml(relation || 'छोरा');
+
+    let parentBase = '';
     if (f && m) {
-        return `<span style="font-weight:600;">${escapeHtml(f)}</span> तथा <span style="font-weight:600;">${escapeHtml(m)}</span>को ${rel} `;
+        parentBase = `<span style="font-weight:600;">${escapeHtml(f)}</span> तथा <span style="font-weight:600;">${escapeHtml(m)}</span>`;
+    } else if (f) {
+        parentBase = `<span style="font-weight:600;">${escapeHtml(f)}</span>`;
+    } else if (m) {
+        parentBase = `<span style="font-weight:600;">${escapeHtml(m)}</span>`;
     }
-    if (f) {
-        return `<span style="font-weight:600;">${escapeHtml(f)}</span>को ${rel} `;
+
+    if (rel === 'बुहारी') {
+        if (parentBase && h) {
+            return `${parentBase}को बुहारी, <span style="font-weight:600;">${escapeHtml(h)}</span>को श्रीमती `;
+        }
+        if (h) {
+            return `<span style="font-weight:600;">${escapeHtml(h)}</span>को श्रीमती `;
+        }
+        if (parentBase) {
+            return `${parentBase}को बुहारी `;
+        }
+        return '';
     }
-    if (m) {
-        return `<span style="font-weight:600;">${escapeHtml(m)}</span>को ${rel} `;
-    }
-    return '';
+
+    return parentBase ? `${parentBase}को ${rel} ` : '';
 }
 
 function buildIdentityClause(docType) {
@@ -232,12 +259,13 @@ function updateDoc() {
     // Student & Family Details
     const father = document.getElementById('inFatherName')?.value || '';
     const mother = document.getElementById('inMotherName')?.value || '';
+    const husband = document.getElementById('inHusbandName')?.value || '';
     const relation = getCheckedRadio('relationRadio', mode === 'chhori-buhari' ? 'छोरी' : 'छोरा');
     const studentRaw = document.getElementById('inStudentName')?.value.trim() || '';
     const studentDisplay = studentRaw ? escapeHtml(studentRaw) : '................';
     const docType = getCheckedRadio('idDocTypeRadio', 'CITIZENSHIP');
 
-    const guardianClause = buildGuardianClause(father, mother, relation);
+    const guardianClause = buildGuardianClause(father, mother, husband, relation);
     const idClause = buildIdentityClause(docType);
 
     if (mode === 'chhori-buhari') {
@@ -250,14 +278,14 @@ function updateDoc() {
         const yearVal = (yearChoice === 'CUSTOM')
             ? (document.getElementById('inCustomYear')?.value.trim() || '................')
             : yearChoice;
-        const yearSuffix = (yearChoice === 'CUSTOM' && /(?:बर्ष|वर्ष|सेमेस्टर)/.test(yearVal)) ? 'मा' : ' बर्षमा';
+        const yearSuffix = (yearChoice === 'CUSTOM' && /(?:बर्ष|वर्ष|सेमेस्टर)/.test(yearVal)) ? 'मा' : ' वर्षमा';
 
         const bodyEl = document.getElementById('bodyChhoriBuhari');
         if (bodyEl) {
             bodyEl.innerHTML =
-                `उपरोक्त विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं.${wardNep} मा बसोबास गर्ने ` +
-                `${guardianClause}<span style="font-weight:bold;">${studentDisplay}</span>${idClause} ` +
-                `ले यस वडा कार्यालयमा पेश गर्नुभएको माग निवेदन बमोजिम निज निवेदक ` +
+                `उपरोक्त विषयमा झापा जिल्ला, गौरादह नगरपालिका वडा नं. ${wardNep} बस्ने ` +
+                `${guardianClause}<span style="font-weight:bold;">${studentDisplay}</span>${idClause}ले ` +
+                `यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निज निवेदक ` +
                 `<span style="font-weight:bold;">${studentDisplay}</span> हाल ${escapeHtml(campus)}मा ` +
                 `स्नातक तह <span style="font-weight:bold;">${escapeHtml(subject)}</span> ` +
                 `<span style="font-weight:bold;">${escapeHtml(yearVal)}</span>${yearSuffix} अध्ययनरत रहनुभएको हुँदा ` +
@@ -268,19 +296,19 @@ function updateDoc() {
         const schoolWard = document.getElementById('inSchoolWard')?.value || wardNep;
         const schoolRaw = document.getElementById('inSchoolName')?.value || '';
         const schoolDisplay = formatSchoolDisplay(schoolRaw);
+        const schoolPost = schoolRaw.trim() ? 'मा' : ' मा';
         const classRaw = document.getElementById('inClassDetails')?.value.trim() || '';
-        const classDisplay = classRaw
-            ? (classRaw.endsWith('मा') ? escapeHtml(toNepaliDigit(classRaw)) : `${escapeHtml(toNepaliDigit(classRaw))} मा`)
-            : '............. मा';
+        const classClean = classRaw.replace(/\s+मा$/, '').trim();
+        const classDisplay = classClean ? escapeHtml(toNepaliDigit(classClean)) : '.............';
 
         const bodyEl = document.getElementById('bodyGeneral');
         if (bodyEl) {
             bodyEl.innerHTML =
-                `उपरोक्त विषयमा जिल्ला झापा गौरादह नगरपालिका वडा नं.${wardNep} मा बसोबास गर्ने ` +
-                `${guardianClause}<span style="font-weight:bold;">${studentDisplay}</span>${idClause} ` +
-                `ले यस वडा कार्यालयमा पेश गर्नुभएको माग निवेदन बमोजिम निज निवेदक ` +
-                `<span style="font-weight:bold;">${studentDisplay}</span> हाल गौरादह नगरपालिका वडा नं.${escapeHtml(toNepaliDigit(schoolWard))} स्थित ` +
-                `<span style="font-weight:bold;">${schoolDisplay}</span> मा ` +
+                `उपरोक्त विषयमा झापा जिल्ला, गौरादह नगरपालिका वडा नं. ${wardNep} बस्ने ` +
+                `${guardianClause}<span style="font-weight:bold;">${studentDisplay}</span>${idClause}ले ` +
+                `यस वडा कार्यालयमा पेस गर्नुभएको माग निवेदन बमोजिम निज निवेदक ` +
+                `<span style="font-weight:bold;">${studentDisplay}</span> हाल गौरादह नगरपालिका वडा नं. ${escapeHtml(toNepaliDigit(schoolWard))} स्थित ` +
+                `<span style="font-weight:bold;">${schoolDisplay}</span>${schoolPost} ` +
                 `<span style="font-weight:bold;">${classDisplay}</span> अध्ययनरत रहेको हुँदा ` +
                 `निजलाई गौरादह नगरपालिकाद्वारा शैक्षिक छात्रवृत्ति कार्यक्रम अन्तर्गत प्राप्त हुने ` +
                 `छात्रवृत्ति कार्यक्रममा समावेश गरिदिनुहुन सिफारिस साथ अनुरोध छ ।`;
@@ -356,6 +384,7 @@ async function printAndSaveSystem() {
         ns: document.getElementById('inNepalSamvat')?.value.trim() || '-',
         fatherName: document.getElementById('inFatherName')?.value.trim() || '',
         motherName: document.getElementById('inMotherName')?.value.trim() || '',
+        husbandName: document.getElementById('inHusbandName')?.value.trim() || '',
         relation: getCheckedRadio('relationRadio', mode === 'chhori-buhari' ? 'छोरी' : 'छोरा'),
         studentName,
         applicantName: studentName,
@@ -445,7 +474,7 @@ function renderDatabaseTable() {
         if (!wardMatch) return false;
         if (!query) return true;
         const haystack = [
-            r.studentName, r.fatherName, r.motherName, r.citNo,
+            r.studentName, r.fatherName, r.motherName, r.husbandName, r.citNo,
             r.birthRegNo, r.schoolName, r.campusName, r.chalani
         ].filter(Boolean).join(' ').toLowerCase();
         return haystack.includes(query);
@@ -498,11 +527,14 @@ function editFromDB(id) {
 
     document.getElementById('inFatherName').value = rec.fatherName || '';
     document.getElementById('inMotherName').value = rec.motherName || '';
+    const husbandInput = document.getElementById('inHusbandName');
+    if (husbandInput) husbandInput.value = rec.husbandName || '';
     document.getElementById('inStudentName').value = rec.studentName || '';
 
     document.querySelectorAll('input[name="relationRadio"]').forEach(r => {
         r.checked = (r.value === (rec.relation || (rec.mode === 'general' ? 'छोरा' : 'छोरी')));
     });
+    if (typeof toggleRelationFields === 'function') toggleRelationFields();
 
     const docType = rec.idDocType || (rec.birthRegNo ? 'BIRTH_REG' : (rec.citNo ? 'CITIZENSHIP' : 'NONE'));
     document.querySelectorAll('input[name="idDocTypeRadio"]').forEach(r => { r.checked = (r.value === docType); });
@@ -518,7 +550,8 @@ function editFromDB(id) {
     toggleCustomSubject();
     document.getElementById('inCustomSubject').value = rec.customSubject || '';
 
-    document.querySelectorAll('input[name="yearRadio"]').forEach(r => { r.checked = (r.value === (rec.yearChoice || 'पहिलो')); });
+    const normalizedYear = rec.yearChoice === 'दोश्रो' ? 'दोस्रो' : (rec.yearChoice || 'पहिलो');
+    document.querySelectorAll('input[name="yearRadio"]').forEach(r => { r.checked = (r.value === normalizedYear); });
     toggleCustomYear();
     document.getElementById('inCustomYear').value = rec.customYear || '';
 
@@ -601,13 +634,8 @@ async function initChhatrabrittiModule() {
         schoolWardEl.value = toNepaliDigit(activeWard);
     }
 
-    if (window.MultiWard && typeof window.MultiWard.getNextChalani === 'function') {
-        try {
-            const chalaniVal = await window.MultiWard.getNextChalani(db, 'chhatrabritti', activeWard);
-            const chalInput = document.getElementById('inChalani');
-            if (chalInput && !chalInput.value) chalInput.value = chalaniVal;
-        } catch (e) {}
-    }
+    const chalInput = document.getElementById('inChalani');
+    if (chalInput) chalInput.value = '';
 
     setMode('chhori-buhari');
 

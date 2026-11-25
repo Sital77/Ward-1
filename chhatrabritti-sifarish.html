@@ -212,8 +212,8 @@
 
             <div class="row-grid">
                 <div class="form-group">
-                    <label>चलानी नं (च.नं.):</label>
-                    <input type="text" id="inChalani" placeholder="उदा: ५२" oninput="updateDoc()">
+                    <label>चलानी नं (च.नं. - हातैले हाल्ने भए खाली छोड्नुस्):</label>
+                    <input type="text" id="inChalani" placeholder="खाली (हातैले लेख्न वा टाइप गर्न)" oninput="updateDoc()">
                 </div>
                 <div class="form-group">
                     <label>मिति (वि.सं.):</label>
@@ -231,35 +231,41 @@
         <div class="section-card body-section">
             <div class="section-label">👤 विद्यार्थी तथा अभिभावक विवरण</div>
 
-            <!-- अभिभावक (बुवा / आमा वैकल्पिक - एक वा दुबै) -->
-            <div class="row-grid">
-                <div class="form-group">
-                    <label>बुवाको नाम (ऐच्छिक):</label>
-                    <input type="text" id="inFatherName" placeholder="बुवाको मात्र वा दुबै हाल्न मिल्ने" oninput="updateDoc()">
-                </div>
-                <div class="form-group">
-                    <label>आमाको नाम (ऐच्छिक):</label>
-                    <input type="text" id="inMotherName" placeholder="आमाको मात्र वा दुबै हाल्न मिल्ने" oninput="updateDoc()">
-                </div>
-            </div>
-
             <!-- नाता -->
             <div class="form-group">
                 <label>नाता (छोरी / बुहारी / छोरा):</label>
                 <div class="radio-container">
                     <div class="radio-option" id="wrapRelChhori">
-                        <input type="radio" id="relChhori" name="relationRadio" value="छोरी" onchange="updateDoc()" checked>
+                        <input type="radio" id="relChhori" name="relationRadio" value="छोरी" onchange="toggleRelationFields(); updateDoc()" checked>
                         <label for="relChhori" class="radio-label">छोरी</label>
                     </div>
                     <div class="radio-option" id="wrapRelBuhari">
-                        <input type="radio" id="relBuhari" name="relationRadio" value="बुहारी" onchange="updateDoc()">
-                        <label for="relBuhari" class="radio-label">बुहारी</label>
+                        <input type="radio" id="relBuhari" name="relationRadio" value="बुहारी" onchange="toggleRelationFields(); updateDoc()">
+                        <label for="relBuhari" class="radio-label">बुहारी (श्रीमती)</label>
                     </div>
                     <div class="radio-option" id="wrapRelChhora">
-                        <input type="radio" id="relChhora" name="relationRadio" value="छोरा" onchange="updateDoc()">
+                        <input type="radio" id="relChhora" name="relationRadio" value="छोरा" onchange="toggleRelationFields(); updateDoc()">
                         <label for="relChhora" class="radio-label">छोरा</label>
                     </div>
                 </div>
+            </div>
+
+            <!-- अभिभावक (बुबा / आमा वैकल्पिक - एक मात्र वा दुबै) -->
+            <div class="row-grid">
+                <div class="form-group">
+                    <label id="lblInFatherName">बुबाको नाम (ऐच्छिक):</label>
+                    <input type="text" id="inFatherName" placeholder="बुबाको मात्र वा दुबै हाल्न मिल्ने" oninput="updateDoc()">
+                </div>
+                <div class="form-group">
+                    <label id="lblInMotherName">आमाको नाम (ऐच्छिक):</label>
+                    <input type="text" id="inMotherName" placeholder="आमाको मात्र वा दुबै हाल्न मिल्ने" oninput="updateDoc()">
+                </div>
+            </div>
+
+            <!-- बुहारी (श्रीमती) को हकमा श्रीमान्‌को नाम -->
+            <div class="form-group" id="husbandBox" style="display:none; background:#fff; padding:9px 10px; border:1px dashed #90cdf4; border-radius:8px;">
+                <label for="inHusbandName" style="color:#2b6cb0;">पतिको (श्रीमान्) नाम (बुहारीको हकमा — “फलानोको श्रीमती”):</label>
+                <input type="text" id="inHusbandName" placeholder="उदा: रमेश अधिकारी" oninput="updateDoc()">
             </div>
 
             <!-- विद्यार्थीको नाम -->
@@ -361,8 +367,8 @@
                             <label for="yr1" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">पहिलो</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" id="yr2" name="yearRadio" value="दोश्रो" onchange="toggleCustomYear(); updateDoc()">
-                            <label for="yr2" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">दोश्रो</label>
+                            <input type="radio" id="yr2" name="yearRadio" value="दोस्रो" onchange="toggleCustomYear(); updateDoc()">
+                            <label for="yr2" class="radio-label" style="font-size:0.82rem; padding:7px 2px;">दोस्रो</label>
                         </div>
                         <div class="radio-option">
                             <input type="radio" id="yr3" name="yearRadio" value="तेस्रो" onchange="toggleCustomYear(); updateDoc()">

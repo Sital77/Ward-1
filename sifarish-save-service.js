@@ -94,7 +94,7 @@
             // Fallback: Safe combination of name + relative / DOB / fiscal year
             const citizenName = data.studentName || data.beneficiaryName || data.applicantName || data.name || data.patientName || '';
             const cleanName = normalizeNoSpace(citizenName);
-            const relativeName = normalizeNoSpace(data.fatherName || data.spouseName || data.guardianName || '');
+            const relativeName = normalizeNoSpace(data.fatherName || data.husbandName || data.spouseName || data.guardianName || '');
             const ay = normalizeNepaliText(data.ay || data.fiscalYear || '');
             if (!cleanName) return '';
             return `citizen_profile___${cleanName}___${relativeName}___${ay}`;
