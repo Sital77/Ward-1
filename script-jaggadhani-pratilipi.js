@@ -181,7 +181,7 @@ function updateDoc() {
     const divDetailCit      = document.getElementById('divDetailCit');
     const toNep = typeof window.toNepaliDigit === 'function' ? window.toNepaliDigit : (x => x);
     if (citNo || citDate || citDist) {
-        lblCitDetailsSpan.innerHTML = `(ना.प्र.नं. <span style="font-weight:bold;">${toNep(citNo) || '...'}</span>, जारी मिति: <span style="font-weight:bold;">${toNep(citDate) || '...'}</span>, <span style="font-weight:bold;">${citDist || '...'}</span>)`;
+        lblCitDetailsSpan.innerHTML = ` (ना.प्र.नं. <span style="font-weight:bold;">${toNep(citNo) || '...'}</span>, जारी मिति: <span style="font-weight:bold;">${toNep(citDate) || '...'}</span>, <span style="font-weight:bold;">${citDist || '...'}</span>)`;
         divDetailCit.style.display = 'block';
         document.getElementById('lblDetailCitNo').innerText       = toNep(citNo) || '...';
         document.getElementById('lblDetailCitDate').innerText     = toNep(citDate) || '...';

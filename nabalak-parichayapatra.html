@@ -12,17 +12,214 @@
             font-family: 'Mukta', sans-serif;
         }
 
-        .letter-body-para {
-            font-size: 11pt;
-            line-height: 1.7;
+        /* Fixed uniform 2-page layout independent of global font-size slider */
+        #printPage1 {
+            padding: 6mm 9mm 5mm 9mm !important;
+            box-sizing: border-box;
+            font-size: 9.2pt;
+            line-height: 1.34;
+            color: #000;
+            position: relative;
+            display: block;
+        }
+
+        .nb-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 2px;
+            margin-bottom: 3px;
+        }
+
+        .nb-receiver-office {
+            margin: 0;
+            font-weight: 600;
+            font-size: 9.8pt;
+            line-height: 1.32;
+        }
+
+        .nb-photo-paste-box {
+            width: 78px;
+            height: 92px;
+            border: 1.2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3px;
+            font-size: 8.2pt;
+            font-weight: 500;
+            background: #fff;
+            overflow: hidden;
+            line-height: 1.25;
+        }
+
+        .nb-subject {
+            text-align: center;
+            font-weight: 700;
+            font-size: 10pt;
+            margin: 1px 0 3px 0;
+        }
+
+        .nb-salutation {
+            margin: 0 0 2px 0;
+            font-weight: 600;
+            font-size: 9.5pt;
+        }
+
+        .nb-intro-para {
+            margin: 0 0 5px 0;
+            font-weight: 500;
+            font-size: 9.2pt;
+            line-height: 1.36;
             text-align: justify;
-            text-justify: inter-word;
+        }
+
+        .nabalak-tbl {
+            width: 100%;
+            border: 1px solid #000;
+            border-collapse: collapse;
+            font-size: 8.9pt;
+            line-height: 1.3;
+            table-layout: fixed;
+        }
+
+        .nabalak-tbl td {
+            border-right: 1px solid #000;
+            padding: 3px 5px;
+            vertical-align: top;
+        }
+
+        .nabalak-tbl td:last-child {
+            border-right: none;
+        }
+
+        .nb-grp {
+            margin-bottom: 3px;
+        }
+
+        .nb-grp:last-child {
+            margin-bottom: 0;
+        }
+
+        .nb-line {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .nb-subline {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-top: 1px;
+            padding-left: 10px;
+        }
+
+        .nb-decl {
+            margin: 5px 0 4px 0;
+            font-weight: 600;
+            font-size: 9pt;
+            line-height: 1.34;
+            text-align: justify;
+        }
+
+        .nb-sign-tbl {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2px;
+            font-size: 9pt;
+            line-height: 1.32;
+        }
+
+        .nb-thumb-tbl {
+            border: 1px solid #000;
+            border-collapse: collapse;
+            width: 185px;
+            text-align: center;
+            font-size: 9pt;
+        }
+
+        .nb-thumb-tbl td {
+            border: 1px solid #000;
+            width: 50%;
+            padding: 1px 0;
+        }
+
+        .nb-thumb-tbl tr:last-child td {
+            height: 58px;
+            padding: 0;
+        }
+
+        .sifarish-bottom-section {
+            margin-top: 10px;
+            page-break-inside: avoid;
+        }
+
+        .sifarish-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 10pt;
+            margin: 0 0 3px 0;
+            text-decoration: underline;
         }
 
         .sifarish-para {
-            font-size: 7.2pt !important;
-            line-height: 1.15 !important;
+            margin: 0;
+            font-weight: 500;
+            font-size: 9.1pt;
+            line-height: 1.36;
             text-align: justify;
+        }
+
+        .sifarish-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            font-size: 9pt;
+            line-height: 1.34;
+        }
+
+        #printPage2 {
+            position: relative;
+            padding: 11mm 13mm 10mm 13mm !important;
+            box-sizing: border-box;
+            margin-top: 25px;
+            font-size: 10.5pt;
+            line-height: 1.62;
+            color: #000;
+            display: block;
+        }
+
+        .nb-p2-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 12.5pt;
+            text-decoration: underline;
+            margin: 4px 0 14px 0;
+        }
+
+        .nb-p2-para {
+            margin: 0 0 12px 0;
+            font-weight: 500;
+            font-size: 10.5pt;
+            text-align: justify;
+            line-height: 1.7;
+        }
+
+        .nb-p2-sec-heading {
+            font-weight: 700;
+            font-size: 10.8pt;
+            text-decoration: underline;
+            margin-bottom: 4px;
+        }
+
+        .nb-p2-list {
+            font-size: 10.2pt;
+            line-height: 1.65;
+            font-weight: 500;
+            padding-left: 10px;
+            margin-bottom: 10px;
         }
 
         .section-card {
@@ -57,51 +254,20 @@
             color: #4a5568;
         }
 
-        /* Photo Upload & Preview UI matching CCIMS Screenshot */
-        .photo-upload-box {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 12px;
-            background: #f7fafc;
-            border: 1.5px dashed #cbd5e0;
-            border-radius: 10px;
-        }
-
-        .photo-preview-circle {
-            width: 85px;
-            height: 105px;
-            border-radius: 8px;
-            background: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .photo-preview-circle img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-upload-btn {
+        .smart-btn {
             background: #fff;
             border: 1.5px solid #3182ce;
             color: #3182ce;
-            padding: 8px 16px;
+            padding: 7px 12px;
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        .photo-upload-btn:hover {
-            background: #3182ce;
-            color: #fff;
+        .smart-btn:hover {
+            opacity: 0.92;
         }
 
         /* Tabs UI exactly matching Screenshot 3 */
@@ -264,7 +430,7 @@
 
         @page {
             size: A4 portrait;
-            margin: 3mm 6mm 3mm 6mm;
+            margin: 4mm 6mm 4mm 6mm;
         }
 
         @media print {
@@ -280,7 +446,6 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background-color: #ffffff !important;
-                font-size: 10pt !important;
                 overflow: visible !important;
             }
 
@@ -301,18 +466,18 @@
             .a4-page {
                 box-shadow: none !important;
                 margin: 0 !important;
-                padding: 3mm 6mm !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 height: auto !important;
                 min-height: unset !important;
                 max-height: none !important;
                 overflow: visible !important;
-                page-break-after: always !important;
+                display: block !important;
                 page-break-inside: avoid !important;
             }
 
             #printPage1 {
+                padding: 2mm 4mm 2mm 4mm !important;
                 page-break-after: always !important;
             }
 
@@ -323,8 +488,9 @@
             .a4-page.page-2,
             #printPage2 {
                 page-break-before: always !important;
+                page-break-after: auto !important;
                 margin-top: 0 !important;
-                padding: 5mm 8mm !important;
+                padding: 6mm 8mm 6mm 8mm !important;
             }
         }
     </style>
@@ -355,12 +521,12 @@
                 onchange="handleBirthCertUpload(event)">
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
-                <button type="button" class="photo-upload-btn"
+                <button type="button" class="smart-btn"
                     style="background: #3182ce; color: #fff; border-color: #2b6cb0; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;"
                     onclick="document.getElementById('certFileUploader').click()">
                     📂 फाइल अपलोड (.html)
                 </button>
-                <button type="button" class="photo-upload-btn"
+                <button type="button" class="smart-btn"
                     style="background: #2b6cb0; color: #fff; border-color: #2c5282; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;"
                     onclick="toggleSmartPasteBox(true)">
                     📋 स्मार्ट पेस्ट (Text/HTML)
@@ -368,12 +534,12 @@
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                <button type="button" class="photo-upload-btn"
+                <button type="button" class="smart-btn"
                     style="background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;"
                     onclick="copyFormDataToClipboard()">
                     📑 फारम डाटा कपी (Copy)
                 </button>
-                <button type="button" class="photo-upload-btn"
+                <button type="button" class="smart-btn"
                     style="background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; font-weight: 600; padding: 7px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;"
                     onclick="toggleFormPasteBox(true)">
                     📥 फारम डाटा पेस्ट (Paste)
@@ -495,32 +661,8 @@
                 </div>
                 <div class="form-group">
                     <label>Date of Birth (AD) * :</label>
-                    <input type="text" id="inDOB_AD" placeholder="2009-04-14" oninput="updateDoc()"
-                        onchange="updateDoc()">
-                </div>
-            </div>
-        </div>
-
-        <!-- ══ 3. PHOTO UPLOAD (Screenshot 1 matching) ══ -->
-        <div class="section-card">
-            <div class="section-label">🖼️ निवेदक (नाबालक) को तस्विर</div>
-            <div class="photo-upload-box">
-                <div class="photo-preview-circle" id="photoPreviewContainer">
-                    <span style="font-size: 2rem; color: #a0aec0;">👤</span>
-                </div>
-                <div>
-                    <div style="font-weight: 700; color: #2d3748; margin-bottom: 4px;">तस्विर अपलोड गर्नुहोस्</div>
-                    <div style="font-size: 0.82rem; color: #718096; margin-bottom: 10px;">पासपोर्ट साइजको दुवै कान
-                        देखिने स्पष्ट फोटो (JPG/PNG)</div>
-                    <input type="file" id="inPhotoUpload" accept="image/*" style="display: none;"
-                        onchange="handlePhotoUpload(event)">
-                    <div style="display: flex; gap: 8px;">
-                        <button type="button" class="photo-upload-btn"
-                            onclick="document.getElementById('inPhotoUpload').click()">📁 फोटो अपलोड गर्नुहोस्</button>
-                        <button type="button" class="photo-upload-btn"
-                            style="border-color: #e53e3e; color: #e53e3e; display: none;" id="btnRemovePhoto"
-                            onclick="removePhoto()">🗑️ हटाउनुहोस्</button>
-                    </div>
+                    <input type="text" id="inDOB_AD" placeholder="2009-04-14" oninput="autoConvertAdToBs(); updateDoc()"
+                        onchange="autoConvertAdToBs(); updateDoc()">
                 </div>
             </div>
         </div>
@@ -949,44 +1091,39 @@
     <!-- ══════════════ PREVIEW PANEL (Exact match to final reference format) ══════════════ -->
     <div class="preview-panel">
         <!-- ══ PAGE 1 ══ -->
-        <div class="a4-page page-1" id="printPage1"
-            style="position: relative; padding: 3mm 6mm 3mm 6mm; box-sizing: border-box;">
+        <div class="a4-page page-1" id="printPage1">
 
-            <!-- Top Header Row: Address left, Photo right -->
-            <div
-                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1px; margin-top: 5px;">
+            <!-- Top Header Row: Address left, Photo paste box right -->
+            <div class="nb-header-row">
                 <div style="flex: 1;">
-                    <p style="margin: 0; font-weight: 600; font-size: 9pt; line-height: 1.25;" id="lblReceiverOffice">
+                    <p class="nb-receiver-office" id="lblReceiverOffice">
                         श्री प्रमुख जिल्ला अधिकारीज्यू,<br>इलाका प्रशासन कार्यालय, गौरीगञ्ज ।
                     </p>
                 </div>
                 <div style="flex-shrink: 0; margin-left: 10px;">
-                    <div id="lblPhotoBox"
-                        style="width: 75px; height: 95px; border: 1.2px solid #000; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px; font-size: 7.5pt; font-weight: 500; background: #fff; overflow: hidden; line-height: 1.2;">
+                    <div id="lblPhotoBox" class="nb-photo-paste-box">
                         निवेदकको दुवै कान देखिने पासपोर्ट साइजको फोटो
                     </div>
                 </div>
             </div>
 
             <!-- Subject Line -->
-            <div style="text-align: center; font-weight: 600; font-size: 9.5pt; margin-top: 1px; margin-bottom: 1px;">
-                <span class="subject-label" style="color: #e51a23;">विषय:</span> नाबालक परिचय-पत्र पाउँ ।
+            <div class="nb-subject">
+                <span class="subject-label" style="color: #e51a23;">विषय:</span> नाबालक परिचयपत्र पाऊँ ।
             </div>
 
             <!-- Salutation & Opening Paragraph -->
-            <p style="margin: 0 0 1px 0; font-weight: 600; font-size: 9pt;">महोदय,</p>
-            <p
-                style="margin: 0 0 3px 0; font-weight: 500; font-size: 8.5pt; line-height: 1.35; text-align: justify; text-indent: 0;">
-                मेरो निम्नानुसार विवरण भएको नाबालकको परिचयपत्र बनाउनु पर्ने भएको हुँदा सिफारिस साथ रू.१०/- को टिकट टाँसी
-                यो निवेदन पेश गरेको छु। मेरो <span id="lblIntroChildRel" style="font-weight: 600;">छोरा</span> <span
+            <p class="nb-salutation">महोदय,</p>
+            <p class="nb-intro-para">
+                मेरो निम्नानुसार विवरण भएको नाबालकको परिचयपत्र बनाउनुपर्ने भएको हुँदा सिफारिससाथ रु. १०/- को टिकट टाँसी
+                यो निवेदन पेस गरेको छु । मेरो <span id="lblIntroChildRel" style="font-weight: 600;">छोरा</span> <span
                     id="lblIntroChildTitle" style="font-weight: 600;">श्री</span> <span id="lblIntroChildName"
                     style="border-bottom: 1px dashed #000; padding: 0 4px; font-weight: 600;">................</span>ले
-                यस अघि नाबालक परिचय पत्र बनाएको छैन ।
+                यसअघि नाबालक परिचयपत्र बनाएको छैन ।
             </p>
 
-            <!-- 2-Column Bordered Table (Exact match to sample image with balanced column heights) -->
-            <table class="nabalak-tbl"
-                style="width: 100%; border: 1px solid #000; border-collapse: collapse; font-size: 8.5pt; table-layout: fixed;">
+            <!-- 2-Column Bordered Table -->
+            <table class="nabalak-tbl">
                 <tr>
                     <!-- LEFT COLUMN (Items १ to ७) -->
                     <td style="width: 50%; border-right: 1px solid #000; padding: 2px 4px; vertical-align: top;">
@@ -1248,33 +1385,32 @@
             </table>
 
             <!-- Declaration Line -->
-            <p style="margin: 1px 0 1px 0; font-weight: 600; font-size: 8pt;">
-                मैले माथि उल्लेख गरेको सम्पूर्ण व्यहोरा ठिक साँचो हो । उक्त व्यहोरा झुठ्ठा ठहरे प्रचलित कानून बमोजिम
+            <p class="nb-decl">
+                मैले माथि उल्लेख गरेको सम्पूर्ण व्यहोरा ठिक साँचो हो । उक्त व्यहोरा झुटा ठहरे प्रचलित कानुनबमोजिम
                 हुने सजाय तथा जरिवाना सहुँला बुझाउँला ।
             </p>
 
             <!-- Bottom Table of Page 1 (Fingerprints & Bhavadiya) -->
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1px; font-size: 8pt;">
+            <table class="nb-sign-tbl">
                 <tr>
                     <td style="width: 44%; vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 1px; font-size: 8pt;"> नाबालकको औँठाको छाप</div>
-                        <table
-                            style="border: 1px solid #000; border-collapse: collapse; width: 180px; text-align: center; font-size: 8pt;">
+                        <div style="font-weight: 600; margin-bottom: 2px;">नाबालकको औँठाको छाप</div>
+                        <table class="nb-thumb-tbl">
                             <tr>
-                                <td style="border: 1px solid #000; width: 50%; padding: 1px 0;">दाँया</td>
-                                <td style="border: 1px solid #000; width: 50%; padding: 1px 0;">बाँया</td>
+                                <td>दायाँ</td>
+                                <td>बायाँ</td>
                             </tr>
                             <tr>
-                                <td style="border: 1px solid #000; height: 70px;"></td>
-                                <td style="border: 1px solid #000; height: 70px;"></td>
+                                <td></td>
+                                <td></td>
                             </tr>
                         </table>
                     </td>
                     <td style="width: 8%;"></td>
                     <td style="width: 48%; vertical-align: top;">
-                        <div style="font-weight: 600; margin-bottom: 4px; text-align: left;">भवदीय</div>
+                        <div style="font-weight: 600; margin-bottom: 3px; text-align: left;">भवदीय</div>
                         <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
-                            <span style="font-weight: 500; white-space: nowrap;">निवेदकको नामथर : </span>
+                            <span style="font-weight: 500; white-space: nowrap;">निवेदकको नाम, थर : </span>
                             <span id="lblSubmitName_P1"
                                 style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 4px; font-weight: 600;">................</span>
                         </div>
@@ -1297,102 +1433,96 @@
                 </tr>
             </table>
 
+            <!-- ── गाउँपालिका/नगरपालिकाको सिफारिस (Same Page 1) ── -->
+            <div class="sifarish-bottom-section">
+                <div class="sifarish-title">
+                    नगरपालिकाको सिफारिस
+                </div>
+                <p class="sifarish-para">
+                    <span id="lblRecRM_Sif"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span>
+                    गा.पा./न.पा. वडा नं. <span id="lblRecWard_Sif"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">......</span> मा मिति
+                    <span id="lblDOB_Sif"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span> मा
+                    जन्म भई हाल <span id="lblPermRM_Sif"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span>
+                    गा.पा./न.पा. वडा नं. <span id="lblPermWard_Sif"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">......</span> मा
+                    स्थायी रूपमा बसोबास गरी आएका यसमा लेखिएका बाबु <span id="lblSifFather"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span> र
+                    आमा <span id="lblSifMother"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span> को
+                    <span id="lblRelation_Sif">छोरा</span> वर्ष <span id="lblAge_Sif"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">......</span> को
+                    <span id="lblTitle_Sif">श्री</span> <span id="lblNameNP_Sif"
+                        style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 700;">................</span>लाई
+                    म राम्ररी चिन्दछु । उपर्युक्त लेखिएबमोजिमको निजको व्यहोरा मैले जाने बुझेसम्म साँचो हो । निजलाई नाबालक
+                    परिचयपत्र दिए हुन्छ भन्ने व्यहोराको सिफारिस गर्दछु ।
+                </p>
 
-
-
-            <!-- ── गाउँपालिका/उप/महा/नगरपालिकाको सिफारिस (Same Page) ── -->
-            <div class="sifarish-title"
-                style="text-align: center; font-weight: 700; font-size: 8pt; margin-top: 15px; margin-bottom: 1px;">
-                नगरपालिकाको सिफारिस
+                <table class="sifarish-table">
+                    <tr>
+                        <td style="width: 46%; vertical-align: top;">
+                            <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
+                                <span style="font-weight: 500; white-space: nowrap;">मिति : </span>
+                                <span id="lblSifarishMiti"
+                                    style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 500;">................</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline;">
+                                <span style="font-weight: 500; white-space: nowrap;">कार्यालयको नाम र छाप : </span>
+                                <span id="lblNabalakOfficeStamp"
+                                    style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 600;">गौरादह
+                                    नगरपालिका वडा नं. १ कार्यालय</span>
+                            </div>
+                        </td>
+                        <td style="width: 8%;"></td>
+                        <td style="width: 46%; vertical-align: top;" id="docFooterSection">
+                            <div style="font-weight: 600; margin-bottom: 2px;">सिफारिस गर्नेको :</div>
+                            <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
+                                <span style="font-weight: 500; white-space: nowrap;">दस्तखत: </span>
+                                <span style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px;">&nbsp;</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
+                                <span style="font-weight: 500; white-space: nowrap;">नाम, थर: </span>
+                                <span id="lblSigName"
+                                    style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 600;">नगेन्द्र
+                                    भण्डारी</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
+                                <span style="font-weight: 500; white-space: nowrap;">पद: </span>
+                                <span id="lblSigTitle"
+                                    style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 600;">वडा
+                                    अध्यक्ष</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
-            <p class="sifarish-para"
-                style="margin: 0; font-weight: 500; font-size: 7.2pt; text-align: justify; line-height: 1.15;">
-                <span id="lblRecRM_Sif"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span>
-                गा.पा./न.पा. वडा नं. <span id="lblRecWard_Sif"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">......</span> मा मिति
-                <span id="lblDOB_Sif"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span> मा
-                जन्म भई हाल <span id="lblPermRM_Sif"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span>
-                गा.पा./न.पा. वडा नं. <span id="lblPermWard_Sif"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">......</span> मा बस्ने
-                स्थायी रुपमा बसोबास गरी आएका यसमा लेखिएका बाबु <span id="lblSifFather"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span>
-                आमा <span id="lblSifMother"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">................</span> को
-                <span id="lblRelation_Sif">छोरा</span> वर्ष <span id="lblAge_Sif"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 600;">......</span> को
-                <span id="lblTitle_Sif">श्री</span> <span id="lblNameNP_Sif"
-                    style="border-bottom: 1px dashed #000; padding: 0 2px; font-weight: 700;">................</span>
-                लाई म राम्ररी चिन्दछु। उपयुक्त लेखिए बमोजिमको निजको व्यहोरा मैले जाने बुझेसम्म साँचो हो। निजलाई नावालक
-                परिचय पत्र दिए हुन्छ। भन्ने व्यहोराको सिफारिस गर्दछु ।
-            </p>
-
-            <table class="sifarish-table"
-                style="width: 100%; border-collapse: collapse; margin-top: 2px; font-size: 8pt;">
-                <tr>
-                    <td style="width: 46%; vertical-align: top;">
-                        <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
-                            <span style="font-weight: 500; white-space: nowrap;">मिति : </span>
-                            <span id="lblSifarishMiti"
-                                style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 500;">................</span>
-                        </div>
-                        <div style="display: flex; align-items: baseline;">
-                            <span style="font-weight: 500; white-space: nowrap;">कार्यालयको नाम र छाप : </span>
-                            <span id="lblNabalakOfficeStamp"
-                                style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 600;">गौरादह
-                                नगरपालिका वडा नं. १ कार्यालय</span>
-                        </div>
-                    </td>
-                    <td style="width: 8%;"></td>
-                    <td style="width: 46%; vertical-align: top;" id="docFooterSection">
-                        <div style="font-weight: 600; margin-bottom: 2px;">सिफारिस गर्नेको :</div>
-                        <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
-                            <span style="font-weight: 500; white-space: nowrap;">दस्तखत: </span>
-                            <span style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px;">&nbsp;</span>
-                        </div>
-                        <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
-                            <span style="font-weight: 500; white-space: nowrap;">नाम, थर: </span>
-                            <span id="lblSigName"
-                                style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 600;">नगेन्द्र
-                                भण्डारी</span>
-                        </div>
-                        <div style="display: flex; align-items: baseline; margin-bottom: 2px;">
-                            <span style="font-weight: 500; white-space: nowrap;">पद: </span>
-                            <span id="lblSigTitle"
-                                style="border-bottom: 1px dashed #000; flex-grow: 1; margin-left: 6px; font-weight: 600;">वडा
-                                अध्यक्ष</span>
-                        </div>
-                    </td>
-                </tr>
-            </table>
 
         </div><!-- /a4-page page-1 -->
 
-        <!-- PAGE 2 (ईलाका प्रशासन कार्यालयले भर्ने) -->
-        <div class="a4-page page-2" id="printPage2"
-            style="position: relative; padding: 10mm 12mm 8mm 12mm; box-sizing: border-box; margin-top: 25px; font-size: 10.5pt; line-height: 1.6;">
+        <!-- PAGE 2 (इलाका प्रशासन कार्यालयले भर्ने) -->
+        <div class="a4-page page-2" id="printPage2">
 
             <!-- Section Title -->
-            <div
-                style="text-align: center; font-weight: 700; font-size: 12.5pt; text-decoration: underline; margin-top: 5px; margin-bottom: 12px;">
-                ईलाका प्रशासन कार्यालयले भर्नेः
+            <div class="nb-p2-title">
+                इलाका प्रशासन कार्यालयले भर्नेः
             </div>
 
             <!-- सनाखत गर्ने paragraph -->
-            <p style="margin: 0 0 14px 0; font-weight: 500; font-size: 10.5pt; text-align: justify; line-height: 1.75;">
-                यसमा लेखिएको नाबालक श्री .............................................. मेरो एकाघर संगोलका
-                ........................................................... हुन । यस आवेदनमा लेखिएको सम्पूर्ण विवरण ठिक
-                साँचो हो । निजलाई नाबालक परिचयपत्र दिएमा कुनै फरक पर्दैन । फरक परेमा कानून बमोजिम सहुँला बुझाउँला भनी
+            <p class="nb-p2-para">
+                यसमा लेखिएको नाबालक श्री .............................................. मेरो एकाघर सगोलका
+                ........................................................... हुन् । यस आवेदनमा लेखिएको सम्पूर्ण विवरण ठिक
+                साँचो हो । निजलाई नाबालक परिचयपत्र दिएमा कुनै फरक पर्दैन । फरक परेमा कानुनबमोजिम सहुँला बुझाउँला भनी
                 सनाखत गर्नेः
             </p>
 
-            <!-- सनाखत गर्नेको औठाको छाप (Left) & सनाखत गर्नेको दस्तखत (Right) side-by-side -->
+            <!-- सनाखत गर्नेको औँठाको छाप (Left) & सनाखत गर्नेको दस्तखत (Right) side-by-side -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
                 <!-- Left Column: Thumbprints -->
                 <div style="width: 44%;">
-                    <div style="font-weight: 700; font-size: 10.5pt; margin-bottom: 5px;">सनाखत गर्नेको औठाको छाप :
+                    <div style="font-weight: 700; font-size: 10.5pt; margin-bottom: 5px;">सनाखत गर्नेको औँठाको छाप :
                     </div>
                     <table
                         style="border: 1.2px solid #000; border-collapse: collapse; width: 100%; max-width: 210px; text-align: center; font-size: 10pt;">
@@ -1412,67 +1542,66 @@
                     <div style="font-weight: 700; font-size: 10.5pt; text-decoration: underline; margin-bottom: 6px;">
                         सनाखत गर्नेको दस्तखत</div>
                     <div style="display: flex; align-items: baseline; margin-bottom: 4px;">
-                        <span style="font-weight: 600; width: 95px; white-space: nowrap;">नाम,थर :</span>
+                        <span style="font-weight: 600; width: 98px; white-space: nowrap;">नाम, थर :</span>
                         <span style="border-bottom: 1px dashed #000; flex-grow: 1; min-height: 15px;">&nbsp;</span>
                     </div>
                     <div style="display: flex; align-items: baseline; margin-bottom: 4px;">
-                        <span style="font-weight: 600; width: 95px; white-space: nowrap;">नाता सम्बन्ध :</span>
+                        <span style="font-weight: 600; width: 98px; white-space: nowrap;">नाता सम्बन्ध :</span>
                         <span style="border-bottom: 1px dashed #000; flex-grow: 1; min-height: 15px;">&nbsp;</span>
                     </div>
                     <div style="display: flex; align-items: baseline; margin-bottom: 4px;">
-                        <span style="font-weight: 600; width: 95px; white-space: nowrap;">नागरिकता नं :</span>
+                        <span style="font-weight: 600; width: 98px; white-space: nowrap;">नागरिकता नं. :</span>
                         <span style="border-bottom: 1px dashed #000; flex-grow: 1; min-height: 15px;">&nbsp;</span>
                     </div>
                     <div style="display: flex; align-items: baseline;">
-                        <span style="font-weight: 600; width: 95px; white-space: nowrap;">सम्पर्क नं :</span>
+                        <span style="font-weight: 600; width: 98px; white-space: nowrap;">सम्पर्क नं. :</span>
                         <span style="border-bottom: 1px dashed #000; flex-grow: 1; min-height: 15px;">&nbsp;</span>
                     </div>
                 </div>
             </div>
 
             <!-- श्रीमान् section -->
-            <p style="margin: 0 0 10px 0; font-weight: 500; font-size: 10.5pt; text-align: justify; line-height: 1.75;">
+            <p class="nb-p2-para">
                 श्रीमान्,<br>
                 यसमा लेखिएको श्री ................................................................ लाई निम्न कागजातका
-                आधारमा नाबालक परिचयपत्र प्रदान गर्ने निर्णयार्थ पेश गरेको छु ।
+                आधारमा नाबालक परिचयपत्र प्रदान गर्ने निर्णयार्थ पेस गरेको छु ।
             </p>
 
-            <!-- संलग्न कागजातहरुः -->
-            <div
-                style="text-align: left; font-weight: 700; font-size: 11pt; text-decoration: underline; margin-bottom: 5px;">
-                संलग्न कागजातहरुः
+            <!-- संलग्न कागजातहरूः -->
+            <div class="nb-p2-sec-heading">
+                संलग्न कागजातहरूः
             </div>
-            <div style="font-size: 10pt; line-height: 1.65; font-weight: 500; padding-left: 8px; margin-bottom: 8px;">
-                <div>१. नाबालकको बुवाको नागरिकता प्रमाणपत्रको प्रतिलिपि (सक्कल समेत)</div>
+            <div class="nb-p2-list">
+                <div>१. नाबालकको बुबाको नागरिकता प्रमाणपत्रको प्रतिलिपि (सक्कल समेत)</div>
                 <div>२. नाबालकको आमाको नागरिकता प्रमाणपत्रको प्रतिलिपि (सक्कल समेत)</div>
-                <div>३. नाबालकको आमा बुवाको बीचको विवाह दर्ता प्रमाणपत्रको प्रतिलिपि (सक्कल समेत)</div>
-                <div>४. नाबालकको जन्म दर्ता प्रमाण पत्र (सक्कल समेत)</div>
+                <div>३. नाबालकको आमाबुवाको विवाह दर्ता प्रमाणपत्रको प्रतिलिपि (सक्कल समेत)</div>
+                <div>४. नाबालकको जन्म दर्ता प्रमाणपत्र (सक्कल समेत)</div>
                 <div>५. नाबालकको हालसालै खिचिएको ३ प्रति फोटो ।</div>
             </div>
 
-            <!-- बासईसराई section -->
-            <div style="font-weight: 700; font-size: 10.5pt; text-decoration: underline; margin-bottom: 4px;">
-                बासईसराई गर्नेहरुको हकमाः
+            <!-- बसाइँसराइ section -->
+            <div class="nb-p2-sec-heading">
+                बसाइँसराइ गर्नेहरूको हकमाः
             </div>
-            <div style="font-size: 10pt; line-height: 1.65; font-weight: 500; padding-left: 8px; margin-bottom: 8px;">
-                <div>६. बसाईसराई प्रमाणपत्र</div>
-                <div>७. जग्गाधनी पूर्जा</div>
-                <div>८. बाहिरी जिल्लाबाट जारी भएको नागरिकता प्रमाणपत्रको अभिलेख बुझिने छ ।</div>
+            <div class="nb-p2-list">
+                <div>६. बसाइँसराइ प्रमाणपत्र</div>
+                <div>७. जग्गाधनी पुर्जा</div>
+                <div>८. बाहिरी जिल्लाबाट जारी भएको नागरिकता प्रमाणपत्रको अभिलेख बुझिनेछ ।</div>
             </div>
 
             <!-- कर्मचारी परिवार section -->
-            <div style="font-weight: 700; font-size: 10.5pt; text-decoration: underline; margin-bottom: 4px;">
+            <div class="nb-p2-sec-heading">
                 कर्मचारी परिवारको हकमाः
             </div>
-            <div style="font-size: 10pt; line-height: 1.65; font-weight: 500; padding-left: 8px; margin-bottom: 18px;">
-                <div>९. कर्मचारी कार्यरत कार्यालयको पत्र र क्र.स. १ देखि ५ सम्म उल्लेखित कागजातहरु</div>
+            <div class="nb-p2-list" style="margin-bottom: 18px;">
+                <div>९. कर्मचारी कार्यरत कार्यालयको पत्र र क्र.सं. १ देखि ५ सम्म उल्लिखित कागजातहरू</div>
             </div>
 
             <!-- Footer Sign Row -->
             <div
-                style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; font-size: 10.5pt; font-weight: 500;">
+                style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 22px; font-size: 10.5pt; font-weight: 500;">
                 <div style="line-height: 1.5;">
-                    <div>वितरित ना.वा.प.प.नं. ........................................</div>
+                    <div>वितरित ना.बा.प.प.नं. ........................................</div>
                     <div style="margin-top: 4px;">मिति : <span>................................</span></div>
                 </div>
                 <div style="text-align: center;">
@@ -1481,7 +1610,7 @@
                 </div>
                 <div style="text-align: center;">
                     <div style="border-bottom: 1px dashed #000; width: 110px; margin-bottom: 3px;">&nbsp;</div>
-                    <div>पेश गर्ने</div>
+                    <div>पेस गर्ने</div>
                 </div>
                 <div style="text-align: center;">
                     <div style="border-bottom: 1px dashed #000; width: 110px; margin-bottom: 3px;">&nbsp;</div>

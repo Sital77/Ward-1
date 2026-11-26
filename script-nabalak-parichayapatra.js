@@ -18,19 +18,56 @@ const db = firebase.firestore();
 let globalDatabase = [];
 window.globalDatabase = globalDatabase;
 let currentUploadedPhotoData = null;
+let dbHasLoaded = false;
+
+function getNabalakCacheKey() {
+    const w = (localStorage.getItem('sifarish_ward') || '1').trim();
+    return `nabalak_abhilekh_w${w}_v1`;
+}
+
+function hydrateNabalakCache() {
+    try {
+        const raw = localStorage.getItem(getNabalakCacheKey());
+        if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr) && arr.length > 0 && globalDatabase.length === 0) {
+                globalDatabase = arr.filter(r => !r.isDeleted);
+                window.globalDatabase = globalDatabase;
+            }
+        }
+    } catch (e) {}
+}
+
+function persistNabalakCache(list) {
+    try {
+        const compact = (list || []).slice(0, 250).map(item => {
+            const copy = { ...item };
+            if (copy.photoData) delete copy.photoData;
+            return copy;
+        });
+        localStorage.setItem(getNabalakCacheKey(), JSON.stringify(compact));
+    } catch (e) {}
+}
+
+hydrateNabalakCache();
 
 // Auth ready भएपछि मात्र snapshot listener start गर्ने
 (window._firebaseAuthReady || Promise.resolve()).then(() => {
     db.collection("nabalakRecords").onSnapshot((snapshot) => {
         globalDatabase = [];
         snapshot.forEach((doc) => {
-            globalDatabase.push({ id: doc.id, ...doc.data() });
+            const data = doc.data();
+            if (!data.isDeleted) {
+                globalDatabase.push({ id: doc.id, ...data });
+            }
         });
         globalDatabase.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        dbHasLoaded = true;
         window.globalDatabase = globalDatabase;
+        persistNabalakCache(globalDatabase);
         renderDatabaseTable();
-    });
-}).catch(() => {});
+    }, () => { dbHasLoaded = true; });
+}).catch(() => { dbHasLoaded = true; });
 
 
 // ── Helpers ─────────────────────────────────────────
@@ -104,7 +141,7 @@ function removePhoto() {
 
     const printBox = document.getElementById('lblPhotoBox');
     if (printBox) {
-        printBox.innerHTML = `फोटो`;
+        printBox.innerHTML = `निवेदकको दुवै कान देखिने पासपोर्ट साइजको फोटो`;
     }
 }
 
@@ -219,6 +256,36 @@ function autoConvertBsToAd() {
         }
     } catch (e) { }
 }
+window.autoConvertBsToAd = autoConvertBsToAd;
+
+function autoConvertAdToBs() {
+    try {
+        const adInputElem = document.getElementById('inDOB_AD');
+        if (!adInputElem) return;
+        autoFormatDateInput(adInputElem, '-');
+        const adDateStr = toEnglishDigit(adInputElem.value.trim()).replace(/[/.]/g, '-');
+        const parts = adDateStr.split('-');
+        if (parts.length !== 3) return;
+        const yr = parseInt(parts[0], 10);
+        const mo = parseInt(parts[1], 10);
+        const da = parseInt(parts[2], 10);
+        if (isNaN(yr) || isNaN(mo) || isNaN(da) || yr < 1940 || yr > 2050 || mo < 1 || mo > 12 || da < 1 || da > 31) return;
+
+        const converter = window["@sbmdkl/nepali-date-converter"];
+        if (!converter || typeof converter.adToBs !== 'function') return;
+        const isoStr = `${yr}-${String(mo).padStart(2, '0')}-${String(da).padStart(2, '0')}`;
+        const bsResult = converter.adToBs(isoStr);
+        if (typeof bsResult === 'string' && bsResult.trim()) {
+            const bsNep = toNepaliDigit(bsResult.trim().replace(/-/g, '/'));
+            const bsElem = document.getElementById('inDOB_BS');
+            if (bsElem && bsElem.value !== bsNep) {
+                bsElem.value = bsNep;
+                if (typeof updateDoc === 'function') updateDoc();
+            }
+        }
+    } catch (e) { }
+}
+window.autoConvertAdToBs = autoConvertAdToBs;
 
 function calculateApproxAge(bsDateStr) {
     if (!bsDateStr) return '....';
@@ -625,6 +692,14 @@ function updateDoc() {
         if (document.getElementById('inCustomReceiver')) document.getElementById('inCustomReceiver').style.display = 'none';
     }
 
+    // Localize office stamp dynamically based on active ward
+    const officeStampEl = document.getElementById('lblNabalakOfficeStamp');
+    if (officeStampEl) {
+        const rawWard = (window.getActiveWardNumber ? window.getActiveWardNumber() : (localStorage.getItem('sifarish_ward') || '1')).toString();
+        const wardNep = rawWard === 'municipality' ? 'कार्यपालिकाको कार्यालय' : `वडा नं. ${toNepaliDigit(rawWard)} कार्यालय`;
+        officeStampEl.innerText = `गौरादह नगरपालिका ${wardNep}`;
+    }
+
     // 7. Sign Authority
     toggleCustomSign();
 }
@@ -658,10 +733,11 @@ function toggleCustomSign() {
 }
 
 function adjustSignaturePosition(marginVal) {
+    const val = Math.max(0, Math.min(40, parseInt(marginVal || 0, 10) || 0));
     const section = document.getElementById('docFooterSection');
-    if (section) section.style.marginTop = marginVal + 'px';
+    if (section) section.style.paddingTop = val + 'px';
     const label = document.getElementById('marginVal');
-    if (label) label.innerText = toNepaliDigit(marginVal) + ' px';
+    if (label) label.innerText = toNepaliDigit(val) + ' px';
 }
 
 function updateNepalSambatFromMiti() {
@@ -719,17 +795,45 @@ function initializeAutomaticDate() {
 }
 
 // ── Database & Modal Handlers ───────────────────────
-function toggleModal(show) {
+async function toggleModal(show) {
     const modal = document.getElementById('abhilekhModal');
     if (!modal) return;
     modal.style.display = show ? 'flex' : 'none';
-    if (show) renderDatabaseTable();
+    if (show) {
+        renderDatabaseTable();
+        if (!dbHasLoaded && globalDatabase.length === 0) {
+            try {
+                await (window._firebaseAuthReady || Promise.resolve());
+                const snap = await db.collection("nabalakRecords").get();
+                const list = [];
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.isDeleted) list.push({ id: doc.id, ...data });
+                });
+                list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                globalDatabase = list;
+                window.globalDatabase = globalDatabase;
+                dbHasLoaded = true;
+                persistNabalakCache(globalDatabase);
+                renderDatabaseTable();
+            } catch (e) {
+                dbHasLoaded = true;
+                renderDatabaseTable();
+            }
+        }
+    }
 }
+window.toggleModal = toggleModal;
 
 function renderDatabaseTable() {
     const tbody = document.getElementById('dbTableBody');
     if (!tbody) return;
     tbody.innerHTML = '';
+
+    if (!dbHasLoaded && globalDatabase.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: #3182ce;">⏳ अभिलेख लोड हुँदैछ...</td></tr>`;
+        return;
+    }
 
     const query = (document.getElementById('searchField') ? document.getElementById('searchField').value.trim().toLowerCase() : '');
     const toNep = typeof toNepaliDigit === 'function' ? toNepaliDigit : (window.toNepaliDigit || (x => x));
@@ -738,8 +842,9 @@ function renderDatabaseTable() {
     const qEng = toEng(query);
 
     const filtered = globalDatabase.filter(r => {
+        if (r.isDeleted) return false;
         if (!query) return true;
-        const target = `${r.nameFirstNP || ''} ${r.nameMidNP || ''} ${r.nameLastNP || ''} ${r.nameNP || ''} ${r.birthRegNo || ''} ${r.fatherNP || ''} ${r.fatherCitNo || ''} ${r.motherCitNo || ''}`.toLowerCase();
+        const target = `${r.nameFirstNP || ''} ${r.nameMidNP || ''} ${r.nameLastNP || ''} ${r.nameNP || ''} ${r.birthRegNo || ''} ${r.fatherNP || ''} ${r.fatherCit || ''} ${r.fatherCitNo || ''} ${r.motherCit || ''} ${r.motherCitNo || ''}`.toLowerCase();
         const tNep = toNep(target);
         const tEng = toEng(target);
         return target.includes(query) || tNep.includes(qNep) || tEng.includes(qEng);
@@ -767,17 +872,27 @@ function renderDatabaseTable() {
         tbody.appendChild(tr);
     });
 }
+window.renderDatabaseTable = renderDatabaseTable;
 
 async function deleteFromDB(id) {
-    if (confirm("के तपाईं यो रेकर्ड क्लाउड डेटाबेसबाट स्थायी रूपमा हटाउन चाहनुहुन्छ?")) {
-        try {
+    if (!confirm("के तपाईं यो अभिलेख रद्दीटोकरी (Recycle Bin) मा सार्न चाहनुहुन्छ?")) return;
+    try {
+        const rec = globalDatabase.find(item => item.id === id) || {};
+        const fullName = [rec.nameFirstNP, rec.nameMidNP, rec.nameLastNP].filter(Boolean).join(' ') || rec.nameNP || 'नाबालक अभिलेख';
+        if (typeof window.softDeleteRecord === 'function') {
+            await window.softDeleteRecord('nabalakRecords', id, { name: fullName, title: 'नाबालक परिचय पत्र सिफारिस' });
+        } else {
             await db.collection("nabalakRecords").doc(id).delete();
-        } catch (e) {
-
-            alert("डिलिट गर्न समस्या भयो ।");
         }
+        globalDatabase = globalDatabase.filter(item => item.id !== id);
+        window.globalDatabase = globalDatabase;
+        persistNabalakCache(globalDatabase);
+        renderDatabaseTable();
+    } catch (e) {
+        alert("डिलिट गर्न समस्या भयो ।");
     }
 }
+window.deleteFromDB = deleteFromDB;
 
 function populateFormForEdit(recordId) {
     const r = globalDatabase.find(item => item.id === recordId);
@@ -790,46 +905,79 @@ function populateFormForEdit(recordId) {
     document.getElementById('editRecordIndex').value = r.id || '';
     document.getElementById('formMainTitle').innerText = "🔄 सम्पादन मोड (नाबालक परिचय पत्र)";
 
-    if (r.chalani) document.getElementById('inChalani').value = r.chalani;
-    if (r.miti) document.getElementById('inMiti').value = r.miti;
-    if (r.ns) document.getElementById('inNepalSamvat').value = r.ns;
-    if (r.idType) document.getElementById('inIdType').value = r.idType;
-    if (r.birthRegNo) document.getElementById('inBirthRegNo').value = r.birthRegNo;
-    if (r.dobBS) document.getElementById('inDOB_BS').value = r.dobBS;
-    if (r.dobAD) document.getElementById('inDOB_AD').value = r.dobAD;
-
-    if (r.nameFirstNP) document.getElementById('inNameFirstNP').value = r.nameFirstNP;
-    if (r.nameMidNP) document.getElementById('inNameMidNP').value = r.nameMidNP;
-    if (r.nameLastNP) document.getElementById('inNameLastNP').value = r.nameLastNP;
-    if (r.nameFirstEN) document.getElementById('inNameFirstEN').value = r.nameFirstEN;
-    if (r.nameMidEN) document.getElementById('inNameMidEN').value = r.nameMidEN;
-    if (r.nameLastEN) document.getElementById('inNameLastEN').value = r.nameLastEN;
-
-    if (r.gender) document.getElementById('inGender').value = r.gender;
-    if (r.religion) document.getElementById('inReligion').value = r.religion;
-    if (r.caste) document.getElementById('inCaste').value = r.caste;
-    if (r.contactNo) document.getElementById('inContactNo').value = r.contactNo;
-
-    if (r.photoData) {
-        currentUploadedPhotoData = r.photoData;
-        document.getElementById('photoPreviewContainer').innerHTML = `<img src="${currentUploadedPhotoData}" alt="Uploaded Photo">`;
-        document.getElementById('btnRemovePhoto').style.display = 'inline-block';
-        document.getElementById('lblPhotoBox').innerHTML = `<img src="${currentUploadedPhotoData}" alt="Photo">`;
+    // Letterhead & Receiver Office
+    if (r.ay) {
+        document.querySelectorAll('input[name="ayRadio"]').forEach(el => {
+            if (el.value === r.ay) el.checked = true;
+        });
+    }
+    if (r.chalani !== undefined) document.getElementById('inChalani').value = r.chalani === '-' ? '' : r.chalani;
+    if (r.miti !== undefined) document.getElementById('inMiti').value = r.miti;
+    if (r.ns !== undefined) document.getElementById('inNepalSamvat').value = r.ns;
+    if (r.receiverOffice && document.getElementById('inReceiverOffice')) {
+        document.getElementById('inReceiverOffice').value = r.receiverOffice;
+    }
+    if (r.customReceiver !== undefined && document.getElementById('inCustomReceiver')) {
+        document.getElementById('inCustomReceiver').value = r.customReceiver;
     }
 
-    if (r.fatherNP) document.getElementById('inFatherNameNP').value = r.fatherNP;
-    if (r.fatherCit) document.getElementById('inFatherCitNo').value = r.fatherCit;
-    if (r.fatherCitType && document.getElementById('inFatherCitType')) document.getElementById('inFatherCitType').value = r.fatherCitType;
-    if (r.fatherCitDist && document.getElementById('inFatherCitDist')) document.getElementById('inFatherCitDist').value = r.fatherCitDist;
-    if (r.fatherAddress && document.getElementById('inFatherAddress')) document.getElementById('inFatherAddress').value = r.fatherAddress;
-    if (r.fatherNid) document.getElementById('inFatherNidNo').value = r.fatherNid;
+    if (r.idType) document.getElementById('inIdType').value = r.idType;
+    if (r.birthRegNo !== undefined) document.getElementById('inBirthRegNo').value = r.birthRegNo;
+    if (r.dobBS !== undefined) document.getElementById('inDOB_BS').value = r.dobBS;
+    if (r.dobAD !== undefined) document.getElementById('inDOB_AD').value = r.dobAD;
 
-    if (r.motherNP) document.getElementById('inMotherNameNP').value = r.motherNP;
-    if (r.motherCit) document.getElementById('inMotherCitNo').value = r.motherCit;
-    if (r.motherCitType && document.getElementById('inMotherCitType')) document.getElementById('inMotherCitType').value = r.motherCitType;
-    if (r.motherCitDist && document.getElementById('inMotherCitDist')) document.getElementById('inMotherCitDist').value = r.motherCitDist;
-    if (r.motherAddress && document.getElementById('inMotherAddress')) document.getElementById('inMotherAddress').value = r.motherAddress;
-    if (r.motherNid) document.getElementById('inMotherNidNo').value = r.motherNid;
+    document.getElementById('inNameFirstNP').value = r.nameFirstNP || '';
+    document.getElementById('inNameMidNP').value = r.nameMidNP || '';
+    document.getElementById('inNameLastNP').value = r.nameLastNP || '';
+    document.getElementById('inNameFirstEN').value = r.nameFirstEN || '';
+    document.getElementById('inNameMidEN').value = r.nameMidEN || '';
+    document.getElementById('inNameLastEN').value = r.nameLastEN || '';
+
+    if (r.gender) document.getElementById('inGender').value = r.gender;
+    if (r.religion !== undefined) document.getElementById('inReligion').value = r.religion;
+    document.getElementById('inCaste').value = r.caste || '';
+    document.getElementById('inContactNo').value = r.contactNo || '';
+
+    // Restore Birth & Permanent Address
+    if (document.getElementById('inBirthDistrict')) document.getElementById('inBirthDistrict').value = r.birthDistrict || '';
+    if (document.getElementById('inBirthRM')) document.getElementById('inBirthRM').value = r.birthRM || '';
+    if (document.getElementById('inBirthWard')) document.getElementById('inBirthWard').value = r.birthWard || '';
+    if (document.getElementById('inBirthPlaceEN')) document.getElementById('inBirthPlaceEN').value = r.birthPlaceEN || '';
+
+    if (document.getElementById('inPermProvince')) document.getElementById('inPermProvince').value = r.permProvince || '';
+    if (document.getElementById('inPermDistrict')) document.getElementById('inPermDistrict').value = r.permDistrict || '';
+    if (document.getElementById('inPermRM')) document.getElementById('inPermRM').value = r.permRM || '';
+    if (r.permWard && document.getElementById('inPermWard')) document.getElementById('inPermWard').value = r.permWard;
+    if (document.getElementById('inPermToleNP')) document.getElementById('inPermToleNP').value = r.permToleNP || '';
+    if (document.getElementById('inPermToleEN')) document.getElementById('inPermToleEN').value = r.permToleEN || '';
+
+    // Safely handle legacy photoData without crashing when sidebar upload widget is absent
+    const previewCont = document.getElementById('photoPreviewContainer');
+    const removeBtn = document.getElementById('btnRemovePhoto');
+    const printPhotoBox = document.getElementById('lblPhotoBox');
+    if (r.photoData) {
+        currentUploadedPhotoData = r.photoData;
+        if (previewCont) previewCont.innerHTML = `<img src="${currentUploadedPhotoData}" alt="Uploaded Photo">`;
+        if (removeBtn) removeBtn.style.display = 'inline-block';
+        if (printPhotoBox) printPhotoBox.innerHTML = `<img src="${currentUploadedPhotoData}" alt="Photo" style="max-width:100%; max-height:100%; object-fit:cover;">`;
+    } else {
+        currentUploadedPhotoData = null;
+        if (printPhotoBox) printPhotoBox.innerHTML = 'निवेदकको दुवै कान देखिने पासपोर्ट साइजको फोटो';
+    }
+
+    document.getElementById('inFatherNameNP').value = r.fatherNP || '';
+    document.getElementById('inFatherCitNo').value = r.fatherCit || '';
+    if (r.fatherCitType !== undefined && document.getElementById('inFatherCitType')) document.getElementById('inFatherCitType').value = r.fatherCitType;
+    if (document.getElementById('inFatherCitDist')) document.getElementById('inFatherCitDist').value = r.fatherCitDist || '';
+    if (document.getElementById('inFatherAddress')) document.getElementById('inFatherAddress').value = r.fatherAddress || '';
+    document.getElementById('inFatherNidNo').value = r.fatherNid || '';
+
+    document.getElementById('inMotherNameNP').value = r.motherNP || '';
+    document.getElementById('inMotherCitNo').value = r.motherCit || '';
+    if (r.motherCitType !== undefined && document.getElementById('inMotherCitType')) document.getElementById('inMotherCitType').value = r.motherCitType;
+    if (document.getElementById('inMotherCitDist')) document.getElementById('inMotherCitDist').value = r.motherCitDist || '';
+    if (document.getElementById('inMotherAddress')) document.getElementById('inMotherAddress').value = r.motherAddress || '';
+    document.getElementById('inMotherNidNo').value = r.motherNid || '';
 
     // Guardian Details
     if (r.guardSelect) {
@@ -837,22 +985,38 @@ function populateFormForEdit(recordId) {
     } else {
         autoFillGuardian('father');
     }
-    if (r.guardianRelation && document.getElementById('inGuardianRelation')) document.getElementById('inGuardianRelation').value = r.guardianRelation;
-    if (r.guardianName && document.getElementById('inGuardianName')) document.getElementById('inGuardianName').value = r.guardianName;
-    if (r.guardianAddress && document.getElementById('inGuardianAddress')) document.getElementById('inGuardianAddress').value = r.guardianAddress;
-    if (r.guardianCit && document.getElementById('inGuardianCitNo')) document.getElementById('inGuardianCitNo').value = r.guardianCit;
-    if (r.guardianCitType && document.getElementById('inGuardianCitType')) document.getElementById('inGuardianCitType').value = r.guardianCitType;
-    if (r.guardianCitDist && document.getElementById('inGuardianCitDist')) document.getElementById('inGuardianCitDist').value = r.guardianCitDist;
-    if (r.guardianNid && document.getElementById('inGuardianNidNo')) document.getElementById('inGuardianNidNo').value = r.guardianNid;
+    if (document.getElementById('inGuardianRelation')) document.getElementById('inGuardianRelation').value = r.guardianRelation || '';
+    if (document.getElementById('inGuardianName')) document.getElementById('inGuardianName').value = r.guardianName || '';
+    if (document.getElementById('inGuardianAddress')) document.getElementById('inGuardianAddress').value = r.guardianAddress || '';
+    if (document.getElementById('inGuardianCitNo')) document.getElementById('inGuardianCitNo').value = r.guardianCit || '';
+    if (r.guardianCitType !== undefined && document.getElementById('inGuardianCitType')) document.getElementById('inGuardianCitType').value = r.guardianCitType;
+    if (document.getElementById('inGuardianCitDist')) document.getElementById('inGuardianCitDist').value = r.guardianCitDist || '';
+    if (document.getElementById('inGuardianNidNo')) document.getElementById('inGuardianNidNo').value = r.guardianNid || '';
 
-    if (r.grandfatherNP && document.getElementById('inGrandfatherName')) document.getElementById('inGrandfatherName').value = r.grandfatherNP;
-    if (r.grandfatherNid && document.getElementById('inGrandfatherNidNo')) document.getElementById('inGrandfatherNidNo').value = r.grandfatherNid;
-    if (r.grandmotherNP && document.getElementById('inGrandmotherName')) document.getElementById('inGrandmotherName').value = r.grandmotherNP;
-    if (r.grandmotherNid && document.getElementById('inGrandmotherNidNo')) document.getElementById('inGrandmotherNidNo').value = r.grandmotherNid;
+    if (document.getElementById('inGrandfatherName')) document.getElementById('inGrandfatherName').value = r.grandfatherNP || '';
+    if (document.getElementById('inGrandfatherNidNo')) document.getElementById('inGrandfatherNidNo').value = r.grandfatherNid || '';
+    if (document.getElementById('inGrandmotherName')) document.getElementById('inGrandmotherName').value = r.grandmotherNP || '';
+    if (document.getElementById('inGrandmotherNidNo')) document.getElementById('inGrandmotherNidNo').value = r.grandmotherNid || '';
+
+    if (r.signAuth && document.getElementById('inSignAuthority')) {
+        document.getElementById('inSignAuthority').value = r.signAuth;
+    }
+    if (r.customSignName !== undefined && document.getElementById('inCustomSignName')) {
+        document.getElementById('inCustomSignName').value = r.customSignName;
+    }
+    if (r.customSignTitle !== undefined && document.getElementById('inCustomSignTitle')) {
+        document.getElementById('inCustomSignTitle').value = r.customSignTitle;
+    }
+    if (r.sigMargin !== undefined && document.getElementById('inSigMargin')) {
+        document.getElementById('inSigMargin').value = r.sigMargin;
+        adjustSignaturePosition(r.sigMargin);
+    }
 
     toggleModal(false);
     updateDoc();
 }
+window.populateFormForEdit = populateFormForEdit;
+window.editFromDB = populateFormForEdit;
 
 // ── Print & Save to Firestore ───────────────────────
 async function printAndSaveSystem() {
@@ -954,7 +1118,11 @@ async function printAndSaveSystem() {
         grandfatherNid: (document.getElementById('inGrandfatherNidNo') ? document.getElementById('inGrandfatherNidNo').value.trim() : ''),
         grandmotherNP: (document.getElementById('inGrandmotherName') ? document.getElementById('inGrandmotherName').value.trim() : ''),
         grandmotherNid: (document.getElementById('inGrandmotherNidNo') ? document.getElementById('inGrandmotherNidNo').value.trim() : ''),
+        receiverOffice: document.getElementById('inReceiverOffice') ? document.getElementById('inReceiverOffice').value : '',
+        customReceiver: document.getElementById('inCustomReceiver') ? document.getElementById('inCustomReceiver').value.trim() : '',
         signAuth: document.getElementById('inSignAuthority').value,
+        customSignName: document.getElementById('inCustomSignName') ? document.getElementById('inCustomSignName').value.trim() : '',
+        customSignTitle: document.getElementById('inCustomSignTitle') ? document.getElementById('inCustomSignTitle').value.trim() : '',
         sigMargin: document.getElementById('inSigMargin').value,
         createdBy:           localStorage.getItem('sifarish_user') || 'wada1',
         createdWard:         localStorage.getItem('sifarish_ward') || '1',
@@ -990,6 +1158,7 @@ async function printAndSaveSystem() {
         }
     }
 }
+window.printAndSaveSystem = printAndSaveSystem;
 
 // ── Core Birth Certificate HTML Parser ─────────────────────────
 function parseBirthCertificateDOM(doc) {
@@ -998,6 +1167,38 @@ function parseBirthCertificateDOM(doc) {
     function clean(str) {
         if (!str) return "";
         return str.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function getCleanNodeText(node) {
+        if (!node) return '';
+        if (node.nodeType === 3) return node.nodeValue || '';
+        if (node.nodeType !== 1) return '';
+        const tag = node.tagName;
+        if (tag === 'BR') return '\n';
+        const isBlock = /^(TR|P|DIV|LI|DT|DD|H[1-6])$/.test(tag);
+        const isCell = /^(TD|TH)$/.test(tag);
+        let out = '';
+        for (const ch of node.childNodes) {
+            out += getCleanNodeText(ch);
+            if (isCell) out += ' ';
+        }
+        if (isCell) out = out.trim() + ' | ';
+        else if (isBlock) out = out.trim() + '\n';
+        return out;
+    }
+
+    function extractRowText(row) {
+        if (!row) return '';
+        const cells = row.querySelectorAll('th, td');
+        if (cells.length > 0) {
+            return Array.from(cells).map(c => clean(getCleanNodeText(c).replace(/\|/g, ' '))).filter(Boolean).join(' ');
+        }
+        return clean(row.innerText || getCleanNodeText(row));
+    }
+
+    function extractCellText(cell) {
+        if (!cell) return '';
+        return clean((cell.innerText || getCleanNodeText(cell)).replace(/\s*\|\s*/g, ' '));
     }
 
     function isCorruptedOrInvalid(str) {
@@ -1099,8 +1300,9 @@ function parseBirthCertificateDOM(doc) {
             }
         }
 
-        // 2. Line by line search on body text
-        const bodyLines = (doc.body ? doc.body.innerText || doc.body.textContent || '' : '').split(/[\r\n]+/);
+        // 2. Line by line search on body text (preserve cell boundaries on detached DOMParser nodes)
+        const rawBody = doc.body ? (doc.body.innerText || getCleanNodeText(doc.body)) : '';
+        const bodyLines = rawBody.split(/[\r\n]+/);
         for (let line of bodyLines) {
             let cl = clean(line);
             for (let lbl of labelList) {
@@ -1141,7 +1343,7 @@ function parseBirthCertificateDOM(doc) {
             let rowFatherCol = -1;
             let rowMotherCol = -1;
             for (let cIdx = 0; cIdx < cells.length; cIdx++) {
-                let cellTxt = clean(cells[cIdx].innerText || cells[cIdx].textContent || '');
+                let cellTxt = extractCellText(cells[cIdx]);
                 let hasFather = (cellTxt.includes("बाबुको") || cellTxt.toLowerCase().includes("father")) && !cellTxt.includes("हजुरबाबु");
                 let hasMother = cellTxt.includes("आमाको") || cellTxt.toLowerCase().includes("mother");
                 if (hasFather && !hasMother) rowFatherCol = cIdx;
@@ -1161,10 +1363,10 @@ function parseBirthCertificateDOM(doc) {
             for (let rIdx = headerRowIdx + 1; rIdx < rows.length; rIdx++) {
                 const cells = rows[rIdx].querySelectorAll('th, td');
                 if (cells.length === 0) continue;
-                let rowLabel = clean(rows[rIdx].innerText || rows[rIdx].textContent || '');
+                let rowLabel = extractRowText(rows[rIdx]);
 
-                let fCellTxt = (fatherCol < cells.length) ? clean(cells[fatherCol].innerText || cells[fatherCol].textContent || '') : '';
-                let mCellTxt = (motherCol < cells.length) ? clean(cells[motherCol].innerText || cells[motherCol].textContent || '') : '';
+                let fCellTxt = (fatherCol < cells.length) ? extractCellText(cells[fatherCol]) : '';
+                let mCellTxt = (motherCol < cells.length) ? extractCellText(cells[motherCol]) : '';
 
                 function extractMultiCellVal(txt) {
                     return txt.replace(/^(?:पूरा नाम|नाम|Full Name|ठेगाना|स्थायी ठेगाना|नागरिकता प्रमाणपत्र नं\.?|नागरिकता नं\.?|जारी मिति|जारी जिल्ला|राष्ट्रिय परिचय नं\.?|Passport No\.?|Citizenship No\.?)[:\s\-–]+/i, '').trim();
@@ -1207,13 +1409,13 @@ function parseBirthCertificateDOM(doc) {
             let activeSection = 'child';
             for (let rIdx = 0; rIdx < rows.length; rIdx++) {
                 const row = rows[rIdx];
-                const rowTxt = clean(row.innerText || row.textContent || '');
+                const rowTxt = extractRowText(row);
                 if (!rowTxt) continue;
 
                 // Detect Section Change
                 const cells = row.querySelectorAll('th, td');
                 for (let cell of cells) {
-                    let cTxt = clean(cell.innerText || cell.textContent || '');
+                    let cTxt = extractCellText(cell);
                     let isSectionHeaderCell = cell.hasAttribute('rowspan') || cell.tagName === 'TH' || cell.querySelector('strong, b') || cTxt.length < 50;
                     if (isSectionHeaderCell) {
                         if ((cTxt.includes("बाबुको विवरण") || cTxt.includes("Father's Details") || cTxt.includes("(Father's Details)")) && !cTxt.includes("हजुरबाबु")) {
@@ -1652,41 +1854,15 @@ function parseBirthCertificateDOM(doc) {
     }
 
     // ── Birth Place ───────────────────────────────────────────
-    const birthPlaceRaw = findValueByLabels(["Birth Place:", "जन्म स्थान/Birth Place:", "जन्म स्थान / Birth Place:", "जन्म स्थान:"]);
+    const birthPlaceRaw = findValueByLabels(["Birth Place:", "जन्म स्थान/Birth Place:", "जन्म स्थान / Birth Place:", "जन्म स्थान:", "जन्मस्थान:"]);
     if (birthPlaceRaw) {
-        let wardMatch = birthPlaceRaw.match(/(?:Ward No\.?|वडा\s*नं\.?)\s*([०-९0-9]+)/i);
-        if (wardMatch && document.getElementById('inBirthWard')) document.getElementById('inBirthWard').value = wardMatch[1];
-        let rmMatch = birthPlaceRaw.match(/([^,\-]+(?:Municipality|Rural Municipality|नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/i);
-        if (rmMatch && document.getElementById('inBirthRM')) {
-            document.getElementById('inBirthRM').value = rmMatch[1].replace(/-.*$/, '').trim();
-        }
-        let distMatch = birthPlaceRaw.match(/([^,\s]+)\s*(?:District|जिल्ला)/i);
-        if (distMatch && document.getElementById('inBirthDistrict')) {
-            document.getElementById('inBirthDistrict').value = distMatch[1];
-        }
-        let enMatch = birthPlaceRaw.match(/\(([^)]+)\)/);
-        if (enMatch && document.getElementById('inBirthPlaceEN')) {
-            document.getElementById('inBirthPlaceEN').value = enMatch[1].trim().toUpperCase();
-        }
+        applyParsedAddressToFields(birthPlaceRaw, 'Birth');
     }
 
     // ── Permanent Address ─────────────────────────────────────
-    const permPlaceRaw = findValueByLabels(["Permanent Address:", "स्थायी ठेगाना/Permanent Address:", "स्थायी ठेगाना:"]);
+    const permPlaceRaw = findValueByLabels(["Permanent Address:", "स्थायी ठेगाना/Permanent Address:", "स्थायी ठेगाना:", "स्थायी बसोबास:"]);
     if (permPlaceRaw) {
-        let wardMatch = permPlaceRaw.match(/(?:Ward No\.?|वडा\s*नं\.?)\s*([०-९0-9]+)/i);
-        if (wardMatch && document.getElementById('inPermWard')) document.getElementById('inPermWard').value = wardMatch[1];
-        let rmMatch = permPlaceRaw.match(/([^,\-]+(?:Municipality|Rural Municipality|नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका))/i);
-        if (rmMatch && document.getElementById('inPermRM')) {
-            document.getElementById('inPermRM').value = rmMatch[1].replace(/-.*$/, '').trim();
-        }
-        let distMatch = permPlaceRaw.match(/([^,\s]+)\s*(?:District|जिल्ला)/i);
-        if (distMatch && document.getElementById('inPermDistrict')) {
-            document.getElementById('inPermDistrict').value = distMatch[1];
-        }
-        let provMatch = permPlaceRaw.match(/([^,\s]+)\s*(?:Province|प्रदेश)/i);
-        if (provMatch && document.getElementById('inPermProvince')) {
-            document.getElementById('inPermProvince').value = provMatch[1];
-        }
+        applyParsedAddressToFields(permPlaceRaw, 'Perm');
     }
 
     if (typeof updateDoc === 'function') updateDoc();
@@ -1751,6 +1927,48 @@ function toggleFormPasteBox(show) {
 }
 window.toggleFormPasteBox = toggleFormPasteBox;
 
+function applyParsedAddressToFields(rawStr, prefix) {
+    if (!rawStr) return;
+    const text = rawStr.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+
+    let provMatch = text.match(/(?:प्रदेश\s*[:\-]\s*([^,\s]+)|([^,\s]+)\s*(?:Province|प्रदेश))/i);
+    let distMatch = text.match(/(?:जिल्ला\s*[:\-]\s*([^,\s]+)|([^,\s]+)\s*(?:District|जिल्ला))/i);
+    let rmMatch = text.match(/([^,\-]+(?:Municipality|Rural Municipality|Sub-Metropolitan|Metropolitan|नगरपालिका|गाउँपालिका|उपमहानगरपालिका|महानगरपालिका|न\.पा\.|गा\.पा\.))/i);
+    let wardMatch = text.match(/(?:Ward No\.?|वडा\s*नं\.?)\s*[:\-]?\s*([०-९0-9]+)|[-–]\s*([०-९0-9]+)(?=\s*(?:,|$|\s))/i);
+
+    let provVal = provMatch ? (provMatch[1] || provMatch[2] || '').trim() : '';
+    let distVal = distMatch ? (distMatch[1] || distMatch[2] || '').trim() : '';
+    if (!distVal && rmMatch) {
+        let trailingDist = text.split(',').pop().replace(/\([^)]*\)/g, '').trim();
+        if (trailingDist && trailingDist.length < 25 && !trailingDist.includes('प्रदेश')) distVal = trailingDist;
+    }
+    let rmVal = rmMatch ? rmMatch[1].replace(/-.*$/, '').trim() : '';
+    let wardVal = wardMatch ? (wardMatch[1] || wardMatch[2] || '').trim() : '';
+
+    if (prefix === 'Birth') {
+        if (wardVal && document.getElementById('inBirthWard')) document.getElementById('inBirthWard').value = toNepaliDigit(wardVal);
+        if (rmVal && document.getElementById('inBirthRM')) document.getElementById('inBirthRM').value = rmVal;
+        if (distVal && document.getElementById('inBirthDistrict')) document.getElementById('inBirthDistrict').value = distVal;
+        let enMatch = text.match(/\(([A-Za-z0-9\s,.-]+)\)/);
+        if (enMatch && document.getElementById('inBirthPlaceEN')) {
+            document.getElementById('inBirthPlaceEN').value = enMatch[1].trim().toUpperCase();
+        }
+    } else if (prefix === 'Perm') {
+        if (provVal && document.getElementById('inPermProvince')) document.getElementById('inPermProvince').value = provVal;
+        if (distVal && document.getElementById('inPermDistrict')) document.getElementById('inPermDistrict').value = distVal;
+        if (rmVal && document.getElementById('inPermRM')) document.getElementById('inPermRM').value = rmVal;
+        if (wardVal && document.getElementById('inPermWard')) {
+            const wNep = toNepaliDigit(wardVal);
+            const sel = document.getElementById('inPermWard');
+            if (Array.from(sel.options).some(o => o.value === wNep)) sel.value = wNep;
+        }
+        let toleMatch = text.match(/(?:गाउँ\s*\/\s*टोल|टोल|Tole|Village)\s*[:\-]?\s*([^,()]+)/i);
+        if (toleMatch && document.getElementById('inPermToleNP')) {
+            document.getElementById('inPermToleNP').value = toleMatch[1].trim();
+        }
+    }
+}
+
 function executeSmartPaste() {
     const inp = document.getElementById('smartPasteInput');
     if (!inp || !inp.value.trim()) {
@@ -1764,63 +1982,106 @@ function executeSmartPaste() {
         const doc = parser.parseFromString(content, "text/html");
         parseBirthCertificateDOM(doc);
     } else {
-        const lines = content.split(/\r?\n/);
-        let activeSection = 'child';
-        for (let line of lines) {
-            line = line.trim();
-            if (!line) continue;
+        const rawLines = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        // Merge standalone trailing-colon labels with next line if value is on next line
+        const lines = [];
+        for (let i = 0; i < rawLines.length; i++) {
+            if (/[:\-]$/.test(rawLines[i]) && i + 1 < rawLines.length && !/[:\-]/.test(rawLines[i + 1])) {
+                lines.push(`${rawLines[i]} ${rawLines[i + 1]}`);
+                i++;
+            } else {
+                lines.push(rawLines[i]);
+            }
+        }
 
+        function splitNameIntoFields(val, firstId, midId, lastId, upper = false) {
+            const cleaned = (val || '').trim();
+            if (!cleaned) return;
+            const names = cleaned.split(/\s+/);
+            const fmt = s => upper ? s.toUpperCase() : s;
+            if (document.getElementById(firstId)) document.getElementById(firstId).value = fmt(names[0] || '');
+            if (names.length === 1) {
+                if (document.getElementById(midId)) document.getElementById(midId).value = '';
+                if (document.getElementById(lastId)) document.getElementById(lastId).value = '';
+            } else if (names.length === 2) {
+                if (document.getElementById(midId)) document.getElementById(midId).value = '';
+                if (document.getElementById(lastId)) document.getElementById(lastId).value = fmt(names[1]);
+            } else {
+                if (document.getElementById(midId)) document.getElementById(midId).value = fmt(names.slice(1, names.length - 1).join(' '));
+                if (document.getElementById(lastId)) document.getElementById(lastId).value = fmt(names[names.length - 1]);
+            }
+        }
+
+        let activeSection = 'child';
+        let sideBySideParents = false;
+        for (let line of lines) {
+            if ((line.includes("बाबुको विवरण") || line.includes("Father's Details")) && (line.includes("आमाको विवरण") || line.includes("Mother's Details"))) {
+                sideBySideParents = true;
+                activeSection = 'parents_both';
+                continue;
+            }
             if ((line.includes("बाबुको विवरण") || line.includes("Father's Details")) && !line.includes("हजुरबाबु")) {
+                sideBySideParents = false;
                 activeSection = 'father';
                 continue;
             } else if (line.includes("आमाको विवरण") || line.includes("Mother's Details")) {
+                sideBySideParents = false;
                 activeSection = 'mother';
                 continue;
             } else if (line.includes("सूचकको विवरण") || line.includes("Informant's Details")) {
+                sideBySideParents = false;
                 activeSection = 'informant';
                 continue;
             } else if (line.includes("बाजेको विवरण") || line.includes("हजुरबुवा") || line.includes("Full Name of Grandfather")) {
+                sideBySideParents = false;
                 activeSection = 'grandfather';
                 continue;
+            }
+
+            if (sideBySideParents && line.includes('\t')) {
+                const cols = line.split(/\t+/).map(c => c.trim()).filter(Boolean);
+                if (cols.length >= 2) {
+                    const fVal = cols[0].split(/[:\-–]+/).slice(1).join(':').trim() || cols[0];
+                    const mVal = cols[1].split(/[:\-–]+/).slice(1).join(':').trim() || cols[1];
+                    if (line.includes("पूरा नाम") && !line.includes("Full Name")) {
+                        if (document.getElementById('inFatherNameNP')) document.getElementById('inFatherNameNP').value = fVal;
+                        if (document.getElementById('inMotherNameNP')) document.getElementById('inMotherNameNP').value = mVal;
+                    } else if (line.includes("नागरिकता")) {
+                        let fc = (fVal.match(/([०-९0-9\/-]+)/) || [])[1];
+                        let mc = (mVal.match(/([०-९0-9\/-]+)/) || [])[1];
+                        if (fc && document.getElementById('inFatherCitNo')) document.getElementById('inFatherCitNo').value = fc;
+                        if (mc && document.getElementById('inMotherCitNo')) document.getElementById('inMotherCitNo').value = mc;
+                    }
+                    continue;
+                }
             }
 
             if ((line.includes("दर्ता नम्बर") || line.includes("Registration No")) && document.getElementById('inBirthRegNo')) {
                 let parts = line.split(/[:\s(]+/);
                 for (let p of parts) {
-                    if (/[०-९0-9]{10,}/.test(p)) {
+                    if (/[०-९0-9]{8,}/.test(p)) {
                         document.getElementById('inBirthRegNo').value = p.replace(/\)/g, '');
                         break;
                     }
                 }
-            } else if (activeSection === 'child' && (line.includes("पूरा नाम") || line.includes("Full Name")) && !line.includes("बाजेको") && !line.includes("बाबुको") && !line.includes("आमाको") && !line.includes("सूचक")) {
+            } else if (activeSection === 'child' && (line.includes("पूरा नाम") || line.includes("Full Name") || line.includes("नाम (नेपालीमा)") || line.includes("शिशुको नाम")) && !line.includes("बाजेको") && !line.includes("बाबुको") && !line.includes("आमाको") && !line.includes("सूचक")) {
                 let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
-                let names = val.split(/\s+/);
-                if (line.includes("Full Name")) {
-                    if (names.length === 1 && document.getElementById('inNameFirstEN')) document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
-                    else if (names.length === 2 && document.getElementById('inNameFirstEN')) {
-                        document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
-                        document.getElementById('inNameLastEN').value = names[1].toUpperCase();
-                    } else if (names.length >= 3 && document.getElementById('inNameFirstEN')) {
-                        document.getElementById('inNameFirstEN').value = names[0].toUpperCase();
-                        document.getElementById('inNameLastEN').value = names[names.length - 1].toUpperCase();
-                        document.getElementById('inNameMidEN').value = names.slice(1, names.length - 1).join(' ').toUpperCase();
-                    }
+                if (line.includes("Full Name") && !/[\u0900-\u097F]/.test(val)) {
+                    splitNameIntoFields(val, 'inNameFirstEN', 'inNameMidEN', 'inNameLastEN', true);
                 } else {
-                    if (names.length === 1 && document.getElementById('inNameFirstNP')) document.getElementById('inNameFirstNP').value = names[0];
-                    else if (names.length === 2 && document.getElementById('inNameFirstNP')) {
-                        document.getElementById('inNameFirstNP').value = names[0];
-                        document.getElementById('inNameLastNP').value = names[1];
-                    } else if (names.length >= 3 && document.getElementById('inNameFirstNP')) {
-                        document.getElementById('inNameFirstNP').value = names[0];
-                        document.getElementById('inNameLastNP').value = names[names.length - 1];
-                        document.getElementById('inNameMidNP').value = names.slice(1, names.length - 1).join(' ');
-                    }
+                    splitNameIntoFields(val, 'inNameFirstNP', 'inNameMidNP', 'inNameLastNP', false);
                 }
-            } else if ((line.includes("जन्म मिति") || line.includes("Date of Birth")) && document.getElementById('inDOB_BS')) {
+            } else if ((line.includes("जन्म मिति") || line.includes("Date of Birth"))) {
                 let bsMatch = line.match(/([०-९0-9]{4}[/-][०-९0-9]{1,2}[/-][०-९0-9]{1,2})/);
-                if (bsMatch) {
-                    document.getElementById('inDOB_BS').value = bsMatch[1].replace(/-/g, '/');
+                let adMatch = line.match(/\((\d{1,2}[/-]\d{1,2}[/-]\d{4})\s*A\.?D\.?\)|(\d{4}-\d{2}-\d{2})\s*(?:A\.?D\.?|\()/i);
+                if (bsMatch && document.getElementById('inDOB_BS')) {
+                    document.getElementById('inDOB_BS').value = toNepaliDigit(bsMatch[1].replace(/-/g, '/'));
                     if (typeof autoConvertBsToAd === 'function') autoConvertBsToAd();
+                } else if (adMatch && document.getElementById('inDOB_AD')) {
+                    const adToken = (adMatch[1] || adMatch[2] || '').trim();
+                    const p = adToken.split(/[/-]/);
+                    document.getElementById('inDOB_AD').value = p[0].length === 4 ? `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}` : `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+                    if (typeof autoConvertAdToBs === 'function') autoConvertAdToBs();
                 }
             } else if ((line.includes("लिङ्ग") || line.includes("Sex")) && document.getElementById('inGender')) {
                 if (line.includes("पुरूष") || line.includes("पुरुष") || line.toUpperCase().includes("MALE")) {
@@ -1828,20 +2089,26 @@ function executeSmartPaste() {
                 } else if (line.includes("महिला") || line.toUpperCase().includes("FEMALE")) {
                     document.getElementById('inGender').value = "महिला|Female";
                 }
-            } else if ((activeSection === 'grandfather' || line.includes("बाजेको पूरा नाम") || line.includes("बाजेको नाम") || line.includes("Full Name of Grandfather")) && document.getElementById('inGrandfatherName')) {
+            } else if ((line.includes("जन्म स्थान") || line.includes("जन्मस्थान") || line.includes("Birth Place")) && !line.includes("बाबु") && !line.includes("आमा")) {
                 let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
-                if (val) document.getElementById('inGrandfatherName').value = val;
-            } else if ((activeSection === 'father' || line.includes("बाबुको पूरा नाम") || line.includes("बाबुको नाम")) && (line.includes("पूरा नाम") || line.includes("Full Name") || line.includes("बाबुको"))) {
+                applyParsedAddressToFields(val || line, 'Birth');
+            } else if (line.includes("स्थायी ठेगाना") || line.includes("Permanent Address") || line.includes("स्थायी बसोबास")) {
                 let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
-                if (val && document.getElementById('inFatherNameNP')) document.getElementById('inFatherNameNP').value = val;
-            } else if ((activeSection === 'mother' || line.includes("आमाको पूरा नाम") || line.includes("आमाको नाम")) && (line.includes("पूरा नाम") || line.includes("Full Name") || line.includes("आमाको"))) {
+                applyParsedAddressToFields(val || line, 'Perm');
+            } else if ((activeSection === 'grandfather' || line.includes("बाजेको पूरा नाम") || line.includes("बाजेको नाम") || line.includes("हजुरबुबा") || line.includes("Full Name of Grandfather")) && document.getElementById('inGrandfatherName')) {
                 let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
-                if (val && document.getElementById('inMotherNameNP')) document.getElementById('inMotherNameNP').value = val;
+                if (val && !/^[A-Za-z\s.]+$/.test(val)) document.getElementById('inGrandfatherName').value = val;
+            } else if ((activeSection === 'father' || line.includes("बाबुको पूरा नाम") || line.includes("बाबुको नाम")) && (line.includes("पूरा नाम") || line.includes("नाम") || line.includes("Full Name") || line.includes("बाबुको"))) {
+                let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
+                if (val && document.getElementById('inFatherNameNP') && /[\u0900-\u097F]/.test(val)) document.getElementById('inFatherNameNP').value = val;
+            } else if ((activeSection === 'mother' || line.includes("आमाको पूरा नाम") || line.includes("आमाको नाम")) && (line.includes("पूरा नाम") || line.includes("नाम") || line.includes("Full Name") || line.includes("आमाको"))) {
+                let val = line.split(/[:\-–]+/).slice(1).join(':').trim();
+                if (val && document.getElementById('inMotherNameNP') && /[\u0900-\u097F]/.test(val)) document.getElementById('inMotherNameNP').value = val;
             } else if (activeSection === 'father' && (line.includes("नागरिकता") || line.includes("Citizenship") || line.includes("NIN") || line.includes("Passport"))) {
-                let numMatch = line.match(/\(([0-9]+)\)/) || line.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                let numMatch = line.match(/\(([०-९0-9\/-]+)\)/) || line.match(/[:\-–]\s*([०-९0-9\/-]+)/);
                 if (numMatch && document.getElementById('inFatherCitNo')) document.getElementById('inFatherCitNo').value = numMatch[1].trim();
             } else if (activeSection === 'mother' && (line.includes("नागरिकता") || line.includes("Citizenship") || line.includes("NIN") || line.includes("Passport"))) {
-                let numMatch = line.match(/\(([0-9]+)\)/) || line.match(/[:\-–]\s*([०-९0-9\/-]+)/);
+                let numMatch = line.match(/\(([०-९0-9\/-]+)\)/) || line.match(/[:\-–]\s*([०-९0-9\/-]+)/);
                 if (numMatch && document.getElementById('inMotherCitNo')) document.getElementById('inMotherCitNo').value = numMatch[1].trim();
             } else if (line.includes("बाबुको नागरिकता") && document.getElementById('inFatherCitNo')) {
                 document.getElementById('inFatherCitNo').value = line.split(/[:\-–]+/).pop().trim().split(/\s|\(/)[0];
@@ -1969,7 +2236,7 @@ function executeFormPaste() {
         alert("✅ कपी गरिएको डाटाबाट फारम सफलतापूर्वक भरिएको छ!");
         toggleFormPasteBox(false);
     } catch (e) {
-        alert("डाटा פורम्याट मिलेन! कृपया सही JSON डाटा पेस्ट गर्नुहोस्।");
+        alert("डाटा ढाँचा (Format) मिलेन! कृपया सही JSON डाटा पेस्ट गर्नुहोस्।");
     }
 }
 window.executeFormPaste = executeFormPaste;

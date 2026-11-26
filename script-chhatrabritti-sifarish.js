@@ -119,8 +119,8 @@ function toggleRelationFields() {
     const lblF = document.getElementById('lblInFatherName');
     const lblM = document.getElementById('lblInMotherName');
     if (husBox) husBox.style.display = isBuhari ? 'block' : 'none';
-    if (lblF) lblF.innerText = isBuhari ? 'बुबा / ससुराको नाम (ऐच्छिक):' : 'बुबाको नाम (ऐच्छिक):';
-    if (lblM) lblM.innerText = isBuhari ? 'आमा / सासूको नाम (ऐच्छिक):' : 'आमाको नाम (ऐच्छिक):';
+    if (lblF) lblF.innerText = 'बुबाको नाम (ऐच्छिक):';
+    if (lblM) lblM.innerText = 'आमाको नाम (ऐच्छिक):';
 }
 window.toggleRelationFields = toggleRelationFields;
 function toggleIdDocSection() {
@@ -187,13 +187,13 @@ function buildGuardianClause(father, mother, husband, relation) {
 
     if (rel === 'बुहारी') {
         if (parentBase && h) {
-            return `${parentBase}को बुहारी, <span style="font-weight:600;">${escapeHtml(h)}</span>को श्रीमती `;
+            return `${parentBase}को छोरी, <span style="font-weight:600;">${escapeHtml(h)}</span>को श्रीमती `;
         }
         if (h) {
             return `<span style="font-weight:600;">${escapeHtml(h)}</span>को श्रीमती `;
         }
         if (parentBase) {
-            return `${parentBase}को बुहारी `;
+            return `${parentBase}को छोरी `;
         }
         return '';
     }

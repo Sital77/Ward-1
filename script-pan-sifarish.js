@@ -190,6 +190,9 @@ function updateDoc() {
     if (document.getElementById('lblSifarisWada')) {
         document.getElementById('lblSifarisWada').innerText = wada;
     }
+    if (document.getElementById('lblSifarisWadaK')) {
+        document.getElementById('lblSifarisWadaK').innerText = wada;
+    }
 
     // Recipient Address update
     let receiverOffice = 'gauradaha';
@@ -232,7 +235,7 @@ function updateDoc() {
         if (citNo) parts.push(`ना.प्र.नं. ${toNep(citNo)}`);
         if (citDate) parts.push(`जारी मिति: ${toNep(citDate)}`);
         if (citDist) parts.push(`जारी जिल्ला: ${citDist}`);
-        citText = ` (${parts.join(', ')}) `;
+        citText = ` (${parts.join(', ')})`;
     }
 
     const lblCitBlockK = document.getElementById('lblCitBlockK');

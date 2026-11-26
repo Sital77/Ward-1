@@ -80,7 +80,7 @@
             'citizen', 'surakshyaSanrakshakTestRecords', 'surakshyaBhattaRecords', 'bankRecords',
             'apangataRecords', 'panRecords', 'abibahitRecords', 'bibahaRecords',
             'nabalakRecords', 'pariwarikRecords', 'aamdaniPramanitRecords', 'abhilekhRecords',
-            'swasthyaSahayataRecords', 'chhatrabrittiRecords',
+            'chhatrabrittiRecords',
             'test_citizenRecords'
         ];
         if (personalCols.includes(normCol)) {
@@ -119,7 +119,14 @@
             }
         }
 
-        // 4. General fallback
+        // 4. Dynamic Sifarish & General fallback
+        if (normCol === 'dynamicSifarishRecords') {
+            const tplKey = normalizeNoSpace(data.templateId || data.templateTitle || '');
+            const appName = normalizeNoSpace(data.applicantName || data.name || '');
+            const genAY = normalizeNepaliText(data.ay || data.fiscalYear || '');
+            return appName ? `dyn___${tplKey}___${appName}___${genAY}` : '';
+        }
+
         const genName = normalizeNoSpace(data.name || data.applicantName || data.committeeName || data.projectName || data.title || '');
         const genAY = normalizeNepaliText(data.ay || data.fiscalYear || '');
         return genName ? `gen___${genName}___${genAY}` : '';

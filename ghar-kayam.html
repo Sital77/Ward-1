@@ -88,10 +88,32 @@
             position: relative;
         }
 
+        /* Balanced top margin and tight addressee-to-subject spacing */
+        body .preview-panel .a4-page {
+            padding: 7mm 16mm 12mm 16mm !important;
+        }
+        body .preview-panel .a4-page .custom-svg-letterhead {
+            margin: 0 0 3px 0 !important;
+        }
+        body .preview-panel .a4-page .receiver-address-block {
+            margin-top: 2px !important;
+            margin-bottom: 3px !important;
+            line-height: 1.25 !important;
+        }
+        body .preview-panel .a4-page .subject-container {
+            margin: 2px 0 6px 0 !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 0.18in 0.45in 0.22in 0.45in;
+        }
         @media print {
             .input-panel  { display: none !important; }
             .preview-panel { width: 100% !important; }
             .modal-overlay { display: none !important; }
+            body .preview-panel .a4-page {
+                padding: 0 4px !important;
+            }
         }
     </style>
     <link rel="preload" as="image" href="assets/letter%20head.svg" fetchpriority="high">
@@ -219,6 +241,18 @@
                     <input type="text" id="inGharMiti" placeholder="२०८१/०५/२५" oninput="updateDoc()">
                 </div>
             </div>
+
+            <div class="form-group">
+                <label>घर कायमको किसिम (पुर्जामा उल्लेख हुने):</label>
+                <div class="radio-container" style="flex-wrap:wrap; height:auto; gap:4px;">
+                    <div class="radio-option"><input type="radio" id="huAwasiya" name="houseUsageRadio" value="आवासीय घर" onchange="updateDoc()" checked><label for="huAwasiya" class="radio-label" style="font-size:0.84rem; padding:7px 4px;">आवासीय घर</label></div>
+                    <div class="radio-option"><input type="radio" id="huByawasayik" name="houseUsageRadio" value="व्यावसायिक घर" onchange="updateDoc()"><label for="huByawasayik" class="radio-label" style="font-size:0.84rem; padding:7px 4px;">व्यावसायिक घर</label></div>
+                    <div class="radio-option"><input type="radio" id="huCustom" name="houseUsageRadio" value="CUSTOM" onchange="updateDoc()"><label for="huCustom" class="radio-label" style="font-size:0.84rem; padding:7px 4px;">अन्य (आफैँ लेख्ने)</label></div>
+                </div>
+                <div id="customHouseUsageBox" style="display:none; margin-top:8px;">
+                    <input type="text" id="inCustomHouseUsage" placeholder="उदा: आवासीय तथा व्यावसायिक घर" oninput="updateDoc()">
+                </div>
+            </div>
         </div>
 
         <!-- ══ HOUSE/LAND ROWS ══ -->
@@ -304,7 +338,7 @@
 
             <!-- ── Receiver ── -->
             <div class="receiver-address-block">
-                श्री भूमी प्रशासन कार्यालय<br>
+                श्री भूमि प्रशासन कार्यालय<br>
                 दमक, झापा
             </div>
 
@@ -321,10 +355,10 @@
                 बसोबास गर्ने <span id="lblName" class="fill-space" style="font-weight:700;"></span>
                 (ना.प्र.नं.<span id="lblCitNo" class="fill-space"></span>,
                 जारी मिति: <span id="lblCitDate" class="fill-space"></span>,
-                <span id="lblCitDistrict" class="fill-space" style="padding-right:0;"></span><span style="padding:0;">)</span><span style="padding:0;">ले</span> यस वडा कार्यालयमा पूर्जा/सेस्तामा घर कायमका लागि
-                सिफारिस गरिदिनुहुन भनि पेस गर्नुभएको निवेदनको आधारमा तपसिल बमोजिमको कित्तामा मिति:<span id="lblGharMiti" class="fill-space"></span>
-                मा घर निर्माण कार्य सम्पन्न भएको भवन अभिलेखीकरणको आधारमा पूर्जामा आवासीय घर कायम गरिदिनुहुन
-                स्थानीय सरकार सञ्चालन ऐन, २०७४ को दफा १२(२) ड (२८) बमोजिम सिफारिस   गरिन्छ ।
+                <span id="lblCitDistrict" class="fill-space" style="padding-right:0;"></span><span style="padding:0;">)</span><span style="padding:0;">ले</span> यस वडा कार्यालयमा पुर्जा/स्रेस्तामा घर कायमका लागि
+                सिफारिस गरिदिनुहुन भनी पेस गर्नुभएको निवेदनको आधारमा तपसिल बमोजिमको कित्तामा मिति:<span id="lblGharMiti" class="fill-space"></span>
+                मा घर निर्माण कार्य सम्पन्न भएको भवन अभिलेखीकरणको आधारमा पुर्जामा <span id="lblHouseUsageType" style="font-weight:bold;">आवासीय घर</span> कायम गरिदिनुहुन
+                स्थानीय सरकार सञ्चालन ऐन, २०७४ को दफा १२(२) ड (२८) बमोजिम सिफारिस गरिन्छ ।
             </div>
 
             <!-- ── House/Land Table ── -->

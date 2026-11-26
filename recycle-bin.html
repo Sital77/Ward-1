@@ -370,7 +370,7 @@
                     <div class="stat-icon">🔄</div>
                     <div>
                         <div class="stat-val" id="statRestoredCount">०</div>
-                        <div class="stat-label">सफलतापुर्वक रिस्टोर गरिएका</div>
+                        <div class="stat-label">सफलतापूर्वक रिस्टोर गरिएका</div>
                     </div>
                 </div>
             </div>
@@ -388,6 +388,20 @@
                     <option value="batoPramanitRecords">बाटो प्रमाणित</option>
                     <option value="gharKayamRecords">घर कायम</option>
                     <option value="pariwarikRecords">पारिवारिक विवरण</option>
+                    <option value="nabalakRecords">नाबालक परिचयपत्र</option>
+                    <option value="jaggadhaniPratilipiRecords">जग्गाधनी प्रतिलिपि</option>
+                    <option value="jaggadhaniPoojaRecords">जग्गाधनी पुर्जा</option>
+                    <option value="bargikaranSifarishRecords">वर्गीकरण सिफारिस</option>
+                    <option value="bibahaRecords">विवाह प्रमाणित</option>
+                    <option value="aamdaniPramanitRecords">आम्दानी प्रमाणित</option>
+                    <option value="abhilekhRecords">अभिलेख प्रमाणित</option>
+                    <option value="abibahitRecords">अविवाहित प्रमाणित</option>
+                    <option value="apangataRecords">अपाङ्गता सिफारिस</option>
+                    <option value="surakshyaBhattaRecords">सामाजिक सुरक्षा भत्ता संरक्षक</option>
+                    <option value="surakshyaSanrakshakTestRecords">संरक्षक सामाजिक सुरक्षा सिफारिस</option>
+                    <option value="bankRecords">बैंक खाता सिफारिस</option>
+                    <option value="chhatrabrittiRecords">छात्रवृत्ति सिफारिस</option>
+                    <option value="dynamicSifarishRecords">अन्य डाइनामिक सिफारिस</option>
                 </select>
             </div>
 
@@ -452,6 +466,9 @@
             'bargikaranSifarishRecords': '📊 वर्गीकरण सिफारिस',
             'bibahaRecords': '💍 विवाह प्रमाणित',
             'aamdaniRecords': '💰 आम्दानी प्रमाणित',
+            'aamdaniPramanitRecords': '💰 आम्दानी प्रमाणित',
+            'chhatrabrittiRecords': '🎓 छात्रवृत्ति सिफारिस',
+            'dynamicSifarishRecords': '🧩 अन्य डाइनामिक सिफारिस',
             'abhilekhRecords': '📁 अभिलेख प्रमाणित',
             'abibahitRecords': '👤 अविवाहित प्रमाणित',
             'apangataRecords': '♿ अपाङ्गता सिफारिस',
@@ -633,7 +650,7 @@
                     await window.restoreRecord(colName, docId);
                     restoredCount++;
                     document.getElementById('statRestoredCount').innerText = toNepaliNum(restoredCount);
-                    alert(`✅ "${title}" सफलतापुर्वक रिस्टोर गरियो!`);
+                    alert(`✅ "${title}" सफलतापूर्वक रिस्टोर गरियो!`);
                 } catch (e) {
                     alert("रिस्टोर गर्न समस्या भयो: " + e.message);
                 }

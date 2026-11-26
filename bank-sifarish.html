@@ -598,7 +598,7 @@
                             <input type="radio" name="trimesterRadio" value="प्रथम त्रैमासिक" onchange="selectTrimester(this)"> प्रथम त्रैमासिक
                         </label>
                         <label class="trimester-option">
-                            <input type="radio" name="trimesterRadio" value="दोश्रो त्रैमासिक" onchange="selectTrimester(this)"> दोश्रो त्रैमासिक
+                            <input type="radio" name="trimesterRadio" value="दोस्रो त्रैमासिक" onchange="selectTrimester(this)"> दोस्रो त्रैमासिक
                         </label>
                         <label class="trimester-option">
                             <input type="radio" name="trimesterRadio" value="तेस्रो त्रैमासिक" onchange="selectTrimester(this)"> तेस्रो त्रैमासिक
@@ -613,7 +613,7 @@
             <!-- ── MODE 2: DECEASED ACCOUNT CLOSURE FIELDS ── -->
             <div id="secDeceasedAccount" style="display:none;">
                 <div class="form-group">
-                    <label>नागरिकता जारी मिति (निवेदकको - वैकल्पि):</label>
+                    <label>नागरिकता जारी मिति (निवेदकको - वैकल्पिक):</label>
                     <input type="text" id="inApplicantCitDate" placeholder="उदा: २०७५/०५/१२" oninput="updateDoc()">
                 </div>
 
@@ -2179,7 +2179,7 @@
                 const deceasedCitNo = getDisplayCitNo(document.getElementById('inDeceasedCitNo').value);
 
                 bodyTextEl.innerHTML = `
-                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${heirRelation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ l
+                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr}ले दिनुभएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${relation}</span> <span style="font-weight:bold;">${deceasedName}</span>को मिति: <span style="font-weight:bold;">${deathDate}</span> गते मृत्यु भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं. <span style="font-weight:bold;">${deceasedAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${heirRelation}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr}लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिन बैंकलाई आवश्यक सिफारिस गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                 `;
 
                 document.getElementById('tapasilHeaderBlock').innerText = "मृतक तथा हकदारको विवरण :";
@@ -2258,7 +2258,7 @@
                 const childBeneficiaryId = (document.getElementById('inChildBeneficiaryId') || {}).value ? document.getElementById('inChildBeneficiaryId').value.trim() : '';
 
                 bodyTextEl.innerHTML = `
-                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} ले दिनु भएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${childRelation}</span> <span style="font-weight:bold;">${childName}</span>ले <span style="font-weight:bold;">${targetGroup}</span> अन्तर्गत सामाजिक सुरक्षा भत्ता प्राप्त गरिरहनुभएको र हाल निजको सामाजिक सुरक्षा अन्तर्गत ${targetGroup}ले प्राप्त गर्ने भत्ताको उमेर सिमा पुरा भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं.<span style="font-weight:bold;">${childAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${guardianRel}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr} लाई निकाश गरी उक्त बैंक खाता बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ l
+                    प्रस्तुत विषयमा जिल्ला ${appDist} ${appPalika} वडा नं.${appWada} मा बसोबास गर्ने <span style="font-weight:bold;">${applicantName}</span>${citInfoStr}ले दिनुभएको माग निवेदन अनुसार निजको <span style="font-weight:bold;">${childRelation}</span> <span style="font-weight:bold;">${childName}</span>ले <span style="font-weight:bold;">${targetGroup}</span> अन्तर्गत सामाजिक सुरक्षा भत्ता प्राप्त गरिरहनुभएको र हाल निजको सामाजिक सुरक्षा अन्तर्गत ${targetGroup}ले प्राप्त गर्ने भत्ताको उमेर सीमा पूरा भएको हुँदा निजको ${recName} ${recOffice}मा रहेको सामाजिक सुरक्षा ही.नं.<span style="font-weight:bold;">${childAccNo}</span> खातामा रहेको मौजुदा रकम निजको नजिकको हकदार <span style="font-weight:bold;">${guardianRel}</span> <span style="font-weight:bold;">${applicantName}</span>${citInfoStr}लाई निकासा गरी उक्त बैंक खाता बन्द गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                 `;
 
                 document.getElementById('tapasilHeaderBlock').innerText = "लाभग्राहीको विवरण :";
@@ -2844,7 +2844,7 @@
             document.getElementById('inFiscalYear').value = rec.fiscalYear || rec.ay || '';
 
             // Restore trimester radio
-            const trimVal = rec.trimester || '';
+            const trimVal = (rec.trimester === 'दोश्रो त्रैमासिक') ? 'दोस्रो त्रैमासिक' : (rec.trimester || '');
             const trimRadios = document.querySelectorAll('input[name="trimesterRadio"]');
             trimRadios.forEach(r => { r.checked = (r.value === trimVal); });
             document.querySelectorAll('.trimester-option').forEach(item => {

@@ -187,7 +187,6 @@
         'jaggadhani-patra': { collection: 'jaggadhaniPoojaRecords', title: 'जग्गाधनीपूर्जा रजिष्ट्रेसन' },
         'nabalak-parichayapatra': { collection: 'nabalakRecords', title: 'नाबालक परिचय पत्र सिफारिस' },
         'yojana-samjhauta': { collection: 'yojanaSamjhautaRecords', title: 'योजना सम्झौता सिफारिस' },
-        'swasthya-sahayata-sifarish': { collection: 'swasthyaSahayataRecords', title: 'स्वास्थ्य सहायता सिफारिस' },
         'chhatrabritti-sifarish': { collection: 'chhatrabrittiRecords', title: 'छात्रवृत्ति सिफारिस' }
     };
 
@@ -410,7 +409,6 @@
     else if (path.includes('jaggadhani-pratilipi.html')) templateId = 'jaggadhani-pratilipi';
     else if (path.includes('aamdani-pramanit.html')) templateId = 'aamdani-pramanit';
     else if (path.includes('bargikaran-sifarish.html')) templateId = 'bargikaran-sifarish';
-    else if (path.includes('swasthya-sahayata-sifarish.html')) templateId = 'swasthya-sahayata-sifarish';
     else if (path.includes('chhatrabritti-sifarish.html')) templateId = 'chhatrabritti-sifarish';
     else if (path.includes('dynamic-sifarish.html')) {
         templateId = new URLSearchParams(window.location.search).get('id') || '';
@@ -424,8 +422,28 @@
         setTimeout(resolve, 3500); // 3.5s fallback timeout
     });
 
-    // yojana-bank-sifarish, bank-sifarish, surakshya-bhatta-sifarish, surakshya-sanrakshak-test, and yojana-tippani have their own complete JS logic - skip template loading entirely
-    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish' || templateId === 'surakshya-sanrakshak-test' || templateId === 'yojana-tippani' || templateId === 'swasthya-sahayata-sifarish' || templateId === 'chhatrabritti-sifarish');
+    function isStaticTemplateOutdated(tid, tc) {
+        if (!tc) return true;
+        if (tc.includes('पूजी') || tc.includes('किताामा')) return true;
+        if (tid === 'bato-pramanit') return (!tc.includes('lblLandUseStatement') || !tc.includes('भू-उपयोग ऐन') || !tc.includes('lblSelectedZone') || tc.includes('पेश गर्नुभएको'));
+        if (tid === 'gharbato') return (!tc.includes('lblLandUseStatement') || !tc.includes('भू-उपयोग ऐन') || !tc.includes('lblSelectedZone'));
+        if (tid === 'charkilla') return (!tc.includes('lblLandUseStatement') || !tc.includes('भू-उपयोग ऐन') || !tc.includes('lblSelectedZone') || (tc.includes('नाममा तहाँ') && !tc.includes('श्री भुमी प्रशासन')));
+        if (tid === 'suchana-tans') return (tc.includes('A4-242.jpg') || tc.includes('letterheadType'));
+        if (tid === 'bank-sifarish') return (!tc.includes('lblTapasilCitLabel') || !tc.includes('rowTapasilNid'));
+        if (tid === 'ghar-kayam') return (!tc.includes('lblHouseUsageType') || tc.includes('पूर्जा/सेस्तामा') || tc.includes('भनि पेस') || tc.includes('सिफारिस   गरिन्छ') || tc.includes('जम्मा<br>क्षेत्रफल') || tc.includes('जम्मा क्षेत्रफल'));
+        if (tid === 'abhilekh-pramanit') return (!tc.includes('receiverAddressContainer') || tc.includes('lblReceiverAddress'));
+        if (tid === 'aamdani-pramanit') return (!tc.includes('globalLandAddr') || tc.includes('width: 250px;') || !tc.includes('lblLandDetails') || tc.includes('तपशिल') || tc.includes('जोजस सँग') || tc.includes('</span> <span id="lblCitBlock"'));
+        if (tid === 'pariwarik-bibaran') return (!tc.includes('outputTableHead') || !tc.includes('familyDetailsTable') || tc.includes('letter-body tapsil-title'));
+        if (tid === 'pan-sifarish') return (!tc.includes('lblCitBlockK') || !tc.includes('lblCitBlockBanda') || !tc.includes('lblSifarisWadaK') || tc.includes('पेश गर्नु भएको') || tc.includes('</span> <span id="lblCitBlockK"') || tc.includes(' को तहाँ'));
+        if (tid === 'jaggadhani-pratilipi') return (tc.includes('दमक, झापा l') || tc.includes('</span> <span id="lblCitDetailsSpan">') || tc.includes('पूर्जा उपलब्ध'));
+        if (tid === 'bibaha-pramanit') return (tc.includes('जो जस सँग') || tc.includes('<span id="lblApplicantCit"></span> ले'));
+        if (tid === 'abibahit-pramanit') return (tc.includes('lblGender') || tc.includes('पेश गर्नुभएको') || tc.includes('गते सम्म'));
+        if (tid === 'bargikaran-sifarish') return (tc.includes('पेश गर्नु भएको') || tc.includes('तपशिल') || tc.includes('वर्गिकरण'));
+        return false;
+    }
+
+    // Dedicated/fixed-layout modules manage their own HTML directly without Firestore template injection
+    const skipTemplateLoad = (templateId === 'yojana-bank-sifarish' || templateId === 'bank-sifarish' || templateId === 'surakshya-bhatta-sifarish' || templateId === 'surakshya-sanrakshak-test' || templateId === 'yojana-tippani' || templateId === 'nabalak-parichayapatra' || templateId === 'chhatrabritti-sifarish');
 
     if (templateId && !isDynamic && !skipTemplateLoad) {
         // Intercept window.onload assigner
@@ -468,40 +486,8 @@
                 try {
                     const localList = JSON.parse(localStorage.getItem('custom_sifarish_templates') || '[]');
                     localOverride = localList.find(t => t.id === templateId);
-                    if (localOverride && localOverride.template_content) {
-                        if (localOverride.template_content.includes('पूजी') || localOverride.template_content.includes('किताामा')) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'bato-pramanit' && (!localOverride.template_content.includes('lblLandUseStatement') || !localOverride.template_content.includes('भू-उपयोग ऐन'))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'gharbato' && (!localOverride.template_content.includes('lblLandUseStatement') || !localOverride.template_content.includes('भू-उपयोग ऐन'))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'charkilla' && (!localOverride.template_content.includes('lblLandUseStatement') || !localOverride.template_content.includes('भू-उपयोग ऐन') || (localOverride.template_content.includes('नाममा तहाँ') && !localOverride.template_content.includes('श्री भुमी प्रशासन')))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'nabalak-parichayapatra' && !localOverride.template_content.includes('lblDynamicRelation')) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'suchana-tans' && (localOverride.template_content.includes('A4-242.jpg') || localOverride.template_content.includes('letterheadType'))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'ghar-kayam' && (localOverride.template_content.includes('जम्मा<br>क्षेत्रफल') || localOverride.template_content.includes('जम्मा क्षेत्रफल'))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'aamdani-pramanit' && (!localOverride.template_content.includes('globalLandAddr') || localOverride.template_content.includes('width: 250px;'))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'pariwarik-bibaran' && (!localOverride.template_content.includes('outputTableHead') || !localOverride.template_content.includes('familyDetailsTable') || localOverride.template_content.includes('letter-body tapsil-title'))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'pan-sifarish' && (!localOverride.template_content.includes('lblCitBlockK') || !localOverride.template_content.includes('lblCitBlockBanda'))) {
-                            localOverride = null;
-                        }
-                        if (localOverride && templateId === 'abibahit-pramanit' && localOverride.template_content.includes('lblGender')) {
-                            localOverride = null;
-                        }
+                    if (localOverride && isStaticTemplateOutdated(templateId, localOverride.template_content)) {
+                        localOverride = null;
                     }
                 } catch(e) {}
 
@@ -513,34 +499,7 @@
                 db.collection('sifarish_templates').doc(templateId).get().then((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
-                        let isOutdated = false;
-                        if (!data.template_content) {
-                            isOutdated = true;
-                        } else if (templateId === 'bato-pramanit' && (!data.template_content.includes('lblLandUseStatement') || !data.template_content.includes('भू-उपयोग ऐन') || !data.template_content.includes('lblSelectedZone'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'gharbato' && (!data.template_content.includes('lblLandUseStatement') || !data.template_content.includes('भू-उपयोग ऐन') || !data.template_content.includes('lblSelectedZone'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'charkilla' && (!data.template_content.includes('lblLandUseStatement') || !data.template_content.includes('भू-उपयोग ऐन') || !data.template_content.includes('lblSelectedZone') || (data.template_content.includes('नाममा तहाँ') && !data.template_content.includes('श्री भुमी प्रशासन')))) {
-                            isOutdated = true;
-                        } else if (templateId === 'nabalak-parichayapatra' && (!data.template_content.includes('lblDynamicRelation') || !data.template_content.includes('lblDynamicChildName'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'suchana-tans' && (data.template_content.includes('किताामा') || data.template_content.includes('पूजी') || data.template_content.includes('A4-242.jpg') || data.template_content.includes('letterheadType'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'bank-sifarish' && (!data.template_content.includes('lblTapasilCitLabel') || !data.template_content.includes('rowTapasilNid'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'ghar-kayam' && (!data.template_content.includes('पूर्जा/सेस्तामा') || data.template_content.includes('पूजी') || data.template_content.includes('किताामा') || data.template_content.includes('जम्मा<br>क्षेत्रफल') || data.template_content.includes('जम्मा क्षेत्रफल'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'abhilekh-pramanit' && (!data.template_content.includes('receiverAddressContainer') || data.template_content.includes('lblReceiverAddress'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'aamdani-pramanit' && (!data.template_content.includes('globalLandAddr') || data.template_content.includes('width: 250px;') || !data.template_content.includes('lblLandDetails'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'pariwarik-bibaran' && (!data.template_content.includes('outputTableHead') || !data.template_content.includes('familyDetailsTable') || data.template_content.includes('letter-body tapsil-title'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'pan-sifarish' && (!data.template_content.includes('lblCitBlockK') || !data.template_content.includes('lblCitBlockBanda'))) {
-                            isOutdated = true;
-                        } else if (templateId === 'abibahit-pramanit' && data.template_content.includes('lblGender')) {
-                            isOutdated = true;
-                        }
+                        const isOutdated = isStaticTemplateOutdated(templateId, data.template_content);
 
                         if (isOutdated) {
                             seedLocalContent(db, templateId)
@@ -1623,12 +1582,16 @@
             `;
         }
 
-        // Apply styles initially
-        applyStyles(savedSize, savedItalic, savedColor);
+        const isFixedTypographyForm = (templateId === 'nabalak-parichayapatra');
+
+        // Apply styles initially (skip global font-size slider & micro overrides for Nabalak fixed 2-page form)
+        if (!isFixedTypographyForm) {
+            applyStyles(savedSize, savedItalic, savedColor);
+        }
 
         // 5. Create Controls UI widget safely (prevent duplicates)
         let card = document.getElementById('fontSettingsCard');
-        if (!card) {
+        if (!card && !isFixedTypographyForm) {
             card = document.createElement('div');
             card.id = 'fontSettingsCard';
             card.className = 'font-settings-card';
@@ -1784,6 +1747,8 @@
                 badge.style.cssText = 'background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(30,58,138,0.25); border: 1px solid rgba(255,255,255,0.25); font-family: inherit;';
                 if (card && card.parentNode) {
                     card.parentNode.insertBefore(badge, card);
+                } else if (btnPrint && btnPrint.parentNode) {
+                    btnPrint.parentNode.insertBefore(badge, btnPrint);
                 }
             }
 

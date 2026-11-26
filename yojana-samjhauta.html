@@ -244,7 +244,7 @@
 
             <div class="form-group" style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
                 <div>
-                    <label>चालू आर्थिक बर्ष:</label>
+                    <label>चालू आर्थिक वर्ष:</label>
                     <input type="text" id="inFiscalYear" placeholder="उदा: २०८३/०८४" value="२०८३/०८४" oninput="updateDoc()">
                 </div>
                 <div>
@@ -599,7 +599,7 @@
             }
 
             // B. Fiscal Year
-            const fyMatch = pastedText.match(/आर्थिक\s*बर्ष\.?\s*[:\-\s]*([२०८९०-९0-9\/]+)/i);
+            const fyMatch = pastedText.match(/आर्थिक\s*[बव]र्ष\.?\s*[:\-\s]*([२०८९०-९0-9\/]+)/i);
             if (fyMatch) {
                 parsedData.fiscalYear = fyMatch[1].trim();
             }
@@ -802,7 +802,7 @@
             const bodyTextEl = document.getElementById('bodyText');
             bodyTextEl.innerHTML = `
                 <div class="letter-body-para">
-                    उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.${wardNep} को चालू आर्थिक बर्ष ${fiscalYearStr} को ${budgetTypeStr} अन्तर्गत <strong>“${projectNameStr}”</strong> शिर्षकमा विनियोजन भएको रकम रू.<strong>${budgetAmtStr}</strong> (अक्षरेपी ${budgetWordsStr}) बाट योजना कार्यन्वयन गर्नको लागि गठित <strong>${committeeNameStr}</strong> सँग तहाँ कार्यालयको नियमानुसार योजना सम्झौता गरिदिनुहुन सिफारिस साथ अनुरोध छ।
+                    उपरोक्त विषयमा झापा जिल्ला गौरादह नगरपालिका वडा नं.${wardNep} को चालू आर्थिक वर्ष ${fiscalYearStr} को ${budgetTypeStr} अन्तर्गत <strong>“${projectNameStr}”</strong> शीर्षकमा विनियोजन भएको रकम रू.<strong>${budgetAmtStr}</strong> (अक्षरेपी ${budgetWordsStr}) बाट योजना कार्यान्वयन गर्नको लागि गठित <strong>${committeeNameStr}</strong>सँग तहाँ कार्यालयको नियमानुसार योजना सम्झौता गरिदिनुहुन सिफारिस साथ अनुरोध छ ।
                 </div>
                 ${tapasilHtml}
             `;

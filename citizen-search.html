@@ -403,7 +403,7 @@
                 <div class="empty-results">
                     <div class="empty-results-icon">📂</div>
                     <h3>नागरिक वा संस्थाको नाम टाइप गर्नुहोस्</h3>
-                    <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै २० वटा सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
+                    <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
                 </div>
             </div>
         </div>
@@ -424,7 +424,7 @@
         }
         const db = firebase.firestore();
 
-        // 20 Sifarish collections and their page mappings
+        // Sifarish collections and their page mappings
         const COLLECTION_SPECS = [
             { name: 'yojanaBankRecords', label: '📂 योजना बैंक खाता', page: 'yojana-bank-sifarish.html' },
             { name: 'yojanaSamjhautaRecords', label: '📝 योजना सम्झौता', page: 'yojana-samjhauta.html' },
@@ -441,15 +441,15 @@
             { name: 'jaggadhaniPoojaRecords', label: '📄 जग्गाधनी पुर्जा', page: 'jaggadhani-patra.html' },
             { name: 'bargikaranSifarishRecords', label: '📊 वर्गीकरण सिफारिस', page: 'bargikaran-sifarish.html' },
             { name: 'bibahaRecords', label: '💍 विवाह प्रमाणित', page: 'bibaha-pramanit.html' },
-            { name: 'aamdaniRecords', label: '💰 आम्दानी प्रमाणित', page: 'aamdani-pramanit.html' },
+            { name: 'aamdaniPramanitRecords', label: '💰 आम्दानी प्रमाणित', page: 'aamdani-pramanit.html' },
             { name: 'abhilekhRecords', label: '📁 अभिलेख प्रमाणित', page: 'abhilekh-pramanit.html' },
             { name: 'abibahitRecords', label: '👤 अविवाहित प्रमाणित', page: 'abibahit-pramanit.html' },
             { name: 'apangataRecords', label: '♿ अपाङ्गता सिफारिस', page: 'apangata-sifarish.html' },
             { name: 'surakshyaBhattaRecords', label: '🛡️ सामाजिक सुरक्षा भत्ता संरक्षक (पुराना अभिलेख)', page: 'surakshya-bhatta-sifarish.html' },
             { name: 'surakshyaSanrakshakTestRecords', label: '🛡️ संरक्षक सामाजिक सुरक्षा सिफारिस टेस्ट', page: 'surakshya-sanrakshak-test.html' },
             { name: 'bankRecords', label: '🏦 बैंक खाता सिफारिस', page: 'bank-sifarish.html' },
-            { name: 'swasthyaSahayataRecords', label: '🏥 स्वास्थ्य सहायता सिफारिस', page: 'swasthya-sahayata-sifarish.html' },
-            { name: 'chhatrabrittiRecords', label: '🎓 छात्रवृत्ति सिफारिस', page: 'chhatrabritti-sifarish.html' }
+            { name: 'chhatrabrittiRecords', label: '🎓 छात्रवृत्ति सिफारिस', page: 'chhatrabritti-sifarish.html' },
+            { name: 'dynamicSifarishRecords', label: '🧩 अन्य डाइनामिक सिफारिस', page: 'dynamic-sifarish.html' }
         ];
 
         let searchDebounceTimer = null;
@@ -607,7 +607,8 @@
                 d.birthRegNo,
                 d.schoolName,
                 d.campusName,
-                d.classDetails
+                d.classDetails,
+                d.templateTitle
             ];
             const baseText = parts.filter(Boolean).join(' ').toLowerCase();
             const nepaliVersion = toNepaliNum(baseText);
@@ -674,7 +675,7 @@
                     <div class="empty-results">
                         <div class="empty-results-icon">📂</div>
                         <h3>नागरिक वा संस्थाको नाम टाइप गर्नुहोस्</h3>
-                        <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै २१ वटा सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
+                        <p>माथिको खोज बाकसमा कुनै पनि विवरण टाइप गर्दा प्रणालीका सबै सिफारिस कलेक्सनहरूबाट डाटा खोजिनेछ।</p>
                     </div>`;
                 return;
             }
@@ -846,7 +847,7 @@
                 const first = list[0].data;
                 const metaParts = [];
                 if (first.fatherName) metaParts.push(`बुवा: ${first.fatherName}`);
-                if (first.citizenshipNo) metaParts.push(`ना.प्र.नं: ${first.citizenshipNo}`);
+                if (first.citNo || first.citizenshipNo) metaParts.push(`ना.प्र.नं: ${first.citNo || first.citizenshipNo}`);
                 if (first.chairman) metaParts.push(`अध्यक्ष: ${first.chairman}`);
 
                 return `
@@ -877,17 +878,23 @@
                                     const d = item.data;
                                     const chalani = d.chalani || d.chalaniNo || '-';
                                     const miti = d.miti || '-';
-                                    const desc = d.projectName || d.purpose || d.kittaNo || d.bankName || '-';
+                                    const desc = d.projectName || d.purpose || d.kittaNo || d.bankName || d.hospitalName || d.schoolName || d.campusName || d.templateTitle || '-';
+                                    const catLabel = (item.collectionName === 'dynamicSifarishRecords' && d.templateTitle)
+                                        ? ('🧩 ' + escapeHtml(d.templateTitle))
+                                        : item.categoryLabel;
+                                    const targetHref = (item.collectionName === 'dynamicSifarishRecords' && d.templateId)
+                                        ? `${item.pageUrl}?id=${encodeURIComponent(d.templateId)}`
+                                        : item.pageUrl;
 
                                     return `
                                         <tr>
                                             <td>${toNepaliNum(idx + 1)}</td>
-                                            <td><span class="badge-category">${item.categoryLabel}</span></td>
+                                            <td><span class="badge-category">${catLabel}</span></td>
                                             <td><strong>${escapeHtml(chalani)}</strong></td>
                                             <td>${toNepaliNum(miti)}</td>
                                             <td>${escapeHtml(desc)}</td>
                                             <td style="text-align: right;">
-                                                <a href="${item.pageUrl}" class="btn-view-link" target="_blank">
+                                                <a href="${targetHref}" class="btn-view-link" target="_blank">
                                                     📄 खोल्नुहोस् ↗
                                                 </a>
                                             </td>

@@ -189,6 +189,18 @@ function updateDoc() {
     document.getElementById('lblCitDistrict').innerText = citDist;
     document.getElementById('lblGharMiti').innerText    = toNep(gharMiti);
 
+    // House usage type in body sentence (आवासीय घर / व्यावसायिक घर / अन्य)
+    const usageChoiceEl = document.querySelector('input[name="houseUsageRadio"]:checked');
+    const usageChoice = usageChoiceEl ? usageChoiceEl.value : 'आवासीय घर';
+    const customUsageEl = document.getElementById('inCustomHouseUsage');
+    const customUsageBox = document.getElementById('customHouseUsageBox');
+    if (customUsageBox) customUsageBox.style.display = (usageChoice === 'CUSTOM') ? 'block' : 'none';
+    const usageDisplay = (usageChoice === 'CUSTOM')
+        ? ((customUsageEl && customUsageEl.value.trim()) ? customUsageEl.value.trim() : 'आवासीय घर')
+        : usageChoice;
+    const lblHouseUsageType = document.getElementById('lblHouseUsageType');
+    if (lblHouseUsageType) lblHouseUsageType.innerText = usageDisplay;
+
     // House table preview
     const rows = collectHouseRows();
     const tbody = document.getElementById('lblHouseTableBody');
@@ -260,6 +272,8 @@ async function printAndSaveSystem() {
         citDate:     document.getElementById('inCitDate').value.trim()      || '-',
         citDistrict: document.getElementById('inCitDistrict').value.trim()  || '-',
         gharMiti:    document.getElementById('inGharMiti').value.trim()     || '-',
+        houseUsageChoice: (document.querySelector('input[name="houseUsageRadio"]:checked') || {}).value || 'आवासीय घर',
+        customHouseUsage: (document.getElementById('inCustomHouseUsage') || {}).value ? document.getElementById('inCustomHouseUsage').value.trim() : '',
         houseRows,
         subject:     "घर कायम सिफारिस",
         signAuth:    document.getElementById('inSignAuthority').value,
@@ -379,6 +393,10 @@ function editFromDB(id) {
     document.getElementById('inCitDate').value      = rec.citDate === '-' ? '' : (rec.citDate || '');
     document.getElementById('inCitDistrict').value  = rec.citDistrict === '-' ? '' : (rec.citDistrict || '');
     document.getElementById('inGharMiti').value     = rec.gharMiti === '-' ? '' : (rec.gharMiti || '');
+    const usageChoice = rec.houseUsageChoice || 'आवासीय घर';
+    document.querySelectorAll('input[name="houseUsageRadio"]').forEach(r => { r.checked = (r.value === usageChoice); });
+    const customUsageEl = document.getElementById('inCustomHouseUsage');
+    if (customUsageEl) customUsageEl.value = rec.customHouseUsage || '';
 
     // House rows
     document.getElementById('houseRowsContainer').innerHTML = '';

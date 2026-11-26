@@ -127,25 +127,6 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
-    // Health Assistance Recommendation Records (Strict Sensitive Health Data Isolation)
-    match /swasthyaSahayataRecords/{docId} {
-      allow read: if isAuthenticated() && (
-        isSuperAdmin() ||
-        getSessionWard() == null ||
-        !('ward_id' in resource.data) ||
-        resource.data.ward_id == int(getSessionWard()) ||
-        resource.data.createdWard == getSessionWard()
-      );
-      allow create, update: if isAuthenticated() && (
-        isSuperAdmin() ||
-        getSessionWard() == null ||
-        !('ward_id' in request.resource.data) ||
-        request.resource.data.ward_id == int(getSessionWard()) ||
-        request.resource.data.createdWard == getSessionWard()
-      );
-      allow delete: if isSuperAdmin();
-    }
-
     // All Sifarish Recommendation Collections
     match /{collectionName}/{docId} {
       allow read: if isAuthenticated() && (
